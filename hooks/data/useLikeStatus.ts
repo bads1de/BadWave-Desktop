@@ -48,7 +48,7 @@ const useLikeStatus = (songId: string, userId?: string) => {
         // オフラインまたはネットワークエラーの場合はfalseを返す
         if (!onlineManager.isOnline() || isNetworkError(error)) {
           console.log("[useLikeStatus] Fetch skipped: offline/network error");
-          return undefined; // キャッシュがあればそれを使用
+          return false; // キャッシュがあればそれを使用
         }
         console.error("Error fetching like status:", error);
         throw new Error("いいねの状態の取得に失敗しました");

@@ -28,8 +28,7 @@ const useGetSongsByTitle = (title: string) => {
     queryFn: async () => {
       // オフライン時はフェッチをスキップ
       if (!onlineManager.isOnline()) {
-        return undefined;
-      }
+                    return [];      }
 
       const query = supabase
         .from("songs")
@@ -48,8 +47,7 @@ const useGetSongsByTitle = (title: string) => {
           console.log(
             "[useGetSongsByTitle] Fetch skipped: offline/network error"
           );
-          return undefined;
-        }
+                      return [];        }
         console.error("Error fetching songs by title:", error.message);
         throw error;
       }

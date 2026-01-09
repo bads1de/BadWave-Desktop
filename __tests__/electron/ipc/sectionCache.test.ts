@@ -45,7 +45,9 @@ describe("Section Cache IPC", () => {
         lyrics TEXT,
         created_at TEXT,
         downloaded_at INTEGER,
-        last_played_at INTEGER
+        last_played_at INTEGER,
+        play_count INTEGER DEFAULT 0,
+        like_count INTEGER DEFAULT 0
       );
       CREATE TABLE IF NOT EXISTS spotlights (
         id TEXT PRIMARY KEY,
@@ -64,6 +66,14 @@ describe("Section Cache IPC", () => {
         key TEXT PRIMARY KEY,
         item_ids TEXT, 
         updated_at INTEGER
+      );
+      CREATE TABLE IF NOT EXISTS playlists (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        image_path TEXT,
+        is_public INTEGER DEFAULT 0,
+        created_at TEXT
       );
     `);
 

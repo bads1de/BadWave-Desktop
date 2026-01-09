@@ -39,9 +39,8 @@ const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
 
       // オフライン時はフェッチをスキップ
       if (!onlineManager.isOnline()) {
-        return undefined;
-      }
-
+                  return [];
+                }
       const { data, error } = await supabase
         .from("playlists")
         .select("*")
@@ -54,9 +53,8 @@ const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
           console.log(
             "[useGetPublicPlaylists] Fetch skipped: offline/network error"
           );
-          return undefined;
-        }
-        console.error("Error fetching public playlists:", error.message);
+                    return [];
+                  }        console.error("Error fetching public playlists:", error.message);
         throw error;
       }
 

@@ -35,7 +35,7 @@ const useGetSpotlight = (initialData?: Spotlight[]) => {
 
       // オフライン時はフェッチをスキップ
       if (!onlineManager.isOnline()) {
-        return undefined;
+        return [];
       }
 
       const { data, error } = await supabase
@@ -46,7 +46,7 @@ const useGetSpotlight = (initialData?: Spotlight[]) => {
       if (error) {
         if (!onlineManager.isOnline() || isNetworkError(error)) {
           console.log("[useGetSpotlight] Fetch skipped: offline/network error");
-          return undefined;
+          return [];
         }
         console.error("Error fetching spotlights:", error.message);
         throw error;

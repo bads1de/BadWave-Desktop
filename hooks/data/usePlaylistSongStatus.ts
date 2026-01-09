@@ -42,7 +42,7 @@ const usePlaylistSongStatus = (songId: string, playlists: { id: string }[]) => {
           console.log(
             "[usePlaylistSongStatus] Fetch skipped: offline/network error"
           );
-          return undefined; // キャッシュがあればそれを使用
+          return {}; // キャッシュがあればそれを使用
         }
         console.error("Error fetching playlist song status:", error);
         throw new Error("プレイリスト曲の状態の取得に失敗しました");

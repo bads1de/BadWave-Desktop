@@ -39,7 +39,7 @@ const useGetTopPlayedSongs = (userId?: string, period: Period = "day") => {
 
       // オフライン時はフェッチをスキップ
       if (!onlineManager.isOnline()) {
-        return undefined;
+        return [];
       }
 
       const { data, error } = await supabase.rpc("get_top_songs", {
@@ -52,7 +52,7 @@ const useGetTopPlayedSongs = (userId?: string, period: Period = "day") => {
           console.log(
             "[useGetTopPlayedSongs] Fetch skipped: offline/network error"
           );
-          return undefined;
+          return [];
         }
         throw new Error(`再生履歴の取得に失敗しました: ${error.message}`);
       }

@@ -90,6 +90,21 @@ const mockElectron = {
     getCachedPlaylists: jest.fn().mockResolvedValue([]),
     getCachedLikedSongs: jest.fn().mockResolvedValue([]),
     getCachedPlaylistSongs: jest.fn().mockResolvedValue([]),
+    // Added missing methods
+    syncSpotlightsMetadata: jest
+      .fn()
+      .mockResolvedValue({ success: true, count: 0 }),
+    syncSection: jest.fn().mockResolvedValue({ success: true, count: 0 }),
+    getSectionData: jest.fn().mockResolvedValue([]),
+    addLikedSong: jest.fn().mockResolvedValue({ success: true }),
+    removeLikedSong: jest.fn().mockResolvedValue({ success: true }),
+    getLikeStatus: jest.fn().mockResolvedValue({ isLiked: false }),
+    addPlaylistSong: jest.fn().mockResolvedValue({ success: true }),
+    removePlaylistSong: jest.fn().mockResolvedValue({ success: true }),
+    getSongById: jest.fn().mockResolvedValue(null),
+    getPlaylistById: jest.fn().mockResolvedValue(null),
+    getSongsPaginated: jest.fn().mockResolvedValue([]),
+    getSongsTotalCount: jest.fn().mockResolvedValue(0),
   },
   auth: {
     saveCachedUser: jest.fn().mockResolvedValue({ success: true }),
@@ -119,4 +134,11 @@ if (typeof window !== "undefined") {
       dispatchEvent: jest.fn(),
     })),
   });
+
+  // ResizeObserver のモック
+  global.ResizeObserver = jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
+  }));
 }

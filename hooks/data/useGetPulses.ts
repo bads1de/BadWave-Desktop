@@ -28,7 +28,7 @@ const useGetPulses = (initialData?: Pulse[]) => {
     queryFn: async () => {
       // オフライン時はフェッチをスキップ
       if (!onlineManager.isOnline()) {
-        return undefined;
+        return [];
       }
 
       const { data, error } = await supabaseClient
@@ -39,7 +39,7 @@ const useGetPulses = (initialData?: Pulse[]) => {
       if (error) {
         if (!onlineManager.isOnline() || isNetworkError(error)) {
           console.log("[useGetPulses] Fetch skipped: offline/network error");
-          return undefined;
+          return [];
         }
         console.error("Error fetching pulses:", error);
         throw new Error("Pulseの取得に失敗しました");

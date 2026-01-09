@@ -55,8 +55,8 @@ describe("Pagination", () => {
       />
     );
 
-    fireEvent.click(screen.getByText("3"));
-    expect(mockOnPageChange).toHaveBeenCalledWith(2); // 0-indexed
+    fireEvent.click(screen.getByText("2"));
+    expect(mockOnPageChange).toHaveBeenCalledWith(1); // 0-indexed
   });
 
   it("最初のページで「前へ」ボタンが無効", () => {

@@ -33,7 +33,7 @@ const useGetSongsByGenres = (genres: string[], excludeId?: string) => {
 
       // オフライン時はフェッチをスキップ
       if (!onlineManager.isOnline()) {
-        return undefined;
+        return [];
       }
 
       let query = supabaseClient.from("songs").select("*");
@@ -55,7 +55,7 @@ const useGetSongsByGenres = (genres: string[], excludeId?: string) => {
           console.log(
             "[useGetSongsByGenres] Fetch skipped: offline/network error"
           );
-          return undefined;
+          return [];
         }
         throw new Error(
           `ジャンルによる曲の取得に失敗しました: ${error.message}`

@@ -33,7 +33,7 @@ const useGetPlaylistsByTitle = (title: string) => {
 
       // オフライン時はフェッチをスキップ
       if (!onlineManager.isOnline()) {
-        return undefined;
+        return [];
       }
 
       const { data, error } = await supabase
@@ -49,7 +49,7 @@ const useGetPlaylistsByTitle = (title: string) => {
           console.log(
             "[useGetPlaylistsByTitle] Network error, returning cached data"
           );
-          return undefined;
+          return [];
         }
         console.error("Error fetching playlists by title:", error.message);
         throw error;

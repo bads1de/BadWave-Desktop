@@ -93,16 +93,12 @@ describe("PlayerContent Playback Speed", () => {
   it("should open popover and show options when clicked", async () => {
     render(<PlayerContent song={mockSong} playlists={mockPlaylists} />);
 
-    // Using simple approach since Radix UI Popover might need more complex interaction mocks,
-    // but verifying the trigger exists and mock clicks works.
     const trigger = screen.getByText("1x");
     fireEvent.click(trigger);
 
-    // Verify options are rendered (assuming standard Popover behavior without too much mocking)
-    // Note: Radix UI Popover renders into a portal, check if we can query it directly.
-    // Testing library's screen.getByText searches the whole document body.
-    expect(await screen.findByText("2x")).toBeInTheDocument();
-    expect(screen.getByText("0.5x")).toBeInTheDocument();
+    // PlaybackSpeedButton has: [0.9, 0.95, 1, 1.05, 1.1, 1.25]
+    expect(await screen.findByText("1.25x")).toBeInTheDocument();
+    expect(screen.getByText("0.9x")).toBeInTheDocument();
   });
 
   it("should change playback rate when option is clicked", async () => {
@@ -110,10 +106,10 @@ describe("PlayerContent Playback Speed", () => {
 
     fireEvent.click(screen.getByText("1x"));
 
-    const speed2x = await screen.findByText("2x");
-    fireEvent.click(speed2x); // Just clicking the text might trigger the button if it's inside
+    const speed125 = await screen.findByText("1.25x");
+    fireEvent.click(speed125);
 
     // Check if store updated
-    expect(usePlaybackRateStore.getState().rate).toBe(2);
+    expect(usePlaybackRateStore.getState().rate).toBe(1.25);
   });
 });
