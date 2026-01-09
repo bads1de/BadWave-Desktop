@@ -13,6 +13,7 @@ import useAudioEqualizer from "@/hooks/audio/useAudioEqualizer";
 import useLyricsStore from "@/hooks/stores/useLyricsStore";
 import usePlaybackRate from "@/hooks/audio/usePlaybackRate";
 import useSpatialAudio from "@/hooks/audio/useSpatialAudio";
+import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
 import { mediaControls } from "@/libs/electron";
 import { isLocalSong, getPlayablePath } from "@/libs/songUtils";
 import DisabledOverlay from "../common/DisabledOverlay";
@@ -32,6 +33,17 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
 
     // ダウンロード済みの場合はローカルパスを優先
     const playablePath = getPlayablePath(song);
+
+    // カラースキーマを取得
+    const { getColorScheme, hasHydrated } = useColorSchemeStore();
+    const colorScheme = getColorScheme();
+
+    // カラースキーマからの色取得（ハイドレーション前はデフォルト値を使用）
+    const accentFrom = hasHydrated ? colorScheme.colors.accentFrom : "#7c3aed";
+    const primary = hasHydrated ? colorScheme.colors.primary : "#4c1d95";
+    const glowColor = hasHydrated
+      ? `rgba(${colorScheme.colors.glow}, 0.8)`
+      : "rgba(139, 92, 246, 0.8)";
 
     const {
       formattedCurrentTime,
@@ -113,11 +125,15 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
               />
               <div
                 onClick={handlePlay}
-                className="flex items-center justify-center h-7 w-7 rounded-full bg-gradient-to-br from-[#08101f] to-[#0d0d0d] p-1 cursor-pointer group"
+                className="flex items-center justify-center h-9 w-9 rounded-full p-1 cursor-pointer group transition-all duration-300"
+                style={{
+                  background: `linear-gradient(135deg, ${primary}, ${accentFrom})`,
+                  boxShadow: `0 0 12px ${glowColor}`,
+                }}
               >
                 <Icon
                   size={30}
-                  className="text-[#f0f0f0] group-hover:filter group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+                  className="text-white group-hover:filter group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
                 />
               </div>
               <AiFillStepForward
