@@ -49,33 +49,15 @@ const useOnPlay = (songs: Song[]) => {
         // オフライン時はプレイカウント更新をスキップ
         // ref から最新の状態を取得
         if (isOnlineRef.current) {
-          // songデータを取得
-          const { data: songData, error: selectError } = await supabase
-            .from("songs")
-            .select("count")
-            .eq("id", id)
-            .single();
+          // 改善: 1回のRPC呼び出しでアトミックにカウントアップ
+          const { error: rpcError } = await supabase.rpc(
+            "increment_song_play_count",
+            { song_id: id }
+          );
 
-          if (selectError || !songData) {
-            throw selectError;
-          }
-
-          // カウントをインクリメント
-          const { data: incrementedCount, error: incrementError } =
-            await supabase.rpc("increment", { x: songData.count });
-
-          if (incrementError) {
-            throw incrementError;
-          }
-
-          // インクリメントされたカウントでsongを更新
-          const { error: updateError } = await supabase
-            .from("songs")
-            .update({ count: incrementedCount })
-            .eq("id", id);
-
-          if (updateError) {
-            throw updateError;
+          if (rpcError) {
+            console.error("RPC Error:", rpcError);
+            throw rpcError;
           }
 
           // 再生履歴を記録（Supabaseに保存するためオンライン時のみ）
