@@ -56,8 +56,6 @@ export const useSyncPublicPlaylists = (
         const cacheKey = "home_public_playlists";
         await electronAPI.cache.syncSection({ key: cacheKey, data });
 
-        console.log(`[useSyncPublicPlaylists] Synced ${data.length} playlists`);
-
         // キャッシュ無効化
         await queryClient.invalidateQueries({
           queryKey: [CACHED_QUERIES.publicPlaylists, limit],

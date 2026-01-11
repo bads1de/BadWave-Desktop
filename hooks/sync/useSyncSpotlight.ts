@@ -50,8 +50,6 @@ export const useSyncSpotlight = (options?: { autoSync?: boolean }) => {
         const cacheKey = "home_spotlight";
         await electronAPI.cache.syncSection({ key: cacheKey, data });
 
-        console.log(`[useSyncSpotlight] Synced ${data.length} items`);
-
         // キャッシュ無効化
         await queryClient.invalidateQueries({
           queryKey: [CACHED_QUERIES.spotlight],

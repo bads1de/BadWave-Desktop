@@ -69,8 +69,6 @@ export const useSyncRecommendations = (
         const cacheKey = `home_recommendations_${user.id}`;
         await electronAPI.cache.syncSection({ key: cacheKey, data: songs });
 
-        console.log(`[useSyncRecommendations] Synced ${songs.length} songs`);
-
         // キャッシュ無効化
         await queryClient.invalidateQueries({
           queryKey: [CACHED_QUERIES.recommendations, user.id, limit],

@@ -82,10 +82,6 @@ export const useSyncTrends = (
         const cacheKey = `trend_${period}`;
         await electronAPI.cache.syncSection({ key: cacheKey, data });
 
-        console.log(
-          `[useSyncTrends] Synced ${data.length} songs for ${cacheKey}`
-        );
-
         // キャッシュ無効化
         await queryClient.invalidateQueries({
           queryKey: [CACHED_QUERIES.trendSongs, period],

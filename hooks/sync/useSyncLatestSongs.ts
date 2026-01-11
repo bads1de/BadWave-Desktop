@@ -54,8 +54,6 @@ export const useSyncLatestSongs = (
         const cacheKey = "home_latest_songs";
         await electronAPI.cache.syncSection({ key: cacheKey, data });
 
-        console.log(`[useSyncLatestSongs] Synced ${data.length} songs`);
-
         // キャッシュ無効化
         await queryClient.invalidateQueries({
           queryKey: [CACHED_QUERIES.songs, limit],

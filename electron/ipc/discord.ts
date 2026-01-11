@@ -1,6 +1,5 @@
 import { ipcMain } from "electron";
 import * as DiscordRPC from "discord-rpc";
-import { debugLog } from "../utils";
 
 const CLIENT_ID = "1459951305647722568";
 
@@ -19,7 +18,6 @@ export const setupDiscordHandlers = () => {
       if (!rpc) return reject("RPC client creation failed");
 
       rpc.once("ready", () => {
-        debugLog("Discord RPC Connected");
         resolve();
       });
 

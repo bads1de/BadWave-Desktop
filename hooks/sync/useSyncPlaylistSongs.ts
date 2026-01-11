@@ -71,9 +71,6 @@ export const useSyncPlaylistSongs = (
           playlistId: String(playlistId),
           songs,
         });
-        console.log(
-          `[useSyncPlaylistSongs] Synced ${songs.length} songs for playlist ${playlistId}`
-        );
 
         // キャッシュを無効化してUIを更新
         await queryClient.invalidateQueries({
@@ -116,7 +113,6 @@ export const useSyncPlaylistSongs = (
 
     // オフライン → オンライン への遷移を検出
     if (!prevOnlineRef.current && isOnline) {
-      console.log("[useSyncPlaylistSongs] Online restored, triggering sync");
       sync();
     }
     prevOnlineRef.current = isOnline;

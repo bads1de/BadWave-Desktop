@@ -22,8 +22,6 @@ export const useSyncHomeAll = () => {
   const sync = useCallback(async () => {
     setIsSyncing(true);
     try {
-      console.log("[useSyncHomeAll] Starting full home sync...");
-
       const results = await Promise.all([
         syncTrends(),
         syncSpotlight(),
@@ -38,7 +36,6 @@ export const useSyncHomeAll = () => {
         return { success: false, results };
       }
 
-      console.log("[useSyncHomeAll] Full home sync completed successfully");
       return { success: true };
     } catch (error) {
       console.error("[useSyncHomeAll] Critical sync failure:", error);

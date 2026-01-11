@@ -73,7 +73,6 @@ exports.setupDiscordHandlers = void 0;
 var electron_1 = require("electron");
 var DiscordRPC = __importStar(require("discord-rpc"));
 var utils_1 = require("../utils");
-// 提供されたClient ID
 var CLIENT_ID = "1459951305647722568";
 var rpc = null;
 var setupDiscordHandlers = function () {

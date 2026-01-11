@@ -66,7 +66,6 @@ export const useSyncLikedSongs = (options?: { autoSync?: boolean }) => {
         })) as Song[];
 
         await electronAPI.cache.syncLikedSongs({ userId: user.id, songs });
-        console.log(`[useSyncLikedSongs] Synced ${songs.length} liked songs`);
 
         // キャッシュを無効化してUIを更新
         await queryClient.invalidateQueries({
@@ -104,7 +103,6 @@ export const useSyncLikedSongs = (options?: { autoSync?: boolean }) => {
 
     // オフライン → オンライン への遷移を検出
     if (!prevOnlineRef.current && isOnline && user?.id) {
-      console.log("[useSyncLikedSongs] Online restored, triggering sync");
       sync();
     }
     prevOnlineRef.current = isOnline;

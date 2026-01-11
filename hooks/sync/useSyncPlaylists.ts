@@ -61,7 +61,6 @@ export const useSyncPlaylists = (options?: { autoSync?: boolean }) => {
 
       if (data) {
         await electronAPI.cache.syncPlaylists(data as Playlist[]);
-        console.log(`[useSyncPlaylists] Synced ${data.length} playlists`);
 
         // キャッシュを無効化してUIを更新
         await queryClient.invalidateQueries({
@@ -99,7 +98,6 @@ export const useSyncPlaylists = (options?: { autoSync?: boolean }) => {
 
     // オフライン → オンライン への遷移を検出
     if (!prevOnlineRef.current && isOnline && user?.id) {
-      console.log("[useSyncPlaylists] Online restored, triggering sync");
       sync();
     }
     prevOnlineRef.current = isOnline;

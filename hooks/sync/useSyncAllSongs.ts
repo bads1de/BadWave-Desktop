@@ -64,8 +64,6 @@ export const useSyncAllSongs = (options?: { autoSync?: boolean }) => {
         }
       }
 
-      console.log(`[useSyncAllSongs] Synced ${totalSynced} songs`);
-
       // キャッシュ無効化（ページネーションクエリ）
       await queryClient.invalidateQueries({
         queryKey: [CACHED_QUERIES.songs, "paginated"],
