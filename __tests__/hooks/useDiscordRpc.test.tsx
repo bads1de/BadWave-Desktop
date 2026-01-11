@@ -2,16 +2,18 @@ import { renderHook } from "@testing-library/react";
 import { useDiscordRpc } from "@/hooks/useDiscordRpc";
 import { Song } from "@/types";
 
-// window.discord のモック
+// window.electron.discord のモック
 const mockSetActivity = jest.fn();
 const mockClearActivity = jest.fn();
 
 beforeAll(() => {
-  // windowオブジェクトにdiscordをモックとして追加
-  Object.defineProperty(window, "discord", {
+  // windowオブジェクトにelectron.discordをモックとして追加
+  Object.defineProperty(window, "electron", {
     value: {
-      setActivity: mockSetActivity,
-      clearActivity: mockClearActivity,
+      discord: {
+        setActivity: mockSetActivity,
+        clearActivity: mockClearActivity,
+      },
     },
     writable: true,
   });
@@ -62,8 +64,9 @@ describe("useDiscordRpc", () => {
       expect.objectContaining({
         details: mockSong.title,
         state: `by ${mockSong.author}`,
-        smallImageText: "Playing",
-        endTimestamp: expect.any(Number),
+        largeImageKey: "logo",
+        largeImageText: "BadWave",
+        startTimestamp: expect.any(Number),
       })
     );
   });
@@ -83,17 +86,18 @@ describe("useDiscordRpc", () => {
       expect.objectContaining({
         details: mockSong.title,
         state: `by ${mockSong.author}`,
-        smallImageText: "Paused",
-        endTimestamp: undefined, // Paused時は終了時間を送らない
+        largeImageKey: "logo",
+        largeImageText: "BadWave",
+        startTimestamp: undefined,
       })
     );
   });
 
-  it("should do nothing if window.discord is undefined", () => {
-    // window.discord を一時的に削除
-    const originalDiscord = window.discord;
-    Object.defineProperty(window, "discord", {
-      value: undefined,
+  it("should do nothing if window.electron.discord is undefined", () => {
+    // window.electron.discord を一時的に削除
+    const originalElectron = window.electron;
+    Object.defineProperty(window, "electron", {
+      value: { ...originalElectron, discord: undefined },
       writable: true,
     });
 
@@ -108,8 +112,8 @@ describe("useDiscordRpc", () => {
     expect(mockClearActivity).not.toHaveBeenCalled();
 
     // 復元
-    Object.defineProperty(window, "discord", {
-      value: originalDiscord,
+    Object.defineProperty(window, "electron", {
+      value: originalElectron,
       writable: true,
     });
   });

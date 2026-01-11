@@ -61,38 +61,10 @@ interface ElectronAPI {
     set: <T>(key: string, value: T) => Promise<boolean>;
   };
 
-  // 認証操作
-  auth: {
-    // メールアドレスとパスワードでログイン
-    signIn: (email: string, password: string) => Promise<any>;
-    // メールアドレスとパスワードでサインアップ
-    signUp: (email: string, password: string, fullName: string) => Promise<any>;
-    // ログアウト
-    signOut: () => Promise<any>;
-    // 現在のセッションを取得
-    getSession: () => Promise<any>;
-    // OAuthプロバイダーでログイン
-    signInWithOAuth: (provider: string) => Promise<any>;
-    // セッション更新イベントのリスナーを登録
-    onSessionUpdated: (callback: (data: any) => void) => () => void;
-  };
-
   // メディア制御
   media: {
     // メディア制御イベントのリスナーを登録
     onMediaControl: (callback: (action: string) => void) => () => void;
-  };
-
-  // アップデート機能
-  updater: {
-    // 手動でアップデートをチェック
-    checkForUpdates: () => Promise<boolean>;
-    // アップデートが利用可能になったときのリスナーを登録
-    onUpdateAvailable: (callback: () => void) => () => void;
-    // ダウンロード進捗のリスナーを登録
-    onDownloadProgress: (callback: (progressObj: any) => void) => () => void;
-    // アップデートのダウンロードが完了したときのリスナーを登録
-    onUpdateDownloaded: (callback: (info: any) => void) => () => void;
   };
 
   // オフライン機能 (Phase 2)
@@ -110,19 +82,6 @@ interface ElectronAPI {
     downloadSong: (
       song: SongDownloadPayload
     ) => Promise<{ success: boolean; localPath?: string; error?: string }>;
-  };
-
-  // IPC通信
-  ipc: {
-    // メインプロセスにメッセージを送信し、応答を待つ
-    invoke: <T = any>(channel: string, ...args: any[]) => Promise<T>;
-    // メインプロセスからのメッセージを受信
-    on: <T = any>(
-      channel: string,
-      callback: (...args: T[]) => void
-    ) => () => void;
-    // メインプロセスにメッセージを送信（応答を待たない）
-    send: (channel: string, ...args: any[]) => void;
   };
 
   // 開発用ユーティリティ
@@ -182,6 +141,39 @@ interface ElectronAPI {
       playlistId: string;
       songId: string;
     }) => Promise<{ success: boolean; error?: string }>;
+  };
+
+  // 認証キャッシュ
+  auth: {
+    // ユーザー情報を保存
+    saveCachedUser: (user: {
+      id: string;
+      email?: string;
+      avatarUrl?: string;
+    }) => Promise<any>;
+    // ユーザー情報を取得
+    getCachedUser: () => Promise<any>;
+    // ユーザー情報をクリア
+    clearCachedUser: () => Promise<any>;
+  };
+
+  // Discord RPC
+  discord: {
+    setActivity: (activity: any) => Promise<any>;
+    clearActivity: () => Promise<void>;
+  };
+
+  // IPC通信
+  ipc: {
+    // メインプロセスにメッセージを送信し、応答を待つ
+    invoke: <T = any>(channel: string, ...args: any[]) => Promise<T>;
+    // メインプロセスからのメッセージを受信
+    on: <T = any>(
+      channel: string,
+      callback: (...args: T[]) => void
+    ) => () => void;
+    // メインプロセスにメッセージを送信（応答を待たない）
+    send: (channel: string, ...args: any[]) => void;
   };
 }
 
