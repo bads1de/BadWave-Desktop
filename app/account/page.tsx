@@ -9,10 +9,11 @@ import { createClient } from "@/libs/supabase/client";
 import { useUser } from "@/hooks/auth/useUser";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Palette, Database, Activity } from "lucide-react";
+import { Palette, Database, Activity, BarChart2 } from "lucide-react";
 import { AccountModal } from "@/components/Account/AccountModal";
 import { ColorSchemeSelector } from "@/components/Account/ColorSchemeSelector";
-import { TopPlayedSongs } from "@/components/Account/TopPlayedSongs";
+import TopPlayedSongs from "@/app/account/components/TopPlayedSongs";
+import StatsOverview from "@/app/account/components/StatsOverview";
 import { SyncSection } from "@/components/Account/SyncSection";
 
 const AccountPage = () => {
@@ -115,6 +116,13 @@ const AccountPage = () => {
                   <Activity className="w-4 h-4" />
                   アクティビティ
                 </TabsTrigger>
+                <TabsTrigger
+                  value="stats"
+                  className="flex items-center gap-2 py-2 px-4 rounded-xl data-[state=active]:bg-theme-500 data-[state=active]:text-white transition-all duration-300"
+                >
+                  <BarChart2 className="w-4 h-4" />
+                  統計
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="appearance" className="mt-0 outline-none">
@@ -127,6 +135,10 @@ const AccountPage = () => {
 
               <TabsContent value="activity" className="mt-0 outline-none">
                 <TopPlayedSongs user={user} />
+              </TabsContent>
+
+              <TabsContent value="stats" className="mt-0 outline-none">
+                <StatsOverview />
               </TabsContent>
             </Tabs>
 
