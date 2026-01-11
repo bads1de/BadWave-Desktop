@@ -2,7 +2,6 @@ import { ipcMain } from "electron";
 import * as DiscordRPC from "discord-rpc";
 import { debugLog } from "../utils";
 
-// 提供されたClient ID
 const CLIENT_ID = "1459951305647722568";
 
 let rpc: DiscordRPC.Client | null = null;
@@ -10,7 +9,7 @@ let rpc: DiscordRPC.Client | null = null;
 export const setupDiscordHandlers = () => {
   let loginPromise: Promise<void> | null = null;
 
-  // RPCクライアントの初期化
+  // RPCクライアントの初期化とログイン処理
   const initRpc = async () => {
     if (rpc && loginPromise) return loginPromise;
 

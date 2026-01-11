@@ -78,7 +78,7 @@ var CLIENT_ID = "1459951305647722568";
 var rpc = null;
 var setupDiscordHandlers = function () {
     var loginPromise = null;
-    // RPCクライアントの初期化
+    // RPCクライアントの初期化とログイン処理
     var initRpc = function () { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             if (rpc && loginPromise)
@@ -120,11 +120,9 @@ var setupDiscordHandlers = function () {
                     _a.label = 4;
                 case 4:
                     _a.trys.push([4, 6, , 7]);
-                    (0, utils_1.debugLog)("Calling rpc.setActivity with:", activity);
                     return [4 /*yield*/, rpc.setActivity(activity)];
                 case 5:
                     _a.sent();
-                    (0, utils_1.debugLog)("rpc.setActivity succeeded");
                     return [2 /*return*/, { success: true }];
                 case 6:
                     error_1 = _a.sent();

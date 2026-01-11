@@ -25,22 +25,10 @@ import { formatTime } from "@/libs/utils";
 
 // --- Types ---
 
-export interface ElectronApi {
-  ipc: {
-    invoke: (channel: string, ...args: any[]) => Promise<any>;
-  };
-}
-
 export interface LocalFile {
   path: string;
   metadata?: any;
   error?: string;
-}
-
-declare global {
-  interface Window {
-    electron: ElectronApi;
-  }
 }
 
 // --- Sub-components ---

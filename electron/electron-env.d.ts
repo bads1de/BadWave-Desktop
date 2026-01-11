@@ -183,3 +183,6 @@ declare global {
     electron: ElectronAPI;
   }
 }
+
+// このファイルをモジュールとして扱うためのエクスポート
+export {};
