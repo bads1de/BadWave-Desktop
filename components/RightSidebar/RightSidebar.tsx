@@ -135,32 +135,47 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
 
       // ドラッグ終了時に状態を更新
       if (last) {
-        // 閾値以下になったら閉じる
+        // 閾値以下になったら閉じる（アニメーションで0になるように遷移）
         if (newWidth < CLOSE_THRESHOLD) {
           setIsClosed(true);
+          // 閉じるときはサイドバー幅を維持（次に開くときに元の幅に戻る）
         } else {
-          // 最小幅以下にならないように調整
+          // 最小幅以下の場合は、スムーズにMIN_WIDTHまでアニメーション
           const adjustedWidth = Math.max(MIN_WIDTH, newWidth);
           setSidebarWidth(adjustedWidth);
+          // width.set()で自然なバネアニメーションを発生させる
+          width.set(adjustedWidth);
         }
       }
     },
     { axis: "x" }
   );
 
+  // サイドバーが閉じていてトグルボタンが表示される場合のパディング
+  const shouldShowToggle = showRightSidebar && isClosed;
+
   return (
     <div className={twMerge(`flex h-full`, player.activeId && "h-full")}>
-      <main className="h-full flex-1 overflow-y-auto pr-2">{children}</main>
+      <main
+        className={twMerge(
+          "h-full flex-1 overflow-y-auto pr-2",
+          // サイドバーが閉じていてトグルボタンが表示される場合は、
+          // スクロールバーとトグルボタンが重ならないように右側のマージンを追加
+          shouldShowToggle && "xl:mr-8"
+        )}
+      >
+        {children}
+      </main>
       {showRightSidebar && (
         <div className="relative hidden xl:flex h-full">
-          {/* 閉じている場合のトグルボタン */}
+          {/* 閉じている場合のトグルボタン - 固定幅のコンテナ内に配置 */}
           {isClosed && (
             <div
               data-testid="sidebar-toggle"
               onClick={openSidebar}
               className={twMerge(
-                "absolute right-0 top-0 bottom-0 w-8 cursor-pointer",
-                "flex items-center justify-center z-50",
+                "w-8 h-full cursor-pointer",
+                "flex items-center justify-center",
                 "bg-gradient-to-l from-neutral-900/50 to-transparent",
                 "hover:from-neutral-800/70 transition-all duration-300",
                 "border-l border-white/[0.02]"
@@ -188,7 +203,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
               !isClosed && "pl-6 pr-2 pt-2 pb-2",
               "bg-gradient-to-br from-black/95 via-neutral-900/90 to-neutral-900/85",
               "backdrop-blur-2xl border-l border-white/[0.02] shadow-2xl shadow-black/20",
-              "transition-all duration-500 z-40"
+              "z-40"
             )}
           >
             {!isClosed && (

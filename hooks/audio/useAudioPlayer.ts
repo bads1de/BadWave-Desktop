@@ -143,10 +143,10 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
       onPlayNextRef.current();
     };
     const handleCanPlayThrough = () => {
+      // アプリ起動時の復元中は自動再生しない
       if (isRestoringRef.current) return;
-      if (isPlayingRef.current && audio.paused) {
-        audio.play().catch(() => {});
-      }
+      // 曲がロードされたら再生開始
+      audio.play().catch(() => {});
     };
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => {
