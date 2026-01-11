@@ -20,6 +20,7 @@ import DisabledOverlay from "../common/DisabledOverlay";
 import PlaybackSpeedButton from "./PlaybackSpeedButton";
 import EqualizerButton from "./EqualizerButton";
 import VolumeControl from "./VolumeControl";
+import { useDiscordRpc } from "@/hooks/useDiscordRpc";
 
 interface PlayerContentProps {
   song: Song;
@@ -60,6 +61,14 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
       isRepeating,
       isShuffling,
     } = useAudioPlayer(playablePath, song);
+
+    // Discord Rich Presence の更新
+    useDiscordRpc({
+      song,
+      isPlaying,
+      duration,
+      currentTime,
+    });
 
     const Icon = isPlaying ? BsPauseFill : BsPlayFill;
 

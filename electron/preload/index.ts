@@ -61,6 +61,9 @@ const ALLOWED_INVOKE_CHANNELS = [
   // ページネーション対応ハンドラー
   "get-songs-paginated",
   "get-songs-total-count",
+  // Discord RPC
+  "discord:set-activity",
+  "discord:clear-activity",
 ];
 
 const ALLOWED_ON_CHANNELS = [
@@ -192,7 +195,7 @@ contextBridge.exposeInMainWorld("electron", {
     getSongsTotalCount: () => ipcRenderer.invoke("get-songs-total-count"),
   },
 
-  // 認証キャッシュ（オフラインログイン用）
+  // 認証キャッシュ
   auth: {
     // ユーザー情報を保存
     saveCachedUser: (user: {
@@ -204,6 +207,12 @@ contextBridge.exposeInMainWorld("electron", {
     getCachedUser: () => ipcRenderer.invoke("get-cached-user"),
     // ユーザー情報をクリア
     clearCachedUser: () => ipcRenderer.invoke("clear-cached-user"),
+  },
+  
+  // Discord RPC
+  discord: {
+    setActivity: (activity: any) => ipcRenderer.invoke("discord:set-activity", activity),
+    clearActivity: () => ipcRenderer.invoke("discord:clear-activity"),
   },
 
   // IPC通信

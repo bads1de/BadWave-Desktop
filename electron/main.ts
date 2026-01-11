@@ -21,6 +21,7 @@ import { setupLibraryHandlers } from "./ipc/library";
 import { setupSimpleDownloadHandlers } from "./ipc/simple_download";
 import { setupCacheHandlers } from "./ipc/cache";
 import { setupAuthHandlers } from "./ipc/auth";
+import { setupDiscordHandlers } from "./ipc/discord";
 import { setupDevShortcuts } from "./shortcuts";
 import { runMigrations } from "./db/migrate";
 
@@ -55,6 +56,9 @@ function setupIPC() {
 
   // 認証キャッシュハンドラーのセットアップ
   setupAuthHandlers();
+
+  // Discord RPCハンドラーのセットアップ
+  setupDiscordHandlers();
 }
 
 // アプリケーションの準備完了時の処理

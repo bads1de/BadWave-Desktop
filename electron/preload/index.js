@@ -68,6 +68,9 @@ var ALLOWED_INVOKE_CHANNELS = [
     // ページネーション対応ハンドラー
     "get-songs-paginated",
     "get-songs-total-count",
+    // Discord RPC
+    "discord:set-activity",
+    "discord:clear-activity",
 ];
 var ALLOWED_ON_CHANNELS = [
     "media-control",
@@ -211,7 +214,7 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
         // 曲の総件数を取得
         getSongsTotalCount: function () { return electron_1.ipcRenderer.invoke("get-songs-total-count"); },
     },
-    // 認証キャッシュ（オフラインログイン用）
+    // 認証キャッシュ
     auth: {
         // ユーザー情報を保存
         saveCachedUser: function (user) { return electron_1.ipcRenderer.invoke("save-cached-user", user); },
@@ -219,6 +222,11 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
         getCachedUser: function () { return electron_1.ipcRenderer.invoke("get-cached-user"); },
         // ユーザー情報をクリア
         clearCachedUser: function () { return electron_1.ipcRenderer.invoke("clear-cached-user"); },
+    },
+    // Discord RPC
+    discord: {
+        setActivity: function (activity) { return electron_1.ipcRenderer.invoke("discord:set-activity", activity); },
+        clearActivity: function () { return electron_1.ipcRenderer.invoke("discord:clear-activity"); },
     },
     // IPC通信
     ipc: {
