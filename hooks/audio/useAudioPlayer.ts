@@ -7,6 +7,7 @@ import usePlaybackStateStore, {
 import { isLocalFilePath, toFileUrl } from "@/libs/songUtils";
 import { Song } from "@/types";
 import { AudioEngine } from "@/libs/audio/AudioEngine";
+import useLatestRef from "@/hooks/utils/useLatestRef";
 
 /**
  * AudioEngineシングルトンを使用するオーディオプレイヤーフック
@@ -51,22 +52,17 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
 
   const lastSaveTimeRef = useRef<number>(0);
   const hasRestoredRef = useRef<boolean>(false);
-  const isPlayingRef = useRef(isPlaying);
-  const isRestoringRef = useRef(isRestoring);
-  const isRepeatingRef = useRef(isRepeating);
 
-  // Ref同期
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
+  // useLatestRef: イベントリスナー内から最新の状態を参照するため
+  const isPlayingRef = useLatestRef(isPlaying);
+  const isRestoringRef = useLatestRef(isRestoring);
 
+  // audio.loopをisRepeatingと同期（リピート時はブラウザネイティブで処理）
   useEffect(() => {
-    isRestoringRef.current = isRestoring;
-  }, [isRestoring]);
-
-  useEffect(() => {
-    isRepeatingRef.current = isRepeating;
-  }, [isRepeating]);
+    if (audio) {
+      audio.loop = isRepeating;
+    }
+  }, [isRepeating, audio]);
 
   const handlePlay = useCallback(() => {
     if (isRestoring) {
@@ -90,14 +86,11 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
   );
 
   const onPlayNext = useCallback(() => {
-    if (isRepeating) {
-      player.toggleRepeat();
-    }
     const nextSongId = player.getNextSongId();
     if (nextSongId) {
       player.setId(nextSongId);
     }
-  }, [isRepeating, player]);
+  }, [player]);
 
   const onPlayNextRef = useRef(onPlayNext);
   useEffect(() => {
@@ -145,13 +138,9 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleLoadedMetadata = () => setDuration(audio.duration);
+    // audio.loop=true の時は ended イベントが発火しないため、次曲処理のみ
     const handleEnded = () => {
-      if (isRepeatingRef.current) {
-        audio.currentTime = 0;
-        audio.play().catch(() => {});
-      } else {
-        onPlayNextRef.current();
-      }
+      onPlayNextRef.current();
     };
     const handleCanPlayThrough = () => {
       if (isRestoringRef.current) return;
