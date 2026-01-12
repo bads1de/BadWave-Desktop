@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { onlineManager } from "@tanstack/react-query";
 import { electronAPI } from "@/libs/electron/index";
 

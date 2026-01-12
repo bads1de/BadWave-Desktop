@@ -19,6 +19,7 @@ export const useDiscordRpc = ({
       // Electron環境でない、またはDiscord APIがない場合はスキップ
       if (typeof window === "undefined" || !window.electron?.discord) return;
 
+      // もし曲がなければ、活動をクリアして終了
       if (!song) {
         await window.electron.discord.clearActivity();
         return;
@@ -26,21 +27,24 @@ export const useDiscordRpc = ({
 
       // 再生中なら終了予想時刻を計算
       // 現在時刻 + (残り時間 * 1000)
-      let endTimestamp;
+      let endTimestamp: number | undefined = undefined;
       if (isPlaying && duration && currentTime !== undefined) {
         const remainingTime = duration - currentTime;
+
         if (remainingTime > 0) {
           endTimestamp = Date.now() + remainingTime * 1000;
         }
       }
 
       try {
+        // Discord活動を更新
         await window.electron.discord.setActivity({
           details: song.title,
           state: `by ${song.author}`,
           largeImageKey: "logo",
           largeImageText: "BadWave",
-          startTimestamp: isPlaying ? Date.now() : undefined,
+          startTimestamp: isPlaying ? undefined : undefined, // ElapsedよりもRemainingを優先
+          endTimestamp: isPlaying ? endTimestamp : undefined,
           instance: false,
         });
       } catch (error) {

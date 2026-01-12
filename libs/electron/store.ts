@@ -13,6 +13,7 @@ export const store = {
     // Electronでない場合はローカルストレージを使用
     if (typeof window !== "undefined" && window.localStorage) {
       const item = localStorage.getItem(key);
+
       if (item !== null) {
         try {
           return JSON.parse(item) as T;

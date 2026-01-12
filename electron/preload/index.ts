@@ -10,31 +10,32 @@ function validateChannel(channel: string, allowedChannels: string[]): boolean {
   return true;
 }
 
-// 許可されたチャンネルのリスト
-const ALLOWED_INVOKE_CHANNELS = [
-  "get-store-value",
-  "set-store-value",
-  "window-minimize",
-  "window-maximize",
-  "window-close",
+const WINDOW_CHANNELS = ["window-minimize", "window-maximize", "window-close"];
+const STORE_CHANNELS = ["get-store-value", "set-store-value"];
+
+const FILE_CHANNELS = [
   "api-request",
   "handle-select-directory",
   "handle-scan-mp3-files",
   "handle-get-mp3-metadata",
   "handle-get-saved-music-library",
-  "download-song",
   "check-file-exists",
   "get-local-file-path",
+  "handle-get-cached-files-with-metadata",
+];
+
+const OFFLINE_CHANNELS = [
+  "download-song",
   "delete-song",
-  // Phase 2: Offline handlers
   "get-offline-songs",
   "delete-offline-song",
   "check-offline-status",
-  // 開発用: オフラインシミュレーション
   "toggle-offline-simulation",
   "get-offline-simulation-status",
   "set-offline-simulation",
-  // キャッシュハンドラー（オフラインライブラリ表示用）
+];
+
+const CACHE_CHANNELS = [
   "sync-songs-metadata",
   "sync-playlists",
   "sync-playlist-songs",
@@ -45,27 +46,38 @@ const ALLOWED_INVOKE_CHANNELS = [
   "get-cached-playlists",
   "get-cached-liked-songs",
   "get-cached-playlist-songs",
+  "get-song-by-id",
+  "get-playlist-by-id",
+  "get-songs-paginated",
+  "get-songs-total-count",
   "debug-dump-db",
-  // Local-first mutation handlers
+];
+
+const MUTATION_CHANNELS = [
   "add-liked-song",
   "remove-liked-song",
   "get-like-status",
   "add-playlist-song",
   "remove-playlist-song",
-  // 認証キャッシュ
+];
+
+const AUTH_CHANNELS = [
   "save-cached-user",
   "get-cached-user",
   "clear-cached-user",
-  "get-song-by-id",
-  "get-playlist-by-id",
-  // ページネーション対応ハンドラー
-  "get-songs-paginated",
-  "get-songs-total-count",
-  // Discord RPC
-  "discord:set-activity",
-  "discord:clear-activity",
-  // ローカルファイルキャッシュ
-  "handle-get-cached-files-with-metadata",
+];
+
+const EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
+
+const ALLOWED_INVOKE_CHANNELS = [
+  ...WINDOW_CHANNELS,
+  ...STORE_CHANNELS,
+  ...FILE_CHANNELS,
+  ...OFFLINE_CHANNELS,
+  ...CACHE_CHANNELS,
+  ...MUTATION_CHANNELS,
+  ...AUTH_CHANNELS,
+  ...EXTERNAL_CHANNELS,
 ];
 
 const ALLOWED_ON_CHANNELS = [
@@ -114,7 +126,7 @@ contextBridge.exposeInMainWorld("electron", {
     },
   },
 
-  // オフライン機能 (Phase 2)
+  // オフライン機能
   offline: {
     // オフライン（ダウンロード済み）の曲を全て取得
     getSongs: () => ipcRenderer.invoke("get-offline-songs"),

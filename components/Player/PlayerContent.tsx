@@ -20,7 +20,7 @@ import DisabledOverlay from "../common/DisabledOverlay";
 import PlaybackSpeedButton from "./PlaybackSpeedButton";
 import EqualizerButton from "./EqualizerButton";
 import VolumeControl from "./VolumeControl";
-import { useDiscordRpc } from "@/hooks/useDiscordRpc";
+import { useDiscordRpc } from "@/hooks/utils/useDiscordRpc";
 
 interface PlayerContentProps {
   song: Song;

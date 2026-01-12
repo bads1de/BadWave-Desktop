@@ -16,16 +16,16 @@ export function mapFileToSong(file: LocalFile): Song {
     : "不明なタイトル";
 
   return {
-    id: generateLocalSongId(file.path), // ローカル曲用のIDを生成
-    user_id: "local_user", // ローカルファイル用の固定ユーザーID
+    id: generateLocalSongId(file.path),
+    user_id: "local_user",
     author: file.metadata?.common?.artist || "不明なアーティスト",
     title: file.metadata?.common?.title || titleFromFile,
     song_path: file.path,
-    image_path: "", // ローカルファイルの画像パスは現在未対応
+    image_path: "",
     video_path: "",
     genre: file.metadata?.common?.genre?.[0] || "",
     duration: file.metadata?.format?.duration || 0,
-    created_at: new Date().toISOString(), // 現在時刻を作成日時として使用
-    public: false, // ローカルファイルは非公開
+    created_at: new Date().toISOString(),
+    public: false,
   };
 }

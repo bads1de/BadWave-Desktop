@@ -1,9 +1,18 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
+import React, { useState, memo, useCallback } from "react";
 import Image from "next/image";
 import useGetTopPlayedSongs from "@/hooks/data/useGetTopPlayedSongs";
 import useOnPlay from "@/hooks/player/useOnPlay";
+import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
+
+interface TopPlayedSongsProps {
+  user: {
+    id: string;
+    full_name?: string;
+    avatar_url?: string;
+  } | null;
+}
 
 const PERIODS = [
   { value: "day", label: "Today" },
@@ -12,12 +21,15 @@ const PERIODS = [
   { value: "all", label: "All Time" },
 ] as const;
 
-export const TopPlayedSongs = memo(({ user }: { user: any }) => {
+const TopPlayedSongs: React.FC<TopPlayedSongsProps> = memo(({ user }) => {
   const [period, setPeriod] =
     useState<(typeof PERIODS)[number]["value"]>("day");
   const { topSongs, isLoading } = useGetTopPlayedSongs(user?.id, period);
   const onPlay = useOnPlay(topSongs || []);
+  const { getColorScheme, hasHydrated } = useColorSchemeStore();
+  const colorScheme = getColorScheme();
 
+  // 再生ハンドラをメモ化
   const handlePlay = useCallback(
     (id: string) => {
       onPlay(id);
@@ -38,19 +50,28 @@ export const TopPlayedSongs = memo(({ user }: { user: any }) => {
                 key={p.value}
                 onClick={() => setPeriod(p.value)}
                 className={`
-                  inline-flex items-center justify-center whitespace-nowrap rounded-lg
+                  inline-flex items-center justify-center whitespace-nowrap rounded-xl
                   px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium
                   transition-all duration-300
                   focus-visible:outline-none focus-visible:ring-2
-                  focus-visible:ring-theme-500/50 focus-visible:ring-offset-2
+                  focus-visible:ring-offset-2
                   disabled:pointer-events-none disabled:opacity-50
                   min-w-[60px] md:min-w-[80px]
                   ${
                     period === p.value
-                      ? "bg-gradient-to-br rounded-xl from-theme-500/20 to-theme-900/20 border border-theme-500/30 text-white shadow-lg shadow-theme-500/20"
+                      ? "text-white"
                       : "text-neutral-400 hover:text-white hover:bg-neutral-800/50 rounded-xl"
                   }
                 `}
+                style={
+                  period === p.value && hasHydrated
+                    ? {
+                        background: `linear-gradient(to bottom right, ${colorScheme.colors.accentFrom}33, ${colorScheme.colors.primary}33)`,
+                        border: `1px solid ${colorScheme.colors.accentFrom}4D`,
+                        boxShadow: `0 10px 15px -3px ${colorScheme.colors.accentFrom}33`,
+                      }
+                    : undefined
+                }
               >
                 {p.label}
               </button>
@@ -67,10 +88,14 @@ export const TopPlayedSongs = memo(({ user }: { user: any }) => {
             >
               <div className="flex-shrink-0 relative">
                 <div className="w-16 h-16 bg-neutral-700/50 rounded-lg" />
+                <div className="absolute -top-2 -left-2 w-6 h-6 bg-neutral-700/50 rounded-full" />
               </div>
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-neutral-700/50 rounded w-3/4" />
                 <div className="h-3 bg-neutral-700/50 rounded w-1/2" />
+              </div>
+              <div className="flex-shrink-0">
+                <div className="w-20 h-6 bg-neutral-700/50 rounded-full" />
               </div>
             </div>
           ))}
@@ -96,12 +121,19 @@ export const TopPlayedSongs = memo(({ user }: { user: any }) => {
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <div className="absolute -top-2 -left-2 w-6 h-6 bg-theme-500/80 rounded-full flex items-center justify-center text-sm font-bold">
+                <div
+                  className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{
+                    backgroundColor: hasHydrated
+                      ? `${colorScheme.colors.accentFrom}CC`
+                      : "#7c3aedCC",
+                  }}
+                >
                   {index + 1}
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-white font-semibold truncate leading-tight">
+                <h4 className="text-white font-semibold truncate">
                   {song.title}
                 </h4>
                 <p className="text-neutral-400 text-sm truncate">
@@ -109,7 +141,17 @@ export const TopPlayedSongs = memo(({ user }: { user: any }) => {
                 </p>
               </div>
               <div className="flex-shrink-0">
-                <span className="bg-theme-500/20 text-theme-300 px-3 py-1 rounded-full text-sm whitespace-nowrap">
+                <span
+                  className="px-3 py-1 rounded-full text-sm whitespace-nowrap"
+                  style={{
+                    backgroundColor: hasHydrated
+                      ? `${colorScheme.colors.accentFrom}33`
+                      : "#7c3aed33",
+                    color: hasHydrated
+                      ? `rgb(${colorScheme.colors.theme300})`
+                      : "rgb(196, 181, 253)",
+                  }}
+                >
                   {song.play_count}回再生
                 </span>
               </div>
@@ -121,4 +163,7 @@ export const TopPlayedSongs = memo(({ user }: { user: any }) => {
   );
 });
 
+// displayName を設定
 TopPlayedSongs.displayName = "TopPlayedSongs";
+
+export default TopPlayedSongs;

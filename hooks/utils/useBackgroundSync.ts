@@ -27,9 +27,6 @@ export const useBackgroundSync = () => {
   const syncLibrary = useCallback(async () => {
     // オフライン、未ログイン、Electronでない場合はスキップ
     if (!isOnlineRef.current || !user?.id || !electronAPI.isElectron()) {
-      if (!isOnlineRef.current) {
-        console.log("[Sync] Skipped: Offline");
-      }
       return;
     }
 
@@ -37,7 +34,6 @@ export const useBackgroundSync = () => {
     if (syncInProgress.current) {
       // オンラインであれば、現在の処理が終わった後に再試行するように予約する
       if (isOnlineRef.current) {
-        console.log("[Sync] Sync already in progress, scheduling retry");
         shouldRetrySync.current = true;
       }
       return;
@@ -45,7 +41,6 @@ export const useBackgroundSync = () => {
 
     syncInProgress.current = true;
     shouldRetrySync.current = false; // フラグをリセット
-    console.log("[Sync] Background sync started for user:", user.id);
 
     try {
       // --- 1. ユーザーのプレイリストを同期 ---

@@ -8,6 +8,7 @@ export const windowControls = {
     if (isElectron()) {
       return (window as any).electron.window.minimize();
     }
+
     return Promise.resolve();
   },
 
@@ -15,6 +16,7 @@ export const windowControls = {
     if (isElectron()) {
       return (window as any).electron.window.maximize();
     }
+
     return Promise.resolve();
   },
 
@@ -22,6 +24,7 @@ export const windowControls = {
     if (isElectron()) {
       return (window as any).electron.window.close();
     }
+
     return Promise.resolve();
   },
 };

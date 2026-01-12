@@ -112,7 +112,7 @@ interface Window {
 
 ### E. フロントエンド: カスタムフック
 
-`hooks/useDiscordRpc.ts` を作成します。
+`hooks/utils/useDiscordRpc.ts` を作成します。
 
 ```typescript
 import { useEffect } from "react";
@@ -154,7 +154,7 @@ export const useDiscordRpc = () => {
 
 ```tsx
 "use client";
-import { useDiscordRpc } from "@/hooks/useDiscordRpc";
+import { useDiscordRpc } from "@/hooks/utils/useDiscordRpc";
 
 export function DiscordManager() {
   useDiscordRpc();

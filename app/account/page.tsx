@@ -12,8 +12,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Palette, Database, Activity, BarChart2 } from "lucide-react";
 import { AccountModal } from "@/components/Account/AccountModal";
 import { ColorSchemeSelector } from "@/components/Account/ColorSchemeSelector";
-import TopPlayedSongs from "@/app/account/components/TopPlayedSongs";
-import StatsOverview from "@/app/account/components/StatsOverview";
+import TopPlayedSongs from "@/components/Account/TopPlayedSongs";
+import StatsOverview from "@/components/Account/StatsOverview";
 import { SyncSection } from "@/components/Account/SyncSection";
 
 const AccountPage = () => {

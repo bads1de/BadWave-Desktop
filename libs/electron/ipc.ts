@@ -21,7 +21,6 @@ export const ipc = {
       return (window as any).electron.ipc.on(channel, callback);
     }
 
-    // Electronでない場合は空の関数を返す
     return () => {};
   },
 

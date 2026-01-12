@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { useDiscordRpc } from "@/hooks/useDiscordRpc";
+import { useDiscordRpc } from "@/hooks/utils/useDiscordRpc";
 import { Song } from "@/types";
 
 // window.electron.discord のモック
@@ -66,7 +66,7 @@ describe("useDiscordRpc", () => {
         state: `by ${mockSong.author}`,
         largeImageKey: "logo",
         largeImageText: "BadWave",
-        startTimestamp: expect.any(Number),
+        endTimestamp: expect.any(Number),
       })
     );
   });

@@ -14,6 +14,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.syncSongsMetadata(songs);
     }
+
     return { success: false, count: 0, error: "Not in Electron environment" };
   },
 
@@ -26,6 +27,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.syncPlaylists(playlists);
     }
+
     return { success: false, count: 0, error: "Not in Electron environment" };
   },
 
@@ -39,6 +41,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.syncPlaylistSongs(data);
     }
+
     return { success: false, count: 0, error: "Not in Electron environment" };
   },
 
@@ -52,6 +55,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.syncLikedSongs(data);
     }
+
     return { success: false, count: 0, error: "Not in Electron environment" };
   },
 
@@ -62,6 +66,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.getCachedPlaylists(userId);
     }
+
     return [];
   },
 
@@ -72,6 +77,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.getCachedLikedSongs(userId);
     }
+
     return [];
   },
 
@@ -84,6 +90,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.syncSpotlightsMetadata(spotlights);
     }
+
     return { success: false, count: 0, error: "Not in Electron environment" };
   },
 
@@ -107,6 +114,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.getCachedPlaylistSongs(playlistId);
     }
+
     return [];
   },
 
@@ -120,6 +128,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.getSectionData(key, type);
     }
+
     return [];
   },
 
@@ -135,6 +144,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.addLikedSong(data);
     }
+
     return { success: false, error: "Not in Electron environment" };
   },
 
@@ -148,6 +158,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.removeLikedSong(data);
     }
+
     return { success: false, error: "Not in Electron environment" };
   },
 
@@ -174,6 +185,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.addPlaylistSong(data);
     }
+
     return { success: false, error: "Not in Electron environment" };
   },
 
@@ -187,6 +199,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.removePlaylistSong(data);
     }
+
     return { success: false, error: "Not in Electron environment" };
   },
 
@@ -197,6 +210,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.getSongById(songId);
     }
+
     return null;
   },
 
@@ -217,6 +231,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.getSongsPaginated(offset, limit);
     }
+
     return [];
   },
 
@@ -227,6 +242,7 @@ export const cache = {
     if (isElectron()) {
       return (window as any).electron.cache.getSongsTotalCount();
     }
+
     return 0;
   },
 };
