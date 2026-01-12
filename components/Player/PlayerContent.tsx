@@ -12,6 +12,7 @@ import useAudioPlayer from "@/hooks/audio/useAudioPlayer";
 import useAudioEqualizer from "@/hooks/audio/useAudioEqualizer";
 import useLyricsStore from "@/hooks/stores/useLyricsStore";
 import usePlaybackRate from "@/hooks/audio/usePlaybackRate";
+import useSlowedReverb from "@/hooks/audio/useSlowedReverb";
 import useSpatialAudio from "@/hooks/audio/useSpatialAudio";
 import use8DAudio from "@/hooks/audio/use8DAudio";
 import useLoFiAudio from "@/hooks/audio/useLoFiAudio";
@@ -77,6 +78,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     // イコライザーと再生速度を適用（AudioEngineを使用）
     useAudioEqualizer();
     usePlaybackRate();
+    useSlowedReverb();
     useSpatialAudio();
     use8DAudio();
     useLoFiAudio();

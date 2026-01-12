@@ -12,6 +12,10 @@ export type RotationSpeed = "slow" | "medium" | "fast";
  * - Lo-Fi / Vintage Radio Mode
  */
 interface EffectStore {
+  // Slowed + Reverb
+  isSlowedReverb: boolean;
+  toggleSlowedReverb: () => void;
+
   // 8D Audio
   is8DAudioEnabled: boolean;
   rotationSpeed: RotationSpeed;
@@ -39,6 +43,11 @@ export const ROTATION_SPEED_VALUES: Record<RotationSpeed, number> = {
 const useEffectStore = create<EffectStore>()(
   persist(
     (set) => ({
+      // Slowed + Reverb
+      isSlowedReverb: false,
+      toggleSlowedReverb: () =>
+        set((state) => ({ isSlowedReverb: !state.isSlowedReverb })),
+
       // 8D Audio
       is8DAudioEnabled: false,
       rotationSpeed: "medium" as RotationSpeed,

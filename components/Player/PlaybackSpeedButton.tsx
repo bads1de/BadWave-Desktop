@@ -16,19 +16,18 @@ import useEffectStore, {
 const PlaybackSpeedButton: React.FC = () => {
   const playbackRate = usePlaybackRateStore((state) => state.rate);
   const setPlaybackRate = usePlaybackRateStore((state) => state.setRate);
-  const isSlowedReverb = usePlaybackRateStore((state) => state.isSlowedReverb);
-  const setIsSlowedReverb = usePlaybackRateStore(
-    (state) => state.setIsSlowedReverb
-  );
   const { isSpatialEnabled, toggleSpatialEnabled } = useSpatialStore();
-
-  // 8D Audio と Lo-Fi の状態
+  // 8D Audio, Lo-Fi, Slowed+Reverb の状態
   const is8DAudioEnabled = useEffectStore((state) => state.is8DAudioEnabled);
   const toggle8DAudio = useEffectStore((state) => state.toggle8DAudio);
   const rotationSpeed = useEffectStore((state) => state.rotationSpeed);
   const setRotationSpeed = useEffectStore((state) => state.setRotationSpeed);
   const isLoFiEnabled = useEffectStore((state) => state.isLoFiEnabled);
   const toggleLoFi = useEffectStore((state) => state.toggleLoFi);
+  const isSlowedReverb = useEffectStore((state) => state.isSlowedReverb);
+  const toggleSlowedReverb = useEffectStore(
+    (state) => state.toggleSlowedReverb
+  );
 
   const rates = [0.9, 0.95, 1, 1.05, 1.1, 1.25];
   const rotationSpeeds: { value: RotationSpeed; label: string }[] = [
@@ -128,7 +127,7 @@ const PlaybackSpeedButton: React.FC = () => {
             </div>
           </div>
           <button
-            onClick={() => setIsSlowedReverb(!isSlowedReverb)}
+            onClick={toggleSlowedReverb}
             className={`w-8 h-4 rounded-full transition-colors relative ${
               isSlowedReverb ? "bg-theme-500" : "bg-neutral-600"
             }`}
