@@ -1,5 +1,5 @@
 import { mapFileToSong } from "@/libs/localFileMappers";
-import { LocalFile } from "@/app/local/page";
+import { LocalFile } from "@/types/local";
 import { generateLocalSongId } from "@/libs/songUtils";
 
 // generateLocalSongId は内部で btoa を使用しているため、

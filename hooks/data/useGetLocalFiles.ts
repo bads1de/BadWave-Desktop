@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CACHED_QUERIES } from "@/constants";
-import { LocalFile } from "@/app/local/page";
+import { LocalFile } from "@/types/local";
 
 /**
  * スキャン情報の型

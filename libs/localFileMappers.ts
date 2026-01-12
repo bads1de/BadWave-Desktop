@@ -1,7 +1,7 @@
 import { Song } from "@/types";
 
 import { generateLocalSongId } from "./songUtils";
-import { LocalFile } from "@/app/local/page";
+import { LocalFile } from "@/types/local";
 
 /**
  * ローカルファイルデータをSong型に変換するヘルパー関数

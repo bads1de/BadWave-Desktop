@@ -82,7 +82,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startNextServer = startNextServer;
 exports.stopNextServer = stopNextServer;
-exports.getServerPort = getServerPort;
 var electron_1 = require("electron");
 var path = __importStar(require("path"));
 var http = __importStar(require("http"));
@@ -224,11 +223,5 @@ function stopNextServer() {
         serverProcess.kill();
         serverProcess = null;
     }
-}
-/**
- * 現在のサーバーポートを取得
- */
-function getServerPort() {
-    return serverPort;
 }
 //# sourceMappingURL=server.js.map
