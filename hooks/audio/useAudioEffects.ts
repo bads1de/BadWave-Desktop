@@ -13,6 +13,7 @@ import { AudioEngine } from "@/libs/audio/AudioEngine";
  * - Slowed + Reverb
  * - 8D Audio
  * - Retro Mode
+ * - Bass Boost
  */
 const useAudioEffects = () => {
   // Stores
@@ -25,6 +26,8 @@ const useAudioEffects = () => {
     setRotationSpeed,
     isRetroEnabled,
     toggleRetro,
+    isBassBoostEnabled,
+    toggleBassBoost,
   } = useEffectStore();
 
   const { isSpatialEnabled, toggleSpatialEnabled } = useSpatialStore();
@@ -107,6 +110,14 @@ const useAudioEffects = () => {
     engine.setRetroMode(isRetroEnabled);
   }, [isRetroEnabled]);
 
+  // --- Bass Boost Logic ---
+  useEffect(() => {
+    const engine = AudioEngine.getInstance();
+    if (!engine.isInitialized) return;
+
+    engine.setBassBoostMode(isBassBoostEnabled);
+  }, [isBassBoostEnabled]);
+
   return {
     // Spatial
     isSpatialEnabled,
@@ -125,6 +136,10 @@ const useAudioEffects = () => {
     // Retro
     isRetroEnabled,
     toggleRetro,
+
+    // Bass Boost
+    isBassBoostEnabled,
+    toggleBassBoost,
   };
 };
 

@@ -33,6 +33,10 @@ class AudioEngine {
   public distortionNode: WaveShaperNode | null = null;
   private isRetroActive = false;
 
+  // Bass Boost ノード
+  public bassBoostFilter: BiquadFilterNode | null = null;
+  private isBassBoostActive = false;
+
   // 状態管理
   public currentSongId: string | null = null;
   public isInitialized = false;
@@ -134,6 +138,12 @@ class AudioEngine {
       this.distortionNode = this.context.createWaveShaper();
       this.distortionNode.oversample = "4x";
 
+      // --- Bass Boost ノード作成 ---
+      this.bassBoostFilter = this.context.createBiquadFilter();
+      this.bassBoostFilter.type = "lowshelf";
+      this.bassBoostFilter.frequency.value = 100; // 100Hzを中心に
+      this.bassBoostFilter.gain.value = 0; // 初期はOFF (0dB)
+
       // --- 接続 (Routing) ---
       // Main Path: Source -> EQ -> Spatial -> 8D Panner -> Retro(HighPass->LowPass->Distortion) -> MasterGain -> Dest
       let currentNode: AudioNode = this.sourceNode;
@@ -159,6 +169,10 @@ class AudioEngine {
       // Distortion 接続
       currentNode.connect(this.distortionNode);
       currentNode = this.distortionNode;
+
+      // Bass Boost 接続
+      currentNode.connect(this.bassBoostFilter);
+      currentNode = this.bassBoostFilter;
 
       currentNode.connect(this.gainNode);
       this.gainNode.connect(this.context.destination);
@@ -383,6 +397,30 @@ class AudioEngine {
       this.distortionNode.curve = null;
 
       this.isRetroActive = false;
+    }
+  }
+
+  // ========================================
+  // Bass Boost
+  // ========================================
+
+  /**
+   * Bass Boost の有効/無効を切り替え
+   * 低域を+9dBブーストして迫力のあるサウンドに
+   */
+  public setBassBoostMode(enabled: boolean): void {
+    if (!this.bassBoostFilter || !this.context) return;
+
+    const now = this.context.currentTime;
+
+    if (enabled) {
+      // +9dB の重低音ブースト
+      this.bassBoostFilter.gain.linearRampToValueAtTime(9, now + 0.2);
+      this.isBassBoostActive = true;
+    } else {
+      // 0dB に戻す
+      this.bassBoostFilter.gain.linearRampToValueAtTime(0, now + 0.2);
+      this.isBassBoostActive = false;
     }
   }
 }

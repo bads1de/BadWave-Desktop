@@ -17,13 +17,17 @@ const PlaybackSpeedButton: React.FC = () => {
   const playbackRate = usePlaybackRateStore((state) => state.rate);
   const setPlaybackRate = usePlaybackRateStore((state) => state.setRate);
   const { isSpatialEnabled, toggleSpatialEnabled } = useSpatialStore();
-  // 8D Audio, Retro, Slowed+Reverb の状態
+  // 8D Audio, Retro, Bass Boost, Slowed+Reverb の状態
   const is8DAudioEnabled = useEffectStore((state) => state.is8DAudioEnabled);
   const toggle8DAudio = useEffectStore((state) => state.toggle8DAudio);
   const rotationSpeed = useEffectStore((state) => state.rotationSpeed);
   const setRotationSpeed = useEffectStore((state) => state.setRotationSpeed);
   const isRetroEnabled = useEffectStore((state) => state.isRetroEnabled);
   const toggleRetro = useEffectStore((state) => state.toggleRetro);
+  const isBassBoostEnabled = useEffectStore(
+    (state) => state.isBassBoostEnabled
+  );
+  const toggleBassBoost = useEffectStore((state) => state.toggleBassBoost);
   const isSlowedReverb = useEffectStore((state) => state.isSlowedReverb);
   const toggleSlowedReverb = useEffectStore(
     (state) => state.toggleSlowedReverb
@@ -45,7 +49,8 @@ const PlaybackSpeedButton: React.FC = () => {
             isSlowedReverb ||
             isSpatialEnabled ||
             is8DAudioEnabled ||
-            isRetroEnabled
+            isRetroEnabled ||
+            isBassBoostEnabled
               ? "text-theme-500 drop-shadow-[0_0_8px_var(--glow-color)]"
               : "text-neutral-400 hover:text-white"
           }`}
@@ -256,6 +261,38 @@ const PlaybackSpeedButton: React.FC = () => {
               }`}
               style={{
                 left: isRetroEnabled ? "calc(100% - 3px - 12px)" : "2px",
+              }}
+            />
+          </button>
+        </div>
+
+        {/* Bass Boost */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-neutral-400">Bass Boost</span>
+            <div className="group relative flex items-center justify-center">
+              <HelpCircle
+                size={12}
+                className="text-neutral-500 cursor-help hover:text-neutral-300 transition-colors"
+              />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#252525] border border-[#404040] rounded shadow-xl text-[10px] leading-relaxed text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                重低音を強調して、キックやベースがズンズン響く迫力のあるサウンドにします。
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#252525] border-b border-r border-[#404040] rotate-45"></div>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={toggleBassBoost}
+            className={`w-8 h-4 rounded-full transition-colors relative ${
+              isBassBoostEnabled ? "bg-theme-500" : "bg-neutral-600"
+            }`}
+          >
+            <div
+              className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
+                isBassBoostEnabled ? "left-4.5 translate-x-0" : "left-0.5"
+              }`}
+              style={{
+                left: isBassBoostEnabled ? "calc(100% - 3px - 12px)" : "2px",
               }}
             />
           </button>

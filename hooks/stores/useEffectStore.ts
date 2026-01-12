@@ -10,6 +10,7 @@ export type RotationSpeed = "slow" | "medium" | "fast";
  * エフェクト設定の状態管理ストア
  * - 8D Audio（自動パンニング）
  * - Retro Mode
+ * - Bass Boost
  */
 interface EffectStore {
   // Slowed + Reverb
@@ -25,6 +26,10 @@ interface EffectStore {
   // Retro Mode
   isRetroEnabled: boolean;
   toggleRetro: () => void;
+
+  // Bass Boost
+  isBassBoostEnabled: boolean;
+  toggleBassBoost: () => void;
 
   // ハイドレート
   hasHydrated: boolean;
@@ -59,6 +64,11 @@ const useEffectStore = create<EffectStore>()(
       isRetroEnabled: false,
       toggleRetro: () =>
         set((state) => ({ isRetroEnabled: !state.isRetroEnabled })),
+
+      // Bass Boost
+      isBassBoostEnabled: false,
+      toggleBassBoost: () =>
+        set((state) => ({ isBassBoostEnabled: !state.isBassBoostEnabled })),
 
       // ハイドレート
       hasHydrated: false,
