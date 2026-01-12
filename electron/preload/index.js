@@ -17,31 +17,29 @@ function validateChannel(channel, allowedChannels) {
     }
     return true;
 }
-// 許可されたチャンネルのリスト
-var ALLOWED_INVOKE_CHANNELS = [
-    "get-store-value",
-    "set-store-value",
-    "window-minimize",
-    "window-maximize",
-    "window-close",
+var WINDOW_CHANNELS = ["window-minimize", "window-maximize", "window-close"];
+var STORE_CHANNELS = ["get-store-value", "set-store-value"];
+var FILE_CHANNELS = [
     "api-request",
     "handle-select-directory",
     "handle-scan-mp3-files",
     "handle-get-mp3-metadata",
     "handle-get-saved-music-library",
-    "download-song",
     "check-file-exists",
     "get-local-file-path",
+    "handle-get-cached-files-with-metadata",
+];
+var OFFLINE_CHANNELS = [
+    "download-song",
     "delete-song",
-    // Phase 2: Offline handlers
     "get-offline-songs",
     "delete-offline-song",
     "check-offline-status",
-    // 開発用: オフラインシミュレーション
     "toggle-offline-simulation",
     "get-offline-simulation-status",
     "set-offline-simulation",
-    // キャッシュハンドラー（オフラインライブラリ表示用）
+];
+var CACHE_CHANNELS = [
     "sync-songs-metadata",
     "sync-playlists",
     "sync-playlist-songs",
@@ -52,28 +50,26 @@ var ALLOWED_INVOKE_CHANNELS = [
     "get-cached-playlists",
     "get-cached-liked-songs",
     "get-cached-playlist-songs",
+    "get-song-by-id",
+    "get-playlist-by-id",
+    "get-songs-paginated",
+    "get-songs-total-count",
     "debug-dump-db",
-    // Local-first mutation handlers
+];
+var MUTATION_CHANNELS = [
     "add-liked-song",
     "remove-liked-song",
     "get-like-status",
     "add-playlist-song",
     "remove-playlist-song",
-    // 認証キャッシュ
+];
+var AUTH_CHANNELS = [
     "save-cached-user",
     "get-cached-user",
     "clear-cached-user",
-    "get-song-by-id",
-    "get-playlist-by-id",
-    // ページネーション対応ハンドラー
-    "get-songs-paginated",
-    "get-songs-total-count",
-    // Discord RPC
-    "discord:set-activity",
-    "discord:clear-activity",
-    // ローカルファイルキャッシュ
-    "handle-get-cached-files-with-metadata",
 ];
+var EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
+var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true);
 var ALLOWED_ON_CHANNELS = [
     "media-control",
     "download-progress",
@@ -114,7 +110,7 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
             };
         },
     },
-    // オフライン機能 (Phase 2)
+    // オフライン機能
     offline: {
         // オフライン（ダウンロード済み）の曲を全て取得
         getSongs: function () { return electron_1.ipcRenderer.invoke("get-offline-songs"); },

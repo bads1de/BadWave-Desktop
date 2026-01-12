@@ -1,0 +1,67 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+/**
+ * 8D Audio の回転速度オプション
+ */
+export type RotationSpeed = "slow" | "medium" | "fast";
+
+/**
+ * エフェクト設定の状態管理ストア
+ * - 8D Audio（自動パンニング）
+ * - Lo-Fi / Vintage Radio Mode
+ */
+interface EffectStore {
+  // 8D Audio
+  is8DAudioEnabled: boolean;
+  rotationSpeed: RotationSpeed;
+  toggle8DAudio: () => void;
+  setRotationSpeed: (speed: RotationSpeed) => void;
+
+  // Lo-Fi Mode
+  isLoFiEnabled: boolean;
+  toggleLoFi: () => void;
+
+  // ハイドレート
+  hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
+}
+
+/**
+ * 回転速度に対応するLFO周期（秒）
+ */
+export const ROTATION_SPEED_VALUES: Record<RotationSpeed, number> = {
+  slow: 8, // 8秒で1周
+  medium: 4, // 4秒で1周
+  fast: 2, // 2秒で1周
+};
+
+const useEffectStore = create<EffectStore>()(
+  persist(
+    (set) => ({
+      // 8D Audio
+      is8DAudioEnabled: false,
+      rotationSpeed: "medium" as RotationSpeed,
+      toggle8DAudio: () =>
+        set((state) => ({ is8DAudioEnabled: !state.is8DAudioEnabled })),
+      setRotationSpeed: (speed) => set({ rotationSpeed: speed }),
+
+      // Lo-Fi Mode
+      isLoFiEnabled: false,
+      toggleLoFi: () =>
+        set((state) => ({ isLoFiEnabled: !state.isLoFiEnabled })),
+
+      // ハイドレート
+      hasHydrated: false,
+      setHasHydrated: (state) => set({ hasHydrated: state }),
+    }),
+    {
+      name: "badwave-effect-store",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    }
+  )
+);
+
+export default useEffectStore;

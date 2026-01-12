@@ -13,6 +13,8 @@ import useAudioEqualizer from "@/hooks/audio/useAudioEqualizer";
 import useLyricsStore from "@/hooks/stores/useLyricsStore";
 import usePlaybackRate from "@/hooks/audio/usePlaybackRate";
 import useSpatialAudio from "@/hooks/audio/useSpatialAudio";
+import use8DAudio from "@/hooks/audio/use8DAudio";
+import useLoFiAudio from "@/hooks/audio/useLoFiAudio";
 import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
 import { mediaControls } from "@/libs/electron";
 import { isLocalSong, getPlayablePath } from "@/libs/songUtils";
@@ -76,6 +78,8 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     useAudioEqualizer();
     usePlaybackRate();
     useSpatialAudio();
+    use8DAudio();
+    useLoFiAudio();
 
     const { toggleLyrics } = useLyricsStore();
 

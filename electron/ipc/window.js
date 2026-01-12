@@ -8,6 +8,7 @@ function setupWindowHandlers() {
         var win = electron_1.BrowserWindow.fromWebContents(event.sender);
         win === null || win === void 0 ? void 0 : win.minimize();
     });
+    // 最大化/復元
     electron_1.ipcMain.handle("window-maximize", function (event) {
         var win = electron_1.BrowserWindow.fromWebContents(event.sender);
         if (win === null || win === void 0 ? void 0 : win.isMaximized()) {
@@ -17,6 +18,7 @@ function setupWindowHandlers() {
             win === null || win === void 0 ? void 0 : win.maximize();
         }
     });
+    // ウィンドウを閉じる
     electron_1.ipcMain.handle("window-close", function (event) {
         var win = electron_1.BrowserWindow.fromWebContents(event.sender);
         // アプリケーションの仕様として、closeではなくhideする場合が多いが
