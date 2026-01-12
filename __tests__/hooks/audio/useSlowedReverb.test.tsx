@@ -7,20 +7,22 @@ import useEffectStore from "@/hooks/stores/useEffectStore";
 import usePlaybackRateStore from "@/hooks/stores/usePlaybackRateStore";
 import { AudioEngine } from "@/libs/audio/AudioEngine";
 
-// AudioEngine のモック
+// AudioEngine Mock
+const mockSetPreservesPitch = jest.fn();
+const mockSetSlowedReverbMode = jest.fn();
+const mockEngineState = { isInitialized: true };
+
 jest.mock("@/libs/audio/AudioEngine", () => ({
   AudioEngine: {
     getInstance: jest.fn(() => ({
-      isInitialized: true,
-      setPreservesPitch: jest.fn(),
-      setSlowedReverbMode: jest.fn(),
+      get isInitialized() { return mockEngineState.isInitialized; },
+      setPreservesPitch: mockSetPreservesPitch,
+      setSlowedReverbMode: mockSetSlowedReverbMode,
     })),
   },
 }));
 
 describe("useSlowedReverb", () => {
-  const mockEngine = AudioEngine.getInstance();
-
   beforeEach(() => {
     jest.clearAllMocks();
     act(() => {
@@ -29,15 +31,15 @@ describe("useSlowedReverb", () => {
       usePlaybackRateStore.setState({ rate: 1.0 });
     });
     // モックのリセット
-    (mockEngine.isInitialized as any) = true;
+    mockEngineState.isInitialized = true;
   });
 
   it("should initialize with default logic (OFF)", () => {
     renderHook(() => useSlowedReverb());
 
     // 初期状態ではOFFのロジックが走るはず
-    expect(mockEngine.setPreservesPitch).toHaveBeenCalledWith(true);
-    expect(mockEngine.setSlowedReverbMode).toHaveBeenCalledWith(false);
+    expect(mockSetPreservesPitch).toHaveBeenCalledWith(true);
+    expect(mockSetSlowedReverbMode).toHaveBeenCalledWith(false);
     expect(usePlaybackRateStore.getState().rate).toBe(1.0);
   });
 
@@ -52,10 +54,10 @@ describe("useSlowedReverb", () => {
     expect(usePlaybackRateStore.getState().rate).toBe(0.85);
 
     // 2. ピッチ補正がOFF (false) になること
-    expect(mockEngine.setPreservesPitch).toHaveBeenCalledWith(false);
+    expect(mockSetPreservesPitch).toHaveBeenCalledWith(false);
 
     // 3. AudioEngineのモードがONになること（リバーブ適用）
-    expect(mockEngine.setSlowedReverbMode).toHaveBeenCalledWith(true);
+    expect(mockSetSlowedReverbMode).toHaveBeenCalledWith(true);
   });
 
   it("should revert effects when disabled", () => {
@@ -75,10 +77,10 @@ describe("useSlowedReverb", () => {
     expect(usePlaybackRateStore.getState().rate).toBe(1.0);
 
     // 2. ピッチ補正がON (true) に戻ること
-    expect(mockEngine.setPreservesPitch).toHaveBeenCalledWith(true);
+    expect(mockSetPreservesPitch).toHaveBeenCalledWith(true);
 
     // 3. AudioEngineのモードがOFFになること
-    expect(mockEngine.setSlowedReverbMode).toHaveBeenCalledWith(false);
+    expect(mockSetSlowedReverbMode).toHaveBeenCalledWith(false);
   });
 
   it("should store previous rate and restore it", () => {

@@ -13,17 +13,21 @@ const useSlowedReverb = () => {
   const isSlowedReverb = useEffectStore((state) => state.isSlowedReverb);
   const setRate = usePlaybackRateStore((state) => state.setRate);
 
-  // 元の速度を保持するためのRef（今回はシンプルに1.0に戻すが、拡張性を考慮）
-  const previousRateRef = useRef<number>(1.0);
+  // 元の速度を保持するためのRef。nullの場合は未保存（初期状態）
+  const previousRateRef = useRef<number | null>(null);
 
   useEffect(() => {
     const engine = AudioEngine.getInstance();
 
     if (isSlowedReverb) {
-      // 現在の速度を保存して、0.85倍に設定
-      previousRateRef.current = usePlaybackRateStore.getState().rate;
-      if (previousRateRef.current === 0.85) {
-        // 既に0.85なら（連打などで）保存しない、あるいは1.0をデフォルトと仮定
+      // 現在の速度を保存
+      const currentRate = usePlaybackRateStore.getState().rate;
+      
+      // 既に0.85（Slowed状態）なら、誤って0.85を保存しないようにする
+      if (currentRate !== 0.85) {
+        previousRateRef.current = currentRate;
+      } else if (previousRateRef.current === null) {
+        // 現在0.85で、過去の保存値がない場合はデフォルト1.0とする
         previousRateRef.current = 1.0;
       }
 
@@ -37,14 +41,15 @@ const useSlowedReverb = () => {
       engine.setPreservesPitch(true);
       engine.setSlowedReverbMode(false);
 
-      // 速度を1.0に戻す（ユーザー体験として、エフェクトOFFで通常速度に戻るのが自然）
-      // もし以前の速度に戻したいなら setRate(previousRateRef.current) を使う
-      setRate(1.0);
+      // 速度を元に戻す（保存されている場合のみ）
+      // これにより、初期マウント時(false)に意図せず速度が上書きされるのを防ぐ
+      if (previousRateRef.current !== null) {
+        setRate(previousRateRef.current);
+      }
     }
   }, [isSlowedReverb, setRate]);
 
   // Audioソースが変わった時などにピッチ補正設定がリセットされる可能性があるため再適用
-  // AudioEngine側で永続化されていない設定（HTMLAudioElementのプロパティ）を監視する必要がある
   useEffect(() => {
     const engine = AudioEngine.getInstance();
     const audio = engine.audio;

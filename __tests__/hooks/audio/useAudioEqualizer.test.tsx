@@ -3,7 +3,6 @@
  */
 import { renderHook, act, waitFor } from "@testing-library/react";
 import useAudioEqualizer from "@/hooks/audio/useAudioEqualizer";
-import usePlaybackRateStore from "@/hooks/stores/usePlaybackRateStore";
 import useEqualizerStore from "@/hooks/stores/useEqualizerStore";
 import { AudioEngine } from "@/libs/audio/AudioEngine";
 
@@ -29,7 +28,6 @@ describe("useAudioEqualizer", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     act(() => {
-      usePlaybackRateStore.setState({ isSlowedReverb: false });
       useEqualizerStore.setState({ isEnabled: true, bands: Array(6).fill({ freq: 100, gain: 5 }) });
     });
     mockFilter.gain.value = 0;
@@ -52,30 +50,6 @@ describe("useAudioEqualizer", () => {
 
     await waitFor(() => {
       expect(mockFilter.gain.value).toBe(0);
-    });
-  });
-
-  it("should apply reverb gain when isSlowedReverb is true", async () => {
-    act(() => {
-      usePlaybackRateStore.setState({ isSlowedReverb: true });
-    });
-
-    renderHook(() => useAudioEqualizer());
-
-    await waitFor(() => {
-      expect(mockReverbGain.gain.setTargetAtTime).toHaveBeenCalledWith(0.4, 100, 0.1);
-    });
-  });
-
-  it("should set reverb gain to 0 when isSlowedReverb is false", async () => {
-    act(() => {
-      usePlaybackRateStore.setState({ isSlowedReverb: false });
-    });
-
-    renderHook(() => useAudioEqualizer());
-
-    await waitFor(() => {
-      expect(mockReverbGain.gain.setTargetAtTime).toHaveBeenCalledWith(0, 100, 0.1);
     });
   });
 });
