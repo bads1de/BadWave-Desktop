@@ -1,7 +1,7 @@
 import { BrowserWindow, shell, app } from "electron";
 import * as path from "path";
 import { isDev, debugLog } from "../utils";
-import { startNextServer, getServerPort, stopNextServer } from "./server";
+import { startNextServer, stopNextServer } from "./server";
 
 // グローバル参照を保持（ガベージコレクションを防ぐため）
 let mainWindow: BrowserWindow | null = null;

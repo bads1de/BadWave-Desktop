@@ -128,10 +128,3 @@ export function stopNextServer(): void {
     serverProcess = null;
   }
 }
-
-/**
- * 現在のサーバーポートを取得
- */
-export function getServerPort(): number {
-  return serverPort;
-}
