@@ -126,7 +126,7 @@ const PulseUploadModal: React.FC = memo(() => {
             id="genre"
             disabled={isLoading}
             {...register("genre", { required: true })}
-            placeholder="例: Synthwave, Vaporwave, Lo-fi"
+            placeholder="例: Synthwave, Vaporwave, Retro"
             className="h-10 bg-zinc-800/50 border-zinc-700/50 focus:border-theme-500/50"
           />
         </div>

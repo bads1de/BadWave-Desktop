@@ -8,7 +8,7 @@ describe("useEffectStore", () => {
         isSlowedReverb: false,
         is8DAudioEnabled: false,
         rotationSpeed: "medium",
-        isLoFiEnabled: false,
+        isRetroEnabled: false,
         hasHydrated: false,
       });
     });
@@ -16,7 +16,7 @@ describe("useEffectStore", () => {
 
   it("should toggle Slowed+Reverb", () => {
     expect(useEffectStore.getState().isSlowedReverb).toBe(false);
-    
+
     act(() => {
       useEffectStore.getState().toggleSlowedReverb();
     });
@@ -43,13 +43,13 @@ describe("useEffectStore", () => {
     expect(useEffectStore.getState().rotationSpeed).toBe("fast");
   });
 
-  it("should toggle Lo-Fi mode", () => {
-    expect(useEffectStore.getState().isLoFiEnabled).toBe(false);
+  it("should toggle Retro mode", () => {
+    expect(useEffectStore.getState().isRetroEnabled).toBe(false);
 
     act(() => {
-      useEffectStore.getState().toggleLoFi();
+      useEffectStore.getState().toggleRetro();
     });
-    expect(useEffectStore.getState().isLoFiEnabled).toBe(true);
+    expect(useEffectStore.getState().isRetroEnabled).toBe(true);
   });
 
   it("should handle hydration state", () => {

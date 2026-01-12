@@ -13,18 +13,20 @@ const mockSetPreservesPitch = jest.fn();
 const mockSetSlowedReverbMode = jest.fn();
 const mockSetSpatialMode = jest.fn();
 const mockSet8DAudioMode = jest.fn();
-const mockSetLoFiMode = jest.fn();
+const mockSetRetroMode = jest.fn();
 const mockEngineState = { isInitialized: true };
 
 jest.mock("@/libs/audio/AudioEngine", () => ({
   AudioEngine: {
     getInstance: jest.fn(() => ({
-      get isInitialized() { return mockEngineState.isInitialized; },
+      get isInitialized() {
+        return mockEngineState.isInitialized;
+      },
       setPreservesPitch: mockSetPreservesPitch,
       setSlowedReverbMode: mockSetSlowedReverbMode,
       setSpatialMode: mockSetSpatialMode,
       set8DAudioMode: mockSet8DAudioMode,
-      setLoFiMode: mockSetLoFiMode,
+      setRetroMode: mockSetRetroMode,
     })),
   },
 }));
@@ -38,7 +40,7 @@ describe("useAudioEffects", () => {
         isSlowedReverb: false,
         is8DAudioEnabled: false,
         rotationSpeed: "medium",
-        isLoFiEnabled: false,
+        isRetroEnabled: false,
       });
       useSpatialStore.setState({ isSpatialEnabled: false });
       usePlaybackRateStore.setState({ rate: 1.0 });
@@ -141,23 +143,23 @@ describe("useAudioEffects", () => {
     });
   });
 
-  describe("Lo-Fi Mode", () => {
-    it("should toggle Lo-Fi mode", () => {
+  describe("Retro Mode", () => {
+    it("should toggle Retro mode", () => {
       const { result } = renderHook(() => useAudioEffects());
 
       act(() => {
-        result.current.toggleLoFi();
+        result.current.toggleRetro();
       });
 
-      expect(result.current.isLoFiEnabled).toBe(true);
-      expect(mockSetLoFiMode).toHaveBeenCalledWith(true);
+      expect(result.current.isRetroEnabled).toBe(true);
+      expect(mockSetRetroMode).toHaveBeenCalledWith(true);
 
       act(() => {
-        result.current.toggleLoFi();
+        result.current.toggleRetro();
       });
 
-      expect(result.current.isLoFiEnabled).toBe(false);
-      expect(mockSetLoFiMode).toHaveBeenCalledWith(false);
+      expect(result.current.isRetroEnabled).toBe(false);
+      expect(mockSetRetroMode).toHaveBeenCalledWith(false);
     });
   });
 
@@ -165,13 +167,17 @@ describe("useAudioEffects", () => {
     it("should do nothing if engine is not initialized", () => {
       mockEngineState.isInitialized = false;
       const { result } = renderHook(() => useAudioEffects());
-      
-      // Lo-Fi check
-      act(() => { result.current.toggleLoFi(); });
-      expect(mockSetLoFiMode).not.toHaveBeenCalled();
+
+      // Retro check
+      act(() => {
+        result.current.toggleRetro();
+      });
+      expect(mockSetRetroMode).not.toHaveBeenCalled();
 
       // 8D Audio check
-      act(() => { result.current.toggle8DAudio(); });
+      act(() => {
+        result.current.toggle8DAudio();
+      });
       expect(mockSet8DAudioMode).not.toHaveBeenCalled();
     });
   });

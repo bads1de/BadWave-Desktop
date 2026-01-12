@@ -78,7 +78,7 @@ describe("AudioEngine", () => {
     engine.initialize();
 
     expect(mockAudioContext.createMediaElementSource).toHaveBeenCalled();
-    expect(mockAudioContext.createBiquadFilter).toHaveBeenCalled(); // EQ filters, Spatial, Lo-Fi
+    expect(mockAudioContext.createBiquadFilter).toHaveBeenCalled(); // EQ filters, Spatial, Retro
     expect(mockAudioContext.createGain).toHaveBeenCalled(); // Master, Reverb, LFO
     expect(mockAudioContext.createStereoPanner).toHaveBeenCalled();
     expect(engine.isInitialized).toBe(true);
@@ -87,7 +87,7 @@ describe("AudioEngine", () => {
   it("should not initialize twice", () => {
     engine.initialize();
     mockAudioContext.createMediaElementSource.mockClear();
-    
+
     engine.initialize();
     expect(mockAudioContext.createMediaElementSource).not.toHaveBeenCalled();
   });
@@ -102,19 +102,19 @@ describe("AudioEngine", () => {
       // Enable
       engine.set8DAudioMode(true, 4);
       expect(mockLinearRampToValueAtTime).toHaveBeenCalled(); // Gain ramp up
-      
+
       // Disable
       engine.set8DAudioMode(false);
       expect(mockLinearRampToValueAtTime).toHaveBeenCalled(); // Gain ramp down
     });
 
-    it("should control Lo-Fi mode", () => {
+    it("should control Retro mode", () => {
       // Enable
-      engine.setLoFiMode(true);
+      engine.setRetroMode(true);
       expect(mockExponentialRampToValueAtTime).toHaveBeenCalledTimes(2); // HPF freq, LPF freq changes
-      
+
       // Disable
-      engine.setLoFiMode(false);
+      engine.setRetroMode(false);
       expect(mockExponentialRampToValueAtTime).toHaveBeenCalled();
     });
 
@@ -132,23 +132,23 @@ describe("AudioEngine", () => {
     });
 
     it("should update reverb state correctly based on priority", () => {
-        // Spatial > SlowedReverb > Off
-        
-        // 1. Spatial ON
-        engine.setSpatialMode(true);
-        // Spatial Active
-        
-        // 2. SlowedReverb ON (Spatial is still ON)
-        engine.setSlowedReverbMode(true);
-        // Should prioritize Spatial
-        
-        // 3. Spatial OFF
-        engine.setSpatialMode(false);
-        // Should fallback to SlowedReverb
-        
-        // 4. SlowedReverb OFF
-        engine.setSlowedReverbMode(false);
-        // Should be OFF
+      // Spatial > SlowedReverb > Off
+
+      // 1. Spatial ON
+      engine.setSpatialMode(true);
+      // Spatial Active
+
+      // 2. SlowedReverb ON (Spatial is still ON)
+      engine.setSlowedReverbMode(true);
+      // Should prioritize Spatial
+
+      // 3. Spatial OFF
+      engine.setSpatialMode(false);
+      // Should fallback to SlowedReverb
+
+      // 4. SlowedReverb OFF
+      engine.setSlowedReverbMode(false);
+      // Should be OFF
     });
   });
 });

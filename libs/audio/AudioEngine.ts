@@ -27,10 +27,11 @@ class AudioEngine {
   private lfoGain: GainNode | null = null;
   private is8DAudioActive = false;
 
-  // Lo-Fi ノード
-  public loFiLowPass: BiquadFilterNode | null = null;
-  public loFiHighPass: BiquadFilterNode | null = null;
-  private isLoFiActive = false;
+  // Retro ノード
+  public retroLowPass: BiquadFilterNode | null = null;
+  public retroHighPass: BiquadFilterNode | null = null;
+  public distortionNode: WaveShaperNode | null = null;
+  private isRetroActive = false;
 
   // 状態管理
   public currentSongId: string | null = null;
@@ -116,21 +117,25 @@ class AudioEngine {
       this.lfoGain.connect(this.stereoPanner.pan);
       this.lfoOscillator.start();
 
-      // --- Lo-Fi ノード作成 ---
+      // --- Retro ノード作成 ---
       // High Pass: 低音を削る
-      this.loFiHighPass = this.context.createBiquadFilter();
-      this.loFiHighPass.type = "highpass";
-      this.loFiHighPass.frequency.value = 0; // 初期は全通（0Hz）
-      this.loFiHighPass.Q.value = 0.5;
+      this.retroHighPass = this.context.createBiquadFilter();
+      this.retroHighPass.type = "highpass";
+      this.retroHighPass.frequency.value = 0; // 初期は全通（0Hz）
+      this.retroHighPass.Q.value = 0.5;
 
       // Low Pass (High Cut): 高音を削る
-      this.loFiLowPass = this.context.createBiquadFilter();
-      this.loFiLowPass.type = "lowpass";
-      this.loFiLowPass.frequency.value = 22050; // 初期は全通
-      this.loFiLowPass.Q.value = 0.5;
+      this.retroLowPass = this.context.createBiquadFilter();
+      this.retroLowPass.type = "lowpass";
+      this.retroLowPass.frequency.value = 22050; // 初期は全通
+      this.retroLowPass.Q.value = 0.5;
+
+      // Distortion (WaveShaper): 歪みを追加
+      this.distortionNode = this.context.createWaveShaper();
+      this.distortionNode.oversample = "4x";
 
       // --- 接続 (Routing) ---
-      // Main Path: Source -> EQ -> Spatial -> 8D Panner -> Lo-Fi(HighPass->LowPass) -> MasterGain -> Dest
+      // Main Path: Source -> EQ -> Spatial -> 8D Panner -> Retro(HighPass->LowPass->Distortion) -> MasterGain -> Dest
       let currentNode: AudioNode = this.sourceNode;
 
       this.filters.forEach((filter) => {
@@ -146,10 +151,14 @@ class AudioEngine {
       currentNode.connect(this.stereoPanner);
       currentNode = this.stereoPanner;
 
-      // Lo-Fi Filters 接続
-      currentNode.connect(this.loFiHighPass);
-      currentNode.connect(this.loFiLowPass);
-      currentNode = this.loFiLowPass;
+      // Retro Filters 接続
+      currentNode.connect(this.retroHighPass);
+      currentNode.connect(this.retroLowPass);
+      currentNode = this.retroLowPass;
+
+      // Distortion 接続
+      currentNode.connect(this.distortionNode);
+      currentNode = this.distortionNode;
 
       currentNode.connect(this.gainNode);
       this.gainNode.connect(this.context.destination);
@@ -182,6 +191,23 @@ class AudioEngine {
     }
 
     this.convolver.buffer = impulse;
+  }
+
+  /**
+   * ディストーションカーブを生成
+   * amount: 0 ~ 100+ (大きいほど歪む)
+   */
+  private makeDistortionCurve(amount: number): Float32Array {
+    const k = typeof amount === "number" ? amount : 50;
+    const n_samples = 44100;
+    const curve = new Float32Array(n_samples);
+    const deg = Math.PI / 180;
+
+    for (let i = 0; i < n_samples; ++i) {
+      const x = (i * 2) / n_samples - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
   }
 
   /**
@@ -306,40 +332,57 @@ class AudioEngine {
   }
 
   // ========================================
-  // Lo-Fi / Vintage Radio Mode
+  // Retro Mode (Old: Lo-Fi/Vintage)
   // ========================================
 
   /**
-   * Lo-Fi / Vintage Radio モードの有効/無効を切り替え
-   * クラックルノイズ無し、帯域制限のみで温かみを出す
+   * Retro モードの有効/無効を切り替え
+   * 80年代カセットテープ / 32kbps風の劣化サウンド
    */
-  public setLoFiMode(enabled: boolean): void {
-    if (!this.loFiLowPass || !this.loFiHighPass || !this.context) return;
+  public setRetroMode(enabled: boolean): void {
+    if (
+      !this.retroLowPass ||
+      !this.retroHighPass ||
+      !this.distortionNode ||
+      !this.context
+    )
+      return;
 
     const now = this.context.currentTime;
 
     if (enabled) {
-      // 温かみのあるラジオボイス設定
-      // HighPass: 500Hz以下をカット (低音を削る)
-      this.loFiHighPass.frequency.exponentialRampToValueAtTime(500, now + 0.3);
-      this.loFiHighPass.Q.value = 0.8;
+      // 32kbps m4a / 80年代ラジカセ風（歪み + 帯域制限）
 
-      // LowPass: 3000Hz以上をカット (高音を削る)
-      this.loFiLowPass.frequency.exponentialRampToValueAtTime(3000, now + 0.3);
-      this.loFiLowPass.Q.value = 0.5; // マイルドに
+      // HighPass: 200Hz以下をカット (低音を削るが、ボーカルの芯は残す)
+      this.retroHighPass.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+      this.retroHighPass.Q.value = 1.0;
 
-      this.isLoFiActive = true;
+      // LowPass: 4000Hz以上をカット (高域のチリチリを抑える)
+      this.retroLowPass.frequency.exponentialRampToValueAtTime(4000, now + 0.3);
+      this.retroLowPass.Q.value = 1.0;
+
+      // Distortion: 軽めのサチュレーションでテープの質感を出す
+      // amount=100 くらいが丁度いい劣化感
+      this.distortionNode.curve = this.makeDistortionCurve(100) as any;
+
+      this.isRetroActive = true;
     } else {
       // フィルターを全通に戻す
       // HighPass -> 10Hz (0にはできないため低い値)
-      this.loFiHighPass.frequency.exponentialRampToValueAtTime(10, now + 0.3);
-      this.loFiHighPass.Q.value = 0.5;
+      this.retroHighPass.frequency.exponentialRampToValueAtTime(10, now + 0.3);
+      this.retroHighPass.Q.value = 0.5;
 
       // LowPass -> 22050Hz
-      this.loFiLowPass.frequency.exponentialRampToValueAtTime(22050, now + 0.3);
-      this.loFiLowPass.Q.value = 0.5;
+      this.retroLowPass.frequency.exponentialRampToValueAtTime(
+        22050,
+        now + 0.3
+      );
+      this.retroLowPass.Q.value = 0.5;
 
-      this.isLoFiActive = false;
+      // Distortion解除
+      this.distortionNode.curve = null;
+
+      this.isRetroActive = false;
     }
   }
 }

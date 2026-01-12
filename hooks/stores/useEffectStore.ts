@@ -9,7 +9,7 @@ export type RotationSpeed = "slow" | "medium" | "fast";
 /**
  * エフェクト設定の状態管理ストア
  * - 8D Audio（自動パンニング）
- * - Lo-Fi / Vintage Radio Mode
+ * - Retro Mode
  */
 interface EffectStore {
   // Slowed + Reverb
@@ -22,9 +22,9 @@ interface EffectStore {
   toggle8DAudio: () => void;
   setRotationSpeed: (speed: RotationSpeed) => void;
 
-  // Lo-Fi Mode
-  isLoFiEnabled: boolean;
-  toggleLoFi: () => void;
+  // Retro Mode
+  isRetroEnabled: boolean;
+  toggleRetro: () => void;
 
   // ハイドレート
   hasHydrated: boolean;
@@ -55,10 +55,10 @@ const useEffectStore = create<EffectStore>()(
         set((state) => ({ is8DAudioEnabled: !state.is8DAudioEnabled })),
       setRotationSpeed: (speed) => set({ rotationSpeed: speed }),
 
-      // Lo-Fi Mode
-      isLoFiEnabled: false,
-      toggleLoFi: () =>
-        set((state) => ({ isLoFiEnabled: !state.isLoFiEnabled })),
+      // Retro Mode
+      isRetroEnabled: false,
+      toggleRetro: () =>
+        set((state) => ({ isRetroEnabled: !state.isRetroEnabled })),
 
       // ハイドレート
       hasHydrated: false,

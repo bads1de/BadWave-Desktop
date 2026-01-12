@@ -12,7 +12,7 @@ import { AudioEngine } from "@/libs/audio/AudioEngine";
  * - Spatial Audio (空間オーディオ)
  * - Slowed + Reverb
  * - 8D Audio
- * - Lo-Fi Mode
+ * - Retro Mode
  */
 const useAudioEffects = () => {
   // Stores
@@ -23,8 +23,8 @@ const useAudioEffects = () => {
     rotationSpeed,
     toggle8DAudio,
     setRotationSpeed,
-    isLoFiEnabled,
-    toggleLoFi,
+    isRetroEnabled,
+    toggleRetro,
   } = useEffectStore();
 
   const { isSpatialEnabled, toggleSpatialEnabled } = useSpatialStore();
@@ -99,32 +99,32 @@ const useAudioEffects = () => {
     [setRotationSpeed]
   );
 
-  // --- Lo-Fi Logic ---
+  // --- Retro Logic ---
   useEffect(() => {
     const engine = AudioEngine.getInstance();
     if (!engine.isInitialized) return;
 
-    engine.setLoFiMode(isLoFiEnabled);
-  }, [isLoFiEnabled]);
+    engine.setRetroMode(isRetroEnabled);
+  }, [isRetroEnabled]);
 
   return {
     // Spatial
     isSpatialEnabled,
     toggleSpatialEnabled,
-    
+
     // Slowed + Reverb
     isSlowedReverb,
     toggleSlowedReverb,
-    
+
     // 8D Audio
     is8DAudioEnabled,
     rotationSpeed,
     toggle8DAudio,
     change8DRotationSpeed,
-    
-    // Lo-Fi
-    isLoFiEnabled,
-    toggleLoFi,
+
+    // Retro
+    isRetroEnabled,
+    toggleRetro,
   };
 };
 
