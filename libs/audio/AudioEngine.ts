@@ -23,7 +23,175 @@ class AudioEngine {
 
   // 8D Audio ノード
   public stereoPanner: StereoPannerNode | null = null;
-  /* ... (中略) ... */
+  private lfoOscillator: OscillatorNode | null = null;
+  private lfoGain: GainNode | null = null;
+  private is8DAudioActive = false;
+
+  // Lo-Fi ノード
+  public loFiLowPass: BiquadFilterNode | null = null;
+  public loFiHighPass: BiquadFilterNode | null = null;
+  private isLoFiActive = false;
+
+  // 状態管理
+  public currentSongId: string | null = null;
+  public isInitialized = false;
+
+  private constructor() {
+    // ブラウザ環境でのみ audio 要素を作成
+    if (typeof window !== "undefined") {
+      this.audio = new Audio();
+      this.audio.crossOrigin = "anonymous";
+    }
+  }
+
+  public static getInstance(): AudioEngine {
+    if (!AudioEngine.instance) {
+      AudioEngine.instance = new AudioEngine();
+    }
+    return AudioEngine.instance;
+  }
+
+  /**
+   * Web Audio API グラフを初期化（イコライザー、リバーブ含む）
+   * 一度だけ呼ばれる
+   */
+  public initialize(): void {
+    if (!this.audio || this.isInitialized) return;
+
+    try {
+      this.context = new AudioContext();
+      this.sourceNode = this.context.createMediaElementSource(this.audio);
+
+      // --- ノード作成 ---
+
+      // 6バンドイコライザーフィルターを作成
+      this.filters = EQ_BANDS.map((band, index) => {
+        const filter = this.context!.createBiquadFilter();
+        if (index === 0) {
+          filter.type = "lowshelf";
+        } else if (index === EQ_BANDS.length - 1) {
+          filter.type = "highshelf";
+        } else {
+          filter.type = "peaking";
+          filter.Q.value = 1.4;
+        }
+        filter.frequency.value = band.freq;
+        filter.gain.value = 0;
+        return filter;
+      });
+
+      // 空間オーディオ用（ダンスホール風）フィルタ
+      // LowPassフィルタで高音を削り、こもった音を作る
+      this.spatialFilter = this.context.createBiquadFilter();
+      this.spatialFilter.type = "lowpass";
+      this.spatialFilter.frequency.value = 22050; // デフォルトは全通（エフェクトなし）
+      this.spatialFilter.Q.value = 1.0; // 少し共振させて「箱鳴り」感を出す
+
+      // マスターゲインノード
+      this.gainNode = this.context.createGain();
+      this.gainNode.gain.value = 1;
+
+      // リバーブ用コンボルバーとゲインノード
+      this.convolver = this.context.createConvolver();
+      this.reverbGainNode = this.context.createGain();
+      this.reverbGainNode.gain.value = 0;
+
+      // インパルス応答を生成
+      this.setupImpulseResponse();
+
+      // --- 8D Audio ノード作成 ---
+      this.stereoPanner = this.context.createStereoPanner();
+      this.stereoPanner.pan.value = 0; // 中央から開始
+
+      // LFO (Low Frequency Oscillator) でパン値を自動制御
+      this.lfoOscillator = this.context.createOscillator();
+      this.lfoOscillator.type = "sine";
+      this.lfoOscillator.frequency.value = 0.25; // 4秒で1周（デフォルト）
+
+      this.lfoGain = this.context.createGain();
+      this.lfoGain.gain.value = 0; // 初期はOFF（8D無効）
+
+      // LFO -> LFOGain -> StereoPanner.pan
+      this.lfoOscillator.connect(this.lfoGain);
+      this.lfoGain.connect(this.stereoPanner.pan);
+      this.lfoOscillator.start();
+
+      // --- Lo-Fi ノード作成 ---
+      // High Pass: 低音を削る
+      this.loFiHighPass = this.context.createBiquadFilter();
+      this.loFiHighPass.type = "highpass";
+      this.loFiHighPass.frequency.value = 0; // 初期は全通（0Hz）
+      this.loFiHighPass.Q.value = 0.5;
+
+      // Low Pass (High Cut): 高音を削る
+      this.loFiLowPass = this.context.createBiquadFilter();
+      this.loFiLowPass.type = "lowpass";
+      this.loFiLowPass.frequency.value = 22050; // 初期は全通
+      this.loFiLowPass.Q.value = 0.5;
+
+      // --- 接続 (Routing) ---
+      // Main Path: Source -> EQ -> Spatial -> 8D Panner -> Lo-Fi(HighPass->LowPass) -> MasterGain -> Dest
+      let currentNode: AudioNode = this.sourceNode;
+
+      this.filters.forEach((filter) => {
+        currentNode.connect(filter);
+        currentNode = filter;
+      });
+
+      // Spatial Filter 接続
+      currentNode.connect(this.spatialFilter);
+      currentNode = this.spatialFilter;
+
+      // 8D Audio Panner 接続
+      currentNode.connect(this.stereoPanner);
+      currentNode = this.stereoPanner;
+
+      // Lo-Fi Filters 接続
+      currentNode.connect(this.loFiHighPass);
+      currentNode.connect(this.loFiLowPass);
+      currentNode = this.loFiLowPass;
+
+      currentNode.connect(this.gainNode);
+      this.gainNode.connect(this.context.destination);
+
+      // Reverb Path: (After effects) -> ReverbGain -> Convolver -> Dest
+      this.stereoPanner.connect(this.reverbGainNode);
+      this.reverbGainNode.connect(this.convolver);
+      this.convolver.connect(this.context.destination);
+
+      this.isInitialized = true;
+      console.log("[AudioEngine] Initialized successfully");
+    } catch (error) {
+      console.error("[AudioEngine] Initialization failed:", error);
+    }
+  }
+
+  private setupImpulseResponse(): void {
+    if (!this.context || !this.convolver) return;
+
+    const sampleRate = this.context.sampleRate;
+    const length = sampleRate * 3;
+    const impulse = this.context.createBuffer(2, length, sampleRate);
+    const left = impulse.getChannelData(0);
+    const right = impulse.getChannelData(1);
+
+    for (let i = 0; i < length; i++) {
+      const decay = Math.pow((length - i) / length, 2);
+      left[i] = (Math.random() * 2 - 1) * decay;
+      right[i] = (Math.random() * 2 - 1) * decay;
+    }
+
+    this.convolver.buffer = impulse;
+  }
+
+  /**
+   * AudioContextをresumeする（ユーザー操作後に呼ぶ）
+   */
+  public async resumeContext(): Promise<void> {
+    if (this.context && this.context.state === "suspended") {
+      await this.context.resume();
+    }
+  }
 
   /**
    * リバーブ量 (Wet/Dry の Wet成分) を設定 (0.0 - 1.0)

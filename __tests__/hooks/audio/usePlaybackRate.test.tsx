@@ -27,7 +27,7 @@ describe("usePlaybackRate", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     act(() => {
-      usePlaybackRateStore.setState({ rate: 1.0, isSlowedReverb: false });
+      usePlaybackRateStore.setState({ rate: 1.0 });
     });
     mockAudio.playbackRate = 1.0;
   });
@@ -54,18 +54,6 @@ describe("usePlaybackRate", () => {
     expect(mockAudio.playbackRate).toBe(2.0);
   });
 
-  it("should use 0.85 when isSlowedReverb is true", () => {
-    act(() => {
-      usePlaybackRateStore.setState({ rate: 1.0, isSlowedReverb: true });
-    });
-
-    renderHook(() => usePlaybackRate());
-
-    expect(mockAudio.playbackRate).toBe(0.85);
-    // preservesPitch should be false when isSlowedReverb is true
-    expect((mockAudio as any).preservesPitch).toBe(false);
-  });
-
   it("should re-apply playback rate on durationchange event", () => {
     act(() => {
       usePlaybackRateStore.setState({ rate: 1.25 });
@@ -76,9 +64,9 @@ describe("usePlaybackRate", () => {
     // Simulate browser resetting playbackRate on source change
     mockAudio.playbackRate = 1.0;
 
-    const durationChangeHandler = (mockAudio.addEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "durationchange"
-    )[1];
+    const durationChangeHandler = (
+      mockAudio.addEventListener as jest.Mock
+    ).mock.calls.find((call) => call[0] === "durationchange")[1];
 
     act(() => {
       durationChangeHandler();
