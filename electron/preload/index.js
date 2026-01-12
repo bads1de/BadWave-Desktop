@@ -71,11 +71,14 @@ var ALLOWED_INVOKE_CHANNELS = [
     // Discord RPC
     "discord:set-activity",
     "discord:clear-activity",
+    // ローカルファイルキャッシュ
+    "handle-get-cached-files-with-metadata",
 ];
 var ALLOWED_ON_CHANNELS = [
     "media-control",
     "download-progress",
     "offline-simulation-changed",
+    "scan-progress",
 ];
 var ALLOWED_SEND_CHANNELS = ["log", "player-state-change"];
 // Electronの機能をウィンドウオブジェクトに安全に公開
@@ -225,7 +228,9 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
     },
     // Discord RPC
     discord: {
-        setActivity: function (activity) { return electron_1.ipcRenderer.invoke("discord:set-activity", activity); },
+        setActivity: function (activity) {
+            return electron_1.ipcRenderer.invoke("discord:set-activity", activity);
+        },
         clearActivity: function () { return electron_1.ipcRenderer.invoke("discord:clear-activity"); },
     },
     // IPC通信

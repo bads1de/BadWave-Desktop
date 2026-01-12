@@ -64,12 +64,15 @@ const ALLOWED_INVOKE_CHANNELS = [
   // Discord RPC
   "discord:set-activity",
   "discord:clear-activity",
+  // ローカルファイルキャッシュ
+  "handle-get-cached-files-with-metadata",
 ];
 
 const ALLOWED_ON_CHANNELS = [
   "media-control",
   "download-progress",
   "offline-simulation-changed",
+  "scan-progress",
 ];
 
 const ALLOWED_SEND_CHANNELS = ["log", "player-state-change"];
@@ -208,10 +211,11 @@ contextBridge.exposeInMainWorld("electron", {
     // ユーザー情報をクリア
     clearCachedUser: () => ipcRenderer.invoke("clear-cached-user"),
   },
-  
+
   // Discord RPC
   discord: {
-    setActivity: (activity: any) => ipcRenderer.invoke("discord:set-activity", activity),
+    setActivity: (activity: any) =>
+      ipcRenderer.invoke("discord:set-activity", activity),
     clearActivity: () => ipcRenderer.invoke("discord:clear-activity"),
   },
 

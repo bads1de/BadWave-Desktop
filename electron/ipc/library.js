@@ -88,9 +88,19 @@ var path = __importStar(require("path"));
 var mm = __importStar(require("music-metadata"));
 var store_1 = __importDefault(require("../lib/store"));
 var utils_1 = require("../utils");
+var window_manager_1 = require("../lib/window-manager");
 // 音楽ライブラリのデータを保存するためのストアキー
 var MUSIC_LIBRARY_KEY = "music_library";
 var MUSIC_LIBRARY_LAST_SCAN_KEY = "music_library_last_scan";
+/**
+ * スキャン進捗をフロントエンドに送信するヘルパー関数
+ */
+function sendScanProgress(progress) {
+    var mainWindow = (0, window_manager_1.getMainWindow)();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("scan-progress", progress);
+    }
+}
 function setupLibraryHandlers() {
     var _this = this;
     // 指定されたフォルダ内のMP3ファイルをスキャン（永続化対応版）
@@ -100,18 +110,25 @@ function setupLibraryHandlers() {
             args_1[_i - 2] = arguments[_i];
         }
         return __awaiter(_this, __spreadArray([_1, directoryPath_1], args_1, true), void 0, function (_, directoryPath, forceFullScan) {
-            var savedLibrary, isSameDirectory, shouldPerformDiffScan, currentLibrary, scanDirectory_1, allFiles, newFiles, modifiedFiles, unchangedFiles, _a, allFiles_1, filePath, stats, lastModified, savedFile, deletedFiles, filePath, error_1;
+            var savedLibrary, isSameDirectory, shouldPerformDiffScan, currentLibrary_1, scanDirectory_1, allFiles, newFiles, modifiedFiles, unchangedFiles, i, filePath, stats, lastModified, savedFile, deletedFiles, allFilesSet, filePath, filesWithMetadata, error_1;
             var _this = this;
             if (forceFullScan === void 0) { forceFullScan = false; }
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _b.trys.push([0, 6, , 7]);
+                        _a.trys.push([0, 6, , 7]);
                         savedLibrary = store_1.default.get(MUSIC_LIBRARY_KEY);
                         isSameDirectory = (savedLibrary === null || savedLibrary === void 0 ? void 0 : savedLibrary.directoryPath) === directoryPath;
                         shouldPerformDiffScan = isSameDirectory && !forceFullScan;
                         (0, utils_1.debugLog)("[Scan] \u30B9\u30AD\u30E3\u30F3\u958B\u59CB: ".concat(directoryPath, " (\u5DEE\u5206\u30B9\u30AD\u30E3\u30F3: ").concat(shouldPerformDiffScan, ")"));
-                        currentLibrary = {
+                        // 進捗: スキャン開始
+                        sendScanProgress({
+                            phase: "scanning",
+                            current: 0,
+                            total: 0,
+                            message: "ファイルを検索中...",
+                        });
+                        currentLibrary_1 = {
                             directoryPath: directoryPath,
                             files: {},
                         };
@@ -153,32 +170,49 @@ function setupLibraryHandlers() {
                         }); };
                         return [4 /*yield*/, scanDirectory_1(directoryPath)];
                     case 1:
-                        allFiles = _b.sent();
+                        allFiles = _a.sent();
+                        // 進捗: ファイル検索完了、分類開始
+                        sendScanProgress({
+                            phase: "analyzing",
+                            current: 0,
+                            total: allFiles.length,
+                            message: "".concat(allFiles.length, "\u500B\u306E\u30D5\u30A1\u30A4\u30EB\u3092\u5206\u6790\u4E2D..."),
+                        });
                         newFiles = [];
                         modifiedFiles = [];
                         unchangedFiles = [];
-                        _a = 0, allFiles_1 = allFiles;
-                        _b.label = 2;
+                        i = 0;
+                        _a.label = 2;
                     case 2:
-                        if (!(_a < allFiles_1.length)) return [3 /*break*/, 5];
-                        filePath = allFiles_1[_a];
+                        if (!(i < allFiles.length)) return [3 /*break*/, 5];
+                        filePath = allFiles[i];
                         return [4 /*yield*/, fs.promises.stat(filePath)];
                     case 3:
-                        stats = _b.sent();
+                        stats = _a.sent();
                         lastModified = stats.mtimeMs;
+                        // 100ファイルごとに進捗を更新（パフォーマンス考慮）
+                        if (i % 100 === 0 || i === allFiles.length - 1) {
+                            sendScanProgress({
+                                phase: "analyzing",
+                                current: i + 1,
+                                total: allFiles.length,
+                                currentFile: path.basename(filePath),
+                                message: "\u30D5\u30A1\u30A4\u30EB\u3092\u5206\u6790\u4E2D... (".concat(i + 1, "/").concat(allFiles.length, ")"),
+                            });
+                        }
                         if (shouldPerformDiffScan && savedLibrary.files[filePath]) {
                             savedFile = savedLibrary.files[filePath];
                             if (savedFile.lastModified === lastModified) {
                                 // ファイルが変更されていない場合
                                 unchangedFiles.push(filePath);
                                 // 前回のメタデータを再利用
-                                currentLibrary.files[filePath] = savedFile;
+                                currentLibrary_1.files[filePath] = savedFile;
                             }
                             else {
                                 // ファイルが変更されている場合
                                 modifiedFiles.push(filePath);
                                 // 新しいエントリを作成（メタデータは後で取得）
-                                currentLibrary.files[filePath] = {
+                                currentLibrary_1.files[filePath] = {
                                     lastModified: lastModified,
                                 };
                             }
@@ -187,30 +221,46 @@ function setupLibraryHandlers() {
                             // 新しいファイルの場合
                             newFiles.push(filePath);
                             // 新しいエントリを作成（メタデータは後で取得）
-                            currentLibrary.files[filePath] = {
+                            currentLibrary_1.files[filePath] = {
                                 lastModified: lastModified,
                             };
                         }
-                        _b.label = 4;
+                        _a.label = 4;
                     case 4:
-                        _a++;
+                        i++;
                         return [3 /*break*/, 2];
                     case 5:
                         deletedFiles = [];
                         if (shouldPerformDiffScan) {
+                            allFilesSet = new Set(allFiles);
                             for (filePath in savedLibrary.files) {
-                                if (!allFiles.includes(filePath)) {
+                                if (!allFilesSet.has(filePath)) {
                                     deletedFiles.push(filePath);
                                 }
                             }
                         }
                         // スキャン結果をストアに保存
-                        store_1.default.set(MUSIC_LIBRARY_KEY, currentLibrary);
+                        store_1.default.set(MUSIC_LIBRARY_KEY, currentLibrary_1);
                         store_1.default.set(MUSIC_LIBRARY_LAST_SCAN_KEY, new Date().toISOString());
                         (0, utils_1.debugLog)("[Scan] \u30B9\u30AD\u30E3\u30F3\u5B8C\u4E86: \u65B0\u898F=".concat(newFiles.length, ", \u5909\u66F4=").concat(modifiedFiles.length, ", \u5909\u66F4\u306A\u3057=").concat(unchangedFiles.length, ", \u524A\u9664=").concat(deletedFiles.length));
-                        // スキャン結果を返す
+                        // 進捗: スキャン完了
+                        sendScanProgress({
+                            phase: "complete",
+                            current: allFiles.length,
+                            total: allFiles.length,
+                            message: "\u30B9\u30AD\u30E3\u30F3\u5B8C\u4E86: ".concat(allFiles.length, "\u30D5\u30A1\u30A4\u30EB\u3092\u51E6\u7406\u3057\u307E\u3057\u305F"),
+                        });
+                        filesWithMetadata = allFiles.map(function (filePath) {
+                            var fileInfo = currentLibrary_1.files[filePath];
+                            return {
+                                path: filePath,
+                                metadata: (fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata) || null,
+                                needsMetadata: !(fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata), // メタデータ取得が必要かどうか
+                            };
+                        });
                         return [2 /*return*/, {
                                 files: allFiles,
+                                filesWithMetadata: filesWithMetadata,
                                 scanInfo: {
                                     newFiles: newFiles,
                                     modifiedFiles: modifiedFiles,
@@ -221,7 +271,7 @@ function setupLibraryHandlers() {
                                 },
                             }];
                     case 6:
-                        error_1 = _b.sent();
+                        error_1 = _a.sent();
                         (0, utils_1.debugLog)("[Error] MP3\u30D5\u30A1\u30A4\u30EB\u306E\u30B9\u30AD\u30E3\u30F3\u306B\u5931\u6557: ".concat(directoryPath), error_1);
                         return [2 /*return*/, { error: error_1.message }];
                     case 7: return [2 /*return*/];
@@ -270,7 +320,69 @@ function setupLibraryHandlers() {
             }
         });
     }); });
+    // キャッシュ済みのファイルリスト+メタデータを取得（スキャンなし）
+    // ページ遷移時の高速ロード用
+    electron_1.ipcMain.handle("handle-get-cached-files-with-metadata", function () { return __awaiter(_this, void 0, void 0, function () {
+        var savedLibrary, lastScan, filesWithMetadata;
+        return __generator(this, function (_a) {
+            try {
+                savedLibrary = store_1.default.get(MUSIC_LIBRARY_KEY);
+                lastScan = store_1.default.get(MUSIC_LIBRARY_LAST_SCAN_KEY);
+                if (!savedLibrary || Object.keys(savedLibrary.files).length === 0) {
+                    return [2 /*return*/, { exists: false, files: [] }];
+                }
+                filesWithMetadata = Object.entries(savedLibrary.files).map(function (_a) {
+                    var filePath = _a[0], fileInfo = _a[1];
+                    return ({
+                        path: filePath,
+                        metadata: fileInfo.metadata || null,
+                    });
+                });
+                return [2 /*return*/, {
+                        exists: true,
+                        directoryPath: savedLibrary.directoryPath,
+                        files: filesWithMetadata,
+                        lastScan: lastScan,
+                    }];
+            }
+            catch (error) {
+                (0, utils_1.debugLog)("[Error] \u30AD\u30E3\u30C3\u30B7\u30E5\u6E08\u307F\u30D5\u30A1\u30A4\u30EB\u306E\u53D6\u5F97\u306B\u5931\u6557:", error);
+                return [2 /*return*/, { error: error.message, exists: false, files: [] }];
+            }
+            return [2 /*return*/];
+        });
+    }); });
     // MP3ファイルのメタデータを取得
+    // 注意: このハンドラーは個別のファイルに対して呼ばれるため、
+    // ストアへの書き込みは遅延させてバッチ処理する
+    var pendingMetadataUpdates = new Map();
+    var saveTimeout = null;
+    var debouncedSaveLibrary = function () {
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
+        saveTimeout = setTimeout(function () {
+            if (pendingMetadataUpdates.size > 0) {
+                var savedLibrary_1 = store_1.default.get(MUSIC_LIBRARY_KEY);
+                if (savedLibrary_1) {
+                    pendingMetadataUpdates.forEach(function (update, filePath) {
+                        if (!savedLibrary_1.files[filePath]) {
+                            savedLibrary_1.files[filePath] = {
+                                lastModified: update.lastModified,
+                            };
+                        }
+                        savedLibrary_1.files[filePath].metadata = update.metadata;
+                        savedLibrary_1.files[filePath].lastModified = update.lastModified;
+                        delete savedLibrary_1.files[filePath].error;
+                    });
+                    store_1.default.set(MUSIC_LIBRARY_KEY, savedLibrary_1);
+                    (0, utils_1.debugLog)("[Store] \u30E1\u30BF\u30C7\u30FC\u30BF\u3092\u4FDD\u5B58: ".concat(pendingMetadataUpdates.size, "\u4EF6"));
+                }
+                pendingMetadataUpdates.clear();
+            }
+            saveTimeout = null;
+        }, 1000); // 1秒間の遅延でバッチ保存
+    };
     electron_1.ipcMain.handle("handle-get-mp3-metadata", function (_, filePath) { return __awaiter(_this, void 0, void 0, function () {
         var savedLibrary, stats, lastModified, metadata, error_3, savedLibrary;
         return __generator(this, function (_a) {
@@ -295,17 +407,10 @@ function setupLibraryHandlers() {
                     return [4 /*yield*/, mm.parseFile(filePath)];
                 case 2:
                     metadata = _a.sent();
-                    // ライブラリデータを更新
-                    if (savedLibrary) {
-                        if (!savedLibrary.files[filePath]) {
-                            savedLibrary.files[filePath] = { lastModified: lastModified };
-                        }
-                        savedLibrary.files[filePath].metadata = metadata;
-                        savedLibrary.files[filePath].lastModified = lastModified;
-                        delete savedLibrary.files[filePath].error;
-                        // 更新したライブラリデータを保存
-                        store_1.default.set(MUSIC_LIBRARY_KEY, savedLibrary);
-                    }
+                    // ペンディングキューに追加（即座に保存しない）
+                    pendingMetadataUpdates.set(filePath, { metadata: metadata, lastModified: lastModified });
+                    // 遅延保存をスケジュール
+                    debouncedSaveLibrary();
                     return [2 /*return*/, { metadata: metadata, fromCache: false }];
                 case 3:
                     error_3 = _a.sent();

@@ -193,7 +193,6 @@ const LocalPage = () => {
   );
   const [isSelectingDirectory, setIsSelectingDirectory] = useState(false);
   const [selectError, setSelectError] = useState<string | null>(null);
-  const [forceFullScan, setForceFullScan] = useState(false);
 
   // 統合プレイヤーシステムを使用
   const player = usePlayer();
@@ -219,8 +218,9 @@ const LocalPage = () => {
     isLoading,
     error,
     scanInfo: lastScanInfo,
+    scanProgress,
     forceRescan,
-  } = useGetLocalFiles(selectedDirectory, forceFullScan);
+  } = useGetLocalFiles(selectedDirectory);
 
   // フォルダ選択ダイアログを表示
   const handleSelectDirectory = async () => {
@@ -246,8 +246,6 @@ const LocalPage = () => {
       }
 
       setSelectedDirectory(result.filePath);
-      // 新しいディレクトリが選択された場合、forceFullScan をリセット
-      setForceFullScan(false);
     } catch (err: any) {
       console.error("フォルダ選択中にエラーが発生しました:", err);
       setSelectError(`フォルダ選択中にエラーが発生しました: ${err.message}`);
@@ -258,11 +256,7 @@ const LocalPage = () => {
 
   // 強制的に完全スキャンを実行
   const handleForceFullScan = useCallback(async () => {
-    setForceFullScan(true);
-    // キャッシュを無効化して再取得
     await forceRescan();
-    // スキャン完了後に forceFullScan をリセット
-    setForceFullScan(false);
   }, [forceRescan]);
 
   /**
@@ -410,11 +404,58 @@ const LocalPage = () => {
           </div>
         )}
 
-        {isLoading && (
+        {/* スキャン進捗表示 */}
+        {scanProgress && (
+          <div className="bg-[#121212] border border-[#303030] rounded-md p-4 mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              {scanProgress.phase !== "complete" ? (
+                <RefreshCw className="h-5 w-5 text-theme-400 animate-spin" />
+              ) : (
+                <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+              )}
+              <span className="text-theme-300 font-medium">
+                {scanProgress.message}
+              </span>
+            </div>
+
+            {/* プログレスバー */}
+            {scanProgress.total > 0 && (
+              <div className="space-y-2">
+                <div className="w-full bg-[#303030] rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-theme-600 to-theme-400 h-2.5 rounded-full transition-all duration-300 ease-out"
+                    style={{
+                      width: `${Math.round(
+                        (scanProgress.current / scanProgress.total) * 100
+                      )}%`,
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-neutral-400">
+                  <span>
+                    {scanProgress.currentFile && (
+                      <span className="text-neutral-300">
+                        {scanProgress.currentFile}
+                      </span>
+                    )}
+                  </span>
+                  <span>
+                    {scanProgress.current} / {scanProgress.total} ファイル
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ローディング表示（進捗情報がない場合） */}
+        {isLoading && !scanProgress && (
           <div className="bg-[#121212] border border-[#303030] rounded-md p-4 mb-4">
             <div className="text-theme-300 flex items-center gap-2">
               <span className="animate-pulse h-3 w-3 rounded-full bg-theme-500 inline-block"></span>
-              ファイルをスキャン・メタデータ取得中...
+              ファイルを読み込み中...
             </div>
           </div>
         )}

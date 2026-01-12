@@ -5,12 +5,14 @@ import useGetLocalFiles from "@/hooks/data/useGetLocalFiles";
 
 // モックの設定（フック読み込み前に設定）
 const mockInvoke = jest.fn();
+const mockOn = jest.fn(() => jest.fn()); // アンサブスクライブ関数を返す
 
 // window.electron をモック
 Object.defineProperty(window, "electron", {
   value: {
     ipc: {
       invoke: mockInvoke,
+      on: mockOn,
     },
   },
   writable: true,
@@ -80,6 +82,7 @@ describe("useGetLocalFiles", () => {
     };
 
     mockInvoke
+      .mockResolvedValueOnce({ exists: false, files: [] }) // handle-get-cached-files-with-metadata
       .mockResolvedValueOnce(mockScanResult) // handle-scan-mp3-files
       .mockResolvedValueOnce(mockMetadata1) // handle-get-mp3-metadata for song1
       .mockResolvedValueOnce(mockMetadata2); // handle-get-mp3-metadata for song2
@@ -112,9 +115,11 @@ describe("useGetLocalFiles", () => {
   });
 
   it("スキャン時にエラーが発生した場合、エラーを返す", async () => {
-    mockInvoke.mockResolvedValueOnce({
-      error: "ディレクトリが見つかりません",
-    });
+    mockInvoke
+      .mockResolvedValueOnce({ exists: false, files: [] }) // handle-get-cached-files-with-metadata
+      .mockResolvedValueOnce({
+        error: "ディレクトリが見つかりません",
+      });
 
     const wrapper = createWrapper();
     const { result } = renderHook(
@@ -153,24 +158,24 @@ describe("useGetLocalFiles", () => {
     };
 
     mockInvoke
+      .mockResolvedValueOnce({ exists: false, files: [] }) // handle-get-cached-files-with-metadata
       .mockResolvedValueOnce(mockScanResult)
       .mockResolvedValueOnce(mockMetadata);
 
     const wrapper = createWrapper();
-    const { result } = renderHook(
-      () => useGetLocalFiles("/music/directory", true), // forceFullScan = true
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGetLocalFiles("/music/directory"), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    // handle-scan-mp3-files が forceFullScan = true で呼ばれた
+    // handle-scan-mp3-files が呼ばれた
     expect(mockInvoke).toHaveBeenCalledWith(
       "handle-scan-mp3-files",
       "/music/directory",
-      true
+      false // キャッシュがない場合は forceFullScan = false でスキャン
     );
   });
 });
