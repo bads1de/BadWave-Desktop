@@ -367,17 +367,17 @@ class AudioEngine {
     if (enabled) {
       // 32kbps m4a / 80年代ラジカセ風（歪み + 帯域制限）
 
-      // HighPass: 200Hz以下をカット (低音を削るが、ボーカルの芯は残す)
-      this.retroHighPass.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+      // HighPass: 400Hz以下をカット (こもらせる)
+      this.retroHighPass.frequency.exponentialRampToValueAtTime(400, now + 0.3);
       this.retroHighPass.Q.value = 1.0;
 
-      // LowPass: 4000Hz以上をカット (高域のチリチリを抑える)
-      this.retroLowPass.frequency.exponentialRampToValueAtTime(4000, now + 0.3);
+      // LowPass: 2500Hz以上をカット (AMラジオ/電話のような狭帯域)
+      this.retroLowPass.frequency.exponentialRampToValueAtTime(2500, now + 0.3);
       this.retroLowPass.Q.value = 1.0;
 
-      // Distortion: 軽めのサチュレーションでテープの質感を出す
-      // amount=100 くらいが丁度いい劣化感
-      this.distortionNode.curve = this.makeDistortionCurve(100) as any;
+      // Distortion: 音割れを防ぐため大幅に低減 (ほぼ隠し味/サチュレーション程度)
+      // amount=10 くらいで歪み感を抑える
+      this.distortionNode.curve = this.makeDistortionCurve(10) as any;
 
       this.isRetroActive = true;
     } else {
