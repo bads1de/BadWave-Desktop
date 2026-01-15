@@ -11,6 +11,7 @@ import useOnPlay from "@/hooks/player/useOnPlay";
 import usePlayer from "@/hooks/player/usePlayer";
 
 import SongItem from "@/components/Song/SongItem";
+import SongItemSkeleton from "@/components/Song/SongItemSkeleton";
 import Pagination from "@/components/common/Pagination";
 
 const PAGE_SIZE = 24;
@@ -83,10 +84,7 @@ export default function AllSongsPage() {
           {isLoading && songs.length === 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-square bg-neutral-800 rounded-lg animate-pulse"
-                />
+                <SongItemSkeleton key={i} />
               ))}
             </div>
           ) : songs.length === 0 ? (
