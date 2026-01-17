@@ -70,7 +70,7 @@ const SpotlightModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="fixed inset-0 bg-black/80 z-50 backdrop-blur-md transition-all duration-300">
+      <div className="fixed inset-0 bg-black/80 z-[100] backdrop-blur-md transition-all duration-300">
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 md:p-6 pb-24 md:pb-32">
             <div className="relative w-full max-w-6xl mx-auto flex flex-col md:flex-row bg-black h-[85vh] md:h-[80vh] rounded-xl overflow-hidden shadow-2xl border border-white/10 ring-1 ring-white/5">
