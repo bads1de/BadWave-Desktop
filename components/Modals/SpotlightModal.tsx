@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import useSpotlightModal from "@/hooks/modal/useSpotlightModal";
@@ -13,11 +13,11 @@ const SpotlightModal = () => {
   const [isLoading, setIsLoading] = React.useState(true);
 
   // Sync background video with main video
-  useEffect(() => {
+  const setupVideoSync = useCallback(() => {
     const mainVideo = videoRef.current;
     const bgVideo = bgVideoRef.current;
 
-    if (!mainVideo || !bgVideo) return;
+    if (!mainVideo || !bgVideo) return () => {};
 
     const syncPlay = () => bgVideo.play().catch(() => {});
     const syncPause = () => bgVideo.pause();
@@ -38,33 +38,33 @@ const SpotlightModal = () => {
       mainVideo.removeEventListener("timeupdate", syncTime);
       mainVideo.removeEventListener("seeking", syncTime);
     };
-  }, [isOpen, selectedItem, isLoading]);
+  }, []);
 
+  // Handle video playback and sync when modal opens/closes or video changes
   useEffect(() => {
-    setIsLoading(true);
-    const playVideo = async () => {
-      if (videoRef.current && isOpen) {
-        try {
-          // Apply volume settings from store
-          if (volume !== null) {
-            videoRef.current.volume = volume * 0.5;
-          } else {
-            videoRef.current.volume = 0.5;
-          }
-          await videoRef.current.play();
-        } catch (error) {
-          console.error("Video playback failed:", error);
-        }
-      }
-    };
-
-    if (isOpen) {
-      playVideo();
-    } else {
+    if (!isOpen) {
       videoRef.current?.pause();
       bgVideoRef.current?.pause();
+      return;
     }
-  }, [isOpen, selectedItem, volume]);
+
+    // Reset loading state when video changes
+    setIsLoading(true);
+
+    const mainVideo = videoRef.current;
+    if (!mainVideo) return;
+
+    // Apply volume and start playback
+    mainVideo.volume = (volume ?? 1) * 0.5;
+    mainVideo.play().catch((error) => {
+      console.error("Video playback failed:", error);
+    });
+
+    // Setup sync after a short delay to ensure refs are ready
+    const cleanup = setupVideoSync();
+
+    return cleanup;
+  }, [isOpen, selectedItem?.id, volume, setupVideoSync]);
 
   if (!selectedItem) return null;
 
