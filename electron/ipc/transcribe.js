@@ -69,7 +69,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setupAIHandlers = setupAIHandlers;
+exports.setupTranscriptionHandlers = setupTranscriptionHandlers;
 var electron_1 = require("electron");
 var child_process_1 = require("child_process");
 var path = __importStar(require("path"));
@@ -77,16 +77,16 @@ var fs = __importStar(require("fs"));
 var https = __importStar(require("https"));
 var http = __importStar(require("http"));
 /**
- * AI関連のIPCハンドラーをセットアップする
+ * トランスクライブ関連のIPCハンドラーをセットアップする
  */
-function setupAIHandlers() {
+function setupTranscriptionHandlers() {
     var _this = this;
     /**
      * LRC生成リクエスト
      * @param audioPath 音声ファイルのパス（ローカルまたはURL）
      * @param lyricsText 歌詞テキスト
      */
-    electron_1.ipcMain.handle("ai:generate-lrc", function (_event, audioPath, lyricsText) { return __awaiter(_this, void 0, void 0, function () {
+    electron_1.ipcMain.handle("transcribe:generate-lrc", function (_event, audioPath, lyricsText) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve) {
                     // Python環境のパス解決
@@ -102,7 +102,7 @@ function setupAIHandlers() {
                         pythonPath = path.join(process.resourcesPath, "ai", "venv", "Scripts", "python.exe");
                         scriptPath = path.join(process.resourcesPath, "ai", "lrc_generator.py");
                     }
-                    console.log("[AI] Request - Path: ".concat(audioPath));
+                    console.log("[Transcribe] Request - Path: ".concat(audioPath));
                     if (!fs.existsSync(pythonPath)) {
                         return resolve({
                             status: "error",
@@ -112,7 +112,7 @@ function setupAIHandlers() {
                     // Python実行コア
                     var runPython = function (targetPath, isTemp) {
                         if (isTemp === void 0) { isTemp = false; }
-                        console.log("[AI] Executing Python with: ".concat(targetPath));
+                        console.log("[Transcribe] Executing Python with: ".concat(targetPath));
                         var pythonProcess = (0, child_process_1.spawn)(pythonPath, [
                             scriptPath,
                             targetPath,
@@ -131,10 +131,10 @@ function setupAIHandlers() {
                                 fs.unlink(targetPath, function () { });
                             }
                             if (code !== 0) {
-                                console.error("[AI] Python Error (code ".concat(code, "): ").concat(stderr));
+                                console.error("[Transcribe] Python Error (code ".concat(code, "): ").concat(stderr));
                                 return resolve({
                                     status: "error",
-                                    message: "AI\u30A8\u30F3\u30B8\u30F3\u306E\u5B9F\u884C\u306B\u5931\u6557\u3057\u307E\u3057\u305F",
+                                    message: "\u30C8\u30E9\u30F3\u30B9\u30AF\u30E9\u30A4\u30D6\u30A8\u30F3\u30B8\u30F3\u306E\u5B9F\u884C\u306B\u5931\u6557\u3057\u307E\u3057\u305F",
                                 });
                             }
                             try {
@@ -142,10 +142,10 @@ function setupAIHandlers() {
                                 resolve(result);
                             }
                             catch (e) {
-                                console.error("[AI] JSON Parse Error: ".concat(stdout));
+                                console.error("[Transcribe] JSON Parse Error: ".concat(stdout));
                                 resolve({
                                     status: "error",
-                                    message: "AIエンジンの出力解析に失敗しました",
+                                    message: "トランスクライブエンジンの出力解析に失敗しました",
                                 });
                             }
                         });
@@ -153,8 +153,8 @@ function setupAIHandlers() {
                     // パス判定と処理開始
                     var isUrl = audioPath.startsWith("http://") || audioPath.startsWith("https://");
                     if (isUrl) {
-                        console.log("[AI] Remote URL detected. Downloading...");
-                        var tempPath_1 = path.join(electron_1.app.getPath("temp"), "badwave_ai_".concat(Date.now(), ".mp3"));
+                        console.log("[Transcribe] Remote URL detected. Downloading...");
+                        var tempPath_1 = path.join(electron_1.app.getPath("temp"), "badwave_transcribe_".concat(Date.now(), ".mp3"));
                         var file_1 = fs.createWriteStream(tempPath_1);
                         var client = audioPath.startsWith("https") ? https : http;
                         var request = client.get(audioPath, function (response) {
@@ -179,11 +179,11 @@ function setupAIHandlers() {
                         });
                     }
                     else {
-                        console.log("[AI] Local path detected.");
+                        console.log("[Transcribe] Local path detected.");
                         runPython(audioPath, false);
                     }
                 })];
         });
     }); });
 }
-//# sourceMappingURL=ai.js.map
+//# sourceMappingURL=transcribe.js.map

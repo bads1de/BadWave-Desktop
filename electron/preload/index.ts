@@ -68,7 +68,7 @@ const AUTH_CHANNELS = [
 ];
 
 const EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
-const AI_CHANNELS = ["ai:generate-lrc"];
+const TRANSCRIBE_CHANNELS = ["transcribe:generate-lrc"];
 
 const ALLOWED_INVOKE_CHANNELS = [
   ...WINDOW_CHANNELS,
@@ -79,7 +79,7 @@ const ALLOWED_INVOKE_CHANNELS = [
   ...MUTATION_CHANNELS,
   ...AUTH_CHANNELS,
   ...EXTERNAL_CHANNELS,
-  ...AI_CHANNELS,
+  ...TRANSCRIBE_CHANNELS,
 ];
 
 const ALLOWED_ON_CHANNELS = [
@@ -232,10 +232,10 @@ contextBridge.exposeInMainWorld("electron", {
     clearActivity: () => ipcRenderer.invoke("discord:clear-activity"),
   },
 
-  // AI機能
-  ai: {
+  // トランスクライブ機能
+  transcribe: {
     generateLrc: (audioPath: string, lyricsText: string) =>
-      ipcRenderer.invoke("ai:generate-lrc", audioPath, lyricsText),
+      ipcRenderer.invoke("transcribe:generate-lrc", audioPath, lyricsText),
   },
 
   // IPC通信

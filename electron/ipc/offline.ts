@@ -27,7 +27,7 @@ interface SongDownloadPayload {
   created_at: string;
 }
 
-export const setupDownloadHandlers = () => {
+export const setupOfflineDownloadHandlers = () => {
   const db = getDb();
 
   // 楽曲のダウンロードリクエストを処理
@@ -91,8 +91,8 @@ export const setupDownloadHandlers = () => {
               fs.unlink(dest, () => {});
               reject(
                 new Error(
-                  `Download failed with status code: ${response.statusCode} for ${url}`
-                )
+                  `Download failed with status code: ${response.statusCode} for ${url}`,
+                ),
               );
               return;
             }
@@ -127,7 +127,7 @@ export const setupDownloadHandlers = () => {
         downloadTasks.push(
           downloadFile(song.image_path, localImagePath).then(() => {
             finalLocalImagePath = `file://${localImagePath}`;
-          })
+          }),
         );
       }
 

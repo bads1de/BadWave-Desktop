@@ -104,9 +104,13 @@ def clean_text(text):
     import re
 
     # セクションヘッダー除外
-    lines = [l.strip() for l in text.split("\n") if l.strip()]
-    lines = [l for l in lines if not (l.startswith("[") and l.endswith("]"))]
-    lines = [l for l in lines if not (l.startswith("「") and l.endswith("」"))]
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
+    lines = [
+        line for line in lines if not (line.startswith("[") and line.endswith("]"))
+    ]
+    lines = [
+        line for line in lines if not (line.startswith("「") and line.endswith("」"))
+    ]
 
     clean_lines = []
     for line in lines:

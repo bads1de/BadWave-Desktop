@@ -5,24 +5,20 @@ import { getDb } from "./db/client";
 
 // モジュールのインポート
 import { registerProtocolHandlers } from "./lib/protocol";
-import { createMainWindow, getMainWindow } from "./lib/window-manager";
+import { createMainWindow } from "./lib/window-manager";
 import { setupTray, destroyTray } from "./lib/tray";
 
 // IPCハンドラーのインポート
-import { setupDownloadHandlers } from "./ipc/offline";
-import {
-  setupSettingsHandlers,
-  getIsSimulatingOffline,
-  setIsSimulatingOffline,
-} from "./ipc/settings";
+import { setupOfflineDownloadHandlers } from "./ipc/offline";
+import { setupSettingsHandlers } from "./ipc/settings";
 import { setupWindowHandlers } from "./ipc/window";
 import { setupDialogHandlers } from "./ipc/dialog";
 import { setupLibraryHandlers } from "./ipc/library";
-import { setupSimpleDownloadHandlers } from "./ipc/simple_download";
+import { setupDownloadHandlers as setupSystemDownloadHandlers } from "./ipc/download";
 import { setupCacheHandlers } from "./ipc/cache";
 import { setupAuthHandlers } from "./ipc/auth";
 import { setupDiscordHandlers } from "./ipc/discord";
-import { setupAIHandlers } from "./ipc/ai";
+import { setupTranscriptionHandlers } from "./ipc/transcribe";
 import { setupDevShortcuts } from "./shortcuts";
 import { runMigrations } from "./db/migrate";
 
@@ -46,11 +42,11 @@ function setupIPC() {
   // ライブラリハンドラーのセットアップ
   setupLibraryHandlers();
 
-  // 簡易ダウンロードハンドラーのセットアップ
-  setupSimpleDownloadHandlers();
+  // システムダウンロードハンドラーのセットアップ
+  setupSystemDownloadHandlers();
 
   // オフラインダウンロードハンドラーのセットアップ
-  setupDownloadHandlers();
+  setupOfflineDownloadHandlers();
 
   // キャッシュハンドラーのセットアップ（オフラインライブラリ表示用）
   setupCacheHandlers();
@@ -61,8 +57,8 @@ function setupIPC() {
   // Discord RPCハンドラーのセットアップ
   setupDiscordHandlers();
 
-  // AI関連ハンドラーのセットアップ
-  setupAIHandlers();
+  // トランスクライブ関連ハンドラーのセットアップ
+  setupTranscriptionHandlers();
 }
 
 // アプリケーションの準備完了時の処理

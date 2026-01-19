@@ -4,7 +4,7 @@ import * as path from "path";
 import * as https from "https";
 import { debugLog } from "../utils";
 
-export function setupSimpleDownloadHandlers() {
+export function setupDownloadHandlers() {
   // 曲のダウンロード
   // 注意: offline.tsのsetupDownloadHandlersとチャンネル名が重複する可能性があります
   // どちらか一方のみを使用してください

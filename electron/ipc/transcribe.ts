@@ -6,16 +6,16 @@ import * as https from "https";
 import * as http from "http";
 
 /**
- * AI関連のIPCハンドラーをセットアップする
+ * トランスクライブ関連のIPCハンドラーをセットアップする
  */
-export function setupAIHandlers() {
+export function setupTranscriptionHandlers() {
   /**
    * LRC生成リクエスト
    * @param audioPath 音声ファイルのパス（ローカルまたはURL）
    * @param lyricsText 歌詞テキスト
    */
   ipcMain.handle(
-    "ai:generate-lrc",
+    "transcribe:generate-lrc",
     async (_event, audioPath: string, lyricsText: string) => {
       return new Promise((resolve) => {
         // Python環境のパス解決
@@ -48,7 +48,7 @@ export function setupAIHandlers() {
           );
         }
 
-        console.log(`[AI] Request - Path: ${audioPath}`);
+        console.log(`[Transcribe] Request - Path: ${audioPath}`);
 
         if (!fs.existsSync(pythonPath)) {
           return resolve({
@@ -59,7 +59,7 @@ export function setupAIHandlers() {
 
         // Python実行コア
         const runPython = (targetPath: string, isTemp: boolean = false) => {
-          console.log(`[AI] Executing Python with: ${targetPath}`);
+          console.log(`[Transcribe] Executing Python with: ${targetPath}`);
           const pythonProcess = spawn(pythonPath, [
             scriptPath,
             targetPath,
@@ -82,10 +82,12 @@ export function setupAIHandlers() {
             }
 
             if (code !== 0) {
-              console.error(`[AI] Python Error (code ${code}): ${stderr}`);
+              console.error(
+                `[Transcribe] Python Error (code ${code}): ${stderr}`,
+              );
               return resolve({
                 status: "error",
-                message: `AIエンジンの実行に失敗しました`,
+                message: `トランスクライブエンジンの実行に失敗しました`,
               });
             }
 
@@ -93,10 +95,10 @@ export function setupAIHandlers() {
               const result = JSON.parse(stdout.trim());
               resolve(result);
             } catch (e) {
-              console.error(`[AI] JSON Parse Error: ${stdout}`);
+              console.error(`[Transcribe] JSON Parse Error: ${stdout}`);
               resolve({
                 status: "error",
-                message: "AIエンジンの出力解析に失敗しました",
+                message: "トランスクライブエンジンの出力解析に失敗しました",
               });
             }
           });
@@ -107,10 +109,10 @@ export function setupAIHandlers() {
           audioPath.startsWith("http://") || audioPath.startsWith("https://");
 
         if (isUrl) {
-          console.log(`[AI] Remote URL detected. Downloading...`);
+          console.log(`[Transcribe] Remote URL detected. Downloading...`);
           const tempPath = path.join(
             app.getPath("temp"),
-            `badwave_ai_${Date.now()}.mp3`,
+            `badwave_transcribe_${Date.now()}.mp3`,
           );
           const file = fs.createWriteStream(tempPath);
           const client = audioPath.startsWith("https") ? https : http;
@@ -136,7 +138,7 @@ export function setupAIHandlers() {
             resolve({ status: "error", message: `通信エラー: ${err.message}` });
           });
         } else {
-          console.log(`[AI] Local path detected.`);
+          console.log(`[Transcribe] Local path detected.`);
           runPython(audioPath, false);
         }
       });

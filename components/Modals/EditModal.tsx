@@ -50,7 +50,7 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
       },
     });
 
-  const handleAiSync = async () => {
+  const handleTranscribeSync = async () => {
     const lyrics = getValues("lyrics");
     if (!lyrics) {
       toast.error("歌詞を入力してください");
@@ -63,18 +63,14 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
     }
 
     setIsGenerating(true);
-    const toastId = toast.loading("AI同期中... (初回は数分かかります)");
+    const toastId = toast.loading("自動同期中... (初回は数分かかります)");
 
     try {
       // 1. ローカルパスの取得
-      // protocol (supabase://) を物理パスに変換するか、URLを指定
       const electron = (window as any).electron;
       let localPath = "";
 
-      // song_pathが既にローカルパスの場合とURLの場合がある
       if (song.song_path.startsWith("http")) {
-        // httpの場合はキャッシュを探すか、ダウンロードが必要
-        // 今回は簡略化のため get-local-file-path に委ねる
         localPath = await electron.ipc.invoke(
           "get-local-file-path",
           song.song_path,
@@ -83,16 +79,16 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
         localPath = song.song_path;
       }
 
-      const result = await electron.ai.generateLrc(localPath, lyrics);
+      const result = await electron.transcribe.generateLrc(localPath, lyrics);
 
       if (result.status === "success") {
         setValue("lyrics", result.lrc);
-        toast.success("AI同期が完了しました", { id: toastId });
+        toast.success("自動同期が完了しました", { id: toastId });
       } else {
         toast.error(result.message || "同期に失敗しました", { id: toastId });
       }
     } catch (error) {
-      console.error("AI Sync Error:", error);
+      console.error("Transcribe Sync Error:", error);
       toast.error("エラーが発生しました", { id: toastId });
     } finally {
       setIsGenerating(false);
@@ -169,11 +165,11 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
             <button
               type="button"
               disabled={isLoading || isGenerating}
-              onClick={handleAiSync}
+              onClick={handleTranscribeSync}
               className="flex items-center gap-x-1 text-xs text-primary hover:underline disabled:text-neutral-500 disabled:no-underline transition"
             >
               <Sparkles className="h-3 w-3" />
-              {isGenerating ? "生成中..." : "AI同期"}
+              {isGenerating ? "生成中..." : "自動同期"}
             </button>
           )}
         </div>

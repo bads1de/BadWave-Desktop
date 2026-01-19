@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setupDownloadHandlers = void 0;
+exports.setupOfflineDownloadHandlers = void 0;
 var electron_1 = require("electron");
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
@@ -49,7 +49,7 @@ var utils_1 = require("../utils");
 var client_1 = require("../db/client");
 var schema_1 = require("../db/schema");
 var drizzle_orm_1 = require("drizzle-orm");
-var setupDownloadHandlers = function () {
+var setupOfflineDownloadHandlers = function () {
     var db = (0, client_1.getDb)();
     // 楽曲のダウンロードリクエストを処理
     electron_1.ipcMain.handle("download-song", function (event, song) { return __awaiter(void 0, void 0, void 0, function () {
@@ -309,5 +309,5 @@ var setupDownloadHandlers = function () {
         });
     }); });
 };
-exports.setupDownloadHandlers = setupDownloadHandlers;
+exports.setupOfflineDownloadHandlers = setupOfflineDownloadHandlers;
 //# sourceMappingURL=offline.js.map

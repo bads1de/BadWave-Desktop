@@ -69,13 +69,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setupSimpleDownloadHandlers = setupSimpleDownloadHandlers;
+exports.setupDownloadHandlers = setupDownloadHandlers;
 var electron_1 = require("electron");
 var fs = __importStar(require("fs"));
 var path = __importStar(require("path"));
 var https = __importStar(require("https"));
 var utils_1 = require("../utils");
-function setupSimpleDownloadHandlers() {
+function setupDownloadHandlers() {
     var _this = this;
     // 曲のダウンロード
     // 注意: offline.tsのsetupDownloadHandlersとチャンネル名が重複する可能性があります
@@ -189,4 +189,4 @@ function setupSimpleDownloadHandlers() {
         });
     }); });
 }
-//# sourceMappingURL=simple_download.js.map
+//# sourceMappingURL=download.js.map

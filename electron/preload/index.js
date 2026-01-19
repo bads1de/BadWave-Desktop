@@ -69,8 +69,8 @@ var AUTH_CHANNELS = [
     "clear-cached-user",
 ];
 var EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
-var AI_CHANNELS = ["ai:generate-lrc"];
-var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true), AI_CHANNELS, true);
+var TRANSCRIBE_CHANNELS = ["transcribe:generate-lrc"];
+var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true), TRANSCRIBE_CHANNELS, true);
 var ALLOWED_ON_CHANNELS = [
     "media-control",
     "download-progress",
@@ -229,10 +229,10 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
         },
         clearActivity: function () { return electron_1.ipcRenderer.invoke("discord:clear-activity"); },
     },
-    // AI機能
-    ai: {
+    // トランスクライブ機能
+    transcribe: {
         generateLrc: function (audioPath, lyricsText) {
-            return electron_1.ipcRenderer.invoke("ai:generate-lrc", audioPath, lyricsText);
+            return electron_1.ipcRenderer.invoke("transcribe:generate-lrc", audioPath, lyricsText);
         },
     },
     // IPC通信
