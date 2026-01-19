@@ -71,9 +71,9 @@ const useEditSongMutation = (editModal: EditModalHook) => {
               fileType === "video"
                 ? "動画"
                 : fileType === "audio"
-                ? "曲"
-                : "画像"
-            }のアップロードに失敗しました`
+                  ? "曲"
+                  : "画像"
+            }のアップロードに失敗しました`,
         );
         return null;
       }
@@ -84,7 +84,7 @@ const useEditSongMutation = (editModal: EditModalHook) => {
       if (currentPath) {
         const deleteResult = await deleteFileFromR2(
           bucketName,
-          currentPath.split("/").pop()!
+          currentPath.split("/").pop()!,
         );
         if (!deleteResult.success) {
           console.error("ファイルの削除に失敗しました", deleteResult.error);
@@ -179,6 +179,28 @@ const useEditSongMutation = (editModal: EditModalHook) => {
 
       if (error) {
         throw error;
+      }
+
+      // Electron環境: ローカルDB (キャッシュ) を即座に更新
+      if (typeof window !== "undefined" && window.electron) {
+        try {
+          await window.electron.cache.syncSongsMetadata([
+            {
+              id,
+              title,
+              author,
+              lyrics,
+              genre: genre.join(", "),
+              video_path: updatedVideoPath,
+              song_path: updatedSongPath,
+              image_path: updatedImagePath,
+              // 既存の他のフィールドは更新されないように、syncSongsMetadataの実装に依存するが、
+              // 基本的にメタデータのUpsertなので、必要なフィールドがあれば更新される
+            },
+          ]);
+        } catch (e) {
+          console.error("Local cache update failed:", e);
+        }
       }
 
       return { id, title };
