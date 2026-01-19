@@ -139,7 +139,7 @@ def generate_lrc(audio_path, lyrics_text):
         padded_transcript = f"|{full_transcript}|"
 
         # 2. モデルロード
-        model_id = "facebook/wav2vec2-base-960h"  # 英語専用
+        model_id = "facebook/wav2vec2-large-960h-lv60-self"  # 英語専用 (高精度版)
         processor = AutoProcessor.from_pretrained(model_id)
         model = AutoModelForCTC.from_pretrained(model_id)
 

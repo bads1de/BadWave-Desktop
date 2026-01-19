@@ -1,4 +1,4 @@
-import { setupSimpleDownloadHandlers } from "@/electron/ipc/simple_download";
+import { setupDownloadHandlers } from "@/electron/ipc/download";
 import { ipcMain } from "electron";
 import * as fs from "fs";
 import * as https from "https";
@@ -17,7 +17,7 @@ jest.mock("electron", () => ({
 jest.mock("fs", () => ({
   existsSync: jest.fn(),
   createWriteStream: jest.fn(),
-  unlink: jest.fn((path, cb) => cb()),
+  unlink: jest.fn((path, cb: any) => cb()),
   promises: {
     mkdir: jest.fn(),
     access: jest.fn(),
@@ -37,7 +37,7 @@ jest.mock("@/electron/utils", () => ({
   debugLog: jest.fn(),
 }));
 
-describe("IPC: Simple Download", () => {
+describe("IPC: Download", () => {
   let handlers: Record<string, Function> = {};
   const mockSender = { send: jest.fn() };
 
@@ -47,7 +47,7 @@ describe("IPC: Simple Download", () => {
     (ipcMain.handle as jest.Mock).mockImplementation((channel, listener) => {
       handlers[channel] = listener;
     });
-    setupSimpleDownloadHandlers();
+    setupDownloadHandlers();
   });
 
   const invoke = async (channel: string, ...args: any[]) => {
@@ -62,7 +62,7 @@ describe("IPC: Simple Download", () => {
   describe("download-song-simple", () => {
     it("downloads file successfully", async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true); // skip mkdir
-      
+
       const mockWriteStream = {
         on: jest.fn(),
         close: jest.fn((cb) => cb()),
@@ -81,14 +81,20 @@ describe("IPC: Simple Download", () => {
       });
 
       // Invoke handler
-      const downloadPromise = invoke("download-song-simple", "http://example.com/song.mp3", "song.mp3");
+      const downloadPromise = invoke(
+        "download-song-simple",
+        "http://example.com/song.mp3",
+        "song.mp3",
+      );
 
       // Simulate response data flow
       mockResponse.emit("data", Buffer.alloc(50)); // 50%
       mockResponse.emit("data", Buffer.alloc(50)); // 100%
-      
+
       // Simulate file finish
-      const finishHandler = mockWriteStream.on.mock.calls.find((call: any) => call[0] === "finish")[1];
+      const finishHandler = mockWriteStream.on.mock.calls.find(
+        (call: any) => call[0] === "finish",
+      )[1];
       finishHandler();
 
       const result = await downloadPromise;
@@ -100,7 +106,10 @@ describe("IPC: Simple Download", () => {
 
     it("handles download error (status code)", async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.createWriteStream as jest.Mock).mockReturnValue({ on: jest.fn(), close: jest.fn() });
+      (fs.createWriteStream as jest.Mock).mockReturnValue({
+        on: jest.fn(),
+        close: jest.fn(),
+      });
 
       (https.get as jest.Mock).mockImplementation((url, cb) => {
         const mockResponse = new EventEmitter() as any;
@@ -109,9 +118,10 @@ describe("IPC: Simple Download", () => {
         return new EventEmitter();
       });
 
-      await expect(invoke("download-song-simple", "http://example.com/404.mp3", "404.mp3"))
-        .rejects.toThrow("Status Code: 404");
-        
+      await expect(
+        invoke("download-song-simple", "http://example.com/404.mp3", "404.mp3"),
+      ).rejects.toThrow("Status Code: 404");
+
       expect(fs.unlink).toHaveBeenCalled();
     });
   });
