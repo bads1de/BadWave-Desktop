@@ -67,5 +67,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    result = separate_vocals(args.input, args.output_dir, args.model)
+    input_path = args.input
+    # file:// プレフィックスの除去 (Windows/Electron対策)
+    if input_path.startswith("file://"):
+        input_path = input_path.replace("file://", "")
+        if input_path.startswith("/") and input_path[2] == ":":
+            input_path = input_path[1:]
+        import urllib.parse
+
+        input_path = urllib.parse.unquote(input_path)
+    input_path = os.path.abspath(input_path)
+
+    result = separate_vocals(input_path, args.output_dir, args.model)
     print(json.dumps(result))

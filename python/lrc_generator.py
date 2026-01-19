@@ -297,6 +297,19 @@ if __name__ == "__main__":
         sys.exit(1)
 
     audio_path = sys.argv[1]
+
+    # file:// プレフィックスの除去 (Windows/Electron対策)
+    if audio_path.startswith("file://"):
+        audio_path = audio_path.replace("file://", "")
+        # Windowsの場合、file:///C:/... となっていることがあるので先頭の / を除去
+        if audio_path.startswith("/") and audio_path[2] == ":":
+            audio_path = audio_path[1:]
+        # URLエンコードのデコード (スペースが %20 になっている場合など)
+        import urllib.parse
+
+        audio_path = urllib.parse.unquote(audio_path)
+
+    audio_path = os.path.abspath(audio_path)
     lyrics_arg = sys.argv[2]
 
     # ファイルパスの場合は内容を読み込む
