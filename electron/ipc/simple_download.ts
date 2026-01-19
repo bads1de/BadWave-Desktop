@@ -36,7 +36,7 @@ export function setupSimpleDownloadHandlers() {
 
               const totalSize = parseInt(
                 response.headers["content-length"] || "0",
-                10
+                10,
               );
               let downloadedSize = 0;
 
@@ -44,7 +44,7 @@ export function setupSimpleDownloadHandlers() {
                 downloadedSize += chunk.length;
                 if (totalSize > 0) {
                   const progress = Math.round(
-                    (downloadedSize / totalSize) * 100
+                    (downloadedSize / totalSize) * 100,
                   );
                   // 進捗を送信
                   event.sender.send("download-progress", progress);
@@ -69,7 +69,7 @@ export function setupSimpleDownloadHandlers() {
         debugLog(`[Download] Error:`, error);
         throw error;
       }
-    }
+    },
   );
 
   // ファイル存在確認

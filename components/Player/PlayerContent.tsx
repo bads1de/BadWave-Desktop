@@ -225,7 +225,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
         </div>
       </>
     );
-  }
+  },
 );
 
 PlayerContent.displayName = "PlayerContent";

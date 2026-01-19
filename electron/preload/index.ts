@@ -4,7 +4,7 @@ import { contextBridge, ipcRenderer } from "electron";
 function validateChannel(channel: string, allowedChannels: string[]): boolean {
   if (!allowedChannels.includes(channel)) {
     throw new Error(
-      `Channel "${channel}" is not allowed for security reasons.`
+      `Channel "${channel}" is not allowed for security reasons.`,
     );
   }
   return true;
@@ -68,6 +68,7 @@ const AUTH_CHANNELS = [
 ];
 
 const EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
+const AI_CHANNELS = ["ai:generate-lrc"];
 
 const ALLOWED_INVOKE_CHANNELS = [
   ...WINDOW_CHANNELS,
@@ -78,6 +79,7 @@ const ALLOWED_INVOKE_CHANNELS = [
   ...MUTATION_CHANNELS,
   ...AUTH_CHANNELS,
   ...EXTERNAL_CHANNELS,
+  ...AI_CHANNELS,
 ];
 
 const ALLOWED_ON_CHANNELS = [
@@ -224,11 +226,16 @@ contextBridge.exposeInMainWorld("electron", {
     clearCachedUser: () => ipcRenderer.invoke("clear-cached-user"),
   },
 
-  // Discord RPC
   discord: {
     setActivity: (activity: any) =>
       ipcRenderer.invoke("discord:set-activity", activity),
     clearActivity: () => ipcRenderer.invoke("discord:clear-activity"),
+  },
+
+  // AI機能
+  ai: {
+    generateLrc: (audioPath: string, lyricsText: string) =>
+      ipcRenderer.invoke("ai:generate-lrc", audioPath, lyricsText),
   },
 
   // IPC通信

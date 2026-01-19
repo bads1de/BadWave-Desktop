@@ -22,6 +22,7 @@ import { setupSimpleDownloadHandlers } from "./ipc/simple_download";
 import { setupCacheHandlers } from "./ipc/cache";
 import { setupAuthHandlers } from "./ipc/auth";
 import { setupDiscordHandlers } from "./ipc/discord";
+import { setupAIHandlers } from "./ipc/ai";
 import { setupDevShortcuts } from "./shortcuts";
 import { runMigrations } from "./db/migrate";
 
@@ -59,6 +60,9 @@ function setupIPC() {
 
   // Discord RPCハンドラーのセットアップ
   setupDiscordHandlers();
+
+  // AI関連ハンドラーのセットアップ
+  setupAIHandlers();
 }
 
 // アプリケーションの準備完了時の処理
@@ -69,7 +73,7 @@ app.on("ready", async () => {
 
   const isDev = !app.isPackaged;
   debugLog(
-    `isDev = ${isDev} process.env.NODE_ENV = ${process.env.NODE_ENV} app.isPackaged = ${app.isPackaged}`
+    `isDev = ${isDev} process.env.NODE_ENV = ${process.env.NODE_ENV} app.isPackaged = ${app.isPackaged}`,
   );
 
   if (isDev) {

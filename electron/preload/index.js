@@ -69,7 +69,8 @@ var AUTH_CHANNELS = [
     "clear-cached-user",
 ];
 var EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
-var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true);
+var AI_CHANNELS = ["ai:generate-lrc"];
+var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true), AI_CHANNELS, true);
 var ALLOWED_ON_CHANNELS = [
     "media-control",
     "download-progress",
@@ -222,12 +223,17 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
         // ユーザー情報をクリア
         clearCachedUser: function () { return electron_1.ipcRenderer.invoke("clear-cached-user"); },
     },
-    // Discord RPC
     discord: {
         setActivity: function (activity) {
             return electron_1.ipcRenderer.invoke("discord:set-activity", activity);
         },
         clearActivity: function () { return electron_1.ipcRenderer.invoke("discord:clear-activity"); },
+    },
+    // AI機能
+    ai: {
+        generateLrc: function (audioPath, lyricsText) {
+            return electron_1.ipcRenderer.invoke("ai:generate-lrc", audioPath, lyricsText);
+        },
     },
     // IPC通信
     ipc: {

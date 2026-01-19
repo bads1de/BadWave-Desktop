@@ -11,6 +11,8 @@ import { Textarea } from "../ui/textarea";
 import GenreSelect from "../Genre/GenreSelect";
 import Button from "../common/Button";
 import useEditSongMutation from "@/hooks/mutations/useEditSongMutation";
+import { toast } from "react-hot-toast";
+import { Sparkles } from "lucide-react";
 
 interface EditFormValues extends Partial<Song> {
   video?: FileList;
@@ -26,13 +28,14 @@ interface EditModalProps {
 
 const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // TanStack Queryを使用したミューテーション
   const { mutateAsync, isPending: isLoading } = useEditSongMutation({
     onClose,
   });
 
-  const { register, handleSubmit, reset, setValue, watch } =
+  const { register, handleSubmit, reset, setValue, watch, getValues } =
     useForm<EditFormValues>({
       defaultValues: {
         id: song.id,
@@ -46,6 +49,55 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
         genre: song.genre || "All",
       },
     });
+
+  const handleAiSync = async () => {
+    const lyrics = getValues("lyrics");
+    if (!lyrics) {
+      toast.error("歌詞を入力してください");
+      return;
+    }
+
+    if (!song.song_path) {
+      toast.error("音声ファイルが見つかりません");
+      return;
+    }
+
+    setIsGenerating(true);
+    const toastId = toast.loading("AI同期中... (初回は数分かかります)");
+
+    try {
+      // 1. ローカルパスの取得
+      // protocol (supabase://) を物理パスに変換するか、URLを指定
+      const electron = (window as any).electron;
+      let localPath = "";
+
+      // song_pathが既にローカルパスの場合とURLの場合がある
+      if (song.song_path.startsWith("http")) {
+        // httpの場合はキャッシュを探すか、ダウンロードが必要
+        // 今回は簡略化のため get-local-file-path に委ねる
+        localPath = await electron.ipc.invoke(
+          "get-local-file-path",
+          song.song_path,
+        );
+      } else {
+        localPath = song.song_path;
+      }
+
+      const result = await electron.ai.generateLrc(localPath, lyrics);
+
+      if (result.status === "success") {
+        setValue("lyrics", result.lrc);
+        toast.success("AI同期が完了しました", { id: toastId });
+      } else {
+        toast.error(result.message || "同期に失敗しました", { id: toastId });
+      }
+    } catch (error) {
+      console.error("AI Sync Error:", error);
+      toast.error("エラーが発生しました", { id: toastId });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const watchVideo = watch("video");
   const watchSong = watch("song");
@@ -111,11 +163,25 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
           {...register("author", { required: true })}
           placeholder="曲の作者"
         />
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">歌詞</label>
+          {song.song_path && (
+            <button
+              type="button"
+              disabled={isLoading || isGenerating}
+              onClick={handleAiSync}
+              className="flex items-center gap-x-1 text-xs text-primary hover:underline disabled:text-neutral-500 disabled:no-underline transition"
+            >
+              <Sparkles className="h-3 w-3" />
+              {isGenerating ? "生成中..." : "AI同期"}
+            </button>
+          )}
+        </div>
         <Textarea
-          disabled={isLoading}
+          disabled={isLoading || isGenerating}
           {...register("lyrics")}
           placeholder="歌詞"
-          className="bg-neutral-700"
+          className="bg-neutral-700 min-h-[150px]"
         />
         <GenreSelect
           onGenreChange={(genres: string) => setSelectedGenres([genres])}
