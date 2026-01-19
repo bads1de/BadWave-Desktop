@@ -66,20 +66,14 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
     const toastId = toast.loading("自動同期中... (初回は数分かかります)");
 
     try {
-      // 1. ローカルパスの取得
       const electron = (window as any).electron;
-      let localPath = "";
 
-      if (song.song_path.startsWith("http")) {
-        localPath = await electron.ipc.invoke(
-          "get-local-file-path",
-          song.song_path,
-        );
-      } else {
-        localPath = song.song_path;
-      }
-
-      const result = await electron.transcribe.generateLrc(localPath, lyrics);
+      // transcribe.ts は URL とローカルパスの両方を処理できる
+      // URL の場合は内部でダウンロードしてくれる
+      const result = await electron.transcribe.generateLrc(
+        song.song_path,
+        lyrics,
+      );
 
       if (result.status === "success") {
         setValue("lyrics", result.lrc);
@@ -169,7 +163,7 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
               className="flex items-center gap-x-1 text-xs text-primary hover:underline disabled:text-neutral-500 disabled:no-underline transition"
             >
               <Sparkles className="h-3 w-3" />
-              {isGenerating ? "生成中..." : "自動同期"}
+              {isGenerating ? "生成中..." : "transcribe"}
             </button>
           )}
         </div>

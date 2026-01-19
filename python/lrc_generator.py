@@ -1,12 +1,16 @@
 import sys
 import json
+import re
+import os
+import gc
 import librosa
 import numpy as np
 import torch
+import torch_directml
 from transformers import AutoProcessor, AutoModelForCTC
 
 
-# CTC強制アライメントの計算（簡易版）
+# CTC強制アライメントの計算
 def get_trellis(emission, tokens, blank_id=0):
     num_frame = len(emission)
     num_tokens = len(tokens)
@@ -101,7 +105,6 @@ def merge_words(segments, separator="|"):
 
 
 def clean_text(text):
-    import re
 
     # セクションヘッダー除外
     lines = [line.strip() for line in text.split("\n") if line.strip()]
@@ -127,8 +130,61 @@ def format_lrc_timestamp(seconds):
     return f"[{minutes:02d}:{secs:05.2f}]"
 
 
-def generate_lrc(audio_path, lyrics_text):
+def generate_lrc(audio_path, lyrics_text, use_vocal_separation=True):
+    """
+    音声ファイルと歌詞テキストからLRCファイルを生成する
+
+    Args:
+        audio_path: 音声ファイルのパス
+        lyrics_text: 歌詞テキスト
+        use_vocal_separation: ボーカル抽出を行うかどうか (デフォルト: True)
+    """
+    vocal_path = None
+    instrumental_path = None
     try:
+        # 0. ボーカル抽出（精度向上のため）- 別プロセスで実行してGPUメモリを解放
+        if use_vocal_separation:
+            print("[LRC] ボーカル抽出を開始...", file=sys.stderr)
+
+            # vocal_separator.py を別プロセスで実行（GPUメモリ解放のため）
+            import subprocess
+
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            separator_script = os.path.join(script_dir, "vocal_separator.py")
+            python_exe = sys.executable
+
+            result = subprocess.run(
+                [python_exe, separator_script, audio_path],
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode == 0:
+                try:
+                    sep_result = json.loads(result.stdout.strip())
+                    if sep_result["status"] == "success" and sep_result.get(
+                        "vocal_path"
+                    ):
+                        vocal_path = sep_result["vocal_path"]
+                        instrumental_path = sep_result.get("instrumental_path")
+                        audio_path = vocal_path
+                        print(f"[LRC] ボーカル抽出完了: {vocal_path}", file=sys.stderr)
+                    else:
+                        print(
+                            f"[LRC] ボーカル抽出失敗、元音源を使用: {sep_result.get('message', '')}",
+                            file=sys.stderr,
+                        )
+                except json.JSONDecodeError:
+                    print(
+                        "[LRC] ボーカル抽出の出力解析失敗、元音源を使用",
+                        file=sys.stderr,
+                    )
+            else:
+                print("[LRC] ボーカル抽出プロセスエラー、元音源を使用", file=sys.stderr)
+
+            # サブプロセス終了後にGCを実行
+            gc.collect()
+
         # 1. 歌詞の前処理
         clean_lines_data = clean_text(lyrics_text)
         if not clean_lines_data:
@@ -138,23 +194,59 @@ def generate_lrc(audio_path, lyrics_text):
         # 先頭と末尾にパディング
         padded_transcript = f"|{full_transcript}|"
 
-        # 2. モデルロード
-        model_id = "facebook/wav2vec2-large-960h-lv60-self"  # 英語専用 (高精度版)
+        # 2. モデルロード (精度向上のため Large モデルを使用)
+        model_id = "facebook/wav2vec2-large-960h-lv60-self"
         processor = AutoProcessor.from_pretrained(model_id)
-        model = AutoModelForCTC.from_pretrained(model_id)
+
+        # DirectMLデバイスの設定
+        device = torch_directml.device()
+        print(f"[LRC] Using device: {device}", file=sys.stderr)
+
+        model = AutoModelForCTC.from_pretrained(model_id).to(device)
 
         # 3. 音声読み込み (16kHz)
         audio, sr = librosa.load(audio_path, sr=16000)
         duration = len(audio) / sr
 
-        # 4. 推論
-        inputs = processor(
-            audio, sampling_rate=16000, return_tensors="pt", padding=True
-        )
-        with torch.no_grad():
-            logits = model(inputs.input_values).logits
+        # 4. チャンク分割推論（長い音声のGPUメモリ対策）
+        chunk_length_samples = 30 * sr  # 30秒
+        overlap_samples = 2 * sr  # 2秒オーバーラップ
 
-        emission = torch.log_softmax(logits, dim=-1)[0].cpu().numpy()
+        all_emissions = []
+        pos = 0
+
+        print(f"[LRC] 音声長: {duration:.1f}秒、チャンク処理開始...", file=sys.stderr)
+
+        while pos < len(audio):
+            end = min(pos + chunk_length_samples, len(audio))
+            chunk = audio[pos:end]
+
+            inputs = processor(
+                chunk, sampling_rate=16000, return_tensors="pt", padding=True
+            )
+            input_values = inputs.input_values.to(device)
+
+            with torch.no_grad():
+                logits = model(input_values).logits
+
+            chunk_emission = torch.log_softmax(logits, dim=-1)[0].cpu().numpy()
+
+            # オーバーラップ部分を除去（最初のチャンク以外）
+            if pos > 0 and len(all_emissions) > 0:
+                overlap_frames = int(
+                    overlap_samples / sr * (chunk_emission.shape[0] / (len(chunk) / sr))
+                )
+                chunk_emission = chunk_emission[overlap_frames:]
+
+            all_emissions.append(chunk_emission)
+            pos += chunk_length_samples - overlap_samples
+
+            # メモリ解放
+            del input_values, logits
+            gc.collect()
+
+        # 結合
+        emission = np.concatenate(all_emissions, axis=0)
         num_frames = emission.shape[0]
         ratio = duration / num_frames
 
@@ -175,7 +267,7 @@ def generate_lrc(audio_path, lyrics_text):
         # 6. LRC構成
         lrc_lines = ["[by:BadWave AI]"]
         current_word_idx = 1  # パディングの|を飛ばす
-        global_offset = -0.15  # 150ms早める
+        global_offset = -0.3  # 300ms早める (同期感を向上)
 
         for original_line, clean_line in clean_lines_data:
             words_in_line = clean_line.count("|") + 1
@@ -189,6 +281,14 @@ def generate_lrc(audio_path, lyrics_text):
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    finally:
+        # 生成したボーカル/インストゥルメンタルファイルをクリーンアップ
+        for path in [vocal_path, instrumental_path]:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass  # クリーンアップ失敗は無視
 
 
 if __name__ == "__main__":
@@ -197,7 +297,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     audio_path = sys.argv[1]
-    lyrics_text = sys.argv[2]
+    lyrics_arg = sys.argv[2]
+
+    # ファイルパスの場合は内容を読み込む
+    if os.path.isfile(lyrics_arg):
+        with open(lyrics_arg, "r", encoding="utf-8") as f:
+            lyrics_text = f.read()
+    else:
+        lyrics_text = lyrics_arg
 
     result = generate_lrc(audio_path, lyrics_text)
     print(json.dumps(result))
