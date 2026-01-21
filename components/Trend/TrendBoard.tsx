@@ -8,6 +8,8 @@ import useOnPlay from "@/hooks/player/useOnPlay";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
 import { Song } from "@/types";
 
+import ScrollingText from "@/components/common/ScrollingText";
+
 interface TrendBoardProps {
   className?: string;
   songs: Song[];
@@ -29,7 +31,7 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
       (id: string) => {
         onPlay(id);
       },
-      [onPlay]
+      [onPlay],
     );
 
     // アニメーションの設定
@@ -93,15 +95,19 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
                 </div>
 
                 <div className="p-4">
-                  <h3 className="text-white text-xl font-bold mb-1 flex items-center space-x-2">
-                    <span className="text-[#4c1d95]">#{index + 1}</span>
-                    <Link href={`/songs/${song.id}`}>
-                      <span className="truncate hover:underline">
-                        {song.title}
-                      </span>
-                    </Link>
+                  <h3 className="text-white text-xl font-bold mb-1 flex items-center space-x-2 overflow-hidden">
+                    <span className="text-[#4c1d95] flex-shrink-0">
+                      #{index + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/songs/${song.id}`}>
+                        <ScrollingText text={song.title} limitCharacters={12} />
+                      </Link>
+                    </div>
                   </h3>
-                  <p className="text-gray-400 text-sm">{song.author}</p>
+                  <div className="text-gray-400 text-sm">
+                    <ScrollingText text={song.author} limitCharacters={18} />
+                  </div>
                   <p className="text-gray-500 text-xs mt-2">
                     {song.count} plays
                   </p>
@@ -112,7 +118,7 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
         )}
       </div>
     );
-  }
+  },
 );
 
 // 表示名を設定
