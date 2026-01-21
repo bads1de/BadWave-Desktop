@@ -45,3 +45,6 @@ next-env.d.ts
 /python/*.log
 /python/temp_*.txt
 *.pyc
+
+# Embedded Python (dist用)
+/python-dist/

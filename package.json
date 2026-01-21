@@ -16,8 +16,9 @@
     "create-icons": "node scripts/create-icons.js",
     "dev:electron": "npm run build:electron && concurrently \"next dev\" \"wait-on http-get://localhost:3000 && electron .\"",
     "build:electron": "tsc -p electron",
+    "build:python": "node scripts/build-python.js",
     "package:electron": "electron-builder",
-    "dist:electron": "npm run build && npm run build:electron && npm run package:electron",
+    "dist:electron": "npm run build && npm run build:electron && npm run build:python && npm run package:electron",
     "test:electron": "node scripts/test-electron.js"
   },
   "dependencies": {
@@ -148,6 +149,13 @@
       {
         "from": "drizzle",
         "to": "drizzle",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "python-dist",
+        "to": "python",
         "filter": [
           "**/*"
         ]

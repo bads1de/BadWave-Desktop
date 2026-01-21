@@ -24,6 +24,9 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  env: {
+    ADMIN_USER_IDS: process.env.ADMIN_USER_IDS,
+  },
 };
 
 module.exports = nextConfig;

@@ -24,6 +24,7 @@ export function setupTranscriptionHandlers() {
         let scriptPath = "";
 
         if (isDev) {
+          // 開発時: python/venv を使用
           const rootDir = path.join(__dirname, "../..");
           pythonPath = path.join(
             rootDir,
@@ -34,22 +35,18 @@ export function setupTranscriptionHandlers() {
           );
           scriptPath = path.join(rootDir, "python", "lrc_generator.py");
         } else {
-          pythonPath = path.join(
-            process.resourcesPath,
-            "ai",
-            "venv",
-            "Scripts",
-            "python.exe",
-          );
+          // 本番時: resources/python を使用 (Embedded Python)
+          pythonPath = path.join(process.resourcesPath, "python", "python.exe");
           scriptPath = path.join(
             process.resourcesPath,
-            "ai",
+            "python",
             "lrc_generator.py",
           );
         }
 
         console.log(`[Transcribe] Request - Path: ${audioPath}`);
 
+        // Python実行環境の存在確認
         if (!fs.existsSync(pythonPath)) {
           return resolve({
             status: "error",

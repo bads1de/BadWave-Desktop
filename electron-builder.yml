@@ -46,6 +46,11 @@ extraResources:
     to: standalone/public
     filter:
       - "**/*"
+  # Python環境 (Embedded Python + スクリプト)
+  - from: python-dist
+    to: python
+    filter:
+      - "**/*"
 
 # 公開設定
 publish:
