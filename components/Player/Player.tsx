@@ -6,6 +6,7 @@ import usePlayer from "@/hooks/player/usePlayer";
 import useGetPlaylists from "@/hooks/data/useGetPlaylists";
 import React, { memo, useMemo } from "react";
 import PlayerContent from "./PlayerContent";
+import LyricsModal from "../Modals/LyricsModal/LyricsModal";
 
 const Player = () => {
   const pathname = usePathname();
@@ -28,7 +29,7 @@ const Player = () => {
   }, [player.activeId]);
 
   const { song: onlineSong } = useGetSongById(
-    localSong || isActuallyLocalId ? undefined : player.activeId
+    localSong || isActuallyLocalId ? undefined : player.activeId,
   );
 
   // 最終的な曲を決定
@@ -44,11 +45,16 @@ const Player = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-50">
-      <div className="bg-[#121212] border-t border-[#303030] rounded-t-xl w-full h-[100px]">
-        <PlayerContent song={finalSong} playlists={playlists} />
+    <>
+      <div className="fixed bottom-0 left-0 w-full z-50">
+        <div className="bg-[#121212] border-t border-[#303030] rounded-t-xl w-full h-[100px]">
+          <PlayerContent song={finalSong} playlists={playlists} />
+        </div>
       </div>
-    </div>
+
+      {/* 全画面歌詞モーダル */}
+      <LyricsModal song={finalSong} />
+    </>
   );
 };
 

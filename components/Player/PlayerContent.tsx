@@ -11,6 +11,7 @@ import AddPlaylist from "../Playlist/AddPlaylist";
 import useAudioPlayer from "@/hooks/audio/useAudioPlayer";
 import useAudioEqualizer from "@/hooks/audio/useAudioEqualizer";
 import useLyricsStore from "@/hooks/stores/useLyricsStore";
+import useLyricsModalStore from "@/hooks/stores/useLyricsModalStore";
 import usePlaybackRate from "@/hooks/audio/usePlaybackRate";
 import useAudioEffects from "@/hooks/audio/useAudioEffects";
 import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
@@ -78,6 +79,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     useAudioEffects();
 
     const { toggleLyrics } = useLyricsStore();
+    const { openModal } = useLyricsModalStore();
 
     // メディアコントロールのイベントを受け取る
     useEffect(() => {
@@ -112,7 +114,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
         <div className="grid grid-cols-3 h-full bg-[#121212] border-t border-[#303030] rounded-t-xl">
           <div className="flex w-full justify-start px-4">
             <div className="flex items-center gap-x-4">
-              <MediaItem data={song} />
+              <MediaItem data={song} onClick={openModal} />
             </div>
           </div>
 
