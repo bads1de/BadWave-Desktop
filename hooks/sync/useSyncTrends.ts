@@ -13,7 +13,7 @@ import { subMonths, subWeeks, subDays } from "date-fns";
  */
 export const useSyncTrends = (
   period: "all" | "month" | "week" | "day" = "all",
-  options?: { autoSync?: boolean }
+  options?: { autoSync?: boolean },
 ) => {
   const { autoSync = true } = options ?? {};
   const { user } = useUser(); // トレンドはPublicだが、同期ロジック統一のため
@@ -21,7 +21,6 @@ export const useSyncTrends = (
   const queryClient = useQueryClient();
   const [isSyncing, setIsSyncing] = useState(false);
   const syncInProgress = useRef(false);
-  const hasInitialSynced = useRef(false);
 
   const isOnlineRef = useRef(isOnline);
   useEffect(() => {
@@ -49,21 +48,21 @@ export const useSyncTrends = (
           query = query.filter(
             "created_at",
             "gte",
-            subMonths(new Date(), 1).toISOString()
+            subMonths(new Date(), 1).toISOString(),
           );
           break;
         case "week":
           query = query.filter(
             "created_at",
             "gte",
-            subWeeks(new Date(), 1).toISOString()
+            subWeeks(new Date(), 1).toISOString(),
           );
           break;
         case "day":
           query = query.filter(
             "created_at",
             "gte",
-            subDays(new Date(), 1).toISOString()
+            subDays(new Date(), 1).toISOString(),
           );
           break;
       }
@@ -100,23 +99,12 @@ export const useSyncTrends = (
     }
   }, [period, queryClient]);
 
-  // 自動同期
+  // 自動同期 (period変更時やオンライン復帰時に実行)
   useEffect(() => {
     if (!autoSync) return;
-    if (isOnline && !hasInitialSynced.current) {
-      hasInitialSynced.current = true;
+    if (isOnline) {
       sync();
     }
-  }, [autoSync, isOnline, sync]);
-
-  // オンライン復帰時の同期
-  const prevOnlineRef = useRef(isOnline);
-  useEffect(() => {
-    if (!autoSync) return;
-    if (!prevOnlineRef.current && isOnline) {
-      sync();
-    }
-    prevOnlineRef.current = isOnline;
   }, [autoSync, isOnline, sync]);
 
   return { sync, isSyncing };
