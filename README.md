@@ -1,9 +1,40 @@
+<div align="center">
+
 # BadWave Desktop
 
-**BadWave Desktop** は、Web の柔軟性とデスクトップのパワーを融合させた、Windows 向けの高性能音楽プレイヤーです。
-**Electron** と **Next.js (Renderer)** を組み合わせたハイブリッド構成を採用し、ローカルファーストなデータベース設計と、**Python** と連携した高度な解析機能（歌詞生成など）を搭載しています。
+**Web の柔軟性とデスクトップのパワーを融合させた、Windows 向けの高性能音楽プレイヤー**
 
-## 🖥 プロジェクトのハイライト
+<p align="center">
+  <a href="https://www.electronjs.org/">
+    <img src="https://img.shields.io/badge/Electron-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron">
+  </a>
+  <a href="https://nextjs.org/">
+    <img src="https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js">
+  </a>
+  <a href="https://www.typescriptlang.org/">
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  </a>
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  </a>
+  <a href="https://tailwindcss.com/">
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+  </a>
+</p>
+
+<br>
+
+<img src="public/20edb87187fc6d4688bfc8fc5c826eea.jpg" width="100%" alt="BadWave Desktop Screenshot" style="border-radius: 10px;">
+
+<br>
+<br>
+
+**Electron** と **Next.js (Renderer)** を組み合わせたハイブリッド構成を採用。<br>
+ローカルファーストなデータベース設計と、**Python** と連携した高度な解析機能（歌詞生成など）を搭載しています。
+
+</div>
+
+---
 
 ### 1. Electron + Next.js ハイブリッド & IPC 設計
 
