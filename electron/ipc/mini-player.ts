@@ -26,17 +26,6 @@ export function setupMiniPlayerHandlers() {
       }
 
       await createMiniPlayer();
-
-      // ミニプレイヤー作成後、メインウィンドウに状態再送信をリクエスト
-      // 少し遅延させてミニプレイヤーのリスナーが準備できるようにする
-      setTimeout(() => {
-        const mainWindow = getMainWindow();
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          console.log("Requesting state sync from main window");
-          mainWindow.webContents.send("mini-player:request-state");
-        }
-      }, 500);
-
       return { success: true };
     } catch (error) {
       console.error("ミニプレイヤーの作成に失敗:", error);
@@ -47,11 +36,9 @@ export function setupMiniPlayerHandlers() {
   // ミニプレイヤーを閉じる
   ipcMain.handle("mini-player:close", (event) => {
     try {
-      console.log("mini-player:close called");
       // event.senderからウィンドウを取得して閉じる（ミニプレイヤー自身から呼ばれた場合）
       const callerWindow = BrowserWindow.fromWebContents(event.sender);
       if (callerWindow && !callerWindow.isDestroyed()) {
-        console.log("Closing mini-player window from caller");
         callerWindow.close();
         return { success: true };
       }
@@ -98,17 +85,11 @@ export function setupMiniPlayerHandlers() {
     "mini-player:control",
     (_event, action: "play-pause" | "next" | "previous") => {
       try {
-        console.log("[MiniPlayer] Control action received:", action);
         const mainWindow = getMainWindow();
         if (mainWindow && !mainWindow.isDestroyed()) {
-          console.log(
-            "[MiniPlayer] Sending media-control to main window:",
-            action,
-          );
           mainWindow.webContents.send("media-control", action);
           return { success: true };
         } else {
-          console.log("[MiniPlayer] Main window not available");
           return { success: false, error: "Main window not available" };
         }
       } catch (error) {
@@ -127,10 +108,8 @@ export function setupMiniPlayerHandlers() {
   // ミニプレイヤーの準備完了通知
   ipcMain.handle("mini-player:ready", () => {
     try {
-      console.log("[MiniPlayer] Ready signal received");
       const mainWindow = getMainWindow();
       if (mainWindow && !mainWindow.isDestroyed()) {
-        console.log("[MiniPlayer] Requesting state from main window");
         mainWindow.webContents.send("mini-player:request-state");
       }
       return { success: true };

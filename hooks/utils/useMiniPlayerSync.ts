@@ -28,11 +28,6 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
     const currentSong = songRef.current;
     const currentIsPlaying = isPlayingRef.current;
 
-    console.log("Sending state to mini-player:", {
-      song: currentSong,
-      isPlaying: currentIsPlaying,
-    });
-
     await miniPlayer.updateState({
       song: currentSong
         ? {
@@ -50,9 +45,7 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
   useEffect(() => {
     if (!isElectron()) return;
 
-    console.log("Setting up mini-player state request listener");
     const unsubscribe = miniPlayer.onRequestState(() => {
-      console.log("Received state request from mini-player");
       sendState();
     });
 
@@ -65,16 +58,7 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
   useEffect(() => {
     if (!isElectron()) return;
 
-    // ミニプレイヤーが開いているか確認して同期
-    const checkAndSync = async () => {
-      const isOpen = await miniPlayer.isOpen();
-      if (isOpen) {
-        sendState();
-      }
-    };
-
-    checkAndSync();
+    // ミニプレイヤーに状態を同期（メインプロセス側でウィンドウがなければ無視される）
+    sendState();
   }, [song, isPlaying, sendState]);
-
-  return { syncState: sendState };
 }

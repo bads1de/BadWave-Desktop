@@ -6,20 +6,12 @@ import { miniPlayer, isElectron } from "@/libs/electron";
 
 interface MiniPlayerButtonProps {
   disabled?: boolean;
-  onOpen?: () => void;
 }
 
-const MiniPlayerButton: React.FC<MiniPlayerButtonProps> = ({
-  disabled,
-  onOpen,
-}) => {
+const MiniPlayerButton: React.FC<MiniPlayerButtonProps> = ({ disabled }) => {
   const handleOpenMiniPlayer = async () => {
     if (!isElectron() || disabled) return;
     await miniPlayer.open();
-    // 少し待ってから状態を同期（ミニプレイヤーのリスナーが準備できるまで）
-    setTimeout(() => {
-      onOpen?.();
-    }, 300);
   };
 
   // Electron環境でない場合は表示しない

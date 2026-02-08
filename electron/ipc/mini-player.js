@@ -64,15 +64,6 @@ function setupMiniPlayerHandlers() {
                     return [4 /*yield*/, (0, window_manager_1.createMiniPlayer)()];
                 case 1:
                     _a.sent();
-                    // ミニプレイヤー作成後、メインウィンドウに状態再送信をリクエスト
-                    // 少し遅延させてミニプレイヤーのリスナーが準備できるようにする
-                    setTimeout(function () {
-                        var mainWindow = (0, window_manager_1.getMainWindow)();
-                        if (mainWindow && !mainWindow.isDestroyed()) {
-                            console.log("Requesting state sync from main window");
-                            mainWindow.webContents.send("mini-player:request-state");
-                        }
-                    }, 500);
                     return [2 /*return*/, { success: true }];
                 case 2:
                     error_1 = _a.sent();
@@ -85,11 +76,9 @@ function setupMiniPlayerHandlers() {
     // ミニプレイヤーを閉じる
     electron_1.ipcMain.handle("mini-player:close", function (event) {
         try {
-            console.log("mini-player:close called");
             // event.senderからウィンドウを取得して閉じる（ミニプレイヤー自身から呼ばれた場合）
             var callerWindow = electron_1.BrowserWindow.fromWebContents(event.sender);
             if (callerWindow && !callerWindow.isDestroyed()) {
-                console.log("Closing mini-player window from caller");
                 callerWindow.close();
                 return { success: true };
             }
@@ -119,15 +108,12 @@ function setupMiniPlayerHandlers() {
     // ミニプレイヤーからの操作をメインウィンドウに転送
     electron_1.ipcMain.handle("mini-player:control", function (_event, action) {
         try {
-            console.log("[MiniPlayer] Control action received:", action);
             var mainWindow = (0, window_manager_1.getMainWindow)();
             if (mainWindow && !mainWindow.isDestroyed()) {
-                console.log("[MiniPlayer] Sending media-control to main window:", action);
                 mainWindow.webContents.send("media-control", action);
                 return { success: true };
             }
             else {
-                console.log("[MiniPlayer] Main window not available");
                 return { success: false, error: "Main window not available" };
             }
         }
@@ -144,10 +130,8 @@ function setupMiniPlayerHandlers() {
     // ミニプレイヤーの準備完了通知
     electron_1.ipcMain.handle("mini-player:ready", function () {
         try {
-            console.log("[MiniPlayer] Ready signal received");
             var mainWindow = (0, window_manager_1.getMainWindow)();
             if (mainWindow && !mainWindow.isDestroyed()) {
-                console.log("[MiniPlayer] Requesting state from main window");
                 mainWindow.webContents.send("mini-player:request-state");
             }
             return { success: true };

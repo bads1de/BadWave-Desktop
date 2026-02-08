@@ -80,7 +80,8 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     useAudioEffects();
 
     // ミニプレイヤーに曲情報を同期
-    const { syncState } = useMiniPlayerSync({ song, isPlaying });
+    // ミニプレイヤーに曲情報を同期
+    useMiniPlayerSync({ song, isPlaying });
 
     const { toggleLyrics } = useLyricsStore();
     const { openModal } = useLyricsModalStore();
@@ -222,7 +223,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
               <AudioSettingsButton />
 
               {/* ミニプレイヤーボタン */}
-              <MiniPlayerButton onOpen={syncState} />
+              <MiniPlayerButton />
 
               {/* 音量コントロール */}
               <VolumeControl />

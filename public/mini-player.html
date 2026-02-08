@@ -264,8 +264,6 @@
 
       // 状態を更新
       function updateState(state) {
-        console.log("Mini player received state:", state);
-
         if (state.song) {
           hasSong = true;
           songTitle.textContent = state.song.title || "不明なタイトル";
@@ -303,67 +301,40 @@
 
       // イベントリスナー
       closeBtn.addEventListener("click", () => {
-        console.log("Close button clicked");
         if (window.electron && window.electron.miniPlayer) {
           window.electron.miniPlayer.close();
         }
       });
 
       prevBtn.addEventListener("click", async () => {
-        if (!hasSong) {
-          console.log("Previous button clicked but no song");
-          return;
-        }
-        console.log("Previous button clicked");
+        if (!hasSong) return;
         if (window.electron && window.electron.miniPlayer) {
-          const result = await window.electron.miniPlayer.control("previous");
-          console.log("Control result:", result);
-        } else {
-          console.log("miniPlayer API not available");
+          await window.electron.miniPlayer.control("previous");
         }
       });
 
       playBtn.addEventListener("click", async () => {
-        if (!hasSong) {
-          console.log("Play/Pause button clicked but no song");
-          return;
-        }
-        console.log("Play/Pause button clicked, isPlaying:", isPlaying);
+        if (!hasSong) return;
         if (window.electron && window.electron.miniPlayer) {
-          const result = await window.electron.miniPlayer.control("play-pause");
-          console.log("Control result:", result);
-        } else {
-          console.log("miniPlayer API not available");
+          await window.electron.miniPlayer.control("play-pause");
         }
       });
 
       nextBtn.addEventListener("click", async () => {
-        if (!hasSong) {
-          console.log("Next button clicked but no song");
-          return;
-        }
-        console.log("Next button clicked");
+        if (!hasSong) return;
         if (window.electron && window.electron.miniPlayer) {
-          const result = await window.electron.miniPlayer.control("next");
-          console.log("Control result:", result);
-        } else {
-          console.log("miniPlayer API not available");
+          await window.electron.miniPlayer.control("next");
         }
       });
 
       // Electronから状態変更を受け取る
-      // Electronから状態変更を受け取る
       if (window.electron && window.electron.miniPlayer) {
-        console.log("Setting up state change listener");
         window.electron.miniPlayer.onStateChange((state) => {
           updateState(state);
         });
 
         // 準備完了を通知
-        console.log("Notifying ready state");
         window.electron.miniPlayer.ready();
-      } else {
-        console.log("Electron miniPlayer API not available");
       }
     </script>
   </body>
