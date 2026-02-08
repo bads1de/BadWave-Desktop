@@ -76,6 +76,7 @@ var MINI_PLAYER_CHANNELS = [
     "mini-player:update-state",
     "mini-player:control",
     "mini-player:is-open",
+    "mini-player:ready",
 ];
 var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true), TRANSCRIBE_CHANNELS, true), MINI_PLAYER_CHANNELS, true);
 var ALLOWED_ON_CHANNELS = [
@@ -258,6 +259,8 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
         },
         // ミニプレイヤーが開いているか確認
         isOpen: function () { return electron_1.ipcRenderer.invoke("mini-player:is-open"); },
+        // ミニプレイヤーの準備完了を通知
+        ready: function () { return electron_1.ipcRenderer.invoke("mini-player:ready"); },
         // 状態変更イベントのリスナーを登録（ミニプレイヤー側で使用）
         onStateChange: function (callback) {
             var subscription = function (_, state) { return callback(state); };

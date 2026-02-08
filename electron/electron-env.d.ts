@@ -185,6 +185,8 @@ interface ElectronAPI {
     ) => Promise<{ success: boolean; error?: string }>;
     // ミニプレイヤーが開いているか確認
     isOpen: () => Promise<boolean>;
+    // ミニプレイヤーの準備完了を通知
+    ready: () => Promise<{ success: boolean; error?: string }>;
     // 状態変更イベントのリスナーを登録
     onStateChange: (
       callback: (state: {

@@ -98,11 +98,19 @@ export function setupMiniPlayerHandlers() {
     "mini-player:control",
     (_event, action: "play-pause" | "next" | "previous") => {
       try {
+        console.log("[MiniPlayer] Control action received:", action);
         const mainWindow = getMainWindow();
         if (mainWindow && !mainWindow.isDestroyed()) {
+          console.log(
+            "[MiniPlayer] Sending media-control to main window:",
+            action,
+          );
           mainWindow.webContents.send("media-control", action);
+          return { success: true };
+        } else {
+          console.log("[MiniPlayer] Main window not available");
+          return { success: false, error: "Main window not available" };
         }
-        return { success: true };
       } catch (error) {
         console.error("メディアコントロールの転送に失敗:", error);
         return { success: false, error: String(error) };
@@ -114,5 +122,21 @@ export function setupMiniPlayerHandlers() {
   ipcMain.handle("mini-player:is-open", () => {
     const miniPlayer = getMiniPlayerWindow();
     return miniPlayer !== null && !miniPlayer.isDestroyed();
+  });
+
+  // ミニプレイヤーの準備完了通知
+  ipcMain.handle("mini-player:ready", () => {
+    try {
+      console.log("[MiniPlayer] Ready signal received");
+      const mainWindow = getMainWindow();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        console.log("[MiniPlayer] Requesting state from main window");
+        mainWindow.webContents.send("mini-player:request-state");
+      }
+      return { success: true };
+    } catch (error) {
+      console.error("ミニプレイヤーの準備完了処理に失敗:", error);
+      return { success: false, error: String(error) };
+    }
   });
 }

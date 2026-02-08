@@ -100,6 +100,20 @@ export const miniPlayer = {
       return false;
     }
   },
+  /**
+   * ミニプレイヤーの準備完了を通知
+   */
+  ready: async (): Promise<{ success: boolean; error?: string }> => {
+    if (!isElectron()) {
+      return { success: false, error: "Electron環境ではありません" };
+    }
+    try {
+      return await window.electron.miniPlayer.ready();
+    } catch (error) {
+      console.error("ミニプレイヤーの準備完了通知に失敗:", error);
+      return { success: false, error: String(error) };
+    }
+  },
 
   /**
    * 状態変更イベントのリスナーを登録（ミニプレイヤーウィンドウ内で使用）

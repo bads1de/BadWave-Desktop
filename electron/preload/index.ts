@@ -75,6 +75,7 @@ const MINI_PLAYER_CHANNELS = [
   "mini-player:update-state",
   "mini-player:control",
   "mini-player:is-open",
+  "mini-player:ready",
 ];
 
 const ALLOWED_INVOKE_CHANNELS = [
@@ -269,6 +270,8 @@ contextBridge.exposeInMainWorld("electron", {
       ipcRenderer.invoke("mini-player:control", action),
     // ミニプレイヤーが開いているか確認
     isOpen: () => ipcRenderer.invoke("mini-player:is-open"),
+    // ミニプレイヤーの準備完了を通知
+    ready: () => ipcRenderer.invoke("mini-player:ready"),
     // 状態変更イベントのリスナーを登録（ミニプレイヤー側で使用）
     onStateChange: (
       callback: (state: {

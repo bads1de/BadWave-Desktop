@@ -119,11 +119,17 @@ function setupMiniPlayerHandlers() {
     // ミニプレイヤーからの操作をメインウィンドウに転送
     electron_1.ipcMain.handle("mini-player:control", function (_event, action) {
         try {
+            console.log("[MiniPlayer] Control action received:", action);
             var mainWindow = (0, window_manager_1.getMainWindow)();
             if (mainWindow && !mainWindow.isDestroyed()) {
+                console.log("[MiniPlayer] Sending media-control to main window:", action);
                 mainWindow.webContents.send("media-control", action);
+                return { success: true };
             }
-            return { success: true };
+            else {
+                console.log("[MiniPlayer] Main window not available");
+                return { success: false, error: "Main window not available" };
+            }
         }
         catch (error) {
             console.error("メディアコントロールの転送に失敗:", error);
@@ -134,6 +140,22 @@ function setupMiniPlayerHandlers() {
     electron_1.ipcMain.handle("mini-player:is-open", function () {
         var miniPlayer = (0, window_manager_1.getMiniPlayerWindow)();
         return miniPlayer !== null && !miniPlayer.isDestroyed();
+    });
+    // ミニプレイヤーの準備完了通知
+    electron_1.ipcMain.handle("mini-player:ready", function () {
+        try {
+            console.log("[MiniPlayer] Ready signal received");
+            var mainWindow = (0, window_manager_1.getMainWindow)();
+            if (mainWindow && !mainWindow.isDestroyed()) {
+                console.log("[MiniPlayer] Requesting state from main window");
+                mainWindow.webContents.send("mini-player:request-state");
+            }
+            return { success: true };
+        }
+        catch (error) {
+            console.error("ミニプレイヤーの準備完了処理に失敗:", error);
+            return { success: false, error: String(error) };
+        }
     });
 }
 //# sourceMappingURL=mini-player.js.map

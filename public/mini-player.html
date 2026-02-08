@@ -125,6 +125,8 @@
         align-items: center;
         gap: 4px;
         -webkit-app-region: no-drag;
+        position: relative;
+        z-index: 10;
       }
 
       .control-btn {
@@ -139,6 +141,8 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
+        position: relative;
+        z-index: 20;
       }
 
       .control-btn:hover:not(:disabled) {
@@ -305,36 +309,59 @@
         }
       });
 
-      prevBtn.addEventListener("click", () => {
-        if (!hasSong) return;
+      prevBtn.addEventListener("click", async () => {
+        if (!hasSong) {
+          console.log("Previous button clicked but no song");
+          return;
+        }
         console.log("Previous button clicked");
         if (window.electron && window.electron.miniPlayer) {
-          window.electron.miniPlayer.control("previous");
+          const result = await window.electron.miniPlayer.control("previous");
+          console.log("Control result:", result);
+        } else {
+          console.log("miniPlayer API not available");
         }
       });
 
-      playBtn.addEventListener("click", () => {
-        if (!hasSong) return;
-        console.log("Play/Pause button clicked");
+      playBtn.addEventListener("click", async () => {
+        if (!hasSong) {
+          console.log("Play/Pause button clicked but no song");
+          return;
+        }
+        console.log("Play/Pause button clicked, isPlaying:", isPlaying);
         if (window.electron && window.electron.miniPlayer) {
-          window.electron.miniPlayer.control("play-pause");
+          const result = await window.electron.miniPlayer.control("play-pause");
+          console.log("Control result:", result);
+        } else {
+          console.log("miniPlayer API not available");
         }
       });
 
-      nextBtn.addEventListener("click", () => {
-        if (!hasSong) return;
+      nextBtn.addEventListener("click", async () => {
+        if (!hasSong) {
+          console.log("Next button clicked but no song");
+          return;
+        }
         console.log("Next button clicked");
         if (window.electron && window.electron.miniPlayer) {
-          window.electron.miniPlayer.control("next");
+          const result = await window.electron.miniPlayer.control("next");
+          console.log("Control result:", result);
+        } else {
+          console.log("miniPlayer API not available");
         }
       });
 
+      // Electronから状態変更を受け取る
       // Electronから状態変更を受け取る
       if (window.electron && window.electron.miniPlayer) {
         console.log("Setting up state change listener");
         window.electron.miniPlayer.onStateChange((state) => {
           updateState(state);
         });
+
+        // 準備完了を通知
+        console.log("Notifying ready state");
+        window.electron.miniPlayer.ready();
       } else {
         console.log("Electron miniPlayer API not available");
       }
