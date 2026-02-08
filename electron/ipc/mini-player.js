@@ -46,24 +46,18 @@ function setupMiniPlayerHandlers() {
     var _this = this;
     // ミニプレイヤーを開く
     electron_1.ipcMain.handle("mini-player:open", function () { return __awaiter(_this, void 0, void 0, function () {
-        var miniPlayer, mainWindow, error_1;
+        var mainWindow, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    miniPlayer = (0, window_manager_1.getMiniPlayerWindow)();
-                    if (miniPlayer && !miniPlayer.isDestroyed()) {
-                        miniPlayer.show();
-                        miniPlayer.focus();
-                        mainWindow = (0, window_manager_1.getMainWindow)();
-                        if (mainWindow && !mainWindow.isDestroyed()) {
-                            mainWindow.webContents.send("mini-player:request-state");
-                        }
-                        return [2 /*return*/, { success: true }];
-                    }
                     return [4 /*yield*/, (0, window_manager_1.createMiniPlayer)()];
                 case 1:
                     _a.sent();
+                    mainWindow = (0, window_manager_1.getMainWindow)();
+                    if (mainWindow && !mainWindow.isDestroyed()) {
+                        mainWindow.webContents.send("mini-player:request-state");
+                    }
                     return [2 /*return*/, { success: true }];
                 case 2:
                     error_1 = _a.sent();

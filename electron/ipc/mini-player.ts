@@ -13,19 +13,14 @@ export function setupMiniPlayerHandlers() {
   // ミニプレイヤーを開く
   ipcMain.handle("mini-player:open", async () => {
     try {
-      const miniPlayer = getMiniPlayerWindow();
-      if (miniPlayer && !miniPlayer.isDestroyed()) {
-        miniPlayer.show();
-        miniPlayer.focus();
-        // メインウィンドウに状態再送信をリクエスト
-        const mainWindow = getMainWindow();
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("mini-player:request-state");
-        }
-        return { success: true };
+      await createMiniPlayer();
+
+      // メインウィンドウに状態再送信をリクエスト（ウィンドウが新規作成されたかどうかにかかわらず実行）
+      const mainWindow = getMainWindow();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("mini-player:request-state");
       }
 
-      await createMiniPlayer();
       return { success: true };
     } catch (error) {
       console.error("ミニプレイヤーの作成に失敗:", error);

@@ -23,6 +23,7 @@ import MiniPlayerButton from "./MiniPlayerButton";
 import AudioSettingsButton from "./AudioSettingsButton";
 import { useDiscordRpc } from "@/hooks/utils/useDiscordRpc";
 import { useMiniPlayerSync } from "@/hooks/utils/useMiniPlayerSync";
+import { useMediaControl } from "@/hooks/utils/useMediaControl";
 
 interface PlayerContentProps {
   song: Song;
@@ -86,32 +87,12 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     const { toggleLyrics } = useLyricsStore();
     const { openModal } = useLyricsModalStore();
 
-    // メディアコントロールのイベントを受け取る
-    useEffect(() => {
-      // Electronのメディアコントロールイベントを受け取るリスナーを登録
-      const unsubscribe = mediaControls.onMediaControl((action) => {
-        console.log("メディアコントロールイベントを受信:", action);
-
-        switch (action) {
-          case "play-pause":
-            handlePlay();
-            break;
-          case "next":
-            onPlayNext();
-            break;
-          case "previous":
-            onPlayPrevious();
-            break;
-          default:
-            console.log("未知のメディアコントロールアクション:", action);
-        }
-      });
-
-      // コンポーネントのアンマウント時にリスナーを解除
-      return () => {
-        unsubscribe();
-      };
-    }, [handlePlay, onPlayNext, onPlayPrevious]);
+    // メディアコントロール（ミニプレイヤー含む）のイベントを受け取る
+    useMediaControl({
+      onPlayPause: handlePlay,
+      onNext: onPlayNext,
+      onPrevious: onPlayPrevious,
+    });
 
     return (
       <>

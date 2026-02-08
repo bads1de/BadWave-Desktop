@@ -21,99 +21,104 @@ export interface MiniPlayerState {
 /**
  * ミニプレイヤー関連の操作
  */
+// 共通のエラーハンドリング関数
+const safeIpcInvoke = async <T>(
+  fn: () => Promise<T>,
+  fallbackValue: T,
+  errorMessage: string,
+): Promise<T> => {
+  if (!isElectron()) {
+    // 戻り値がオブジェクトで、かつsuccessプロパティを持つ場合（APIレスポンス型の場合）
+    if (
+      typeof fallbackValue === "object" &&
+      fallbackValue !== null &&
+      "success" in fallbackValue
+    ) {
+      return {
+        ...fallbackValue,
+        error: "Electron環境ではありません",
+      };
+    }
+    return fallbackValue;
+  }
+  try {
+    return await fn();
+  } catch (error) {
+    console.error(`${errorMessage}:`, error);
+    if (
+      typeof fallbackValue === "object" &&
+      fallbackValue !== null &&
+      "success" in fallbackValue
+    ) {
+      return {
+        ...fallbackValue,
+        error: String(error),
+      };
+    }
+    return fallbackValue;
+  }
+};
+
 export const miniPlayer = {
   /**
    * ミニプレイヤーを開く
    */
-  open: async (): Promise<{ success: boolean; error?: string }> => {
-    if (!isElectron()) {
-      return { success: false, error: "Electron環境ではありません" };
-    }
-    try {
-      return await window.electron.miniPlayer.open();
-    } catch (error) {
-      console.error("ミニプレイヤーを開く際にエラー:", error);
-      return { success: false, error: String(error) };
-    }
-  },
+  open: () =>
+    safeIpcInvoke(
+      () => window.electron.miniPlayer.open(),
+      { success: false },
+      "ミニプレイヤーを開く際にエラー",
+    ),
 
   /**
    * ミニプレイヤーを閉じる
    */
-  close: async (): Promise<{ success: boolean; error?: string }> => {
-    if (!isElectron()) {
-      return { success: false, error: "Electron環境ではありません" };
-    }
-    try {
-      return await window.electron.miniPlayer.close();
-    } catch (error) {
-      console.error("ミニプレイヤーを閉じる際にエラー:", error);
-      return { success: false, error: String(error) };
-    }
-  },
+  close: () =>
+    safeIpcInvoke(
+      () => window.electron.miniPlayer.close(),
+      { success: false },
+      "ミニプレイヤーを閉じる際にエラー",
+    ),
 
   /**
    * ミニプレイヤーの状態を更新
    */
-  updateState: async (
-    state: MiniPlayerState,
-  ): Promise<{ success: boolean; error?: string }> => {
-    if (!isElectron()) {
-      return { success: false, error: "Electron環境ではありません" };
-    }
-    try {
-      return await window.electron.miniPlayer.updateState(state);
-    } catch (error) {
-      console.error("ミニプレイヤーの状態更新に失敗:", error);
-      return { success: false, error: String(error) };
-    }
-  },
+  updateState: (state: MiniPlayerState) =>
+    safeIpcInvoke(
+      () => window.electron.miniPlayer.updateState(state),
+      { success: false },
+      "ミニプレイヤーの状態更新に失敗",
+    ),
 
   /**
    * ミニプレイヤーから再生コントロール
    */
-  control: async (
-    action: "play-pause" | "next" | "previous",
-  ): Promise<{ success: boolean; error?: string }> => {
-    if (!isElectron()) {
-      return { success: false, error: "Electron環境ではありません" };
-    }
-    try {
-      return await window.electron.miniPlayer.control(action);
-    } catch (error) {
-      console.error("ミニプレイヤーのコントロールに失敗:", error);
-      return { success: false, error: String(error) };
-    }
-  },
+  control: (action: "play-pause" | "next" | "previous") =>
+    safeIpcInvoke(
+      () => window.electron.miniPlayer.control(action),
+      { success: false },
+      "ミニプレイヤーのコントロールに失敗",
+    ),
 
   /**
    * ミニプレイヤーが開いているか確認
    */
-  isOpen: async (): Promise<boolean> => {
-    if (!isElectron()) {
-      return false;
-    }
-    try {
-      return await window.electron.miniPlayer.isOpen();
-    } catch (error) {
-      console.error("ミニプレイヤーの状態確認に失敗:", error);
-      return false;
-    }
-  },
+  isOpen: () =>
+    safeIpcInvoke(
+      () => window.electron.miniPlayer.isOpen(),
+      false,
+      "ミニプレイヤーの状態確認に失敗",
+    ),
+
   /**
    * ミニプレイヤーの準備完了を通知
    */
-  ready: async (): Promise<{ success: boolean; error?: string }> => {
-    if (!isElectron()) {
-      return { success: false, error: "Electron環境ではありません" };
-    }
-    try {
-      return await window.electron.miniPlayer.ready();
-    } catch (error) {
-      console.error("ミニプレイヤーの準備完了通知に失敗:", error);
-      return { success: false, error: String(error) };
-    }
-  },
+  ready: () =>
+    safeIpcInvoke(
+      () => window.electron.miniPlayer.ready(),
+      { success: false },
+      "ミニプレイヤーの準備完了通知に失敗",
+    ),
 
   /**
    * 状態変更イベントのリスナーを登録（ミニプレイヤーウィンドウ内で使用）
