@@ -126,7 +126,6 @@ function createMiniPlayer() {
                         },
                     });
                     htmlPath = path.join(electron_1.app.getAppPath(), "public", "mini-player.html");
-                    (0, utils_1.debugLog)("\u30DF\u30CB\u30D7\u30EC\u30A4\u30E4\u30FCHTML\u30D1\u30B9: ".concat(htmlPath));
                     return [4 /*yield*/, miniPlayerWindow.loadFile(htmlPath)];
                 case 1:
                     _b.sent();
@@ -134,7 +133,6 @@ function createMiniPlayer() {
                     miniPlayerWindow.on("closed", function () {
                         miniPlayerWindow = null;
                     });
-                    (0, utils_1.debugLog)("ミニプレイヤーウィンドウを作成しました");
                     return [2 /*return*/, miniPlayerWindow];
             }
         });
@@ -145,7 +143,6 @@ function closeMiniPlayer() {
     if (miniPlayerWindow && !miniPlayerWindow.isDestroyed()) {
         miniPlayerWindow.close();
         miniPlayerWindow = null;
-        (0, utils_1.debugLog)("ミニプレイヤーウィンドウを閉じました");
     }
 }
 // メインウィンドウの作成
