@@ -56,7 +56,6 @@ export async function createMiniPlayer(): Promise<BrowserWindow> {
 
   // ミニプレイヤー専用HTMLファイルを読み込む
   const htmlPath = path.join(app.getAppPath(), "public", "mini-player.html");
-  debugLog(`ミニプレイヤーHTMLパス: ${htmlPath}`);
 
   await miniPlayerWindow.loadFile(htmlPath);
 
@@ -64,8 +63,6 @@ export async function createMiniPlayer(): Promise<BrowserWindow> {
   miniPlayerWindow.on("closed", () => {
     miniPlayerWindow = null;
   });
-
-  debugLog("ミニプレイヤーウィンドウを作成しました");
   return miniPlayerWindow;
 }
 
@@ -74,7 +71,6 @@ export function closeMiniPlayer(): void {
   if (miniPlayerWindow && !miniPlayerWindow.isDestroyed()) {
     miniPlayerWindow.close();
     miniPlayerWindow = null;
-    debugLog("ミニプレイヤーウィンドウを閉じました");
   }
 }
 
