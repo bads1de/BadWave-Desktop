@@ -18,10 +18,11 @@ import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
 import { mediaControls } from "@/libs/electron";
 import { isLocalSong, getPlayablePath } from "@/libs/songUtils";
 import DisabledOverlay from "../common/DisabledOverlay";
-import PlaybackSpeedButton from "./PlaybackSpeedButton";
-import EqualizerButton from "./EqualizerButton";
 import VolumeControl from "./VolumeControl";
+import MiniPlayerButton from "./MiniPlayerButton";
+import AudioSettingsButton from "./AudioSettingsButton";
 import { useDiscordRpc } from "@/hooks/utils/useDiscordRpc";
+import { useMiniPlayerSync } from "@/hooks/utils/useMiniPlayerSync";
 
 interface PlayerContentProps {
   song: Song;
@@ -77,6 +78,9 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     useAudioEqualizer();
     usePlaybackRate();
     useAudioEffects();
+
+    // ミニプレイヤーに曲情報を同期
+    useMiniPlayerSync({ song, isPlaying });
 
     const { toggleLyrics } = useLyricsStore();
     const { openModal } = useLyricsModalStore();
@@ -214,11 +218,11 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
                 </button>
               </DisabledOverlay>
 
-              {/* プレイバックスピードボタン */}
-              <PlaybackSpeedButton />
+              {/* オーディオ設定 (速度・エフェクト・イコライザー) */}
+              <AudioSettingsButton />
 
-              {/* イコライザーボタン */}
-              <EqualizerButton />
+              {/* ミニプレイヤーボタン */}
+              <MiniPlayerButton />
 
               {/* 音量コントロール */}
               <VolumeControl />

@@ -70,6 +70,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMainWindow = getMainWindow;
+exports.getMiniPlayerWindow = getMiniPlayerWindow;
+exports.createMiniPlayer = createMiniPlayer;
+exports.closeMiniPlayer = closeMiniPlayer;
 exports.createMainWindow = createMainWindow;
 var electron_1 = require("electron");
 var path = __importStar(require("path"));
@@ -77,9 +80,73 @@ var utils_1 = require("../utils");
 var server_1 = require("./server");
 // グローバル参照を保持（ガベージコレクションを防ぐため）
 var mainWindow = null;
+var miniPlayerWindow = null;
 // メインウィンドウの取得
 function getMainWindow() {
     return mainWindow;
+}
+// ミニプレイヤーウィンドウの取得
+function getMiniPlayerWindow() {
+    return miniPlayerWindow;
+}
+// ミニプレイヤーウィンドウの作成
+function createMiniPlayer() {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a, screenWidth, screenHeight, miniPlayerWidth, miniPlayerHeight, margin, htmlPath;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    // 既存のミニプレイヤーがあれば表示して返す
+                    if (miniPlayerWindow && !miniPlayerWindow.isDestroyed()) {
+                        miniPlayerWindow.show();
+                        miniPlayerWindow.focus();
+                        return [2 /*return*/, miniPlayerWindow];
+                    }
+                    _a = electron_1.screen.getPrimaryDisplay().workAreaSize, screenWidth = _a.width, screenHeight = _a.height;
+                    miniPlayerWidth = 320;
+                    miniPlayerHeight = 80;
+                    margin = 20;
+                    miniPlayerWindow = new electron_1.BrowserWindow({
+                        width: miniPlayerWidth,
+                        height: miniPlayerHeight,
+                        x: screenWidth - miniPlayerWidth - margin,
+                        y: screenHeight - miniPlayerHeight - margin,
+                        frame: false,
+                        resizable: false,
+                        alwaysOnTop: true,
+                        skipTaskbar: true,
+                        transparent: false,
+                        hasShadow: true,
+                        backgroundColor: "#121212",
+                        webPreferences: {
+                            nodeIntegration: false,
+                            contextIsolation: true,
+                            preload: path.join(__dirname, "../preload/index.js"),
+                            backgroundThrottling: false,
+                        },
+                    });
+                    htmlPath = path.join(electron_1.app.getAppPath(), "public", "mini-player.html");
+                    (0, utils_1.debugLog)("\u30DF\u30CB\u30D7\u30EC\u30A4\u30E4\u30FCHTML\u30D1\u30B9: ".concat(htmlPath));
+                    return [4 /*yield*/, miniPlayerWindow.loadFile(htmlPath)];
+                case 1:
+                    _b.sent();
+                    // ウィンドウが閉じられたときの処理
+                    miniPlayerWindow.on("closed", function () {
+                        miniPlayerWindow = null;
+                    });
+                    (0, utils_1.debugLog)("ミニプレイヤーウィンドウを作成しました");
+                    return [2 /*return*/, miniPlayerWindow];
+            }
+        });
+    });
+}
+// ミニプレイヤーウィンドウを閉じる
+function closeMiniPlayer() {
+    if (miniPlayerWindow && !miniPlayerWindow.isDestroyed()) {
+        miniPlayerWindow.close();
+        miniPlayerWindow = null;
+        (0, utils_1.debugLog)("ミニプレイヤーウィンドウを閉じました");
+    }
 }
 // メインウィンドウの作成
 function createMainWindow() {

@@ -1,14 +1,81 @@
-import { BrowserWindow, shell, app } from "electron";
+import { BrowserWindow, shell, app, screen } from "electron";
 import * as path from "path";
 import { isDev, debugLog } from "../utils";
 import { startNextServer, stopNextServer } from "./server";
 
 // グローバル参照を保持（ガベージコレクションを防ぐため）
 let mainWindow: BrowserWindow | null = null;
+let miniPlayerWindow: BrowserWindow | null = null;
 
 // メインウィンドウの取得
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
+}
+
+// ミニプレイヤーウィンドウの取得
+export function getMiniPlayerWindow(): BrowserWindow | null {
+  return miniPlayerWindow;
+}
+
+// ミニプレイヤーウィンドウの作成
+export async function createMiniPlayer(): Promise<BrowserWindow> {
+  // 既存のミニプレイヤーがあれば表示して返す
+  if (miniPlayerWindow && !miniPlayerWindow.isDestroyed()) {
+    miniPlayerWindow.show();
+    miniPlayerWindow.focus();
+    return miniPlayerWindow;
+  }
+
+  // 画面サイズを取得して右下に配置
+  const { width: screenWidth, height: screenHeight } =
+    screen.getPrimaryDisplay().workAreaSize;
+
+  const miniPlayerWidth = 320;
+  const miniPlayerHeight = 80;
+  const margin = 20;
+
+  miniPlayerWindow = new BrowserWindow({
+    width: miniPlayerWidth,
+    height: miniPlayerHeight,
+    x: screenWidth - miniPlayerWidth - margin,
+    y: screenHeight - miniPlayerHeight - margin,
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    transparent: false,
+    hasShadow: true,
+    backgroundColor: "#121212",
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "../preload/index.js"),
+      backgroundThrottling: false,
+    },
+  });
+
+  // ミニプレイヤー専用HTMLファイルを読み込む
+  const htmlPath = path.join(app.getAppPath(), "public", "mini-player.html");
+  debugLog(`ミニプレイヤーHTMLパス: ${htmlPath}`);
+
+  await miniPlayerWindow.loadFile(htmlPath);
+
+  // ウィンドウが閉じられたときの処理
+  miniPlayerWindow.on("closed", () => {
+    miniPlayerWindow = null;
+  });
+
+  debugLog("ミニプレイヤーウィンドウを作成しました");
+  return miniPlayerWindow;
+}
+
+// ミニプレイヤーウィンドウを閉じる
+export function closeMiniPlayer(): void {
+  if (miniPlayerWindow && !miniPlayerWindow.isDestroyed()) {
+    miniPlayerWindow.close();
+    miniPlayerWindow = null;
+    debugLog("ミニプレイヤーウィンドウを閉じました");
+  }
 }
 
 // メインウィンドウの作成
@@ -46,7 +113,7 @@ export async function createMainWindow() {
   // 開発モードの場合
   if (isDev) {
     debugLog(
-      `isDev = ${isDev}, process.env.NODE_ENV = ${process.env.NODE_ENV}, app.isPackaged = ${app.isPackaged}`
+      `isDev = ${isDev}, process.env.NODE_ENV = ${process.env.NODE_ENV}, app.isPackaged = ${app.isPackaged}`,
     );
     debugLog("開発モードで起動しています");
     mainWindow.webContents.openDevTools();
@@ -56,7 +123,7 @@ export async function createMainWindow() {
       // 注: wait-on パッケージが npm スクリプトでサーバーの準備を待機するので、
       // ここでは単純に loadURL を呼び出すだけでOK
       debugLog(
-        "ローカル開発サーバー(http://localhost:3000)に接続を試みます..."
+        "ローカル開発サーバー(http://localhost:3000)に接続を試みます...",
       );
       await mainWindow.loadURL("http://localhost:3000");
       debugLog("開発サーバーに接続しました");
@@ -72,8 +139,8 @@ export async function createMainWindow() {
                 <h1>開発サーバーに接続できません</h1>
                 <p>別のターミナルで <code>npm run dev</code> を実行してから、アプリを再起動してください。</p>
               </body>
-            </html>`
-          )
+            </html>`,
+          ),
       );
     }
   }
@@ -102,8 +169,8 @@ export async function createMainWindow() {
                 <p>アプリケーションを再インストールしてください。</p>
                 <p>エラー: ${err}</p>
               </body>
-            </html>`
-          )
+            </html>`,
+          ),
       );
     }
   }

@@ -70,12 +70,21 @@ var AUTH_CHANNELS = [
 ];
 var EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
 var TRANSCRIBE_CHANNELS = ["transcribe:generate-lrc"];
-var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true), TRANSCRIBE_CHANNELS, true);
+var MINI_PLAYER_CHANNELS = [
+    "mini-player:open",
+    "mini-player:close",
+    "mini-player:update-state",
+    "mini-player:control",
+    "mini-player:is-open",
+];
+var ALLOWED_INVOKE_CHANNELS = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], WINDOW_CHANNELS, true), STORE_CHANNELS, true), FILE_CHANNELS, true), OFFLINE_CHANNELS, true), CACHE_CHANNELS, true), MUTATION_CHANNELS, true), AUTH_CHANNELS, true), EXTERNAL_CHANNELS, true), TRANSCRIBE_CHANNELS, true), MINI_PLAYER_CHANNELS, true);
 var ALLOWED_ON_CHANNELS = [
     "media-control",
     "download-progress",
     "offline-simulation-changed",
     "scan-progress",
+    "mini-player:state-changed",
+    "mini-player:request-state",
 ];
 var ALLOWED_SEND_CHANNELS = ["log", "player-state-change"];
 // Electronの機能をウィンドウオブジェクトに安全に公開
@@ -233,6 +242,37 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
     transcribe: {
         generateLrc: function (audioPath, lyricsText) {
             return electron_1.ipcRenderer.invoke("transcribe:generate-lrc", audioPath, lyricsText);
+        },
+    },
+    // ミニプレイヤー機能
+    miniPlayer: {
+        // ミニプレイヤーを開く
+        open: function () { return electron_1.ipcRenderer.invoke("mini-player:open"); },
+        // ミニプレイヤーを閉じる
+        close: function () { return electron_1.ipcRenderer.invoke("mini-player:close"); },
+        // 再生状態を更新
+        updateState: function (state) { return electron_1.ipcRenderer.invoke("mini-player:update-state", state); },
+        // ミニプレイヤーから再生コントロール
+        control: function (action) {
+            return electron_1.ipcRenderer.invoke("mini-player:control", action);
+        },
+        // ミニプレイヤーが開いているか確認
+        isOpen: function () { return electron_1.ipcRenderer.invoke("mini-player:is-open"); },
+        // 状態変更イベントのリスナーを登録（ミニプレイヤー側で使用）
+        onStateChange: function (callback) {
+            var subscription = function (_, state) { return callback(state); };
+            electron_1.ipcRenderer.on("mini-player:state-changed", subscription);
+            return function () {
+                electron_1.ipcRenderer.removeListener("mini-player:state-changed", subscription);
+            };
+        },
+        // 状態再送信リクエストのリスナーを登録（メインウィンドウ側で使用）
+        onRequestState: function (callback) {
+            var subscription = function () { return callback(); };
+            electron_1.ipcRenderer.on("mini-player:request-state", subscription);
+            return function () {
+                electron_1.ipcRenderer.removeListener("mini-player:request-state", subscription);
+            };
         },
     },
     // IPC通信

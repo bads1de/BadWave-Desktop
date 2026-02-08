@@ -12,6 +12,7 @@ import { offline, OfflineSong, SongDownloadPayload } from "./offline";
 import { dev } from "./dev";
 import { cache } from "./cache";
 import { auth } from "./auth";
+import { miniPlayer, MiniPlayerSong, MiniPlayerState } from "./miniPlayer";
 
 /**
  * Electronの機能をまとめたオブジェクト
@@ -28,6 +29,7 @@ export const electronAPI = {
   dev,
   cache,
   auth,
+  miniPlayer,
 };
 
 // 個別のエクスポートも提供
@@ -44,7 +46,13 @@ export {
   dev,
   cache,
   auth,
+  miniPlayer,
 };
 
 // 型のエクスポート
-export type { OfflineSong, SongDownloadPayload };
+export type {
+  OfflineSong,
+  SongDownloadPayload,
+  MiniPlayerSong,
+  MiniPlayerState,
+};

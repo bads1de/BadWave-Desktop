@@ -69,6 +69,13 @@ const AUTH_CHANNELS = [
 
 const EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
 const TRANSCRIBE_CHANNELS = ["transcribe:generate-lrc"];
+const MINI_PLAYER_CHANNELS = [
+  "mini-player:open",
+  "mini-player:close",
+  "mini-player:update-state",
+  "mini-player:control",
+  "mini-player:is-open",
+];
 
 const ALLOWED_INVOKE_CHANNELS = [
   ...WINDOW_CHANNELS,
@@ -80,6 +87,7 @@ const ALLOWED_INVOKE_CHANNELS = [
   ...AUTH_CHANNELS,
   ...EXTERNAL_CHANNELS,
   ...TRANSCRIBE_CHANNELS,
+  ...MINI_PLAYER_CHANNELS,
 ];
 
 const ALLOWED_ON_CHANNELS = [
@@ -87,6 +95,8 @@ const ALLOWED_ON_CHANNELS = [
   "download-progress",
   "offline-simulation-changed",
   "scan-progress",
+  "mini-player:state-changed",
+  "mini-player:request-state",
 ];
 
 const ALLOWED_SEND_CHANNELS = ["log", "player-state-change"];
@@ -236,6 +246,55 @@ contextBridge.exposeInMainWorld("electron", {
   transcribe: {
     generateLrc: (audioPath: string, lyricsText: string) =>
       ipcRenderer.invoke("transcribe:generate-lrc", audioPath, lyricsText),
+  },
+
+  // ミニプレイヤー機能
+  miniPlayer: {
+    // ミニプレイヤーを開く
+    open: () => ipcRenderer.invoke("mini-player:open"),
+    // ミニプレイヤーを閉じる
+    close: () => ipcRenderer.invoke("mini-player:close"),
+    // 再生状態を更新
+    updateState: (state: {
+      song: {
+        id: string;
+        title: string;
+        author: string;
+        image_path: string | null;
+      } | null;
+      isPlaying: boolean;
+    }) => ipcRenderer.invoke("mini-player:update-state", state),
+    // ミニプレイヤーから再生コントロール
+    control: (action: "play-pause" | "next" | "previous") =>
+      ipcRenderer.invoke("mini-player:control", action),
+    // ミニプレイヤーが開いているか確認
+    isOpen: () => ipcRenderer.invoke("mini-player:is-open"),
+    // 状態変更イベントのリスナーを登録（ミニプレイヤー側で使用）
+    onStateChange: (
+      callback: (state: {
+        song: {
+          id: string;
+          title: string;
+          author: string;
+          image_path: string | null;
+        } | null;
+        isPlaying: boolean;
+      }) => void,
+    ) => {
+      const subscription = (_: any, state: any) => callback(state);
+      ipcRenderer.on("mini-player:state-changed", subscription);
+      return () => {
+        ipcRenderer.removeListener("mini-player:state-changed", subscription);
+      };
+    },
+    // 状態再送信リクエストのリスナーを登録（メインウィンドウ側で使用）
+    onRequestState: (callback: () => void) => {
+      const subscription = () => callback();
+      ipcRenderer.on("mini-player:request-state", subscription);
+      return () => {
+        ipcRenderer.removeListener("mini-player:request-state", subscription);
+      };
+    },
   },
 
   // IPC通信

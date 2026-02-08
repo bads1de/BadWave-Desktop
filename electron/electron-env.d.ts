@@ -72,15 +72,15 @@ interface ElectronAPI {
     // オフライン（ダウンロード済み）の曲を全て取得
     getSongs: () => Promise<OfflineSong[]>;
     checkStatus: (
-      songId: string
+      songId: string,
     ) => Promise<{ isDownloaded: boolean; localPath?: string }>;
     // オフライン曲を削除（ファイル + DB）
     deleteSong: (
-      songId: string
+      songId: string,
     ) => Promise<{ success: boolean; error?: string }>;
     // 曲をダウンロード（メタデータ付き）
     downloadSong: (
-      song: SongDownloadPayload
+      song: SongDownloadPayload,
     ) => Promise<{ success: boolean; localPath?: string; error?: string }>;
   };
 
@@ -98,11 +98,11 @@ interface ElectronAPI {
   cache: {
     // 曲のメタデータをキャッシュ
     syncSongsMetadata: (
-      songs: any[]
+      songs: any[],
     ) => Promise<{ success: boolean; count: number; error?: string }>;
     // プレイリストをキャッシュ
     syncPlaylists: (
-      playlists: any[]
+      playlists: any[],
     ) => Promise<{ success: boolean; count: number; error?: string }>;
     // プレイリスト内の曲をキャッシュ
     syncPlaylistSongs: (data: {
@@ -163,6 +163,44 @@ interface ElectronAPI {
     clearActivity: () => Promise<void>;
   };
 
+  // ミニプレイヤー
+  miniPlayer: {
+    // ミニプレイヤーを開く
+    open: () => Promise<{ success: boolean; error?: string }>;
+    // ミニプレイヤーを閉じる
+    close: () => Promise<{ success: boolean; error?: string }>;
+    // 再生状態を更新
+    updateState: (state: {
+      song: {
+        id: string;
+        title: string;
+        author: string;
+        image_path: string | null;
+      } | null;
+      isPlaying: boolean;
+    }) => Promise<{ success: boolean; error?: string }>;
+    // ミニプレイヤーから再生コントロール
+    control: (
+      action: "play-pause" | "next" | "previous",
+    ) => Promise<{ success: boolean; error?: string }>;
+    // ミニプレイヤーが開いているか確認
+    isOpen: () => Promise<boolean>;
+    // 状態変更イベントのリスナーを登録
+    onStateChange: (
+      callback: (state: {
+        song: {
+          id: string;
+          title: string;
+          author: string;
+          image_path: string | null;
+        } | null;
+        isPlaying: boolean;
+      }) => void,
+    ) => () => void;
+    // 状態再送信リクエストのリスナーを登録
+    onRequestState: (callback: () => void) => () => void;
+  };
+
   // IPC通信
   ipc: {
     // メインプロセスにメッセージを送信し、応答を待つ
@@ -170,7 +208,7 @@ interface ElectronAPI {
     // メインプロセスからのメッセージを受信
     on: <T = any>(
       channel: string,
-      callback: (...args: T[]) => void
+      callback: (...args: T[]) => void,
     ) => () => void;
     // メインプロセスにメッセージを送信（応答を待たない）
     send: (channel: string, ...args: any[]) => void;

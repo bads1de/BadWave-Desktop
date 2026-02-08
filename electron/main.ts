@@ -19,6 +19,7 @@ import { setupCacheHandlers } from "./ipc/cache";
 import { setupAuthHandlers } from "./ipc/auth";
 import { setupDiscordHandlers } from "./ipc/discord";
 import { setupTranscriptionHandlers } from "./ipc/transcribe";
+import { setupMiniPlayerHandlers } from "./ipc/mini-player";
 import { setupDevShortcuts } from "./shortcuts";
 import { runMigrations } from "./db/migrate";
 
@@ -59,6 +60,9 @@ function setupIPC() {
 
   // トランスクライブ関連ハンドラーのセットアップ
   setupTranscriptionHandlers();
+
+  // ミニプレイヤーハンドラーのセットアップ
+  setupMiniPlayerHandlers();
 }
 
 // アプリケーションの準備完了時の処理
