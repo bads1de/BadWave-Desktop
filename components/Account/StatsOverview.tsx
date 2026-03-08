@@ -240,6 +240,8 @@ const StatsOverview: React.FC = memo(() => {
                       fontSize: "10px",
                       textTransform: "uppercase",
                     }}
+                    itemStyle={{ color: "#fff" }}
+                    labelStyle={{ color: "rgba(var(--theme-500), 0.8)" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -281,6 +283,8 @@ const StatsOverview: React.FC = memo(() => {
                   fontSize: "10px",
                   textTransform: "uppercase",
                 }}
+                itemStyle={{ color: "#fff" }}
+                labelStyle={{ color: "rgba(var(--theme-500), 0.8)" }}
               />
               <Bar
                 dataKey="count"

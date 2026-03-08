@@ -2,7 +2,6 @@
 
 import React from "react";
 import * as RadixSlider from "@radix-ui/react-slider";
-import { HelpCircle } from "lucide-react";
 import usePlaybackRateStore from "@/hooks/stores/usePlaybackRateStore";
 import useSpatialStore from "@/hooks/stores/useSpatialStore";
 import useEffectStore, { RotationSpeed } from "@/hooks/stores/useEffectStore";
@@ -35,17 +34,17 @@ const SpeedAndEffectsControl: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-3 min-w-[280px]">
-      {/* 速度コントロール */}
-      <div className="flex flex-col gap-2 px-1">
+    <div className="flex flex-col gap-6 min-w-[300px] font-mono">
+      {/* 速度コントロール (HUD Style) */}
+      <div className="flex flex-col gap-3 px-1">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-neutral-400 font-medium">Speed</span>
-          <span className="text-xs text-theme-500 font-bold">
+          <span className="text-[10px] text-theme-500 font-bold uppercase tracking-widest">TEMPORAL_RATE_VAR</span>
+          <span className="text-[10px] text-white font-black drop-shadow-[0_0_5px_rgba(var(--theme-500),0.5)]">
             {playbackRate.toFixed(2)}x
           </span>
         </div>
         <RadixSlider.Root
-          className="relative flex items-center select-none touch-none w-full h-5"
+          className="relative flex items-center select-none touch-none w-full h-4"
           defaultValue={[1]}
           value={[playbackRate]}
           onValueChange={(value) => setPlaybackRate(value[0])}
@@ -54,32 +53,30 @@ const SpeedAndEffectsControl: React.FC = () => {
           step={0.05}
           aria-label="Playback Speed"
         >
-          <RadixSlider.Track className="relative bg-neutral-600 rounded-full flex-grow h-[3px]">
-            <RadixSlider.Range className="absolute bg-theme-500 rounded-full h-full" />
+          <RadixSlider.Track className="relative bg-theme-900 border border-theme-500/20 rounded-none flex-grow h-1.5 overflow-hidden">
+            <RadixSlider.Range className="absolute bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)] h-full" />
           </RadixSlider.Track>
           <RadixSlider.Thumb
-            className="block w-3 h-3 bg-white rounded-full hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-theme-500/50 transition-transform hover:scale-110"
+            className="block w-3 h-3 bg-white border border-theme-500 shadow-[0_0_8px_rgba(var(--theme-500),0.8)] focus:outline-none transition-transform hover:scale-125 cursor-pointer"
             aria-label="Speed"
           />
         </RadixSlider.Root>
-        <div className="flex justify-between text-[10px] text-neutral-600">
-          <span>0.5x</span>
-          <span>1.5x</span>
+        <div className="flex justify-between text-[8px] text-theme-500/40 uppercase">
+          <span>0.5x_MIN</span>
+          <span>1.5x_MAX</span>
         </div>
       </div>
 
-      <div className="h-[1px] bg-neutral-800 w-full" />
-
-      {/* プリセット速度ボタン */}
+      {/* プリセット速度ボタン (Terminal Commands) */}
       <div className="grid grid-cols-3 gap-2">
         {rates.map((rate) => (
           <button
             key={rate}
             onClick={() => setPlaybackRate(rate)}
-            className={`px-2 py-1.5 rounded text-xs transition-colors text-center ${
+            className={`py-2 border text-[10px] font-bold transition-all duration-300 uppercase cyber-glitch ${
               playbackRate === rate
-                ? "bg-theme-500/20 text-theme-500 font-medium ring-1 ring-theme-500/50"
-                : "bg-neutral-800/50 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                ? "bg-theme-500/20 border-theme-500 text-white shadow-[0_0_10px_rgba(var(--theme-500),0.3)]"
+                : "bg-theme-500/5 border-theme-500/10 text-theme-500/60 hover:border-theme-500/40 hover:text-theme-300"
             }`}
           >
             {rate}x
@@ -87,188 +84,70 @@ const SpeedAndEffectsControl: React.FC = () => {
         ))}
       </div>
 
-      <div className="h-[1px] bg-neutral-800 w-full" />
+      <div className="h-px bg-theme-500/10 w-full" />
 
-      {/* Slowed + Reverb */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-neutral-400">Slowed + Reverb</span>
-          <div className="group relative flex items-center justify-center">
-            <HelpCircle
-              size={12}
-              className="text-neutral-500 cursor-help hover:text-neutral-300 transition-colors"
-            />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#252525] border border-[#404040] rounded shadow-xl text-[10px] leading-relaxed text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-              ピッチを下げて再生速度を0.85倍にし、残響音(リバーブ)を追加して、独特の雰囲気を作り出します。
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#252525] border-b border-r border-[#404040] rotate-45"></div>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={toggleSlowedReverb}
-          className={`w-8 h-4 rounded-full transition-colors relative ${
-            isSlowedReverb ? "bg-theme-500" : "bg-neutral-600"
-          }`}
-        >
-          <div
-            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
-              isSlowedReverb ? "left-4.5 translate-x-0" : "left-0.5"
-            }`}
-            style={{
-              left: isSlowedReverb ? "calc(100% - 3px - 12px)" : "2px",
-            }}
-          />
-        </button>
-      </div>
-
-      {/* Spatial Audio (ダンスホール) */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-neutral-400">Spatial Mode</span>
-          <div className="group relative flex items-center justify-center">
-            <HelpCircle
-              size={12}
-              className="text-neutral-500 cursor-help hover:text-neutral-300 transition-colors"
-            />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#252525] border border-[#404040] rounded shadow-xl text-[10px] leading-relaxed text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-              ダンスホールのような、低音が響き高音がこもった、反響感のあるサウンドを再現します。
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#252525] border-b border-r border-[#404040] rotate-45"></div>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={toggleSpatialEnabled}
-          className={`w-8 h-4 rounded-full transition-colors relative ${
-            isSpatialEnabled ? "bg-theme-500" : "bg-neutral-600"
-          }`}
-        >
-          <div
-            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
-              isSpatialEnabled ? "left-4.5 translate-x-0" : "left-0.5"
-            }`}
-            style={{
-              left: isSpatialEnabled ? "calc(100% - 3px - 12px)" : "2px",
-            }}
-          />
-        </button>
-      </div>
-
-      {/* 8D Audio */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-neutral-400">8D Audio</span>
-          <div className="group relative flex items-center justify-center">
-            <HelpCircle
-              size={12}
-              className="text-neutral-500 cursor-help hover:text-neutral-300 transition-colors"
-            />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#252525] border border-[#404040] rounded shadow-xl text-[10px] leading-relaxed text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-              音が頭の周りを回るような没入感のあるサウンドを作り出します。ヘッドホン推奨。
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#252525] border-b border-r border-[#404040] rotate-45"></div>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={toggle8DAudio}
-          className={`w-8 h-4 rounded-full transition-colors relative ${
-            is8DAudioEnabled ? "bg-theme-500" : "bg-neutral-600"
-          }`}
-        >
-          <div
-            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
-              is8DAudioEnabled ? "left-4.5 translate-x-0" : "left-0.5"
-            }`}
-            style={{
-              left: is8DAudioEnabled ? "calc(100% - 3px - 12px)" : "2px",
-            }}
-          />
-        </button>
-      </div>
-
-      {/* 8D Audio 回転速度 */}
-      {is8DAudioEnabled && (
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs text-neutral-500">Rotation Speed</span>
-          <div className="flex gap-1">
-            {rotationSpeeds.map((speed) => (
+      {/* FX_MODULES */}
+      <div className="space-y-4">
+        {[
+          { id: 'slowed', label: 'SLOWED_REVERB', desc: 'PITCH_DOWN_SPATIAL_ADD', active: isSlowedReverb, action: toggleSlowedReverb },
+          { id: 'spatial', label: 'SPATIAL_SYNC', desc: 'HALL_ACOUSTICS_EMULATION', active: isSpatialEnabled, action: toggleSpatialEnabled },
+          { id: '8d', label: '8D_ROTATION', desc: 'BINAURAL_SIGNAL_SWEEP', active: is8DAudioEnabled, action: toggle8DAudio },
+          { id: 'retro', label: 'RETRO_SIGNAL', desc: 'ANALOG_TAPE_SATURATION', active: isRetroEnabled, action: toggleRetro },
+          { id: 'bass', label: 'BASS_AMPLIFIER', desc: 'LOW_FREQ_ENHANCEMENT', active: isBassBoostEnabled, action: toggleBassBoost },
+        ].map((effect) => (
+          <div key={effect.id} className="group/fx relative">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-black tracking-widest uppercase transition-colors duration-300 ${effect.active ? "text-white" : "text-theme-500/60"}`}>
+                    // {effect.label}
+                  </span>
+                  {effect.active && <div className="w-1 h-1 bg-theme-500 rounded-full animate-ping" />}
+                </div>
+                <span className="text-[7px] text-theme-500/30 uppercase tracking-tighter mt-0.5">{effect.desc}</span>
+              </div>
               <button
-                key={speed.value}
-                onClick={() => setRotationSpeed(speed.value)}
-                className={`px-2 py-0.5 rounded text-[10px] transition-colors ${
-                  rotationSpeed === speed.value
-                    ? "bg-theme-500/20 text-theme-500 font-medium"
-                    : "bg-neutral-800/50 text-neutral-500 hover:bg-neutral-700 hover:text-white"
+                onClick={effect.action}
+                className={`w-12 h-5 border transition-all duration-500 relative overflow-hidden ${
+                  effect.active ? "bg-theme-500/20 border-theme-500 shadow-[0_0_15px_rgba(var(--theme-500),0.3)]" : "bg-theme-900/40 border-theme-500/20"
                 }`}
               >
-                {speed.label}
+                <div
+                  className={`absolute top-0.5 w-4 h-3 transition-all duration-500 ${
+                    effect.active ? "left-7 bg-white shadow-[0_0_10px_white]" : "left-1 bg-theme-500/40"
+                  }`}
+                />
               </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Retro Mode */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-neutral-400">Retro Mode</span>
-          <div className="group relative flex items-center justify-center">
-            <HelpCircle
-              size={12}
-              className="text-neutral-500 cursor-help hover:text-neutral-300 transition-colors"
-            />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#252525] border border-[#404040] rounded shadow-xl text-[10px] leading-relaxed text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-              80年代のラジカセやカセットテープのような、粗くて温かみのあるサウンドを再現します。
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#252525] border-b border-r border-[#404040] rotate-45"></div>
             </div>
+            
+            {/* 8D Audio 回転速度 (Sub-Controls) */}
+            {effect.id === '8d' && is8DAudioEnabled && (
+              <div className="mt-3 ml-4 flex items-center justify-between border-l border-theme-500/20 pl-4 py-1">
+                <span className="text-[8px] text-theme-500/40 uppercase">ROT_VELOCITY</span>
+                <div className="flex gap-1">
+                  {rotationSpeeds.map((speed) => (
+                    <button
+                      key={speed.value}
+                      onClick={() => setRotationSpeed(speed.value)}
+                      className={`px-2 py-0.5 border text-[8px] font-bold uppercase transition-all ${
+                        rotationSpeed === speed.value
+                          ? "bg-theme-500/40 border-theme-500 text-white"
+                          : "border-theme-500/10 text-theme-500/40 hover:border-theme-500/30"
+                      }`}
+                    >
+                      {speed.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-        <button
-          onClick={toggleRetro}
-          className={`w-8 h-4 rounded-full transition-colors relative ${
-            isRetroEnabled ? "bg-theme-500" : "bg-neutral-600"
-          }`}
-        >
-          <div
-            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
-              isRetroEnabled ? "left-4.5 translate-x-0" : "left-0.5"
-            }`}
-            style={{
-              left: isRetroEnabled ? "calc(100% - 3px - 12px)" : "2px",
-            }}
-          />
-        </button>
+        ))}
       </div>
-
-      {/* Bass Boost */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-neutral-400">Bass Boost</span>
-          <div className="group relative flex items-center justify-center">
-            <HelpCircle
-              size={12}
-              className="text-neutral-500 cursor-help hover:text-neutral-300 transition-colors"
-            />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#252525] border border-[#404040] rounded shadow-xl text-[10px] leading-relaxed text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-              重低音を強調して、キックやベースがズンズン響く迫力のあるサウンドにします。
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#252525] border-b border-r border-[#404040] rotate-45"></div>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={toggleBassBoost}
-          className={`w-8 h-4 rounded-full transition-colors relative ${
-            isBassBoostEnabled ? "bg-theme-500" : "bg-neutral-600"
-          }`}
-        >
-          <div
-            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
-              isBassBoostEnabled ? "left-4.5 translate-x-0" : "left-0.5"
-            }`}
-            style={{
-              left: isBassBoostEnabled ? "calc(100% - 3px - 12px)" : "2px",
-            }}
-          />
-        </button>
+      
+      {/* HUD装飾ライン */}
+      <div className="mt-2 text-[7px] text-theme-500/20 font-mono text-right uppercase italic">
+         signal_path: bypass_main // filter_active: true
       </div>
     </div>
   );

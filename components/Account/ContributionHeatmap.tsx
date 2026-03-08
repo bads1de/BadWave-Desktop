@@ -90,18 +90,8 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = memo(
           const month = firstDayOfWeek.date.getMonth();
           if (month !== lastMonth) {
             const monthNames = [
-              "1月",
-              "2月",
-              "3月",
-              "4月",
-              "5月",
-              "6月",
-              "7月",
-              "8月",
-              "9月",
-              "10月",
-              "11月",
-              "12月",
+              "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+              "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
             ];
             monthLabels.push({ month: monthNames[month], weekIndex });
             lastMonth = month;
@@ -118,32 +108,50 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = memo(
       // テーマカラーに基づいて濃淡を生成
       const baseColor = colorScheme.colors.accentFrom;
       return [
-        "#161b22",
-        `${baseColor}40`,
-        `${baseColor}70`,
-        `${baseColor}a0`,
+        "#0a0a0f", // 深い黒
+        `${baseColor}20`,
+        `${baseColor}50`,
+        `${baseColor}80`,
         baseColor,
       ];
     }, [colorScheme]);
 
-    const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
+    const dayLabels = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
     return (
-      <div className="bg-gradient-to-br from-neutral-900/80 to-neutral-800/60 backdrop-blur-xl border border-white/[0.05] rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">
-          🌱 リスニングアクティビティ
-        </h3>
-        <div className="overflow-x-auto">
+      <div className="bg-[#0a0a0f]/80 backdrop-blur-xl border border-theme-500/20 rounded-none p-8 font-mono relative overflow-hidden group">
+        {/* 背景装飾 */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+             style={{ 
+               backgroundImage: `linear-gradient(rgba(var(--theme-500), 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--theme-500), 0.5) 1px, transparent 1px)`,
+               backgroundSize: '20px 20px'
+             }} 
+        />
+        
+        {/* HUDコーナー */}
+        <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-theme-500/40" />
+        <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-theme-500/40" />
+
+        <div className="mb-8 border-l-4 border-theme-500 pl-4 relative z-10">
+          <p className="text-[10px] text-theme-500/60 uppercase tracking-[0.4em] mb-1">
+            [ SYSTEM_ACTIVITY_MATRIX ]
+          </p>
+          <h3 className="text-2xl font-black text-white uppercase tracking-widest drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]">
+            TEMPORAL_ENGAGEMENT
+          </h3>
+        </div>
+
+        <div className="overflow-x-auto relative z-10 custom-scrollbar pb-4">
           <div className="inline-block min-w-max">
             {/* 月ラベル */}
             <div
-              className="relative ml-8 mb-1"
+              className="relative ml-10 mb-2"
               style={{ height: "16px", width: weeks.length * 14 }}
             >
               {monthLabels.map((label, idx) => (
                 <div
                   key={idx}
-                  className="text-xs text-neutral-400 absolute"
+                  className="text-[10px] font-bold text-theme-500/60 absolute tracking-tighter"
                   style={{
                     left: label.weekIndex * 14,
                   }}
@@ -155,11 +163,11 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = memo(
 
             <div className="flex">
               {/* 曜日ラベル */}
-              <div className="flex flex-col gap-[2px] mr-1">
+              <div className="flex flex-col gap-[3px] mr-2">
                 {dayLabels.map((day, idx) => (
                   <div
                     key={day}
-                    className="text-xs text-neutral-400 h-[12px] flex items-center"
+                    className="text-[8px] font-bold text-theme-500/40 h-[12px] flex items-center uppercase"
                     style={{ visibility: idx % 2 === 1 ? "visible" : "hidden" }}
                   >
                     {day}
@@ -168,12 +176,12 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = memo(
               </div>
 
               {/* ヒートマップ */}
-              <div className="flex gap-[2px]">
+              <div className="flex gap-[3px]">
                 {weeks.map((week, weekIdx) => (
-                  <div key={weekIdx} className="flex flex-col gap-[2px]">
+                  <div key={weekIdx} className="flex flex-col gap-[3px]">
                     {week.map((day, dayIdx) => {
                       const level = getColorLevel(day.count, maxCount);
-                      const dateStr = day.date.toLocaleDateString("ja-JP", {
+                      const dateStr = day.date.toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
@@ -181,9 +189,9 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = memo(
                       return (
                         <div
                           key={dayIdx}
-                          className="w-[12px] h-[12px] rounded-sm cursor-pointer transition-transform hover:scale-125"
+                          className={`w-[12px] h-[12px] rounded-none cursor-pointer transition-all duration-300 border border-white/5 hover:border-white/40 hover:scale-125 ${level > 0 ? "shadow-[0_0_5px_rgba(var(--theme-500),0.2)]" : ""}`}
                           style={{ backgroundColor: colors[level] }}
-                          title={`${dateStr}: ${day.count}回再生`}
+                          title={`${dateStr}: ${day.count}_PLAYS_DETECTED`}
                         />
                       );
                     })}
@@ -193,18 +201,25 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = memo(
             </div>
 
             {/* 凡例 */}
-            <div className="flex items-center justify-end gap-2 mt-4 text-xs text-neutral-400">
-              <span>Less</span>
-              {colors.map((color, idx) => (
-                <div
-                  key={idx}
-                  className="w-[12px] h-[12px] rounded-sm"
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-              <span>More</span>
+            <div className="flex items-center justify-end gap-3 mt-6 text-[8px] font-bold text-theme-500/40 uppercase tracking-widest">
+              <span>STREAM_IDLE</span>
+              <div className="flex gap-[2px]">
+                {colors.map((color, idx) => (
+                  <div
+                    key={idx}
+                    className="w-[10px] h-[10px] rounded-none border border-white/5"
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+              <span className="text-theme-500">MAX_BANDWIDTH</span>
             </div>
           </div>
+        </div>
+        
+        {/* 装飾用HUDライン */}
+        <div className="mt-6 text-[7px] text-theme-500/20 uppercase tracking-widest italic text-right">
+           matrix_integrity: 99.8% // visualization_mode: active
         </div>
       </div>
     );

@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Playlist, Song } from "@/types";
-import { ListPlus, ListMusic, Check } from "lucide-react";
+import { RiPlayListAddFill, RiPlayListFill } from "react-icons/ri";
 import toast from "react-hot-toast";
 import { useUser } from "@/hooks/auth/useUser";
 import useAuthModal from "@/hooks/auth/useAuthModal";
@@ -86,30 +86,33 @@ const AddPlaylist: React.FC<PlaylistMenuProps> = ({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={disabled}
-        className={`text-neutral-400 transition-all duration-300 ${
-          disabled
-            ? "cursor-not-allowed opacity-50"
-            : "cursor-pointer hover:text-white hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+        className={`text-theme-500 outline-none group transition-all duration-300 drop-shadow-[0_0_5px_rgba(var(--theme-500),0.5)] cyber-glitch ${
+          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-white"
         }`}
       >
-        {children || <ListPlus size={20} />}
+        <div className="p-2 border border-theme-500/20 group-hover:border-theme-500/60 bg-theme-500/5 group-hover:bg-theme-500/20 transition-all rounded-none">
+          {children || <RiPlayListAddFill size={20} />}
+        </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent side="top" align="center" className="font-mono bg-[#0a0a0f]/95 backdrop-blur-xl border-theme-500/40 p-2 min-w-[200px]">
+        <div className="px-3 py-2 text-[8px] text-theme-500/40 border-b border-theme-500/10 mb-1 tracking-widest uppercase">
+           // SELECT_TARGET_COLLECTION
+        </div>
         {playlists.length === 0 ? (
-          <DropdownMenuItem>プレイリストを作成しましょう！</DropdownMenuItem>
+          <DropdownMenuItem className="text-theme-900 text-[10px] tracking-widest">[ ! ] NO_PLAYLISTS_FOUND</DropdownMenuItem>
         ) : (
           playlists.map((playlist) => (
             <DropdownMenuItem
               key={playlist.id}
               onClick={() => handleAddToPlaylist(playlist.id)}
-              className="flex items-center justify-between"
+              className="flex items-center justify-between group/item p-2 hover:bg-theme-500/10 focus:bg-theme-500/20 transition-all cursor-pointer"
             >
               <div className="flex items-center">
-                <ListMusic size={16} className="mr-2" />
-                <span>{playlist.title}</span>
+                <RiPlayListFill size={14} className="mr-3 text-theme-500/60 group-hover/item:text-theme-500" />
+                <span className="text-xs tracking-wider uppercase">{playlist.title}</span>
               </div>
               {isInPlaylist[playlist.id] && (
-                <Check size={16} className="ml-2 text-theme-500" />
+                <span className="ml-2 text-[8px] text-theme-500 font-black animate-pulse">SCAN_OK</span>
               )}
             </DropdownMenuItem>
           ))
