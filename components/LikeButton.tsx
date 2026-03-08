@@ -2,7 +2,7 @@ import useAuthModal from "@/hooks/auth/useAuthModal";
 import { useUser } from "@/hooks/auth/useUser";
 import useLikeStatus from "@/hooks/data/useLikeStatus";
 import useLikeMutation from "@/hooks/mutations/useLikeMutation";
-import { Heart } from "lucide-react";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { memo, useCallback } from "react";
 
 interface LikeButtonProps {
@@ -24,6 +24,8 @@ const LikeButton: React.FC<LikeButtonProps> = memo(
     // いいね操作のミューテーション
     const likeMutation = useLikeMutation(songId, user?.id);
 
+    const Icon = isLiked ? AiFillHeart : AiOutlineHeart;
+
     // いいねボタンのクリックハンドラーをメモ化
     const handleLike = useCallback(() => {
       if (disabled) return;
@@ -38,22 +40,21 @@ const LikeButton: React.FC<LikeButtonProps> = memo(
     return (
       <button
         onClick={handleLike}
-        className={`text-neutral-400 transition-all duration-300 ${
-          disabled
-            ? "cursor-not-allowed opacity-50"
-            : "cursor-pointer hover:text-white hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+        className={`text-theme-500/60 transition-all duration-500 drop-shadow-[0_0_5px_rgba(var(--theme-500),0.5)] font-mono uppercase tracking-widest cyber-glitch outline-none group ${
+          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-white"
         }`}
         aria-label={isLiked ? "Remove like" : "Add like"}
         disabled={likeMutation.isPending || disabled}
       >
-        <div className="flex items-center">
-          <Heart
-            fill={isLiked ? "#FF69B4" : "none"}
-            color={isLiked ? "#FF69B4" : "white"}
-            size={size || 25}
+        <div className="flex items-center gap-2">
+          <Icon 
+            className={isLiked ? "text-theme-500 animate-pulse" : "text-theme-500/40 group-hover:text-theme-500"} 
+            size={size || 22} 
           />
           {showText && (
-            <span className="ml-2">{isLiked ? "いいね済み" : "いいね"}</span>
+            <span className="text-[10px] font-black">
+              {isLiked ? "// AFFINITY_SYNCED" : "// INITIALIZE_SYNC"}
+            </span>
           )}
         </div>
       </button>

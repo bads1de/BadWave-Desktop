@@ -53,13 +53,13 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
         if (type === "video" && song?.video_path) {
           await downloadFile(
             song.video_path,
-            `${song.title || "Untitled"}.mp4`
+            `${song.title || "Untitled"}.mp4`,
           );
         }
 
         setIsLoading(false);
       },
-      [audioUrl, song?.song_path, song?.title, song?.video_path]
+      [audioUrl, song?.song_path, song?.title, song?.video_path],
     );
 
     const isPlaylistCreator =
@@ -78,7 +78,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
         <Popover>
           <PopoverTrigger asChild>
             <button
-              className="text-neutral-400 cursor-pointer hover:text-white transition"
+              className="text-neutral-400 cursor-pointer hover:text-white transition-all duration-300 drop-shadow-[0_0_5px_rgba(var(--theme-500),0.3)]"
               aria-label="More Options"
             >
               <BsThreeDots size={20} />
@@ -86,9 +86,9 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
           </PopoverTrigger>
           <PopoverContent
             side="left"
-            className="w-48 p-0 bg-neutral-800 border-neutral-700"
+            className="w-56 p-0 bg-[#0a0a0f] border-theme-500/40 font-mono shadow-[0_0_30px_rgba(0,0,0,0.8)] rounded-none"
           >
-            <div className="flex flex-col text-sm">
+            <div className="flex flex-col text-[10px] uppercase tracking-widest">
               <div className="px-4 py-3">
                 <DisabledOverlay disabled={isLocal}>
                   <LikeButton
@@ -96,12 +96,13 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
                     songType={"regular"}
                     showText={true}
                     disabled={isLocal}
+                    size={18}
                   />
                 </DisabledOverlay>
               </div>
 
               {isPlaylistCreator && (
-                <div className="px-4 py-3 border-t border-neutral-700">
+                <div className="px-4 py-3 border-t border-theme-500/10">
                   <DisabledOverlay disabled={isLocal}>
                     <DeletePlaylistSongsBtn
                       songId={song.id}
@@ -112,40 +113,50 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
                   </DisabledOverlay>
                 </div>
               )}
+
               <div
                 className={`px-4 py-3 ${
-                  hasOtherOptions ? "border-t border-neutral-700" : ""
+                  hasOtherOptions ? "border-t border-theme-500/10" : ""
                 }`}
               >
                 <button
-                  className="w-full flex items-center text-neutral-400 cursor-pointer hover:text-white hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300"
+                  className="w-full flex items-center text-theme-500/60 hover:text-white transition-all duration-300 group"
                   onClick={() => setIsDownloadModalOpen(true)}
                 >
-                  <Download size={28} className="mr-2" />
-                  ファイルを保存
+                  <Download
+                    size={16}
+                    className="mr-3 group-hover:text-theme-500"
+                  />
+                  // EXTRACT_ASSET
                 </button>
               </div>
 
               {/* オフライン機能 (Phase 2追加 - ローカル曲以外のみ) */}
               {!isLocal && (
-                <div className="px-4 py-3 border-t border-neutral-700">
+                <div className="px-4 py-3 border-t border-theme-500/10">
                   {isDownloaded ? (
                     <button
-                      className="w-full flex items-center text-red-400 cursor-pointer hover:text-red-300 transition-all duration-300"
+                      className="w-full flex items-center text-red-500/60 hover:text-red-400 transition-all duration-300 group"
                       onClick={() => remove()}
                       disabled={isDownloading}
                     >
-                      <IoTrashOutline size={24} className="mr-2" />
-                      キャッシュ削除
+                      <IoTrashOutline
+                        size={16}
+                        className="mr-3 group-hover:text-red-500"
+                      />
+                      // PURGE_CACHE
                     </button>
                   ) : (
                     <button
-                      className="w-full flex items-center text-neutral-400 cursor-pointer hover:text-white hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300"
+                      className="w-full flex items-center text-theme-500/60 hover:text-white transition-all duration-300 group"
                       onClick={() => download()}
                       disabled={isDownloading}
                     >
-                      <IoCloudDownloadOutline size={24} className="mr-2" />
-                      {isDownloading ? "保存中..." : "オフライン保存"}
+                      <IoCloudDownloadOutline
+                        size={16}
+                        className="mr-3 group-hover:text-theme-500"
+                      />
+                      {isDownloading ? "// SYNCING..." : "// SAVE_OFFLINE"}
                     </button>
                   )}
                 </div>
@@ -164,7 +175,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
         />
       </>
     );
-  }
+  },
 );
 
 // 表示名を設定
