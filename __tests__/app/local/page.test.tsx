@@ -157,6 +157,6 @@ describe("LocalPage", () => {
     });
 
     // フォルダ選択ボタンが表示されることを確認
-    expect(screen.getByText("フォルダを選択")).toBeInTheDocument();
+    expect(screen.getByText("MOUNT_DIRECTORY")).toBeInTheDocument();
   });
 });

@@ -53,7 +53,7 @@ const SidebarItem: React.FC<SidebarItemProps> = memo(
       <Link
         href={href}
         className={twMerge(
-          `relative flex h-auto w-full items-center gap-x-3 py-3 px-3 rounded-none transition-all duration-500 cyber-glitch group/item font-mono uppercase tracking-[0.2em]`,
+          `relative flex h-auto w-full items-center gap-x-3 py-3 px-3 rounded-xl transition-all duration-500 cyber-glitch group/item font-mono uppercase tracking-[0.2em]`,
           active
             ? "bg-[#0a0a0f] text-white border border-theme-500/50 shadow-[inset_0_0_15px_rgba(var(--theme-500),0.15)]"
             : "text-theme-500/60 border border-transparent hover:text-white hover:border-theme-500/30 hover:bg-theme-500/5"
@@ -62,7 +62,7 @@ const SidebarItem: React.FC<SidebarItemProps> = memo(
         {/* HUD装飾コーナー */}
         <div
           className={twMerge(
-            "absolute top-0 right-0 w-2 h-2 border-t border-r transition-colors z-10",
+            "absolute top-0 right-0 w-2 h-2 border-t border-r transition-colors z-10 rounded-tr-xl",
             active
               ? "border-theme-500"
               : "border-theme-500/0 group-hover/item:border-theme-500/40"
@@ -70,7 +70,7 @@ const SidebarItem: React.FC<SidebarItemProps> = memo(
         />
         <div
           className={twMerge(
-            "absolute bottom-0 left-0 w-2 h-2 border-b border-l transition-colors z-10",
+            "absolute bottom-0 left-0 w-2 h-2 border-b border-l transition-colors z-10 rounded-bl-xl",
             active
               ? "border-theme-500"
               : "border-theme-500/0 group-hover/item:border-theme-500/40"

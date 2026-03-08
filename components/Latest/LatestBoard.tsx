@@ -38,7 +38,7 @@ const LatestBoard: React.FC<LatestBoardProps> = ({ songs }) => {
 
   if (songs.length === 0) {
     return (
-      <div className="py-10 border border-dashed border-theme-500/20 bg-theme-500/5 text-center">
+      <div className="py-10 border border-dashed border-theme-500/20 bg-theme-500/5 text-center rounded-xl">
         <p className="text-theme-500/60 uppercase tracking-[0.4em] text-xs animate-pulse">
           [ ! ] NO_DATA_STREAMS_IN_BUFFER
         </p>
@@ -57,7 +57,7 @@ const LatestBoard: React.FC<LatestBoardProps> = ({ songs }) => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex space-x-6 pb-4"
+          className="flex space-x-4"
         >
           {songs.map((item) => (
             <motion.div

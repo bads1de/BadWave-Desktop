@@ -24,7 +24,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         type={type}
         className={twMerge(
-          `relative group flex items-center justify-center rounded-none font-mono uppercase tracking-widest transition-all duration-500 cyber-glitch`,
+          `relative group flex items-center justify-center rounded-xl font-mono uppercase tracking-widest transition-all duration-500 cyber-glitch`,
           variant === "default" &&
             "bg-theme-500/10 border border-theme-500/40 text-theme-300 hover:bg-theme-500/30 hover:text-white hover:shadow-[0_0_20px_rgba(var(--theme-500),0.4)]",
           variant === "outline" &&
@@ -51,8 +51,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {/* HUD装飾コーナー (ボタン用) */}
         {variant !== "ghost" && (
           <>
-            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-theme-500/40 group-hover:border-theme-500 transition-colors" />
-            <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-b border-l border-theme-500/40 group-hover:border-theme-500 transition-colors" />
+            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-theme-500/40 group-hover:border-theme-500 transition-colors rounded-tr-xl" />
+            <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-b border-l border-theme-500/40 group-hover:border-theme-500 transition-colors rounded-bl-xl" />
           </>
         )}
       </button>

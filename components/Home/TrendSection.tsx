@@ -42,10 +42,10 @@ const TrendSection: React.FC<TrendSectionProps> = ({
           onPeriodChange={onPeriodChange}
         />
       </div>
-      <div className="relative p-6 bg-[#0a0a0f]/40 border border-theme-500/10 rounded-none shadow-[inset_0_0_30px_rgba(var(--theme-500),0.05)]">
+      <div className="relative p-6 bg-[#0a0a0f]/40 border border-theme-500/10 rounded-2xl shadow-[inset_0_0_30px_rgba(var(--theme-500),0.05)]">
         {/* HUD装飾コーナー */}
-        <div className="absolute top-0 right-0 w-12 h-12 border-t border-r border-theme-500/20 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-12 h-12 border-b border-l border-theme-500/20 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-12 h-12 border-t border-r border-theme-500/20 pointer-events-none rounded-tr-2xl" />
+        <div className="absolute bottom-0 left-0 w-12 h-12 border-b border-l border-theme-500/20 pointer-events-none rounded-bl-2xl" />
 
         <TrendBoard songs={songs} />
       </div>

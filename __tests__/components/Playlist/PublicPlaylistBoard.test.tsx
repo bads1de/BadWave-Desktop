@@ -60,7 +60,7 @@ describe("PublicPlaylistBoard", () => {
 
   it("should show user name on hover", () => {
     render(<PublicPlaylistBoard playlists={mockPlaylists as any} />);
-    expect(screen.getByText("User 1")).toBeInTheDocument();
+    expect(screen.getByText(/User 1/i)).toBeInTheDocument();
     // user_name is in the DOM but hidden by opacity-0. 
     // In JSDOM, classes are there but we don't usually test CSS visibility unless using computed styles.
   });

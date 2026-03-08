@@ -39,7 +39,7 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
 
   if (recommendations.length === 0) {
     return (
-      <div className="py-10 border border-dashed border-theme-500/20 bg-theme-500/5 text-center px-4 font-mono">
+      <div className="py-10 border border-dashed border-theme-500/20 bg-theme-500/5 text-center px-4 font-mono rounded-xl">
         <p className="text-theme-500/60 uppercase tracking-[0.2em] text-xs">
           [ ! ] ALGORITHM_TRAINING_IN_PROGRESS
         </p>
@@ -61,7 +61,7 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex space-x-6 pb-4"
+          className="flex space-x-4"
         >
           {recommendations.map((song) => (
             <motion.div

@@ -29,7 +29,7 @@ describe("SidebarItem", () => {
   it("should apply active styles when active", () => {
     render(<SidebarItem {...props} active={true} />);
     const link = screen.getByRole("link");
-    expect(link).toHaveClass("bg-theme-500/20");
+    expect(link).toHaveClass("border-theme-500/50");
   });
 
   it("should render only icon when collapsed", () => {

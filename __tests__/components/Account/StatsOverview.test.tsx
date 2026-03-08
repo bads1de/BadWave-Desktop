@@ -65,7 +65,8 @@ describe("StatsOverview", () => {
     render(<StatsOverview />);
     
     expect(screen.getByText("15")).toBeInTheDocument();
-    expect(screen.getByText("5日")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getByText("DAYS")).toBeInTheDocument();
     expect(screen.getByText("Pop")).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
     
@@ -80,7 +81,7 @@ describe("StatsOverview", () => {
     
     render(<StatsOverview />);
     
-    const monthButton = screen.getByText("月間");
+    const monthButton = screen.getByText("T_MONTH");
     fireEvent.click(monthButton);
     
     expect(mockUseStats).toHaveBeenCalledWith("month");

@@ -160,10 +160,10 @@ const LocalPage = () => {
         {savedLibraryInfo?.exists &&
           savedLibraryInfo.directoryExists &&
           !selectedDirectory && (
-            <div className="bg-[#0a0a0f] border border-theme-500/20 p-4 mb-8 relative group overflow-hidden">
+            <div className="bg-[#0a0a0f]/60 backdrop-blur-md border border-theme-500/20 p-4 mb-8 relative group overflow-hidden rounded-xl">
                {/* HUD装飾 */}
-              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-theme-500/40" />
-              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-theme-500/40" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-theme-500/40 rounded-tr-xl" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-theme-500/40 rounded-bl-xl" />
 
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1.5 h-6 bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)]" />
@@ -201,7 +201,7 @@ const LocalPage = () => {
                   onClick={() =>
                     setSelectedDirectory(savedLibraryInfo.directoryPath || null)
                   }
-                  className="w-full md:w-auto bg-theme-500 hover:bg-theme-400 text-[#0a0a0f] text-[10px] font-black uppercase rounded-none tracking-widest h-9 px-8 transition-all hover:shadow-[0_0_15px_rgba(var(--theme-500),0.4)]"
+                  className="w-full md:w-auto bg-theme-500 hover:bg-theme-400 text-[#0a0a0f] text-[10px] font-black uppercase rounded-xl tracking-widest h-9 px-8 transition-all hover:shadow-[0_0_15px_rgba(var(--theme-500),0.4)]"
                 >
                   INITIALIZE_ARCHIVE
                 </Button>
@@ -213,7 +213,7 @@ const LocalPage = () => {
           <Button
             onClick={handleSelectDirectory}
             disabled={isLoading || isSelectingDirectory}
-            className="w-full md:w-auto bg-transparent border border-theme-500/40 hover:border-theme-500 text-theme-500 hover:bg-theme-500/5 text-[10px] font-black uppercase rounded-none tracking-widest h-10 px-8 transition-all group"
+            className="w-full md:w-auto bg-transparent border border-theme-500/40 hover:border-theme-500 text-theme-500 hover:bg-theme-500/5 text-[10px] font-black uppercase rounded-xl tracking-widest h-10 px-8 transition-all group"
           >
             {isLoading || isSelectingDirectory ? (
               <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ const LocalPage = () => {
           {selectedDirectory && !isLoading && (
             <Button
               onClick={handleForceFullScan}
-              className="w-full md:w-auto bg-[#1a1a1f] border border-white/5 hover:border-white/20 text-white/60 hover:text-white text-[10px] font-black uppercase rounded-none tracking-widest h-10 px-6 transition-all"
+              className="w-full md:w-auto bg-[#1a1a1f] border border-white/5 hover:border-white/20 text-white/60 hover:text-white text-[10px] font-black uppercase rounded-xl tracking-widest h-10 px-6 transition-all"
               title="すべてのファイルを再スキャンします"
             >
               <RefreshCw className="h-3 w-3 mr-2" />
@@ -248,7 +248,7 @@ const LocalPage = () => {
         </div>
 
         {errorMessage && (
-          <div className="bg-red-500/5 border border-red-500/40 p-4 mb-8 text-red-500 font-mono text-[10px] tracking-widest flex items-center gap-3 animate-shake">
+          <div className="bg-red-500/5 border border-red-500/40 p-4 mb-8 text-red-500 font-mono text-[10px] tracking-widest flex items-center gap-3 animate-shake rounded-xl">
             <AlertCircle className="h-4 w-4" />
             <span className="uppercase">// ERROR: {errorMessage}</span>
           </div>
@@ -256,7 +256,7 @@ const LocalPage = () => {
 
         {/* スキャン進捗表示 */}
         {scanProgress && (
-          <div className="bg-[#0a0a0f] border border-theme-500/20 p-6 mb-8 relative">
+          <div className="bg-[#0a0a0f]/60 backdrop-blur-md border border-theme-500/20 p-6 mb-8 relative rounded-xl">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 {scanProgress.phase !== "complete" ? (
@@ -276,7 +276,7 @@ const LocalPage = () => {
             {/* プログレスバー */}
             {scanProgress.total > 0 && (
               <div className="space-y-3">
-                <div className="w-full bg-theme-500/5 h-1 border border-theme-500/10 overflow-hidden">
+                <div className="w-full bg-theme-500/5 h-1 border border-theme-500/10 overflow-hidden rounded-full">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ 
@@ -300,11 +300,11 @@ const LocalPage = () => {
 
         {/* ローディング表示（進捗情報がない場合） */}
         {isLoading && !scanProgress && (
-          <div className="py-24 flex flex-col items-center justify-center gap-6 border border-theme-500/10 mb-8">
+          <div className="py-24 flex flex-col items-center justify-center gap-6 border border-theme-500/10 mb-8 rounded-xl">
             <div className="relative w-16 h-16">
-              <div className="absolute inset-0 border-2 border-theme-500/10 animate-ping" />
-              <div className="absolute inset-4 border-2 border-theme-500/30 animate-spin" />
-              <div className="absolute inset-8 border-2 border-theme-500 animate-pulse" />
+              <div className="absolute inset-0 border-2 border-theme-500/10 animate-ping rounded-full" />
+              <div className="absolute inset-4 border-2 border-theme-500/30 animate-spin rounded-full" />
+              <div className="absolute inset-8 border-2 border-theme-500 animate-pulse rounded-full" />
             </div>
             <span className="text-theme-500 text-[10px] tracking-[0.4em] uppercase animate-pulse">
               // INITIALIZING_IO_THREAD...
@@ -314,7 +314,7 @@ const LocalPage = () => {
 
         {/* スキャン結果の表示 */}
         {lastScanInfo && !isLoading && mp3Files.length > 0 && (
-          <div className="bg-theme-500/5 border-y border-theme-500/20 p-4 mb-8 flex items-center justify-between text-[8px] uppercase tracking-[0.3em] font-mono">
+          <div className="bg-theme-500/5 border-y border-theme-500/20 p-4 mb-8 flex items-center justify-between text-[8px] uppercase tracking-[0.3em] font-mono rounded-xl">
             <div className="flex gap-8">
               <div className="flex items-center gap-2">
                 <span className="text-theme-500/40">Mode:</span>
@@ -343,7 +343,7 @@ const LocalPage = () => {
           mp3Files.length === 0 &&
           selectedDirectory &&
           !errorMessage && (
-            <div className="py-32 flex flex-col items-center justify-center gap-4 text-theme-500/20 border border-theme-500/10 mb-8">
+            <div className="py-32 flex flex-col items-center justify-center gap-4 text-theme-500/20 border border-theme-500/10 mb-8 rounded-xl">
               <h2 className="text-xl uppercase tracking-[0.5em] font-black">[ ZERO_BLOCKS ]</h2>
               <p className="text-[10px] uppercase tracking-widest text-center mt-2 max-w-sm px-6">
                 // NO_VALID_AUDIO_BUFFERS_DETECTED_IN_MOUNT_POINT. PROCEED_TO_RESCAN_OR_CHANGE_PATH.

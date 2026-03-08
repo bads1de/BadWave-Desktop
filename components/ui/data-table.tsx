@@ -57,36 +57,48 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full font-mono">
       {searchKey && (
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="検索..."
-            value={
-              (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm bg-[#121212] text-white border-[#303030] focus-visible:ring-theme-900 focus-visible:border-theme-800 transition-all duration-300 shadow-inner rounded-lg"
-          />
+        <div className="flex items-center py-6">
+          <div className="relative w-full max-w-md group">
+            <div className="absolute -inset-0.5 bg-theme-500/20 rounded-none blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+            <Input
+              placeholder="SEARCH_FOR_DATA_NODES..."
+              value={
+                (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) =>
+                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+              }
+              className="relative bg-[#0a0a0f] text-theme-300 border-theme-500/20 focus-visible:ring-theme-500/40 focus-visible:border-theme-500/60 transition-all duration-300 rounded-none uppercase tracking-widest text-[10px] h-10 px-4 placeholder:text-theme-500/20"
+            />
+            <div className="absolute top-0 right-0 h-full flex items-center pr-3 pointer-events-none">
+              <span className="text-theme-500/40 text-[8px] animate-pulse">// SCANNING_ENABLED</span>
+            </div>
+          </div>
         </div>
       )}
-      <div className="relative">
-        {/* 背景グラデーション効果 */}
-        <ScrollArea className="rounded-2xl border border-[#303030] bg-[#121212] shadow-lg relative z-10 overflow-hidden">
+      <div className="relative group">
+        {/* 背景装飾 */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-theme-500/10 via-transparent to-theme-500/10 blur-xl opacity-20 pointer-events-none" />
+        
+        <ScrollArea className="rounded-xl border border-theme-500/10 bg-[#0a0a0f]/60 backdrop-blur-md shadow-[0_0_30px_rgba(0,0,0,0.5)] relative z-10 overflow-hidden">
+          {/* HUD装飾コーナー */}
+          <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-theme-500/20 pointer-events-none rounded-tr-xl z-20" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-theme-500/20 pointer-events-none rounded-bl-xl z-20" />
+          
           <Table>
-            <TableHeader className="bg-[#1a1a1a]">
+            <TableHeader className="bg-theme-500/5 border-b border-theme-500/10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
                   key={headerGroup.id}
-                  className="border-b-[#303030] hover:bg-transparent"
+                  className="border-b-theme-500/10 hover:bg-transparent"
                 >
                   {headerGroup.headers.map((header) => {
                     return (
                       <TableHead
                         key={header.id}
-                        className="text-theme-300 font-semibold"
+                        className="text-theme-500 font-black uppercase tracking-widest text-[10px] py-4 h-auto"
                       >
                         {header.isPlaceholder
                           ? null
@@ -107,29 +119,31 @@ export function DataTable<TData, TValue>({
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => onRowClick && onRowClick(row.original)}
-                    className={`border-b-[#202020] transition-all duration-300 ${
+                    className={`border-b-theme-500/5 transition-all duration-300 ${
                       onRowClick ? "cursor-pointer" : ""
                     } ${
-                      index % 2 === 0 ? "bg-[#151515]" : "bg-[#121212]"
-                    } hover:bg-[#202020] hover:shadow-md first:rounded-t-2xl last:rounded-b-2xl`}
+                      index % 2 === 0 ? "bg-transparent" : "bg-theme-500/[0.02]"
+                    } hover:bg-theme-500/10 group/row relative overflow-hidden`}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3">
+                      <TableCell key={cell.id} className="py-4 relative z-10">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
                         )}
                       </TableCell>
                     ))}
+                    {/* 行ホバー時のスキャンライン効果 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-theme-500/0 via-theme-500/[0.05] to-theme-500/0 translate-x-[-100%] group-hover/row:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center text-neutral-400"
+                    className="h-32 text-center text-theme-500/20 font-mono text-xs uppercase tracking-[0.5em]"
                   >
-                    データがありません
+                    [ ZERO_DATA_FOUND ]
                   </TableCell>
                 </TableRow>
               )}
@@ -138,38 +152,31 @@ export function DataTable<TData, TValue>({
         </ScrollArea>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-neutral-400">
-          {table.getFilteredRowModel().rows.length} 件中
-          {table.getState().pagination.pageIndex *
-            table.getState().pagination.pageSize +
-            1}
-          -
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) *
-              table.getState().pagination.pageSize,
-            table.getFilteredRowModel().rows.length
-          )}{" "}
-          件を表示
+      <div className="flex items-center justify-between py-6 px-2">
+        <div className="text-[10px] text-theme-500/40 uppercase tracking-[0.2em]">
+          TOTAL_RECORDS: <span className="text-theme-500/60">{table.getFilteredRowModel().rows.length}</span> | 
+          VIEWING_BLOCK: <span className="text-theme-500/60">{(table.getState().pagination.pageIndex + 1).toString().padStart(2, '0')}</span>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className="border-[#303030] bg-[#121212] text-white hover:bg-[#202020] hover:border-theme-800 transition-all duration-300"
-        >
-          前へ
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className="border-[#303030] bg-[#121212] text-white hover:bg-[#202020] hover:border-theme-800 transition-all duration-300"
-        >
-          次へ
-        </Button>
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="border-theme-500/20 bg-transparent text-theme-500/60 hover:text-theme-500 hover:bg-theme-500/5 hover:border-theme-500/40 transition-all duration-300 rounded-none uppercase text-[9px] tracking-widest px-4 h-8 disabled:opacity-20"
+          >
+            { "<<" } PREV_SEGMENT
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="border-theme-500/20 bg-transparent text-theme-500/60 hover:text-theme-500 hover:bg-theme-500/5 hover:border-theme-500/40 transition-all duration-300 rounded-none uppercase text-[9px] tracking-widest px-4 h-8 disabled:opacity-20"
+          >
+            NEXT_SEGMENT { ">>" }
+          </Button>
+        </div>
       </div>
     </div>
   );

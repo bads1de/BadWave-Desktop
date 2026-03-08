@@ -25,11 +25,11 @@ describe("Button", () => {
 
   it("should apply variant classes", () => {
     render(<Button variant="danger">Delete</Button>);
-    expect(screen.getByRole("button")).toHaveClass("from-red-500/20");
+    expect(screen.getByRole("button")).toHaveClass("bg-red-500/10");
   });
 
   it("should apply size classes", () => {
     render(<Button size="lg">Large</Button>);
-    expect(screen.getByRole("button")).toHaveClass("text-base");
+    expect(screen.getByRole("button")).toHaveClass("text-sm");
   });
 });

@@ -41,7 +41,7 @@ const PublicPlaylistBoard: React.FC<PublicPlaylistBoardProps> = ({
               }
             >
               {/* メインカード */}
-              <div className="relative overflow-hidden bg-[#0a0a0f]/60 backdrop-blur-md rounded-none transition-all duration-500 border border-theme-500/20 group-hover:border-theme-500/60 group-hover:shadow-[0_0_20px_rgba(var(--theme-500),0.3)] cyber-glitch">
+              <div className="relative overflow-hidden bg-[#0a0a0f]/60 backdrop-blur-md rounded-xl transition-all duration-500 border border-theme-500/20 group-hover:border-theme-500/60 group-hover:shadow-[0_0_20px_rgba(var(--theme-500),0.3)] cyber-glitch">
                 {/* アートワーク */}
                 <div className="relative aspect-square w-full overflow-hidden">
                   <Image

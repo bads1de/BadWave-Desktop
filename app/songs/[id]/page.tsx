@@ -218,43 +218,33 @@ const SongPage = (props: SongPageProps) => {
               <div className="flex flex-col md:flex-row items-center md:items-end gap-10">
                 {/* Album Art Container with HUD elements */}
                 <motion.div
-                  className="relative group flex-shrink-0"
+                  whileHover={{ scale: 1.05 }}
+                  className="relative group flex-shrink-0 cyber-glitch"
                 >
-                  <div className="relative w-48 h-48 md:w-64 md:h-64 border border-theme-500/30 p-2 bg-black/40 backdrop-blur-sm">
+                  <div className="relative w-48 h-48 md:w-72 md:h-72 border border-theme-500/20 p-2 bg-[#0a0a0f]/40 backdrop-blur-sm shadow-[0_0_30px_rgba(var(--theme-500),0.2)]">
                     {/* HUD Corners */}
-                    <div className="absolute -top-1 -right-1 w-6 h-6 border-t-2 border-r-2 border-theme-500 group-hover:w-8 group-hover:h-8 transition-all" />
-                    <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-2 border-l-2 border-theme-500 group-hover:w-8 group-hover:h-8 transition-all" />
+                    <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-theme-500 group-hover:w-10 group-hover:h-10 transition-all" />
+                    <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-theme-500 group-hover:w-10 group-hover:h-10 transition-all" />
                     
-                    <div className="relative w-full h-full overflow-hidden">
+                    <div className="relative w-full h-full overflow-hidden border border-theme-500/40">
                       <Image
                         src={song?.image_path || "/images/wait.jpg"}
                         alt="Song Cover"
                         fill
-                        className="object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
-                        sizes="(max-width: 640px) 192px, 256px"
+                        className="object-cover transition-all duration-1000 group-hover:scale-125"
+                        sizes="(max-width: 640px) 192px, 288px"
                       />
                       <motion.div
-                        className="absolute inset-0 bg-theme-500/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm"
+                        className="absolute inset-0 bg-theme-500/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-[2px]"
                         onClick={handlePlayClick}
                       >
-                        <div className="w-16 h-16 border-2 border-white rounded-none flex items-center justify-center">
-                          {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
+                        <div className="w-20 h-20 rounded-full bg-white/10 border border-white/40 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+                          {isPlaying ? <Pause size={40} className="text-white fill-current" /> : <Play size={40} className="text-white fill-current ml-1" />}
                         </div>
                       </motion.div>
                     </div>
                   </div>
                   
-                  {/* Metadata floating labels */}
-                  <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex-col gap-2 translate-x-full hidden lg:flex">
-                    <div className="bg-theme-500/10 border-l-2 border-theme-500 px-3 py-1 flex flex-col">
-                      <span className="text-[8px] text-theme-500/60 uppercase">Buffer_ID</span>
-                      <span className="text-[10px] text-theme-300 font-black">0x{songId.substring(0, 8).toUpperCase()}</span>
-                    </div>
-                    <div className="bg-theme-500/10 border-l-2 border-cyan-500 px-3 py-1 flex flex-col">
-                      <span className="text-[8px] text-cyan-500/60 uppercase">Encoding</span>
-                      <span className="text-[10px] text-cyan-300 font-black">MPEG_LAYER_3</span>
-                    </div>
-                  </div>
                 </motion.div>
 
                 {/* Song Info */}
@@ -266,29 +256,29 @@ const SongPage = (props: SongPageProps) => {
                     </span>
                   </div>
                   
-                  <h1 className="text-5xl md:text-7xl font-black mb-3 text-white uppercase tracking-tight cyber-glitch drop-shadow-[0_0_15px_rgba(var(--theme-500),0.3)]">
+                  <h1 className="text-5xl md:text-8xl font-black mb-3 text-white uppercase tracking-tighter cyber-glitch drop-shadow-[0_0_15px_rgba(var(--theme-500),0.8)] break-all">
                     {song.title}
                   </h1>
                   
                   <div className="flex items-center justify-center md:justify-start gap-4 mb-8">
-                    <p className="text-xl md:text-2xl text-theme-300 font-mono tracking-widest uppercase italic">
-                      // {song.author}
+                    <p className="text-xl md:text-3xl text-theme-400 font-mono tracking-widest uppercase border-l-4 border-theme-500 pl-4">
+                      // AUTH: {song.author}
                     </p>
                   </div>
 
                   {/* Tech Stats */}
-                  <div className="flex flex-wrap justify-center md:justify-start gap-6 mb-8 text-[10px] font-mono tracking-widest uppercase">
-                    <div className="flex flex-col border-b border-theme-500/20 pb-1">
-                      <span className="text-theme-500/40 text-[8px]">Playback_Index</span>
-                      <span className="text-white font-black">{song.count} UNITS</span>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-8 py-4 border-y border-theme-500/10 text-[10px] font-bold text-theme-500/80 tracking-widest uppercase mb-8">
+                    <div className="flex items-center gap-3 bg-theme-500/5 px-4 py-2 border border-theme-500/10">
+                      <Play size={12} className="text-theme-500" />
+                      <span>PLAYS_LOG: {song.count}</span>
                     </div>
-                    <div className="flex flex-col border-b border-theme-500/20 pb-1">
-                      <span className="text-theme-500/40 text-[8px]">Pulse_Signal</span>
-                      <span className="text-theme-400 font-black">{song.like_count} SIGNAL</span>
+                    <div className="flex items-center gap-3 bg-theme-500/5 px-4 py-2 border border-theme-500/10">
+                      <Heart size={12} className="text-theme-500" />
+                      <span>AFFINITY_INDEX: {song.like_count}</span>
                     </div>
-                    <div className="flex flex-col border-b border-theme-500/20 pb-1">
-                      <span className="text-theme-500/40 text-[8px]">Temporal_Span</span>
-                      <span className="text-cyan-400 font-black tabular-nums">{duration || "0:00"}</span>
+                    <div className="flex items-center gap-3 bg-theme-500/5 px-4 py-2 border border-theme-500/10">
+                      <Clock size={12} className="text-theme-500" />
+                      <span>TEMPORAL_DURATION: {duration || "0:00"}</span>
                     </div>
                   </div>
 
@@ -367,10 +357,10 @@ const SongPage = (props: SongPageProps) => {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-6 py-12">
           {/* Genre Tags */}
-          <div className="flex flex-wrap gap-3 mb-12">
+          <div className="flex flex-wrap gap-3 mb-16">
             {genres.map((genre) => (
               <Link href={`/genre/${encodeURIComponent(genre)}`} key={genre}>
-                <span className="px-4 py-1.5 border border-theme-500/20 bg-theme-500/5 text-[10px] text-theme-400 font-black uppercase tracking-widest hover:border-theme-500 transition-colors">
+                <span className="px-5 py-2 border border-theme-500/20 bg-theme-500/5 text-[10px] text-theme-400 font-bold uppercase tracking-[0.2em] hover:bg-theme-500/20 hover:border-theme-500/40 transition-all cursor-pointer">
                   # {genre}
                 </span>
               </Link>
@@ -378,46 +368,46 @@ const SongPage = (props: SongPageProps) => {
           </div>
 
           {/* Tabs */}
-          <div className="mb-8 font-mono">
-            <div className="border-b border-theme-500/10">
+          <div className="mb-12 font-mono">
+            <div className="border-b border-theme-500/10 pb-4">
               <div className="flex gap-10">
                 <button
                   onClick={() => setActiveTab("lyrics")}
                   className={twMerge(
-                    "pb-4 relative uppercase tracking-[0.2em] font-black text-xs transition-colors",
+                    "relative uppercase tracking-[0.3em] font-black text-xs transition-colors",
                     activeTab === "lyrics"
                       ? "text-theme-500"
-                      : "text-theme-500/40 hover:text-theme-300"
+                      : "text-theme-900 hover:text-theme-500/60"
                   )}
                 >
-                  <div className="flex items-center gap-2">
-                    <MdLyrics size={16} />
-                    <span>LRC_STREAM</span>
+                  <div className="flex items-center gap-3">
+                    <MdLyrics size={18} />
+                    <span>LYRICS_ENCRYPTION</span>
                   </div>
                   {activeTab === "lyrics" && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)]"
+                      className="absolute -bottom-[17px] left-0 right-0 h-1 bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)]"
                     />
                   )}
                 </button>
                 <button
                   onClick={() => setActiveTab("similar")}
                   className={twMerge(
-                    "pb-4 relative uppercase tracking-[0.2em] font-black text-xs transition-colors",
+                    "relative uppercase tracking-[0.3em] font-black text-xs transition-colors",
                     activeTab === "similar"
                       ? "text-theme-500"
-                      : "text-theme-500/40 hover:text-theme-300"
+                      : "text-theme-900 hover:text-theme-500/60"
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <Music2 size={16} />
-                    <span>RELATED_NODES</span>
+                    <Music2 size={18} />
+                    <span>SIMILAR_NODES</span>
                   </div>
                   {activeTab === "similar" && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)]"
+                      className="absolute -bottom-[17px] left-0 right-0 h-1 bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)]"
                     />
                   )}
                 </button>
@@ -430,61 +420,63 @@ const SongPage = (props: SongPageProps) => {
             {activeTab === "lyrics" ? (
               <motion.div
                 key="lyrics"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="bg-[#0a0a0f] border border-theme-500/10 p-8 relative overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="bg-[#0a0a0f] border border-theme-500/10 p-10 relative group rounded-none"
               >
                  {/* HUD Corners */}
-                <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-theme-500/40" />
-                <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-theme-500/40" />
+                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-theme-500/40" />
+                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-theme-500/40" />
 
                 <Button
                   onClick={copyLyricsToClipboard}
                   variant="ghost"
-                  className="absolute top-4 right-4 text-theme-500/40 hover:text-theme-500 transition-colors p-2 h-auto"
+                  className="absolute top-6 right-6 text-theme-500/40 hover:text-theme-500 transition-colors p-2 h-auto"
                 >
-                  <ClipboardCopy size={16} />
+                  <ClipboardCopy size={18} />
                 </Button>
                 <div className="prose prose-invert max-w-none">
-                  <div className="whitespace-pre-line font-mono text-sm tracking-wide text-theme-300/80 leading-relaxed max-w-2xl mx-auto text-center">
-                    {song.lyrics || "// NO_LYRICAL_DATA_BUFFERED"}
+                  <div className="whitespace-pre-line font-mono text-lg leading-relaxed text-theme-300 uppercase tracking-tight">
+                    {song.lyrics || "[ NO_LYRICS_DATA_FOUND_IN_SECTOR ]"}
                   </div>
                 </div>
               </motion.div>
             ) : (
               <motion.div
                 key="similar"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {songGenres.map((similarSong) => (
                   <Link href={`/songs/${similarSong.id}`} key={similarSong.id}>
-                    <div className="group relative bg-[#0a0a0f] border border-theme-500/10 hover:border-theme-500/40 transition-all p-3 rounded-none flex items-center gap-4">
-                      <div className="relative w-20 h-20 flex-shrink-0 grayscale-[50%] group-hover:grayscale-0 transition-all">
+                    <Card className="group relative overflow-hidden bg-[#0a0a0f] border border-theme-500/20 rounded-none p-4 hover:border-theme-500/60 transition-all duration-500 cyber-glitch">
+                      <div className="relative aspect-video border border-theme-500/10 overflow-hidden">
                         <Image
                           src={similarSong.image_path || "/images/liked.png"}
                           alt={similarSong.title}
                           fill
-                          className="object-cover"
-                          sizes="80px"
+                          className="object-cover transition-all duration-700 group-hover:scale-125 group-hover:opacity-60"
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
                         />
-                        <div className="absolute inset-0 bg-theme-500/10 opacity-60 group-hover:opacity-0 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
+                          <div className="w-12 h-12 rounded-full border border-theme-500 flex items-center justify-center bg-theme-500/20 backdrop-blur-sm">
+                             <Play size={24} className="text-white fill-current" />
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-grow min-w-0 font-mono">
-                        <h3 className="font-black text-xs text-white uppercase tracking-widest truncate mb-1">
+                      <div className="mt-4 font-mono uppercase">
+                        <h3 className="font-bold text-theme-300 text-sm truncate group-hover:text-white transition-colors">
                           {similarSong.title}
                         </h3>
-                        <p className="text-[9px] text-theme-500/60 uppercase tracking-widest truncate">
-                          // SRC: {similarSong.author}
+                        <p className="text-theme-500/60 text-[10px] mt-1 tracking-widest">
+                          {"//"} NODE: {similarSong.author}
                         </p>
                       </div>
-                      <Play className="opacity-0 group-hover:opacity-100 text-theme-500 transition-opacity" size={16} />
-                       {/* HUD Decoration */}
-                      <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-theme-500/20 group-hover:border-theme-500/60 transition-colors" />
-                    </div>
+                    </Card>
                   </Link>
                 ))}
               </motion.div>

@@ -58,11 +58,11 @@ const SpotlightBoardComponent: React.FC<SpotlightBoardProps> = ({
       onMouseLeave={() => setShowArrows(false)}
     >
       <ScrollableContainer showArrows={showArrows} className="p-4">
-        <div className="flex gap-6">
+        <div className="flex gap-4">
           {spotlightData.map((item, index) => (
             <div
               key={item.id}
-              className={`flex-none w-44 relative aspect-[9/16] rounded-none overflow-hidden shadow-lg border border-theme-500/20 hover:border-theme-400 hover:shadow-[0_0_20px_rgba(var(--theme-500),0.3)] transition-all duration-500 hover:scale-105 group cyber-glitch ${
+              className={`flex-none w-40 relative aspect-[9/16] rounded-xl overflow-hidden shadow-lg border border-theme-500/20 hover:border-theme-400 hover:shadow-[0_0_15px_rgba(var(--theme-500),0.3)] transition-all duration-300 hover:scale-105 group cyber-glitch ${
                 !isOnline ? "opacity-30 grayscale" : ""
               }`}
               onMouseEnter={() => isOnline && handleVideoHover(index)}
@@ -71,10 +71,6 @@ const SpotlightBoardComponent: React.FC<SpotlightBoardProps> = ({
             >
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-theme-900/60 z-10 pointer-events-none" />
               
-              {/* HUDコーナー */}
-              <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-theme-500/40 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
-              <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-theme-500/40 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
-
               {isOnline ? (
                 <video
                   ref={(el) => {
@@ -87,7 +83,7 @@ const SpotlightBoardComponent: React.FC<SpotlightBoardProps> = ({
                   muted={isMuted}
                   playsInline
                   loop
-                  className="w-full h-full object-cover transition-opacity duration-700 group-hover:opacity-90 grayscale-[0.5] group-hover:grayscale-0"
+                  className="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-90"
                 />
               ) : (
                 <div className="w-full h-full bg-theme-900/40 flex items-center justify-center">
@@ -100,7 +96,7 @@ const SpotlightBoardComponent: React.FC<SpotlightBoardProps> = ({
                   e.stopPropagation();
                   handleMuteToggle();
                 }}
-                className="absolute bottom-3 right-3 p-2.5 rounded-none bg-theme-900/60 hover:bg-theme-500/40 backdrop-blur-md transition-all duration-300 z-20 border border-theme-500/30"
+                className="absolute bottom-2 right-2 p-2 rounded-full bg-theme-900/50 hover:bg-theme-500/40 backdrop-blur-md transition-colors z-20 border border-theme-500/30"
               >
                 <svg
                   className="w-4 h-4 text-theme-300"

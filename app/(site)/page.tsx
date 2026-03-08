@@ -118,26 +118,24 @@ export default function Home() {
             />
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* スポットライトセクション */}
-            {!isMounted || (spotlightLoading && spotlightData.length === 0) ? (
-              <SectionSkeleton title="Spotlight" type="spotlight" />
-            ) : (
-              <SpotlightSection spotlightData={spotlightData} />
-            )}
+          {/* スポットライトセクション */}
+          {!isMounted || (spotlightLoading && spotlightData.length === 0) ? (
+            <SectionSkeleton title="Spotlight" type="spotlight" />
+          ) : (
+            <SpotlightSection spotlightData={spotlightData} />
+          )}
 
-            {/* あなたへのおすすめセクション */}
-            {!isMounted ||
-            (recommendationsLoading && recommendations.length === 0) ? (
-              <SectionSkeleton
-                title="For You"
-                description="Personalized recommendations based on your taste"
-                type="forYou"
-              />
-            ) : (
-              <ForYouSection recommendations={recommendations} />
-            )}
-          </div>
+          {/* あなたへのおすすめセクション */}
+          {!isMounted ||
+          (recommendationsLoading && recommendations.length === 0) ? (
+            <SectionSkeleton
+              title="For You"
+              description="Personalized recommendations based on your taste"
+              type="forYou"
+            />
+          ) : (
+            <ForYouSection recommendations={recommendations} />
+          )}
 
           {/* 最新曲セクション */}
           {!isMounted || (latestLoading && latestSongs.length === 0) ? (
