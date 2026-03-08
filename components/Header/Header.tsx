@@ -13,6 +13,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
       className={twMerge(
         `
         relative
+        z-40
         h-fit
         bg-[#0a0a0f]/80
         backdrop-blur-md

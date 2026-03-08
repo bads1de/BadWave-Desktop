@@ -105,7 +105,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
             </div>
           </div>
 
-          <div className="flex flex-col w-full justify-center items-center max-w-[722px] gap-x-6 font-mono">
+          <div className="flex flex-col w-full justify-center items-center max-w-[600px] mx-auto font-mono">
             <div className="flex items-center gap-x-12">
               <div className="group relative">
                 <FaRandom
@@ -191,8 +191,8 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
             </div>
           </div>
 
-          <div className="flex w-full justify-end pr-2">
-            <div className="flex items-center gap-x-6 w-full md:w-[220px] lg:w-[260px]">
+          <div className="flex w-full justify-end pr-16">
+            <div className="flex items-center gap-x-6 md:w-[220px] lg:w-[260px]">
               <DisabledOverlay disabled={isLocalFile}>
                 <AddPlaylist
                   playlists={playlists}
