@@ -13,14 +13,25 @@ interface ForYouSectionProps {
  */
 const ForYouSection: React.FC<ForYouSectionProps> = ({ recommendations }) => {
   return (
-    <section>
-      <h2 className="text-3xl font-bold text-white tracking-tight mb-4">
-        For You
-      </h2>
-      <p className="text-sm text-neutral-400 mb-6">
-        Personalized recommendations based on your taste
-      </p>
-      <ForYouBoard recommendations={recommendations} />
+    <section className="relative">
+      <div className="flex items-center gap-x-4 mb-6 group/header">
+        <div className="h-10 w-1 bg-theme-500 shadow-[0_0_15px_rgba(var(--theme-500),0.8)] animate-pulse" />
+        <div>
+          <h2 className="text-3xl font-bold text-white tracking-[0.2em] uppercase font-mono drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]">
+            FOR_YOU_OPERATOR
+          </h2>
+          <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase">
+            // ALGORITHM_RECOMMENDATIONS_READY
+          </p>
+        </div>
+      </div>
+      <div className="relative p-6 bg-[#0a0a0f]/40 border border-theme-500/10 rounded-none shadow-[inset_0_0_20px_rgba(var(--theme-500),0.05)]">
+        {/* HUD装飾コーナー */}
+        <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-theme-500/20 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-theme-500/20 pointer-events-none" />
+
+        <ForYouBoard recommendations={recommendations} />
+      </div>
     </section>
   );
 };

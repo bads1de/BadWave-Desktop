@@ -57,28 +57,42 @@ const MediaItem: React.FC<MediaItemProps> = memo(
           `
         flex
         items-center
-        gap-x-3
-        rounded-xl
+        gap-x-4
+        rounded-none
         p-2
         group
         relative
         animate-fade-in
-        ${isPlayable ? "cursor-pointer" : "cursor-not-allowed opacity-60"}
+        font-mono
+        transition-all
+        duration-300
+        ${
+          isPlayable
+            ? "cursor-pointer hover:bg-theme-500/5"
+            : "cursor-not-allowed opacity-40 grayscale"
+        }
         `,
-          className
+          className,
         )}
       >
         <div
           className={twMerge(
             `
           relative
-          rounded-lg
+          rounded-none
+          h-12
+          w-12
           min-h-[48px]
           min-w-[48px]
-          transition-transform
-          duration-300
-          shadow-md
-          `
+          transition-all
+          duration-500
+          border
+          border-theme-500/20
+          group-hover:border-theme-500/60
+          group-hover:shadow-[0_0_15px_rgba(var(--theme-500),0.3)]
+          overflow-hidden
+          cyber-glitch
+          `,
           )}
         >
           {imagePath && (
@@ -86,40 +100,39 @@ const MediaItem: React.FC<MediaItemProps> = memo(
               fill
               src={imagePath}
               alt="MediaItem"
-              className={`object-cover rounded-xl transition-all duration-500 ${
-                isPlayable ? "group-hover:scale-110" : "grayscale"
+              className={`object-cover transition-all duration-700 ${
+                isPlayable ? "group-hover:scale-125 group-hover:opacity-70" : ""
               }`}
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
             />
           )}
 
+          {/* シグナルオーバーレイ */}
+          <div className="absolute inset-0 bg-theme-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
           {/* オフラインで再生不可のインジケーター */}
           {!isPlayable && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
-              <IoCloudOffline size={20} className="text-gray-400" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+              <IoCloudOffline size={16} className="text-theme-500/60" />
             </div>
           )}
         </div>
         {!isCollapsed && (
-          <div className="flex flex-col gap-y-1 overflow-hidden w-[70%]">
+          <div className="flex flex-col gap-y-0.5 overflow-hidden w-[75%]">
             <div className="flex items-center gap-2">
-              <ScrollingText text={data.title} limitCharacters={10} />
+              <div className="text-theme-300 font-bold text-sm truncate uppercase tracking-tighter group-hover:text-white transition-colors group-hover:drop-shadow-[0_0_5px_rgba(var(--theme-500),0.5)]">
+                <ScrollingText text={data.title} limitCharacters={15} />
+              </div>
               {/* ダウンロード済みインジケーター */}
               {isDownloaded && (
                 <IoCloudDone
-                  size={14}
-                  className="text-theme-500 flex-shrink-0"
+                  size={12}
+                  className="text-theme-500 flex-shrink-0 drop-shadow-[0_0_5px_rgba(var(--theme-500),0.5)]"
                 />
               )}
             </div>
-            <p
-              className={`text-sm truncate transition-colors ${
-                isPlayable
-                  ? "text-neutral-400 group-hover:text-neutral-300"
-                  : "text-neutral-600"
-              }`}
-            >
-              {data.author}
+            <p className="text-[10px] text-theme-500/60 truncate uppercase tracking-widest">
+              // AUTH: {data.author}
             </p>
           </div>
         )}

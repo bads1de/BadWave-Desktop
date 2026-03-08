@@ -25,6 +25,8 @@ import PlaylistsSection from "@/components/Home/PlaylistsSection";
 import GenreSection from "@/components/Home/GenreSection";
 import SectionSkeleton from "@/components/Home/SectionSkeleton";
 
+import Header from "@/components/Header/Header";
+
 /**
  * ホームページ
  *
@@ -63,9 +65,48 @@ export default function Home() {
   useSyncPublicPlaylists();
 
   return (
-    <div className="flex bg-[#0d0d0d] h-full overflow-hidden">
-      <div className="w-full h-full overflow-y-auto custom-scrollbar">
-        <main className="px-6 py-8 pb-8 space-y-8">
+    <div className="flex h-full overflow-hidden font-mono bg-[#0a0a0f] relative">
+      {/* 背景装飾 */}
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
+      
+      <div className="w-full h-full overflow-y-auto custom-scrollbar relative z-10">
+        <Header className="sticky top-0 z-20">
+          <div className="flex items-center justify-between w-full px-4 lg:px-8 py-2">
+            <div className="flex flex-col">
+              <h1 className="text-4xl font-black tracking-[0.2em] text-white uppercase cyber-glitch">
+                BADWAVE_MAIN_NET
+              </h1>
+              <div className="flex items-center gap-4 text-[8px] text-theme-500/60 uppercase tracking-[0.3em] font-mono mt-1">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]" />
+                  STATUS: ONLINE
+                </span>
+                <span>// SECTOR: HOME</span>
+                <span className="hidden sm:inline">// NODE: 0x8F2D</span>
+              </div>
+            </div>
+
+            <div className="hidden md:flex items-center gap-8 font-mono">
+              <div className="flex flex-col items-end">
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">System_Uptime</span>
+                <span className="text-xs text-theme-300 font-bold tabular-nums">124:45:02</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Network_Traffic</span>
+                <span className="text-xs text-theme-300 font-bold tabular-nums">42.8 GB/s</span>
+              </div>
+              <div className="flex flex-col items-end border-l border-theme-500/10 pl-8">
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Security_Level</span>
+                <span className="text-xs text-theme-500 font-black">STABLE</span>
+              </div>
+            </div>
+          </div>
+        </Header>
+
+        {/* 背景装飾 */}
+        <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
+        
+        <main className="relative px-6 py-12 pb-24 space-y-24 max-w-7xl mx-auto">
           {/* トレンドボードセクション */}
           {!isMounted || (trendsLoading && trends.length === 0) ? (
             <SectionSkeleton title="Trends" type="trend" />
@@ -77,30 +118,32 @@ export default function Home() {
             />
           )}
 
-          {/* スポットライトセクション */}
-          {!isMounted || (spotlightLoading && spotlightData.length === 0) ? (
-            <SectionSkeleton title="Spotlight" type="spotlight" />
-          ) : (
-            <SpotlightSection spotlightData={spotlightData} />
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* スポットライトセクション */}
+            {!isMounted || (spotlightLoading && spotlightData.length === 0) ? (
+              <SectionSkeleton title="Spotlight" type="spotlight" />
+            ) : (
+              <SpotlightSection spotlightData={spotlightData} />
+            )}
+
+            {/* あなたへのおすすめセクション */}
+            {!isMounted ||
+            (recommendationsLoading && recommendations.length === 0) ? (
+              <SectionSkeleton
+                title="For You"
+                description="Personalized recommendations based on your taste"
+                type="forYou"
+              />
+            ) : (
+              <ForYouSection recommendations={recommendations} />
+            )}
+          </div>
 
           {/* 最新曲セクション */}
           {!isMounted || (latestLoading && latestSongs.length === 0) ? (
             <SectionSkeleton title="Latest Releases" type="latest" />
           ) : (
             <LatestReleasesSection songs={latestSongs} />
-          )}
-
-          {/* あなたへのおすすめセクション */}
-          {!isMounted ||
-          (recommendationsLoading && recommendations.length === 0) ? (
-            <SectionSkeleton
-              title="For You"
-              description="Personalized recommendations based on your taste"
-              type="forYou"
-            />
-          ) : (
-            <ForYouSection recommendations={recommendations} />
           )}
 
           {/* パブリックプレイリストセクション */}

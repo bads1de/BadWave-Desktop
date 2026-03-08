@@ -21,20 +21,23 @@ const TrendPeriodSelector: React.FC<TrendPeriodSelectorProps> = ({
   onPeriodChange,
 }) => {
   return (
-    <div className="inline-flex h-10 items-center justify-center rounded-xl bg-neutral-900/40 backdrop-blur-xl border border-white/[0.02] p-1">
+    <div className="inline-flex h-10 items-center justify-center rounded-none bg-[#0a0a0f] border border-theme-500/20 p-1 font-mono uppercase tracking-widest">
       {TREND_PERIODS.map((period) => (
         <button
           key={period.value}
           onClick={() => onPeriodChange(period.value)}
           className={cn(
-            "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-300",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-500/50 focus-visible:ring-offset-2",
+            "inline-flex items-center justify-center whitespace-nowrap rounded-none px-4 py-1.5 text-[10px] font-black transition-all duration-300",
+            "focus-visible:outline-none",
             "disabled:pointer-events-none disabled:opacity-50",
             selectedPeriod === period.value
-              ? "bg-gradient-to-br rounded-xl from-theme-500/20 to-theme-900/20 border border-theme-500/30 text-white shadow-lg shadow-theme-500/20"
-              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50 rounded-xl"
+              ? "bg-theme-500/20 text-white border border-theme-500/40 shadow-[0_0_10px_rgba(var(--theme-500),0.3)] relative cyber-glitch"
+              : "text-theme-500/40 hover:text-theme-300 hover:bg-theme-500/5"
           )}
         >
+          {selectedPeriod === period.value && (
+            <span className="absolute -top-1 -right-1 w-1 h-1 bg-theme-500 animate-pulse" />
+          )}
           {period.label}
         </button>
       ))}

@@ -8,10 +8,6 @@ body,
   height: 100%;
   background-color: black;
   color-scheme: dark;
-}
-
-:root {
-  --electron-titlebar-height: 0px;
 
   /* カラースキームのデフォルト値（violet） */
   --accent-from: #7c3aed;
@@ -28,6 +24,21 @@ body,
   --theme-500: 139, 92, 246;
   --theme-600: 124, 58, 237;
   --theme-900: 88, 28, 135;
+}
+
+:root {
+  --electron-titlebar-height: 0px;
+}
+
+.electron-app {
+  --electron-titlebar-height: 32px;
+}
+
+.app-wrapper {
+  padding-top: var(--electron-titlebar-height);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* エメラルドテーマ */
@@ -115,37 +126,36 @@ html[data-theme="monochrome"] body {
   --theme-900: 24, 24, 27;
 }
 
-.electron-app {
-  --electron-titlebar-height: 32px;
+/* サイバーパンクテーマ */
+html[data-theme="cyberpunk"],
+html[data-theme="cyberpunk"] body {
+  --accent-from: #ff00ff;
+  --accent-via: #00ffff;
+  --accent-to: #ffff00;
+  --primary-color: #0f172a;
+  --scrollbar-color: 0, 255, 255;
+  --active-tab-color: #00ffff;
+  --glow-color: 255, 0, 255;
+  --theme-300: 165, 243, 252;
+  --theme-400: 34, 211, 238;
+  --theme-500: 6, 182, 212;
+  --theme-600: 219, 39, 119;
+  --theme-900: 15, 23, 42;
+  background-color: #0a0a0f !important;
 }
 
-body {
-  /* padding-top は .app-wrapper に移動しました */
+/* サイバーパンク専用フォント適用 */
+html[data-theme="cyberpunk"] h1,
+html[data-theme="cyberpunk"] h2,
+html[data-theme="cyberpunk"] h3 {
+  font-family: var(--font-syncopate);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
 }
 
-.app-wrapper {
-  padding-top: var(--electron-titlebar-height);
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  cursor: pointer;
-}
-
-.range-slider::-moz-range-thumb {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  cursor: pointer;
+html[data-theme="cyberpunk"] body {
+  font-family: var(--font-space-mono);
 }
 
 .active-tab {
@@ -208,25 +218,29 @@ body {
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(var(--scrollbar-color), 0.4);
   }
-}
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 
-.smooth-scroll {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
-}
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
 
-.smooth-scroll > * {
-  scroll-snap-align: start;
+  .smooth-scroll > * {
+    scroll-snap-align: start;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300;
+  }
 }
 
 @keyframes fadeIn {
@@ -282,28 +296,115 @@ body {
   transform: scale(1.02);
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300;
-}
-
 .scrolling-text-container {
-  overflow: hidden; /* テキストがはみ出さないようにする */
-  white-space: nowrap; /* テキストを折り返さない */
-  width: 100%; /* コンテナの幅を親要素に合わせる */
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .scrolling-text {
-  display: inline-block; /* インライン要素として扱う */
-  animation-name: scroll-text; /* 適用するアニメーションの名前 */
-  animation-timing-function: linear; /* 等速アニメーション */
-  animation-iteration-count: infinite; /* 無限に繰り返す */
+  display: inline-block;
+  animation-name: scroll-text;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 @keyframes scroll-text {
   from {
-    transform: translateX(100%); /* 開始位置: 右端 */
+    transform: translateX(100%);
   }
   to {
-    transform: translateX(-100%); /* 終了位置: 左端 */
+    transform: translateX(-100%);
   }
+}
+
+/* サイバーパンク・アニメーション */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes scanline {
+  0% { bottom: 100%; }
+  80% { bottom: 100%; }
+  100% { bottom: 0%; }
+}
+
+@keyframes scanline-skeleton {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeDown {
+  animation: fadeDown 0.3s ease-out forwards;
+}
+
+.animate-scanline-skeleton {
+  animation: scanline-skeleton 2s ease-in-out infinite;
+}
+
+html[data-theme="cyberpunk"] .cyber-glitch:hover {
+  animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
+  text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;
+}
+
+html[data-theme="cyberpunk"] .neon-border {
+  border: 1px solid #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), inset 0 0 5px rgba(0, 255, 255, 0.2);
+}
+
+html[data-theme="cyberpunk"] .scanline-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.06),
+    rgba(0, 255, 0, 0.02),
+    rgba(0, 0, 255, 0.06)
+  );
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+html[data-theme="cyberpunk"] .scanline-moving::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(0deg, rgba(0, 255, 255, 0) 0%, rgba(0, 255, 255, 0.1) 50%, rgba(0, 255, 255, 0) 100%);
+  animation: scanline 4s linear infinite;
+  pointer-events: none;
+}
+
+.text-rgb-split {
+  text-shadow: -1px 0 #ff00ff, 1px 0 #00ffff;
+}
+
+.hud-border {
+  position: relative;
+  border: 1px solid rgba(var(--theme-500), 0.3);
 }

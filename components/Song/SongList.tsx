@@ -50,27 +50,29 @@ const SongList: React.FC<SongListProps> = memo(
 
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={isPlayable ? { scale: 1.01, y: -2 } : undefined}
         className={twMerge(
           `
         flex
         items-center
         gap-x-4
         w-full
-        bg-neutral-900/40
-        hover:bg-neutral-800/60
-        rounded-2xl
+        bg-[#0a0a0f]
+        hover:bg-theme-500/5
+        rounded-none
         p-3
         group
         transition-all
         duration-500
         backdrop-blur-md
         border
-        border-white/[0.03]
-        hover:border-theme-500/30
-        hover:shadow-[0_8px_30px_rgb(0,0,0,0.4),0_0_20px_rgba(var(--theme-500),0.1)]
+        border-theme-500/10
+        hover:border-theme-500/40
+        hover:shadow-[0_0_20px_rgba(var(--theme-500),0.1)]
+        relative
+        cyber-glitch
+        font-mono
         ${
           isPlayable
             ? "cursor-pointer"
@@ -80,10 +82,16 @@ const SongList: React.FC<SongListProps> = memo(
           className
         )}
       >
+        {/* HUD装飾コーナー */}
+        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-theme-500/0 group-hover:border-theme-500/40 transition-colors" />
+        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-theme-500/0 group-hover:border-theme-500/40 transition-colors" />
+
         <div
           onClick={handleClick}
-          className={`relative w-14 h-14 sm:w-16 sm:h-16 min-w-14 sm:min-w-16 rounded-xl overflow-hidden shadow-2xl transition-transform duration-500 ${
-            isPlayable ? "group-hover:scale-105" : ""
+          className={`relative w-14 h-14 sm:w-16 sm:h-16 min-w-14 sm:min-w-16 rounded-none overflow-hidden border border-theme-500/20 shadow-2xl transition-all duration-500 ${
+            isPlayable
+              ? "group-hover:scale-105 group-hover:border-theme-500/60"
+              : ""
           }`}
         >
           {imagePath && (
@@ -91,21 +99,22 @@ const SongList: React.FC<SongListProps> = memo(
               fill
               src={imagePath}
               alt={data.title}
-              className={`object-cover transition-all duration-700 ${
+              className={`object-cover transition-all duration-700 opacity-80 group-hover:opacity-100 ${
                 isPlayable ? "group-hover:scale-110" : ""
               }`}
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
             />
           )}
+
           {isPlayable ? (
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-              <div className="bg-theme-500 p-2.5 rounded-full text-white shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                <Play size={20} fill="currentColor" />
+            <div className="absolute inset-0 bg-theme-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1px]">
+              <div className="bg-black/80 border border-theme-500/60 p-2 text-theme-500 shadow-[0_0_15px_rgba(var(--theme-500),0.4)] transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                <Play size={18} fill="currentColor" />
               </div>
             </div>
           ) : (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <IoCloudOffline size={20} className="text-gray-400" />
+              <IoCloudOffline size={20} className="text-theme-500/40" />
             </div>
           )}
         </div>
@@ -115,15 +124,15 @@ const SongList: React.FC<SongListProps> = memo(
             href={`/songs/${data.id}`}
             className={!isPlayable ? "pointer-events-none" : ""}
           >
-            <p
-              className={`font-bold text-sm sm:text-base truncate tracking-tight transition-colors ${
+            <div
+              className={`font-black text-sm uppercase tracking-widest truncate transition-colors ${
                 isPlayable
-                  ? "text-white group-hover:text-theme-400"
-                  : "text-neutral-500"
+                  ? "text-white group-hover:text-theme-300 group-hover:drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]"
+                  : "text-theme-500/20"
               }`}
             >
               {data.title}
-            </p>
+            </div>
           </Link>
           <div className="flex items-center gap-x-2">
             <Link
@@ -131,19 +140,19 @@ const SongList: React.FC<SongListProps> = memo(
               className={!isPlayable ? "pointer-events-none" : ""}
             >
               <p
-                className={`text-xs sm:text-sm truncate font-medium transition-colors ${
+                className={`text-[10px] truncate uppercase tracking-widest transition-colors ${
                   isPlayable
-                    ? "text-neutral-400 hover:text-white"
-                    : "text-neutral-600"
+                    ? "text-theme-500/60 hover:text-theme-300"
+                    : "text-theme-500/10"
                 }`}
               >
-                {data?.genre}
+                // {data?.genre}
               </p>
             </Link>
-            <span className="text-neutral-700 text-[10px]">•</span>
+            <span className="text-theme-500/20 text-[8px]">•</span>
             <p
-              className={`text-xs sm:text-sm truncate font-medium ${
-                isPlayable ? "text-neutral-500" : "text-neutral-700"
+              className={`text-[10px] truncate uppercase tracking-widest ${
+                isPlayable ? "text-theme-500/40" : "text-theme-500/10"
               }`}
             >
               {data?.author}
@@ -151,34 +160,34 @@ const SongList: React.FC<SongListProps> = memo(
           </div>
         </div>
 
-        <div className="flex items-center gap-x-3 sm:gap-x-6 pr-2 ml-auto">
+        <div className="flex items-center gap-x-4 sm:gap-x-8 pr-2 ml-auto text-[10px] font-bold uppercase tracking-widest">
           <div
-            className={`flex items-center gap-x-1.5 ${
-              isPlayable ? "text-neutral-400" : "text-neutral-700"
+            className={`flex items-center gap-x-1.5 transition-colors ${
+              isPlayable
+                ? "text-theme-500/40 group-hover:text-theme-500"
+                : "text-theme-500/10"
             }`}
           >
-            <PlayIcon size={14} className="opacity-70" />
-            <span className="text-[13px] font-bold tabular-nums">
-              {data?.count}
-            </span>
+            <PlayIcon size={12} className="opacity-70" />
+            <span className="tabular-nums">{data?.count}</span>
           </div>
 
           <div
-            className={`flex items-center gap-x-1.5 ${
-              isPlayable ? "text-neutral-400" : "text-neutral-700"
+            className={`flex items-center gap-x-1.5 transition-colors ${
+              isPlayable
+                ? "text-theme-500/40 group-hover:text-theme-500"
+                : "text-theme-500/10"
             }`}
           >
-            <Heart size={14} className="opacity-70" />
-            <span className="text-[13px] font-bold tabular-nums">
-              {data?.like_count}
-            </span>
+            <Heart size={12} className="opacity-70" />
+            <span className="tabular-nums">{data?.like_count}</span>
           </div>
 
           {/* ダウンロード状態インジケーター */}
           {isDownloaded && (
             <div className="flex items-center">
-              <div className="bg-theme-500/10 p-1.5 rounded-full border border-theme-500/20 shadow-[0_0_15px_rgba(var(--theme-500),0.2)]">
-                <IoCloudDone size={16} className="text-theme-500" />
+              <div className="text-theme-500 drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]">
+                <IoCloudDone size={16} />
               </div>
             </div>
           )}

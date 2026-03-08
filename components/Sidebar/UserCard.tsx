@@ -38,35 +38,41 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
   if (!userDetails) {
     if (isCollapsed) {
       return (
-        <div className="px-1">
+        <div className="px-2">
           <button
             onClick={authModal.onOpen}
-            className="w-full aspect-square rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 relative group overflow-hidden shadow-lg hover:shadow-theme-500/10"
+            className="w-full aspect-square rounded-none bg-[#0a0a0f] border border-theme-500/30 hover:border-theme-500 hover:shadow-[0_0_15px_rgba(var(--theme-500),0.4)] transition-all duration-500 relative group overflow-hidden cyber-glitch"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <div className="w-full h-full flex items-center justify-center">
-              <User className="w-6 h-6 text-neutral-400 group-hover:text-white transition-colors duration-300" />
+            <div className="absolute inset-0 bg-theme-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+            <div className="w-full h-full flex items-center justify-center relative z-10">
+              <User className="w-8 h-8 text-theme-500/60 group-hover:text-white transition-colors duration-300 drop-shadow-[0_0_5px_rgba(var(--theme-500),0.5)]" />
             </div>
+            {/* 角の装飾 */}
+            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-theme-500/40" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-theme-500/40" />
           </button>
         </div>
       );
     }
 
     return (
-      <Card className="mx-2 overflow-hidden rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border-white/5 hover:border-theme-500/30 transition-all duration-500 shadow-lg hover:shadow-theme-500/10">
+      <Card className="overflow-hidden rounded-none bg-[#0a0a0f]/80 backdrop-blur-xl border border-theme-500/20 hover:border-theme-500/50 transition-all duration-500 shadow-[inset_0_0_15px_rgba(var(--theme-500),0.05)] group/card cyber-glitch mx-2">
         <button
           onClick={authModal.onOpen}
-          className="w-full p-3 relative hover:bg-theme-500/10 transition-all duration-300"
+          className="w-full p-4 relative hover:bg-theme-500/10 transition-all duration-300"
         >
-          <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 shadow-inner">
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900">
-                <User className="w-5 h-5 text-neutral-400" />
+          <div className="flex items-center gap-4">
+            <div className="relative w-12 h-12 rounded-none overflow-hidden border border-theme-500/40 flex-shrink-0 shadow-[0_0_10px_rgba(var(--theme-500),0.2)] bg-theme-900/50">
+              <div className="w-full h-full flex items-center justify-center">
+                <User className="w-6 h-6 text-theme-500 animate-pulse" />
               </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300">
-                ログイン
+            <div className="flex-1 text-left">
+              <p className="text-[10px] font-mono text-theme-500/60 uppercase tracking-widest mb-1">
+                // SYSTEM_LOGIN
+              </p>
+              <p className="text-sm font-bold font-mono text-white tracking-widest uppercase group-hover/card:text-theme-300 transition-colors">
+                [ CONNECT_ID ]
               </p>
             </div>
           </div>
@@ -77,25 +83,27 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
 
   if (isCollapsed) {
     return (
-      <div className="px-1">
+      <div className="px-2">
         <button
           onClick={() => router.push("/account")}
-          className="w-full aspect-square rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 relative group overflow-hidden shadow-lg hover:shadow-theme-500/10"
+          className="w-full aspect-square rounded-none bg-[#0a0a0f] border border-theme-500/30 hover:border-theme-500 hover:shadow-[0_0_20px_rgba(var(--theme-500),0.4)] transition-all duration-500 relative group overflow-hidden cyber-glitch"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+          <div className="absolute inset-0 bg-theme-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
           {userDetails?.avatar_url ? (
             <Image
               src={userDetails.avatar_url}
               alt="ユーザーアバター"
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              className="object-cover transition-all duration-700 group-hover:scale-125 group-hover:opacity-80"
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <User className="w-6 h-6 text-neutral-400 group-hover:text-white transition-colors duration-300" />
+            <div className="w-full h-full flex items-center justify-center relative z-10">
+              <User className="w-8 h-8 text-theme-500/60 group-hover:text-white transition-colors duration-300" />
             </div>
           )}
+          {/* 角の装飾 */}
+          <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-theme-500" />
         </button>
       </div>
     );
@@ -103,58 +111,61 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
 
   return (
     <Card
-      className="mx-2 overflow-hidden rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border-white/5 hover:border-theme-500/30 transition-all duration-500 shadow-lg hover:shadow-theme-500/10"
+      className="overflow-hidden rounded-none bg-[#0a0a0f]/80 backdrop-blur-xl border border-theme-500/30 hover:border-theme-500/60 transition-all duration-500 shadow-[inset_0_0_20px_rgba(var(--theme-500),0.05)] group/card cyber-glitch mx-2"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 hover:opacity-100 transition-all duration-500" />
+        {/* 背景装飾 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-transparent to-transparent opacity-40 group-hover/card:opacity-100 transition-all duration-500" />
 
         <div className="p-3 relative">
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 shadow-inner group transition-transform duration-300 hover:scale-105">
+            <div className="relative w-10 h-10 rounded-none overflow-hidden border-2 border-theme-500/40 flex-shrink-0 shadow-[0_0_15px_rgba(var(--theme-500),0.2)] group-hover/card:border-theme-500 transition-all duration-500">
               {userDetails?.avatar_url ? (
                 <Image
                   src={userDetails.avatar_url}
                   alt="ユーザーアバター"
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="object-cover transition-all duration-700 group-hover/card:scale-125 group-hover/card:opacity-70"
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900">
-                  <User className="w-5 h-5 text-neutral-400" />
+                <div className="w-full h-full flex items-center justify-center bg-theme-900">
+                  <User className="w-5 h-5 text-theme-500" />
                 </div>
               )}
             </div>
 
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300 truncate">
-                {userDetails?.full_name || "ゲスト"}
+            <div className="flex-1 min-w-0 font-mono flex flex-col justify-center">
+              <p className="text-[8px] text-theme-500/60 uppercase tracking-widest mb-0.5 animate-pulse truncate">
+                [ OP_ID ]
+              </p>
+              <p className="text-xs font-bold text-white truncate uppercase tracking-widest drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]">
+                {userDetails?.full_name || "UNKNOWN"}
               </p>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex flex-col gap-1">
               <button
                 onClick={() => router.push("/account")}
-                className="p-1.5 rounded-xl hover:bg-theme-500/10 transition-colors duration-300"
+                className="p-1.5 bg-theme-500/10 hover:bg-theme-500/30 border border-theme-500/30 text-theme-400 hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(var(--theme-500),0.1)]"
               >
-                <Settings
-                  size={16}
-                  className="text-neutral-400 hover:text-theme-300 transition-colors"
-                />
+                <Settings size={14} />
               </button>
               <button
                 onClick={handleLogout}
-                className="p-1.5 rounded-xl hover:bg-theme-500/10 transition-colors duration-300"
+                className="p-1.5 bg-red-500/10 hover:bg-red-500/30 border border-red-500/30 text-red-400 hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.1)]"
               >
-                <LogOut
-                  size={16}
-                  className="text-neutral-400 hover:text-theme-300 transition-colors"
-                />
+                <LogOut size={14} />
               </button>
             </div>
           </div>
+        </div>
+
+        {/* 下部のプログレスバー的な装飾 */}
+        <div className="h-0.5 w-full bg-theme-500/10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 h-full bg-theme-500/40 w-1/3 animate-pulse" />
         </div>
       </div>
     </Card>

@@ -41,34 +41,36 @@ const PublicPlaylistBoard: React.FC<PublicPlaylistBoardProps> = ({
               }
             >
               {/* メインカード */}
-              <div className="relative overflow-hidden bg-neutral-900/40 backdrop-blur-sm rounded-xl transition-all duration-300 border border-white/5 group-hover:border-theme-500/30 group-hover:bg-neutral-800/40">
+              <div className="relative overflow-hidden bg-[#0a0a0f]/60 backdrop-blur-md rounded-none transition-all duration-500 border border-theme-500/20 group-hover:border-theme-500/60 group-hover:shadow-[0_0_20px_rgba(var(--theme-500),0.3)] cyber-glitch">
                 {/* アートワーク */}
                 <div className="relative aspect-square w-full overflow-hidden">
                   <Image
                     src={playlist.image_path || "/images/playlist.png"}
                     alt={playlist.title}
                     fill
-                    className="object-cover transition-all duration-500 group-hover:scale-105"
+                    className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:opacity-60"
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 200px"
                   />
-                  {/* オーバーレイグラデーション */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                  {/* HUDコーナー */}
+                  <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-theme-500/40 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
+                  <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-theme-500/40 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
 
-                  {/* ホバー時のグロー効果 */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute inset-0 bg-theme-500/10 blur-xl" />
-                  </div>
+                  {/* オーバーレイグラデーション */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0f]/20 to-[#0a0a0f]/90 transition-all duration-500" />
                 </div>
 
                 {/* プレイリスト情報 */}
-                <div className="absolute bottom-0 w-full p-4">
+                <div className="absolute bottom-0 w-full p-4 font-mono uppercase">
                   <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-white truncate drop-shadow-lg">
+                    <h3 className="text-sm font-bold text-theme-100 truncate group-hover:text-white transition-colors">
                       {playlist.title}
                     </h3>
-                    <p className="text-xs text-neutral-300 truncate opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {playlist.user_name || "Anonymous"}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] text-theme-500/60 truncate tracking-widest">
+                        // AUTH: {playlist.user_name || "SYSTEM"}
+                      </p>
+                      <div className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(var(--theme-500),0.8)] opacity-0 group-hover:opacity-100" />
+                    </div>
                   </div>
                 </div>
               </div>

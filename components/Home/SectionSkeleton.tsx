@@ -25,51 +25,68 @@ interface SectionSkeletonProps {
  * @param type - セクションタイプ（指定するとそのセクション専用のスケルトンが表示される）
  */
 const SectionSkeleton: React.FC<SectionSkeletonProps> = ({
-  title = "Loading...",
-  description = "Please wait",
+  title = "LOADING...",
+  description = "INITIALIZING_STREAM",
   height = "h-64",
   type,
 }) => {
-  // 基本のセクションヘッダー
+  // 基本のセクションヘッダー (Cyberpunk Style)
   const SectionHeader = () => (
-    <>
-      <h2 className="text-3xl font-bold text-white tracking-tight mb-4">
-        {title}
-      </h2>
-      <p className="text-sm text-neutral-400 mb-6">{description}</p>
-    </>
+    <div className="flex items-center gap-x-4 mb-6 animate-pulse">
+      <div className="h-10 w-1 bg-theme-500 shadow-[0_0_15px_rgba(var(--theme-500),0.8)]" />
+      <div className="relative">
+        <h2 className="text-3xl font-bold text-white tracking-[0.2em] uppercase font-mono drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]">
+          {title}
+        </h2>
+        <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase flex items-center gap-2">
+          <span className="w-1 h-1 bg-theme-500 rounded-full animate-ping" />
+          // {description}
+        </p>
+        {/* スキャンライン装飾 */}
+        <div className="absolute -bottom-1 left-0 w-full h-[1px] bg-gradient-to-r from-theme-500/40 via-transparent to-transparent" />
+      </div>
+    </div>
   );
 
   // トレンドセクション用スケルトン
   const TrendSectionSkeleton = () => (
-    <section>
-      <SectionHeader />
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-36 mt-2" />
-        </div>
+    <section className="relative">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <SectionHeader />
         <div
           data-testid="trend-period-selector-skeleton"
-          className="flex space-x-2"
+          className="flex space-x-2 bg-theme-900/20 p-1 border border-theme-500/20"
         >
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-8 w-16" />
+            <Skeleton
+              key={i}
+              className="h-10 w-24 bg-theme-500/10 border border-theme-500/10 rounded-none relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-theme-500/10 to-transparent animate-scanline-skeleton" />
+            </Skeleton>
           ))}
         </div>
       </div>
-      <div className="flex space-x-4 overflow-hidden">
+      <div className="flex space-x-4 overflow-hidden p-6 bg-[#0a0a0f]/40 border border-theme-500/10 rounded-none relative">
+        {/* HUD装飾コーナー */}
+        <div className="absolute top-0 right-0 w-12 h-12 border-t border-r border-theme-500/20" />
+        <div className="absolute bottom-0 left-0 w-12 h-12 border-b border-l border-theme-500/20" />
+
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
             data-testid="trend-card-skeleton"
-            className="min-w-[300px]"
+            className="min-w-[320px] bg-theme-900/20 border border-theme-500/10 relative overflow-hidden"
           >
-            <Skeleton className="w-full h-60 rounded-xl" />
-            <div className="p-4 space-y-2">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-3 w-1/4 mt-2" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-theme-500/5 to-transparent animate-scanline-skeleton z-10" />
+            <Skeleton className="w-full h-64 rounded-none bg-theme-500/5" />
+            <div className="p-4 space-y-3 font-mono">
+              <Skeleton className="h-6 w-3/4 bg-theme-500/10" />
+              <Skeleton className="h-4 w-1/2 bg-theme-500/5" />
+              <div className="pt-3 border-t border-theme-500/10 flex justify-between">
+                <Skeleton className="h-3 w-1/4 bg-theme-500/5" />
+                <Skeleton className="h-2 w-2 rounded-full bg-theme-500/20" />
+              </div>
             </div>
           </div>
         ))}
@@ -79,16 +96,17 @@ const SectionSkeleton: React.FC<SectionSkeletonProps> = ({
 
   // スポットライトセクション用スケルトン
   const SpotlightSectionSkeleton = () => (
-    <section>
+    <section tabIndex={0}>
       <SectionHeader />
-      <div className="flex space-x-4 overflow-hidden">
+      <div className="flex space-x-4 overflow-hidden p-6 bg-[#0a0a0f]/40 border border-theme-500/10 rounded-none relative">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
             data-testid="spotlight-card-skeleton"
-            className="flex-none w-40 relative aspect-[9/16]"
+            className="flex-none w-40 relative aspect-[9/16] overflow-hidden"
           >
-            <Skeleton className="w-full h-full rounded-xl" />
+            <Skeleton className="w-full h-full rounded-none bg-theme-500/10 border border-theme-500/20 shadow-[inset_0_0_10px_rgba(var(--theme-500),0.1)]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-theme-500/10 to-transparent animate-scanline-skeleton" />
           </div>
         ))}
       </div>
@@ -100,16 +118,17 @@ const SectionSkeleton: React.FC<SectionSkeletonProps> = ({
     <section>
       <SectionHeader />
       <div className="flex space-x-4 overflow-hidden">
-        {[1, 2, 3, 4, 5].map((i) => (
+        {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
             data-testid="song-card-skeleton"
-            className="min-w-[200px] w-[200px]"
+            className="min-w-[200px] w-[200px] bg-[#0a0a0f]/40 border border-theme-500/10 rounded-none p-3 relative overflow-hidden"
           >
-            <Skeleton className="aspect-square w-full rounded-lg" />
-            <div className="mt-2 space-y-2">
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-4 w-2/3" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-theme-500/5 to-transparent animate-scanline-skeleton" />
+            <Skeleton className="aspect-square w-full rounded-none bg-theme-500/5 border border-theme-500/10" />
+            <div className="mt-4 space-y-2">
+              <Skeleton className="h-5 w-full bg-theme-500/10" />
+              <Skeleton className="h-3 w-2/3 bg-theme-500/5" />
             </div>
           </div>
         ))}
@@ -126,13 +145,13 @@ const SectionSkeleton: React.FC<SectionSkeletonProps> = ({
           <div
             key={i}
             data-testid="playlist-card-skeleton"
-            className="min-w-[200px] max-w-[200px]"
+            className="min-w-[200px] max-w-[200px] bg-[#0a0a0f]/40 border border-theme-500/10 rounded-none p-4 relative overflow-hidden"
           >
-            <Skeleton className="aspect-square w-full rounded-xl" />
-            <div className="mt-2 space-y-2">
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-3 w-1/2" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-theme-500/5 to-transparent animate-scanline-skeleton" />
+            <Skeleton className="aspect-square w-full rounded-none bg-theme-500/5" />
+            <div className="mt-4 space-y-2 font-mono">
+              <Skeleton className="h-4 w-full bg-theme-500/10" />
+              <Skeleton className="h-2 w-1/2 bg-theme-500/5" />
             </div>
           </div>
         ))}
@@ -144,14 +163,15 @@ const SectionSkeleton: React.FC<SectionSkeletonProps> = ({
   const GenreSectionSkeleton = () => (
     <section>
       <SectionHeader />
-      <div className="flex space-x-4 overflow-hidden">
+      <div className="flex space-x-4 overflow-hidden p-8 bg-[#0a0a0f]/60 border-y border-theme-500/10 relative">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <div
             key={i}
             data-testid="genre-card-skeleton"
-            className="min-w-[150px] h-32"
+            className="min-w-[150px] h-32 relative overflow-hidden"
           >
-            <Skeleton className="w-full h-full rounded-xl" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-theme-500/5 to-transparent animate-scanline-skeleton" />
+            <Skeleton className="w-full h-full rounded-none bg-theme-500/5 border border-theme-500/20 shadow-[0_0_10px_rgba(var(--theme-500),0.1)]" />
           </div>
         ))}
       </div>

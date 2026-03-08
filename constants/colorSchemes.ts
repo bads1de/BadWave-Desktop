@@ -156,10 +156,31 @@ export const colorSchemes: ColorScheme[] = [
     },
     previewGradient: "linear-gradient(135deg, #71717a, #a1a1aa, #d4d4d8)",
   },
+  {
+    id: "cyberpunk",
+    name: "サイバーパンク",
+    description: "ネオンとグリッチの未来世界",
+    colors: {
+      accentFrom: "#ff00ff", // Neon Magenta
+      accentVia: "#00ffff", // Neon Cyan
+      accentTo: "#ffff00", // Neon Yellow
+      primary: "#0f172a", // Slate-900
+      scrollbar: "0, 255, 255", // Cyan RGB
+      activeTab: "#00ffff",
+      glow: "255, 0, 255",
+      // Tailwind用RGB値 (cyan/magenta mix)
+      theme300: "165, 243, 252", // cyan-300
+      theme400: "34, 211, 238", // cyan-400
+      theme500: "6, 182, 212", // cyan-500
+      theme600: "219, 39, 119", // pink-600 (contrast)
+      theme900: "15, 23, 42", // slate-900
+    },
+    previewGradient: "linear-gradient(135deg, #ff00ff, #00ffff, #ffff00)",
+  },
 ];
 
 export const getColorSchemeById = (id: string): ColorScheme => {
   return colorSchemes.find((scheme) => scheme.id === id) || colorSchemes[0];
 };
 
-export const DEFAULT_COLOR_SCHEME_ID = "violet";
+export const DEFAULT_COLOR_SCHEME_ID = "cyberpunk";

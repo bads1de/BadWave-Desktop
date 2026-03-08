@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
+import { Figtree, Syncopate, Space_Mono } from "next/font/google";
 
 import Player from "@/components/Player/Player";
 import RightSidebar from "@/components/RightSidebar/RightSidebar";
@@ -19,6 +19,16 @@ import { SyncProvider } from "@/providers/SyncProvider";
 import "./globals.css";
 
 const font = Figtree({ subsets: ["latin"] });
+const syncopate = Syncopate({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-syncopate",
+});
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-space-mono",
+});
 
 export const metadata: Metadata = {
   title: "BadWave",
@@ -31,7 +41,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="ja"
+      className={`${syncopate.variable} ${spaceMono.variable}`}
+    >
       <body className={font.className}>
         <ToasterProvider />
         <TanStackProvider>
@@ -41,7 +54,9 @@ export default function RootLayout({
                 <PlaybackStateProvider>
                   <ModalProvider />
                   <WindowControls />
-                  <div className="app-wrapper">
+                  <div className="app-wrapper relative overflow-hidden">
+                    <div className="scanline-overlay z-50" />
+                    <div className="scanline-moving z-50" />
                     <Sidebar>
                       <RightSidebar>{children}</RightSidebar>
                     </Sidebar>

@@ -14,6 +14,7 @@ import usePlayer from "@/hooks/player/usePlayer";
 import useGetLocalFiles from "@/hooks/data/useGetLocalFiles";
 import useGetSavedLibraryInfo from "@/hooks/data/useGetSavedLibraryInfo";
 import LocalFileTable from "@/components/local/LocalFileTable";
+import { motion } from "framer-motion";
 import { LocalFile } from "@/types/local";
 
 const LocalPage = () => {
@@ -124,44 +125,65 @@ const LocalPage = () => {
     (error instanceof Error ? error.message : error ? String(error) : null);
 
   return (
-    <div className="bg-[#0d0d0d] rounded-lg h-full w-full overflow-hidden overflow-y-auto pb-[80px] custom-scrollbar">
-      <Header className="bg-gradient-to-b from-[#0d0d0d] via-[#0d0d0d] to-transparent">
-        <div className="mb-4">
-          <h1 className="text-white text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-theme-400">
-            ローカルファイル
-          </h1>
-          <p className="text-neutral-400 text-sm mt-2">
-            お気に入りの音楽をローカルから再生
-          </p>
-        </div>
-      </Header>
+    <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto pb-[80px] custom-scrollbar relative font-mono">
+      {/* 背景装飾 */}
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
+      
+      <div className="relative z-10">
+        <Header className="sticky top-0 z-20">
+          <div className="flex items-center justify-between w-full px-4 lg:px-8 py-2">
+            <div className="flex flex-col">
+              <h1 className="text-4xl font-black tracking-[0.2em] text-white uppercase cyber-glitch">
+                LOCAL_STORAGE
+              </h1>
+              <div className="flex items-center gap-4 text-[8px] text-theme-500/60 uppercase tracking-[0.3em] font-mono mt-1">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(var(--theme-500),0.5)]" />
+                  FS_STATUS: READ_ONLY
+                </span>
+                <span>// SECTOR: LOCAL_NODE</span>
+                <span className="hidden sm:inline">// ENCRYPTION: NONE</span>
+              </div>
+            </div>
+
+            <div className="hidden md:flex items-center gap-8 border-l border-theme-500/10 pl-8 font-mono">
+              <div className="flex flex-col items-end">
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Buffer_Sync</span>
+                <span className="text-xs text-theme-300 font-bold tabular-nums">READY</span>
+              </div>
+            </div>
+          </div>
+        </Header>
 
       <div className="mt-4 mb-7 px-6">
         {/* 保存されたライブラリ情報 */}
         {savedLibraryInfo?.exists &&
           savedLibraryInfo.directoryExists &&
           !selectedDirectory && (
-            <div className="bg-[#121212] border border-[#303030] rounded-md p-4 mb-4">
-              <div className="text-theme-300 flex items-center gap-2 mb-2">
-                <span className="text-theme-400">💾</span>
-                <span className="font-semibold">保存されたライブラリ</span>
+            <div className="bg-[#0a0a0f] border border-theme-500/20 p-4 mb-8 relative group overflow-hidden">
+               {/* HUD装飾 */}
+              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-theme-500/40" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-theme-500/40" />
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1.5 h-6 bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)]" />
+                <span className="font-black text-white uppercase tracking-widest text-sm">
+                  // SAVED_LIBRARY_DETECTED
+                </span>
               </div>
-              <div className="text-neutral-300 text-sm">
-                <p>
-                  <span className="text-neutral-400">フォルダ:</span>{" "}
-                  <span className="text-white">
-                    {savedLibraryInfo.directoryPath}
-                  </span>
-                </p>
-                <p>
-                  <span className="text-neutral-400">ファイル数:</span>{" "}
-                  <span className="text-white">
-                    {savedLibraryInfo.fileCount}曲
-                  </span>
-                </p>
-                <p>
-                  <span className="text-neutral-400">最終スキャン:</span>{" "}
-                  <span className="text-white">
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-[10px] text-theme-300/60 uppercase tracking-widest">
+                <div className="space-y-1">
+                  <p className="text-theme-500/40 text-[8px]">Mount_Point</p>
+                  <p className="text-white truncate">{savedLibraryInfo.directoryPath}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-theme-500/40 text-[8px]">Stream_Count</p>
+                  <p className="text-white">{savedLibraryInfo.fileCount} UNITS</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-theme-500/40 text-[8px]">Last_Sync</p>
+                  <p className="text-white">
                     {savedLibraryInfo.lastScan
                       ? formatDistanceToNow(
                           new Date(savedLibraryInfo.lastScan),
@@ -170,108 +192,105 @@ const LocalPage = () => {
                             locale: ja,
                           }
                         )
-                      : "不明"}
-                  </span>
-                </p>
+                      : "NULL"}
+                  </p>
+                </div>
               </div>
-              <div className="mt-3">
+              <div className="mt-6">
                 <Button
                   onClick={() =>
                     setSelectedDirectory(savedLibraryInfo.directoryPath || null)
                   }
-                  className="bg-theme-800 hover:bg-theme-700 text-white text-sm rounded-xl"
+                  className="w-full md:w-auto bg-theme-500 hover:bg-theme-400 text-[#0a0a0f] text-[10px] font-black uppercase rounded-none tracking-widest h-9 px-8 transition-all hover:shadow-[0_0_15px_rgba(var(--theme-500),0.4)]"
                 >
-                  このライブラリを読み込む
+                  INITIALIZE_ARCHIVE
                 </Button>
               </div>
             </div>
           )}
 
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
           <Button
             onClick={handleSelectDirectory}
             disabled={isLoading || isSelectingDirectory}
-            className="bg-gradient-to-r from-theme-800 to-theme-600 hover:from-theme-700 hover:to-theme-500 text-white border-none shadow-md hover:shadow-lg transition-all duration-300 px-6 rounded-xl"
+            className="w-full md:w-auto bg-transparent border border-theme-500/40 hover:border-theme-500 text-theme-500 hover:bg-theme-500/5 text-[10px] font-black uppercase rounded-none tracking-widest h-10 px-8 transition-all group"
           >
             {isLoading || isSelectingDirectory ? (
               <div className="flex items-center gap-2">
-                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                <span>処理中...</span>
+                <div className="animate-spin h-3 w-3 border-2 border-theme-500 border-t-transparent inline-block"></div>
+                <span className="animate-pulse">PROCESSING...</span>
               </div>
             ) : (
-              "フォルダを選択"
+              <div className="flex items-center gap-2">
+                <span>MOUNT_DIRECTORY</span>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity">_</span>
+              </div>
             )}
           </Button>
 
           {selectedDirectory && !isLoading && !errorMessage && (
-            <div className="bg-[#121212] px-4 py-2 rounded-md border border-[#303030] text-neutral-300 text-sm flex-1 md:max-w-md overflow-hidden">
-              <span className="font-semibold text-purple-400">
-                選択中のフォルダ:
-              </span>{" "}
-              <span className="truncate">{selectedDirectory}</span>
+            <div className="flex flex-col gap-1 border-l border-theme-500/20 pl-4 py-1">
+              <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Active_Path</span>
+              <span className="text-[10px] text-theme-300 uppercase truncate max-w-md">{selectedDirectory}</span>
             </div>
           )}
 
           {selectedDirectory && !isLoading && (
             <Button
               onClick={handleForceFullScan}
-              className="bg-[#303030] hover:bg-[#404040] text-white text-sm flex items-center gap-1 rounded-xl"
+              className="w-full md:w-auto bg-[#1a1a1f] border border-white/5 hover:border-white/20 text-white/60 hover:text-white text-[10px] font-black uppercase rounded-none tracking-widest h-10 px-6 transition-all"
               title="すべてのファイルを再スキャンします"
             >
-              <RefreshCw className="h-4 w-4" />
-              <span>再スキャン</span>
+              <RefreshCw className="h-3 w-3 mr-2" />
+              <span>RE_SCAN_FS</span>
             </Button>
           )}
         </div>
 
         {errorMessage && (
-          <div className="bg-red-900/20 border border-red-800 rounded-md p-4 mb-4 text-red-300">
-            <p className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-red-500" />
-              {errorMessage}
-            </p>
+          <div className="bg-red-500/5 border border-red-500/40 p-4 mb-8 text-red-500 font-mono text-[10px] tracking-widest flex items-center gap-3 animate-shake">
+            <AlertCircle className="h-4 w-4" />
+            <span className="uppercase">// ERROR: {errorMessage}</span>
           </div>
         )}
 
         {/* スキャン進捗表示 */}
         {scanProgress && (
-          <div className="bg-[#121212] border border-[#303030] rounded-md p-4 mb-4">
-            <div className="flex items-center gap-3 mb-3">
-              {scanProgress.phase !== "complete" ? (
-                <RefreshCw className="h-5 w-5 text-theme-400 animate-spin" />
-              ) : (
-                <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center">
-                  <span className="text-white text-xs">✓</span>
-                </div>
-              )}
-              <span className="text-theme-300 font-medium">
-                {scanProgress.message}
+          <div className="bg-[#0a0a0f] border border-theme-500/20 p-6 mb-8 relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                {scanProgress.phase !== "complete" ? (
+                  <RefreshCw className="h-4 w-4 text-theme-500 animate-spin" />
+                ) : (
+                  <div className="h-2 w-2 bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                )}
+                <span className="text-theme-300 font-black uppercase tracking-widest text-[10px]">
+                  {scanProgress.message}
+                </span>
+              </div>
+              <span className="text-theme-500/40 text-[10px] font-mono">
+                {Math.round((scanProgress.current / scanProgress.total) * 100)}%
               </span>
             </div>
 
             {/* プログレスバー */}
             {scanProgress.total > 0 && (
-              <div className="space-y-2">
-                <div className="w-full bg-[#303030] rounded-full h-2.5 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-theme-600 to-theme-400 h-2.5 rounded-full transition-all duration-300 ease-out"
-                    style={{
-                      width: `${Math.round(
-                        (scanProgress.current / scanProgress.total) * 100
-                      )}%`,
+              <div className="space-y-3">
+                <div className="w-full bg-theme-500/5 h-1 border border-theme-500/10 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ 
+                      width: `${(scanProgress.current / scanProgress.total) * 100}%` 
                     }}
+                    className="bg-theme-500 h-full shadow-[0_0_10px_rgba(var(--theme-500),0.8)]"
                   />
                 </div>
-                <div className="flex justify-between text-xs text-neutral-400">
-                  <span>
-                    {scanProgress.currentFile && (
-                      <span className="text-neutral-300">
-                        {scanProgress.currentFile}
-                      </span>
-                    )}
+                <div className="flex justify-between text-[8px] text-theme-500/40 uppercase tracking-[0.2em]">
+                  <span className="truncate max-w-[70%]">
+                    {scanProgress.currentFile ? `>> ${scanProgress.currentFile}` : "IDLE_STREAM"}
                   </span>
                   <span>
-                    {scanProgress.current} / {scanProgress.total} ファイル
+                    INDEX: {scanProgress.current.toString().padStart(4, '0')} / {scanProgress.total.toString().padStart(4, '0')}
                   </span>
                 </div>
               </div>
@@ -281,59 +300,42 @@ const LocalPage = () => {
 
         {/* ローディング表示（進捗情報がない場合） */}
         {isLoading && !scanProgress && (
-          <div className="bg-[#121212] border border-[#303030] rounded-md p-4 mb-4">
-            <div className="text-theme-300 flex items-center gap-2">
-              <span className="animate-pulse h-3 w-3 rounded-full bg-theme-500 inline-block"></span>
-              ファイルを読み込み中...
+          <div className="py-24 flex flex-col items-center justify-center gap-6 border border-theme-500/10 mb-8">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-2 border-theme-500/10 animate-ping" />
+              <div className="absolute inset-4 border-2 border-theme-500/30 animate-spin" />
+              <div className="absolute inset-8 border-2 border-theme-500 animate-pulse" />
             </div>
+            <span className="text-theme-500 text-[10px] tracking-[0.4em] uppercase animate-pulse">
+              // INITIALIZING_IO_THREAD...
+            </span>
           </div>
         )}
 
         {/* スキャン結果の表示 */}
         {lastScanInfo && !isLoading && mp3Files.length > 0 && (
-          <div className="bg-[#121212] border border-[#303030] rounded-md p-3 mb-4 text-sm">
-            <div className="text-neutral-300 flex flex-wrap gap-x-4 gap-y-1">
-              <span className="text-theme-400 font-semibold">
-                スキャン結果:
-              </span>
-              {lastScanInfo.isFullScan ? (
-                <span className="text-green-400">完全スキャン</span>
-              ) : (
-                <span className="text-blue-400">差分スキャン</span>
-              )}
-              {lastScanInfo.newFiles.length > 0 && (
-                <span>
-                  新規:{" "}
-                  <span className="text-green-400">
-                    {lastScanInfo.newFiles.length}ファイル
-                  </span>
+          <div className="bg-theme-500/5 border-y border-theme-500/20 p-4 mb-8 flex items-center justify-between text-[8px] uppercase tracking-[0.3em] font-mono">
+            <div className="flex gap-8">
+              <div className="flex items-center gap-2">
+                <span className="text-theme-500/40">Mode:</span>
+                <span className={lastScanInfo.isFullScan ? "text-theme-500" : "text-cyan-400"}>
+                  {lastScanInfo.isFullScan ? "FULL_SYNC" : "DIFF_SYNC"}
                 </span>
-              )}
-              {lastScanInfo.modifiedFiles.length > 0 && (
-                <span>
-                  変更:{" "}
-                  <span className="text-yellow-400">
-                    {lastScanInfo.modifiedFiles.length}ファイル
-                  </span>
-                </span>
-              )}
-              {lastScanInfo.unchangedFiles.length > 0 && (
-                <span>
-                  変更なし:{" "}
-                  <span className="text-neutral-400">
-                    {lastScanInfo.unchangedFiles.length}ファイル
-                  </span>
-                </span>
-              )}
-              {lastScanInfo.deletedFiles.length > 0 && (
-                <span>
-                  削除:{" "}
-                  <span className="text-red-400">
-                    {lastScanInfo.deletedFiles.length}ファイル
-                  </span>
-                </span>
-              )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-theme-500/40">New:</span>
+                <span className="text-green-400">{lastScanInfo.newFiles.length}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-theme-500/40">Modified:</span>
+                <span className="text-yellow-400">{lastScanInfo.modifiedFiles.length}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-theme-500/40">Deleted:</span>
+                <span className="text-red-400">{lastScanInfo.deletedFiles.length}</span>
+              </div>
             </div>
+            <div className="text-theme-500/20 animate-pulse">SYSTEM_STABLE</div>
           </div>
         )}
 
@@ -341,12 +343,10 @@ const LocalPage = () => {
           mp3Files.length === 0 &&
           selectedDirectory &&
           !errorMessage && (
-            <div className="bg-[#121212] border border-[#303030] rounded-md p-6 mb-4 text-center">
-              <p className="text-neutral-400 text-lg">
-                選択されたフォルダにMP3ファイルが見つかりませんでした。
-              </p>
-              <p className="text-neutral-500 text-sm mt-2">
-                別のフォルダを選択するか、MP3ファイルを追加してください。
+            <div className="py-32 flex flex-col items-center justify-center gap-4 text-theme-500/20 border border-theme-500/10 mb-8">
+              <h2 className="text-xl uppercase tracking-[0.5em] font-black">[ ZERO_BLOCKS ]</h2>
+              <p className="text-[10px] uppercase tracking-widest text-center mt-2 max-w-sm px-6">
+                // NO_VALID_AUDIO_BUFFERS_DETECTED_IN_MOUNT_POINT. PROCEED_TO_RESCAN_OR_CHANGE_PATH.
               </p>
             </div>
           )}
@@ -359,7 +359,8 @@ const LocalPage = () => {
         )}
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default LocalPage;

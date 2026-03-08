@@ -88,46 +88,62 @@ const GenreHeader: React.FC<GenreHeaderProps> = ({ genre }) => {
   };
 
   return (
-    <div className="relative w-full h-[200px] overflow-hidden">
+    <div className="relative w-full h-[250px] overflow-hidden border-b border-theme-500/20 font-mono">
       <div className="absolute inset-0">
         <Image
           src={getBackgroundImage()}
           alt={genre}
           fill
-          className="object-cover opacity-80"
+          className="object-cover opacity-30 grayscale blur-[2px]"
           sizes="100vw"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
       </div>
-      {/* グラデーションオーバーレイ */}
-      <div className={`absolute inset-0 ${getGradient()} opacity-40`} />
-      {/* グラスモーフィズム効果 */}
-      <div className="absolute inset-0 backdrop-blur-sm bg-black/20">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.2), transparent 70%)",
-          }}
-        />
-      </div>
-      {/* コンテンツ - サイズと余白を調整 */}
-      <div className="relative h-full max-w-7xl mx-auto px-6 py-6 flex items-end">
-        <div className="mb-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center gap-x-3"
-          >
-            <span className="text-4xl drop-shadow-lg">{getIcon()}</span>
 
-            <div>
-              <h1 className="text-3xl font-bold text-white tracking-wide drop-shadow-lg mb-2">
-                {genre}
-              </h1>
-              <div className="h-0.5 w-24 bg-white/30 rounded-full" />
+      {/* スキャンライン */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none bg-[length:100%_4px] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.5)_50%)]" />
+
+      {/* コンテンツ */}
+      <div className="relative h-full max-w-7xl mx-auto px-8 py-8 flex items-end">
+        <div className="w-full">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-1.5 bg-theme-500 shadow-[0_0_15px_rgba(var(--theme-500),0.8)] animate-pulse" />
+                <div>
+                  <p className="text-[10px] text-theme-500 tracking-[0.6em] uppercase mb-1">
+                    [ GENRE_TAG_ANALYZED ]
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <span className="text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">{getIcon()}</span>
+                    <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter cyber-glitch">
+                      {genre}
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end gap-2 border-l border-theme-500/10 pl-6 md:pl-12">
+              <div className="flex flex-col items-end">
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Network_Index</span>
+                <span className="text-xs text-theme-300 font-bold tabular-nums">0x{genre.length.toString(16).toUpperCase().padStart(4, '0')}</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Signal_Status</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-theme-500 font-black">LOCKED</span>
+                  <div className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-ping" />
+                </div>
+              </div>
             </div>
           </motion.div>
+          <div className="mt-8 h-px w-full bg-gradient-to-r from-theme-500/40 via-theme-500/10 to-transparent" />
         </div>
       </div>
     </div>

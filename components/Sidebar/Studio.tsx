@@ -75,27 +75,38 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
       <PopoverTrigger asChild>
         <div
           className={twMerge(
-            "cursor-pointer transition",
+            "cursor-pointer transition-all duration-500 cyber-glitch relative group/item",
             isCollapsed
               ? "w-full flex items-center justify-center border-b border-transparent"
-              : "flex h-auto w-full items-center gap-x-4 py-3.5 px-4 rounded-xl",
-            "border-transparent text-neutral-400 hover:text-white"
+              : "flex h-auto w-full items-center gap-x-3 py-3 px-3 rounded-none",
+            "border border-transparent text-theme-500/60 hover:text-white hover:bg-theme-500/5 hover:border-theme-500/30",
           )}
         >
+          {/* HUD装飾コーナー */}
+          <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-theme-500/0 group-hover/item:border-theme-500/40 transition-colors z-10" />
+          <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-theme-500/0 group-hover/item:border-theme-500/40 transition-colors z-10" />
           {isCollapsed ? (
             <Hover
-              description="スタジオ"
+              description="[ STUDIO ]"
               contentSize="w-auto px-3 py-2"
               side="right"
             >
               <div className="p-3 rounded-xl">
-                <BsWrench size={20} className="text-neutral-400" />
+                <BsWrench
+                  size={24}
+                  className="transition-all duration-300 text-theme-500/60 group-hover:text-theme-300"
+                />
               </div>
             </Hover>
           ) : (
             <>
-              <BsWrench size={24} />
-              <p className="truncate text-sm font-medium">スタジオ</p>
+              <BsWrench
+                size={24}
+                className="text-theme-500/60 group-hover:text-theme-300 transition-all duration-300 drop-shadow-[0_0_8px_rgba(var(--theme-500),0)] group-hover:drop-shadow-[0_0_8px_rgba(var(--theme-500),0.8)]"
+              />
+              <p className="truncate text-sm font-bold tracking-[0.2em] font-mono">
+                [ STUDIO ]
+              </p>
             </>
           )}
         </div>
@@ -103,55 +114,42 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
       <PopoverContent
         side="right"
         align="start"
-        className="w-60 p-2 bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-xl"
+        className="w-56 p-2 bg-[#0a0a0f]/95 backdrop-blur-2xl border border-theme-500/40 shadow-[0_0_30px_rgba(0,0,0,0.8)] rounded-none"
       >
-        <div className="flex flex-col gap-y-1">
+        <div className="flex flex-col gap-y-2 font-mono uppercase tracking-widest text-[10px]">
+          <div className="flex items-center gap-2 text-[10px] text-theme-500/40 uppercase tracking-[0.4em] mb-1 border-b border-theme-500/10 pb-2 px-2 pt-1">
+            <span>[ STUDIO_TOOLS ]</span>
+          </div>
           <button
             onClick={() => openModal("playlist")}
-            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+            className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
-            <div className="p-2 rounded-lg bg-theme-500/10">
-              <RiPlayListFill size={18} className="text-theme-400" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">プレイリストを作成</span>
-            </div>
+            <RiPlayListFill size={20} />
+            <p className="font-bold">// INIT_PLAYLIST</p>
           </button>
 
           <button
             onClick={() => openModal("music")}
-            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+            className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
-            <div className="p-2 rounded-lg bg-theme-500/10">
-              <AiOutlinePlus size={18} className="text-theme-400" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">曲を追加</span>
-            </div>
+            <AiOutlinePlus size={20} />
+            <p className="font-bold">// INGEST_BINARY</p>
           </button>
 
           <button
             onClick={() => openModal("spotlight")}
-            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+            className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
-            <div className="p-2 rounded-lg bg-theme-500/10">
-              <GiMicrophone size={18} className="text-theme-400" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">スポットライト</span>
-            </div>
+            <GiMicrophone size={20} />
+            <p className="font-bold">// SPOTLIGHT_SYNC</p>
           </button>
 
           <button
             onClick={() => openModal("pulse")}
-            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+            className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
-            <div className="p-2 rounded-lg bg-theme-500/10">
-              <RiPulseLine size={18} className="text-theme-400" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">Pulseを投稿</span>
-            </div>
+            <RiPulseLine size={20} />
+            <p className="font-bold">// PULSE_GEN</p>
           </button>
         </div>
       </PopoverContent>

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { twMerge } from "tailwind-merge";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill, BsRepeat1 } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
@@ -97,69 +98,94 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     return (
       <>
         {/* audio要素はAudioEngineシングルトンで管理されるため、ここには不要 */}
-        <div className="grid grid-cols-3 h-full bg-[#121212] border-t border-[#303030] rounded-t-xl">
+        <div className="grid grid-cols-3 h-full bg-transparent">
           <div className="flex w-full justify-start px-4">
             <div className="flex items-center gap-x-4">
               <MediaItem data={song} onClick={openModal} />
             </div>
           </div>
 
-          <div className="flex flex-col w-full justify-center items-center max-w-[722px] gap-x-6">
-            <div className="flex items-center gap-x-8">
-              <FaRandom
-                onClick={toggleShuffle}
-                size={20}
-                className={`cursor-pointer transition-all duration-300 hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] ${
-                  isShuffling
-                    ? "text-theme-500 drop-shadow-[0_0_8px_var(--glow-color)] hover:drop-shadow-[0_0_12px_var(--glow-color)]"
-                    : "text-neutral-400 hover:text-white"
-                }`}
-              />
+          <div className="flex flex-col w-full justify-center items-center max-w-[722px] gap-x-6 font-mono">
+            <div className="flex items-center gap-x-12">
+              <div className="group relative">
+                <FaRandom
+                  onClick={toggleShuffle}
+                  size={18}
+                  className={twMerge(
+                    "cursor-pointer transition-all duration-300",
+                    isShuffling
+                      ? "text-white drop-shadow-[0_0_10px_rgba(var(--theme-500),0.8)]"
+                      : "text-theme-500/40 hover:text-white",
+                  )}
+                />
+                {isShuffling && (
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-theme-500 rounded-none animate-pulse" />
+                )}
+              </div>
+
               <AiFillStepBackward
                 onClick={onPlayPrevious}
-                size={30}
-                className="text-neutral-400 cursor-pointer hover:text-white hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300"
+                size={28}
+                className="text-theme-500/60 cursor-pointer hover:text-white transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]"
               />
+
               <div
                 onClick={handlePlay}
-                className="flex items-center justify-center h-9 w-9 rounded-full p-1 cursor-pointer group transition-all duration-300"
-                style={{
-                  background: `linear-gradient(135deg, ${primary}, ${accentFrom})`,
-                  boxShadow: `0 0 12px ${glowColor}`,
-                }}
+                className="relative flex items-center justify-center h-12 w-12 cursor-pointer group/play transition-all duration-500"
               >
-                <Icon
-                  size={30}
-                  className="text-white group-hover:filter group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
-                />
+                {/* 背景装飾 */}
+                <div className="absolute inset-0 border border-theme-500/20 group-hover/play:border-theme-500/40" />
+                <div className="absolute inset-1 border border-theme-500/40 group-hover/play:border-theme-500/80 transition-colors" />
+
+                <div
+                  className={twMerge(
+                    "flex items-center justify-center rounded-none transition-all duration-500 shadow-[0_0_20px_rgba(var(--theme-500),0.3)] group-hover/play:shadow-[0_0_30px_rgba(var(--theme-500),0.6)] group-hover/play:scale-110 cyber-glitch h-10 w-10 bg-theme-500/20 border border-theme-500/60",
+                  )}
+                >
+                  <Icon
+                    size={28}
+                    className="text-white group-hover/play:drop-shadow-[0_0_8px_white] transition-all duration-300"
+                  />
+                </div>
+                {/* コーナー装飾 */}
+                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-theme-500/40 group-hover/play:border-theme-500" />
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-theme-500/40 group-hover/play:border-theme-500" />
               </div>
+
               <AiFillStepForward
                 onClick={onPlayNext}
-                size={30}
-                className="text-neutral-400 cursor-pointer hover:text-white hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300"
+                size={28}
+                className="text-theme-500/60 cursor-pointer hover:text-white transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(var(--theme-500),0.5)]"
               />
-              <BsRepeat1
-                onClick={toggleRepeat}
-                size={25}
-                className={`cursor-pointer transition-all duration-300 hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] ${
-                  isRepeating
-                    ? "text-theme-500 drop-shadow-[0_0_8px_var(--glow-color)] hover:drop-shadow-[0_0_12px_var(--glow-color)]"
-                    : "text-neutral-400 hover:text-white"
-                }`}
-              />
+
+              <div className="group relative">
+                <BsRepeat1
+                  onClick={toggleRepeat}
+                  size={22}
+                  className={twMerge(
+                    "cursor-pointer transition-all duration-300",
+                    isRepeating
+                      ? "text-white drop-shadow-[0_0_10px_rgba(var(--theme-500),0.8)]"
+                      : "text-theme-500/40 hover:text-white",
+                  )}
+                />
+                {isRepeating && (
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-theme-500 rounded-none animate-pulse" />
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center gap-x-1 mt-4 w-full lg:max-w-[800px] md:max-w-[300px]">
-              <span className="w-[50px] text-center inline-block text-[#f0f0f0]">
+            <div className="flex items-center gap-x-4 mt-4 w-full lg:max-w-[700px] md:max-w-[300px] font-mono text-[10px] tracking-[0.3em] uppercase">
+              <span className="w-[60px] text-right text-theme-500 font-bold opacity-80">
                 {formattedCurrentTime}
               </span>
               <SeekBar
                 currentTime={currentTime}
                 duration={duration}
                 onSeek={handleSeek}
-                className="flex-1 h-2"
+                className="flex-1 h-1"
               />
-              <span className="w-[50px] text-center inline-block text-[#f0f0f0]">
+              <span className="w-[60px] text-left text-theme-500/50">
                 {formattedDuration}
               </span>
             </div>
@@ -189,11 +215,12 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
               <DisabledOverlay disabled={isLocalFile}>
                 <button
                   onClick={!isLocalFile ? toggleLyrics : undefined}
-                  className={`transition-all duration-300 ${
+                  className={twMerge(
+                    "transition-all duration-300",
                     isLocalFile
                       ? "text-neutral-600 cursor-not-allowed"
-                      : "cursor-pointer text-neutral-400 hover:text-white hover:filter hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                  }`}
+                      : "cursor-pointer text-theme-500/60 hover:text-white hover:drop-shadow-[0_0_8px_rgba(var(--theme-500),0.8)]",
+                  )}
                   disabled={isLocalFile}
                 >
                   <Mic2 size={20} />
@@ -211,6 +238,13 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
             </div>
           </div>
         </div>
+
+        <style jsx>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </>
     );
   },

@@ -50,36 +50,47 @@ const SongListContent: React.FC<SongListContentProps> = memo(
     // ローディング中（propsでsongsが渡された場合はスキップ）
     if (!propSongs && isLoading) {
       return (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-theme-500"></div>
+        <div className="flex flex-col items-center justify-center py-24 gap-4 font-mono">
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 border-2 border-theme-500/10 rounded-none animate-ping" />
+            <div className="absolute inset-2 border-2 border-theme-500/30 rounded-none animate-spin" />
+            <div className="absolute inset-4 border-2 border-theme-500 rounded-none animate-pulse" />
+          </div>
+          <p className="text-theme-500 text-[10px] tracking-[0.3em] uppercase animate-pulse">
+            // SYNCING_TRACK_METADATA...
+          </p>
         </div>
       );
     }
 
     if (songs.length === 0) {
       return (
-        <div className=" flex flex-col gap-y-2 w-full px-6 text-neutral-400">
-          楽曲が見つかりませんでした
+        <div className="flex flex-col items-center justify-center py-24 gap-4 text-theme-500/40 font-mono">
+          <div className="text-xl uppercase tracking-[0.4em]">[ VOID_DETECTED ]</div>
+          <p className="text-[10px] uppercase tracking-widest text-center max-w-xs">
+            // NO_AUDIO_STREAMS_FOUND_IN_THIS_SECTOR.
+          </p>
         </div>
       );
     }
 
     return (
-      <div className="flex flex-col w-full px-4 sm:px-6 pb-24">
+      <div className="flex flex-col w-full px-4 sm:px-8 pb-32">
         {/* ツールバー / アクションエリア */}
-        {showDownloadButton && songs.length > 0 && (
-          <div className="flex items-center justify-between py-6 px-2 sticky top-0 z-20 bg-transparent backdrop-blur-sm -mx-2 mb-2">
-            <div className="flex items-center gap-x-3">
-              <span className="text-neutral-400 text-sm font-bold tracking-widest uppercase opacity-60">
-                {songs.length} Tracks
+        {showDownloadButton && (
+          <div className="flex items-center justify-between py-6 px-4 sticky top-0 z-20 bg-[#0a0a0f]/60 backdrop-blur-xl border-y border-theme-500/10 -mx-4 mb-8 font-mono">
+            <div className="flex flex-col gap-1">
+              <span className="text-theme-300 text-xs font-black tracking-[0.2em] uppercase">
+                {songs.length.toString().padStart(2, '0')}_TRACKS_FOUND
               </span>
+              <div className="h-0.5 w-12 bg-theme-500 shadow-[0_0_8px_rgba(var(--theme-500),0.8)]" />
             </div>
             <BulkDownloadButton
               songs={songs}
               downloadLabel={
-                playlistId ? "Download Playlist" : "Download Liked"
+                playlistId ? "DOWNLOAD_ARCHIVE" : "DOWNLOAD_COLLECTION"
               }
-              deleteLabel={playlistId ? "Clear Downloads" : "Clear Downloads"}
+              deleteLabel="CLEAR_LOCAL_CACHE"
             />
           </div>
         )}

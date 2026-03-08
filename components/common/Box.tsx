@@ -12,21 +12,24 @@ const Box: React.FC<BoxProps> = ({ children, className }) => {
     <div
       className={twMerge(
         `
-        rounded-xl
-        bg-neutral-900/40
+        relative
+        rounded-none
+        bg-[#0a0a0f]/60
         backdrop-blur-xl
         border
-        border-white/[0.02]
-        shadow-inner
+        border-theme-500/20
+        shadow-[inset_0_0_15px_rgba(var(--theme-500),0.05)]
         transition-all
         duration-500
-        hover:shadow-lg
-        hover:shadow-theme-500/[0.03]
-        hover:border-theme-500/[0.05]
+        hover:shadow-[0_0_20px_rgba(var(--theme-500),0.15)]
+        hover:border-theme-500/40
+        group/box
         `,
-        className
+        className,
       )}
     >
+      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-theme-500/0 group-hover/box:border-theme-500/20 transition-all duration-500 pointer-events-none rounded-none" />
+      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-theme-500/0 group-hover/box:border-theme-500/20 transition-all duration-500 pointer-events-none rounded-none" />
       {children}
     </div>
   );

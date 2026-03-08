@@ -85,84 +85,69 @@ const GenreCard: React.FC<GenreCardProps> = memo(({ genre }) => {
     <Link href={`/genre/${genre}`}>
       <motion.div
         whileHover={{
-          scale: 1.05,
-          filter: "brightness(1.1)",
+          scale: 1.02,
         }}
-        whileTap={{ scale: 0.95 }}
-        className="cursor-pointer"
+        whileTap={{ scale: 0.98 }}
+        className="cursor-pointer group font-mono"
       >
         <div
-          className={`relative w-80 h-48 rounded-2xl overflow-hidden`}
-          style={{
-            boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.3)",
-          }}
+          className={`relative w-80 h-48 rounded-none overflow-hidden border border-white/10 group-hover:border-theme-500/60 transition-all duration-500 bg-[#0a0a0f] shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_30px_rgba(var(--theme-500),0.2)] cyber-glitch`}
         >
-          {/* 背景画像 - 透明度を上げる */}
+          {/* 背景画像 */}
           {backgroundImage && (
             <div className="absolute inset-0">
               <Image
                 src={backgroundImage}
                 alt={genre}
                 fill
-                className="object-cover opacity-90"
+                className="object-cover opacity-20 grayscale group-hover:opacity-40 group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
                 sizes="320px"
               />
             </div>
           )}
 
-          {/* グラデーションオーバーレイ - ジャンルに応じたグラデーションを適用 */}
-          <div className={`absolute inset-0 ${gradient} opacity-30`} />
-
-          {/* グラスモーフィズム効果 - 透明度を下げる */}
-          <div className="absolute inset-0 backdrop-blur-[2px] bg-white/5">
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.2), transparent 60%)",
-              }}
-            />
-          </div>
-
-          {/* 装飾的なパターン - 透明度を下げる */}
+          {/* スキャンライン / グリッド */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[length:100%_4px] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.5)_50%)]" />
           <div
-            className="absolute inset-0 opacity-20"
+            className="absolute inset-0 opacity-5 pointer-events-none"
             style={{
-              backgroundImage:
-                "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 1px, transparent 1px)",
+              backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px)`,
               backgroundSize: "20px 20px",
             }}
           />
 
+          {/* HUDコーナー */}
+          <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/20 group-hover:border-theme-500 transition-colors" />
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/20 group-hover:border-theme-500 transition-colors" />
+
           {/* コンテンツコンテナ */}
-          <div className="relative h-full p-6 flex flex-col justify-between">
-            {/* ジャンル名とアイコン - テキストに影を追加して視認性を向上 */}
-            <div className="flex items-center space-x-3">
-              <span className="text-3xl drop-shadow-lg">{icon}</span>
-              <h2 className="text-white text-2xl font-bold tracking-wide drop-shadow-lg">
-                {genre}
-              </h2>
+          <div className="relative h-full p-6 flex flex-col justify-between z-10">
+            <div>
+              <p className="text-[8px] text-theme-500 tracking-[0.4em] uppercase mb-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                [ SECTOR_IDENTIFIED ]
+              </p>
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] group-hover:scale-110 transition-transform duration-500">
+                  {icon}
+                </span>
+                <h2 className="text-white text-xl font-black tracking-widest uppercase drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] group-hover:text-theme-300 transition-colors">
+                  {genre}
+                </h2>
+              </div>
             </div>
 
-            {/* 装飾的な要素 */}
             <div className="flex justify-between items-end">
-              <div className="h-1 w-20 bg-white/20 rounded-full" />
-              <motion.div
-                animate={{
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 5, -5, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"
-              >
-                <div className="w-8 h-8 rounded-full bg-white/20" />
-              </motion.div>
+              <div className="h-px w-24 bg-gradient-to-r from-theme-500 to-transparent" />
+              <div className="text-[10px] text-theme-500/40 uppercase tracking-tighter group-hover:text-theme-500 transition-colors">
+                ACCESS_INDEX: 0x{genre.length.toString(16).toUpperCase()}
+              </div>
             </div>
           </div>
+
+          {/* オーバーレイ */}
+          <div
+            className={`absolute inset-0 ${gradient} opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none`}
+          />
         </div>
       </motion.div>
     </Link>

@@ -39,15 +39,20 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
 
   if (recommendations.length === 0) {
     return (
-      <p className="text-neutral-400 text-center">
-        まだ推薦曲がありません。もっと曲を聴いてみましょう！
-      </p>
+      <div className="py-10 border border-dashed border-theme-500/20 bg-theme-500/5 text-center px-4 font-mono">
+        <p className="text-theme-500/60 uppercase tracking-[0.2em] text-xs">
+          [ ! ] ALGORITHM_TRAINING_IN_PROGRESS
+        </p>
+        <p className="text-[10px] text-theme-500/40 mt-2 uppercase tracking-widest">
+          // NEED_MORE_STREAM_DATA_FOR_PERSONALIZATION
+        </p>
+      </div>
     );
   }
 
   return (
     <div
-      className={`${className}`}
+      className={`${className} relative`}
       onMouseEnter={() => setShowArrows(true)}
       onMouseLeave={() => setShowArrows(false)}
     >
@@ -56,13 +61,13 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex space-x-4"
+          className="flex space-x-6 pb-4"
         >
           {recommendations.map((song) => (
             <motion.div
               key={song.id}
               variants={itemVariants}
-              className="group relative transform transition duration-300 ease-in-out hover:scale-105 min-w-[200px] w-[200px]"
+              className="group relative min-w-[200px] w-[200px]"
             >
               <SongItem onClick={handlePlay} data={song} />
             </motion.div>

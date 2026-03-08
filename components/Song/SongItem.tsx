@@ -1,6 +1,7 @@
 "use client";
 
 import { Song } from "@/types";
+import { twMerge } from "tailwind-merge";
 import Image from "next/image";
 import Link from "next/link";
 import { CiHeart, CiPlay1 } from "react-icons/ci";
@@ -46,34 +47,24 @@ const SongItem: React.FC<SongItemProps> = memo(({ onClick, data }) => {
 
   return (
     <div
-      className={`
-        relative
-        group
-        flex
-        flex-col
-        items-center
-        justify-center
-        rounded-xl
-        overflow-hidden
-        bg-gradient-to-b
-        from-gray-900/10
-        to-gray-900/20
-        transition-all
-        duration-300
-        aspect-[9/16]
-        ${
-          isPlayable
-            ? "cursor-pointer hover:from-gray-800/20 hover:to-gray-800/30"
-            : "cursor-not-allowed"
-        }
-      `}
+      className={twMerge(
+        "relative group flex flex-col items-center justify-center rounded-none overflow-hidden bg-[#0a0a0f] transition-all duration-500 aspect-[9/16] border border-theme-500/20 hover:border-theme-500/60 hover:shadow-[0_0_25px_rgba(var(--theme-500),0.2)] cyber-glitch font-mono",
+        isPlayable ? "cursor-pointer hover:bg-theme-500/5" : "cursor-not-allowed",
+      )}
     >
+      {/* HUDコーナー装飾 */}
+      <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-theme-500/40 z-20 group-hover:border-theme-500 transition-colors" />
+      <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-theme-500/40 z-20 group-hover:border-theme-500 transition-colors" />
+
       <div className="relative w-full h-full">
         {imagePath && (
           <Image
-            className={`object-cover w-full h-full transition-all duration-500 ${
-              isPlayable ? "group-hover:scale-110" : "grayscale opacity-50"
-            }`}
+            className={twMerge(
+              "object-cover w-full h-full transition-all duration-700",
+              isPlayable
+                ? "group-hover:scale-110 group-hover:opacity-60 grayscale-[30%] group-hover:grayscale-0"
+                : "grayscale opacity-30",
+            )}
             src={imagePath}
             fill
             alt="Image"
@@ -82,73 +73,82 @@ const SongItem: React.FC<SongItemProps> = memo(({ onClick, data }) => {
           />
         )}
 
+        {/* スキャンライン */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-10 bg-[length:100%_3px] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.5)_50%)]" />
+
         {/* オフラインで再生不可の場合のオーバーレイ */}
         {!isPlayable && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-10">
-            <div className="text-center">
+            <div className="text-center font-mono">
               <IoCloudOffline
                 size={32}
-                className="text-gray-400 mx-auto mb-2"
+                className="text-theme-500/40 mx-auto mb-2"
               />
-              <span className="text-gray-400 text-xs">
-                オフライン時は再生不可
+              <span className="text-theme-500/40 text-[10px] uppercase tracking-widest">
+                [ OFFLINE_LOCKED ]
               </span>
             </div>
           </div>
         )}
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-20">
           <Link
             href={`/songs/${data.id}`}
-            className={`w-full block ${
-              !isPlayable ? "pointer-events-none" : ""
-            }`}
+            className={twMerge(
+              "w-full block mb-1",
+              !isPlayable && "pointer-events-none",
+            )}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div
-              className={`font-medium truncate text-sm transition-colors ${
+              className={twMerge(
+                "font-black truncate text-[10px] uppercase tracking-widest transition-colors",
                 isPlayable
-                  ? "text-gray-100 hover:text-gray-300 group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                  : "text-gray-500"
-              }`}
+                  ? "text-theme-300 hover:text-white group-hover:drop-shadow-[0_0_8px_rgba(var(--theme-500),0.8)]"
+                  : "text-theme-500/20",
+              )}
             >
               <ScrollingText text={data.title} />
             </div>
           </Link>
 
           <p
-            className={`text-xs mt-1 truncate transition-colors ${
+            className={twMerge(
+              "text-[8px] truncate uppercase tracking-tighter transition-colors",
               isPlayable
-                ? "text-gray-400 hover:text-gray-300 group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                : "text-gray-600"
-            }`}
+                ? "text-theme-500/60 group-hover:text-theme-300"
+                : "text-theme-500/10",
+            )}
           >
-            {data.author}
+            // AUTH: {data.author}
           </p>
 
-          <div className="flex items-center justify-start mt-2 space-x-4">
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-theme-500/10">
             <div
-              className={`flex items-center transition-colors ${
+              className={twMerge(
+                "flex items-center text-[8px] font-black uppercase tracking-widest transition-colors",
                 isPlayable
-                  ? "text-gray-400 hover:text-gray-300 group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                  : "text-gray-600"
-              }`}
+                  ? "text-theme-500/40 group-hover:text-theme-400"
+                  : "text-theme-500/10",
+              )}
             >
-              <CiPlay1 size={14} />
-              <span className="ml-1 text-xs">{data.count}</span>
+              <CiPlay1 size={10} className="mr-1" />
+              <span>{data.count}_PLAYS</span>
             </div>
-            <div
-              className={`flex items-center transition-colors ${
-                isPlayable
-                  ? "text-gray-400 hover:text-gray-300 group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                  : "text-gray-600"
-              }`}
-            >
-              <CiHeart size={14} />
-              <span className="ml-1 text-xs">{data.like_count}</span>
+            <div className="flex items-center gap-x-2">
+              <div
+                className={twMerge(
+                  "flex items-center text-[8px] font-black uppercase tracking-widest transition-colors",
+                  isPlayable
+                    ? "text-theme-500/40 group-hover:text-theme-400"
+                    : "text-theme-500/10",
+                )}
+              >
+                <CiHeart size={10} className="mr-1" />
+                <span>{data.like_count}_VAL</span>
+              </div>
+              {/* ダウンロード状態を表示 */}
+              <DownloadIndicator song={data} />
             </div>
-            {/* ダウンロード状態を表示 */}
-            <DownloadIndicator song={data} />
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@ const DownloadIndicator = ({ song }: { song: Song }) => {
 
   return (
     <div className="flex items-center text-theme-500 drop-shadow-[0_0_8px_rgba(var(--theme-500),0.6)]">
-      <IoCloudDone size={14} />
+      <IoCloudDone size={12} />
     </div>
   );
 };

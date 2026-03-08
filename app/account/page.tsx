@@ -37,117 +37,143 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="bg-[#0d0d0d] rounded-lg w-full h-full overflow-hidden">
-      <div className="h-full overflow-y-auto custom-scrollbar">
-        <div className="px-6 py-8 md:px-10 space-y-8">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-theme-200 to-white bg-clip-text text-transparent">
-            アカウント設定
+    <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto custom-scrollbar relative font-mono">
+      {/* 背景装飾 */}
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
+      
+      <div className="relative z-10 px-6 py-8 md:px-10 lg:px-12 space-y-10">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-pulse" />
+            <span className="text-[10px] text-theme-500 font-black tracking-[0.4em] uppercase">
+              USER_PROFILE_SYSTEM
+            </span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tight cyber-glitch drop-shadow-[0_0_15px_rgba(var(--theme-500),0.3)]">
+            ACCOUNT_SETTINGS
           </h1>
+        </div>
 
-          <div className="space-y-8">
-            {/* プロフィールセクション */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-neutral-900/80 via-theme-900/20 to-neutral-900/80 backdrop-blur-xl border border-white/[0.05] shadow-lg rounded-2xl p-8">
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-theme-500/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-theme-900/10 rounded-full blur-3xl"></div>
+        <div className="space-y-12">
+          {/* プロフィールセクション (HUDスタイル) */}
+          <div className="relative bg-[#0a0a0f] border border-theme-500/10 p-8 rounded-none overflow-hidden group">
+            {/* HUD装飾 */}
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-theme-500/40 group-hover:border-theme-500 transition-all" />
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-theme-500/40 group-hover:border-theme-500 transition-all" />
+            
+            <div className="relative flex flex-col md:flex-row items-start md:items-center gap-10">
+              <div className="relative group/avatar">
+                <div className="relative w-32 h-32 md:w-40 md:h-40 border border-theme-500/30 p-1 bg-black/40">
+                   {/* Avatar corners */}
+                  <div className="absolute -top-0.5 -right-0.5 w-3 h-3 border-t border-r border-theme-500" />
+                  <div className="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b border-l border-theme-500" />
+                  
+                  <div className="relative w-full h-full overflow-hidden grayscale-[30%] group-hover/avatar:grayscale-0 transition-all duration-500">
+                    <Image
+                      src={user?.avatar_url || "/images/default-avatar.png"}
+                      alt="Profile"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover/avatar:scale-110"
+                    />
+                  </div>
+                </div>
+                
+                {/* Tech info floating */}
+                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-full text-center">
+                  <span className="text-[8px] text-theme-500/60 uppercase tracking-[0.3em] font-black">
+                    ID: 0x{user?.id?.substring(0, 8).toUpperCase() || "NULL"}
+                  </span>
+                </div>
+              </div>
 
-              <div className="relative flex flex-col md:flex-row items-start md:items-center gap-8">
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-theme-500/30 via-theme-900/20 to-theme-500/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-                  <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full p-1 bg-gradient-to-br from-theme-500 via-theme-600 to-theme-700">
-                    <div className="absolute inset-1 rounded-full overflow-hidden">
-                      <Image
-                        src={user?.avatar_url || "/images/default-avatar.png"}
-                        alt="Profile"
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
+              <div className="flex-1 space-y-6">
+                <div>
+                  <h2 className="text-4xl font-black text-white uppercase tracking-widest break-all">
+                    {user?.full_name || "UNIDENTIFIED_USER"}
+                  </h2>
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className="text-[10px] text-theme-500/60 uppercase tracking-widest">
+                      // AUTH_STATUS: VERIFIED
+                    </span>
+                    <span className="text-[10px] text-theme-500/60 uppercase tracking-widest">
+                      // ACCESS_LVL: NULL_SEC
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-theme-200 to-white bg-clip-text text-transparent">
-                      {user?.full_name || "ユーザー"}
-                    </h2>
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      onClick={() => setIsEditModalOpen(true)}
-                      className="relative overflow-hidden bg-gradient-to-r from-theme-600 to-theme-800 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:shadow-theme-500/20 transition-all duration-300"
-                    >
-                      <span className="relative z-10">プロフィール編集</span>
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      disabled={isLoading}
-                      className="relative overflow-hidden bg-neutral-800 border border-white/10 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-neutral-700 transition-all duration-300"
-                    >
-                      <span className="relative z-10">
-                        {isLoading ? "ログアウト中..." : "ログアウト"}
-                      </span>
-                    </button>
-                  </div>
+                <div className="flex flex-wrap gap-4 pt-2">
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="relative bg-theme-500 hover:bg-theme-400 text-black px-8 py-3 rounded-none font-black text-xs uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(var(--theme-500),0.3)] hover:shadow-[0_0_25px_rgba(var(--theme-500),0.5)] transition-all"
+                  >
+                    PATCH_PROFILE
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoading}
+                    className="relative border border-red-500/40 hover:border-red-500 bg-red-500/5 hover:bg-red-500/10 text-red-500 px-8 py-3 rounded-none font-black text-xs uppercase tracking-[0.2em] transition-all"
+                  >
+                    {isLoading ? "TERMINATING..." : "TERMINATE_SESSION"}
+                  </button>
                 </div>
               </div>
             </div>
-
-            <Tabs defaultValue="appearance" className="space-y-6">
-              <TabsList className="bg-neutral-900/60 p-1 border border-white/[0.05] rounded-xl h-auto flex-wrap">
-                <TabsTrigger
-                  value="appearance"
-                  className="flex items-center gap-2 py-2 px-4 rounded-xl data-[state=active]:bg-theme-500 data-[state=active]:text-white transition-all duration-300"
-                >
-                  <Palette className="w-4 h-4" />
-                  外観
-                </TabsTrigger>
-                <TabsTrigger
-                  value="library"
-                  className="flex items-center gap-2 py-2 px-4 rounded-xl data-[state=active]:bg-theme-500 data-[state=active]:text-white transition-all duration-300"
-                >
-                  <Database className="w-4 h-4" />
-                  ライブラリ
-                </TabsTrigger>
-                <TabsTrigger
-                  value="activity"
-                  className="flex items-center gap-2 py-2 px-4 rounded-xl data-[state=active]:bg-theme-500 data-[state=active]:text-white transition-all duration-300"
-                >
-                  <Activity className="w-4 h-4" />
-                  アクティビティ
-                </TabsTrigger>
-                <TabsTrigger
-                  value="stats"
-                  className="flex items-center gap-2 py-2 px-4 rounded-xl data-[state=active]:bg-theme-500 data-[state=active]:text-white transition-all duration-300"
-                >
-                  <BarChart2 className="w-4 h-4" />
-                  統計
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="appearance" className="mt-0 outline-none">
-                <ColorSchemeSelector />
-              </TabsContent>
-
-              <TabsContent value="library" className="mt-0 outline-none">
-                <SyncSection />
-              </TabsContent>
-
-              <TabsContent value="activity" className="mt-0 outline-none">
-                <TopPlayedSongs user={user} />
-              </TabsContent>
-
-              <TabsContent value="stats" className="mt-0 outline-none">
-                <StatsOverview />
-              </TabsContent>
-            </Tabs>
-
-            <AccountModal
-              isOpen={isEditModalOpen}
-              onClose={() => setIsEditModalOpen(false)}
-              user={user}
-            />
           </div>
+
+          <Tabs defaultValue="appearance" className="space-y-10">
+            <TabsList className="bg-[#0a0a0f] p-0 border-b border-theme-500/10 rounded-none h-auto w-full justify-start gap-8 flex-wrap">
+              <TabsTrigger
+                value="appearance"
+                className="flex items-center gap-3 py-4 px-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-theme-500 text-theme-500/40 border-b-2 border-transparent data-[state=active]:border-theme-500 uppercase font-black text-[10px] tracking-[0.3em] transition-all"
+              >
+                <Palette className="w-4 h-4" />
+                INTERFACE
+              </TabsTrigger>
+              <TabsTrigger
+                value="library"
+                className="flex items-center gap-3 py-4 px-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-theme-500 text-theme-500/40 border-b-2 border-transparent data-[state=active]:border-theme-500 uppercase font-black text-[10px] tracking-[0.3em] transition-all"
+              >
+                <Database className="w-4 h-4" />
+                DATABASE
+              </TabsTrigger>
+              <TabsTrigger
+                value="activity"
+                className="flex items-center gap-3 py-4 px-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-theme-500 text-theme-500/40 border-b-2 border-transparent data-[state=active]:border-theme-500 uppercase font-black text-[10px] tracking-[0.3em] transition-all"
+              >
+                <Activity className="w-4 h-4" />
+                LOGS
+              </TabsTrigger>
+              <TabsTrigger
+                value="stats"
+                className="flex items-center gap-3 py-4 px-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-theme-500 text-theme-500/40 border-b-2 border-transparent data-[state=active]:border-theme-500 uppercase font-black text-[10px] tracking-[0.3em] transition-all"
+              >
+                <BarChart2 className="w-4 h-4" />
+                METRICS
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="appearance" className="mt-0 outline-none">
+              <ColorSchemeSelector />
+            </TabsContent>
+
+            <TabsContent value="library" className="mt-0 outline-none">
+              <SyncSection />
+            </TabsContent>
+
+            <TabsContent value="activity" className="mt-0 outline-none">
+              <TopPlayedSongs user={user} />
+            </TabsContent>
+
+            <TabsContent value="stats" className="mt-0 outline-none">
+              <StatsOverview />
+            </TabsContent>
+          </Tabs>
+
+          <AccountModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            user={user}
+          />
         </div>
       </div>
     </div>

@@ -47,7 +47,10 @@ const Player = () => {
   return (
     <>
       <div className="fixed bottom-0 left-0 w-full z-50">
-        <div className="bg-[#121212] border-t border-[#303030] rounded-t-xl w-full h-[100px]">
+        <div className="bg-[#0a0a0f] border-t-2 border-theme-500/40 w-full h-[100px] shadow-[0_-10px_30px_rgba(0,0,0,0.8),0_-5px_15px_rgba(var(--theme-500),0.1)] relative">
+          {/* HUD装飾ライン */}
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-theme-500/40 to-transparent" />
+          
           <PlayerContent song={finalSong} playlists={playlists} />
         </div>
       </div>

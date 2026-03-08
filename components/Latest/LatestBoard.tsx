@@ -38,13 +38,17 @@ const LatestBoard: React.FC<LatestBoardProps> = ({ songs }) => {
 
   if (songs.length === 0) {
     return (
-      <p className="text-neutral-400 text-center">曲が見つかりませんでした</p>
+      <div className="py-10 border border-dashed border-theme-500/20 bg-theme-500/5 text-center">
+        <p className="text-theme-500/60 uppercase tracking-[0.4em] text-xs animate-pulse">
+          [ ! ] NO_DATA_STREAMS_IN_BUFFER
+        </p>
+      </div>
     );
   }
 
   return (
     <div
-      className="flex flex-col h-full"
+      className="flex flex-col h-full relative"
       onMouseEnter={() => setShowArrows(true)}
       onMouseLeave={() => setShowArrows(false)}
     >
@@ -53,13 +57,13 @@ const LatestBoard: React.FC<LatestBoardProps> = ({ songs }) => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex space-x-4"
+          className="flex space-x-6 pb-4"
         >
           {songs.map((item) => (
             <motion.div
               key={item.id}
               variants={itemVariants}
-              className="group relative transform transition duration-300 ease-in-out hover:scale-105 min-w-[200px] w-[200px]"
+              className="group relative min-w-[200px] w-[200px]"
             >
               <SongItem onClick={(id) => handlePlay(id)} data={item} />
             </motion.div>

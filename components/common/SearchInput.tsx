@@ -108,10 +108,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   return (
     <div className="relative w-full group" ref={containerRef}>
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-theme-500/20 to-theme-900/20 opacity-0 group-focus-within:opacity-100 transition-all duration-300 -z-10" />
-      <div className="relative flex items-center gap-2 w-full rounded-xl bg-neutral-800/80 backdrop-blur-sm border border-white/[0.05] group-hover:border-theme-500/30 group-focus-within:border-theme-500/50 transition-all duration-300 px-4 py-3">
+      <div className="absolute inset-0 rounded-xl bg-theme-500/10 opacity-0 group-focus-within:opacity-100 transition-all duration-300 blur-xl -z-10" />
+      <div className="relative flex items-center gap-2 w-full rounded-none bg-[#0a0a0f]/80 backdrop-blur-md border border-theme-500/30 group-hover:border-theme-500/60 group-focus-within:border-theme-500 shadow-[inset_0_0_15px_rgba(var(--theme-500),0.05)] group-focus-within:shadow-[0_0_20px_rgba(var(--theme-500),0.2),inset_0_0_10px_rgba(var(--theme-500),0.1)] transition-all duration-300 px-4 py-3 cyber-glitch">
+        {/* HUD装飾 */}
+        <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-theme-500/40 group-focus-within:border-theme-500 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-theme-500/40 group-focus-within:border-theme-500 pointer-events-none" />
+
         <BiSearch
-          className="text-neutral-400 group-hover:text-neutral-300 group-focus-within:text-theme-500 transition-colors"
+          className="text-theme-400 group-hover:text-theme-300 group-focus-within:text-theme-500 transition-colors drop-shadow-[0_0_5px_rgba(var(--theme-500),0.5)]"
           size={22}
         />
         <input
@@ -121,16 +125,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full bg-transparent text-neutral-200 placeholder:text-neutral-400 focus:outline-none text-base"
+          className="w-full bg-transparent text-theme-300 placeholder:text-theme-500/50 focus:outline-none text-base font-mono tracking-wider uppercase"
         />
         {value && (
           <button
             onClick={() => setValue("")}
-            className="p-1.5 rounded-lg hover:bg-neutral-700/80 transition-colors"
+            className="p-1.5 rounded-none hover:bg-theme-500/20 transition-colors border border-transparent hover:border-theme-500/30"
             aria-label="検索をクリア"
           >
             <IoMdClose
-              className="text-neutral-400 hover:text-white transition-colors"
+              className="text-theme-400 hover:text-white transition-colors"
               size={18}
             />
           </button>
@@ -139,37 +143,39 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
       {/* 検索履歴ドロップダウン */}
       {showHistory && (
-        <div className="absolute top-full left-0 right-0 mt-2 rounded-xl bg-neutral-900/95 backdrop-blur-md border border-white/[0.08] shadow-2xl shadow-black/50 z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
-            <span className="text-sm font-medium text-neutral-400">
-              検索履歴
+        <div className="absolute top-full left-0 right-0 mt-2 rounded-none bg-[#0a0a0f]/95 backdrop-blur-xl border border-theme-500/40 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(var(--theme-500),0.1)] z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-theme-500/20 bg-theme-500/5">
+            <span className="text-xs font-mono tracking-[0.2em] text-theme-400 uppercase">
+              [ HISTORY_LOG ]
             </span>
             <button
               onClick={clearHistory}
-              className="text-xs text-neutral-500 hover:text-theme-400 transition-colors"
+              className="text-[10px] font-mono uppercase text-theme-500 hover:text-white transition-colors hover:underline"
             >
-              全て削除
+              Clear_All
             </button>
           </div>
-          <ul className="max-h-64 overflow-y-auto custom-scrollbar">
+          <ul className="max-h-64 overflow-y-auto custom-scrollbar p-1 font-mono">
             {history.map((query) => (
               <li
                 key={query}
-                className="flex items-center w-full hover:bg-white/[0.05] transition-colors group/item"
+                className="flex items-center w-full hover:bg-theme-500/10 transition-colors group/item rounded-none m-1"
               >
                 <button
                   onClick={() => handleHistoryClick(query)}
-                  className="flex-1 flex items-center gap-3 px-4 py-2.5 text-left text-sm text-neutral-300 hover:text-white min-w-0"
+                  className="flex-1 flex items-center gap-3 px-3 py-2 text-left text-sm text-theme-300 hover:text-white min-w-0"
                 >
                   <BiSearch
-                    className="text-neutral-500 flex-shrink-0"
+                    className="text-theme-500/60 flex-shrink-0"
                     size={16}
                   />
-                  <span className="truncate">{query}</span>
+                  <span className="truncate uppercase tracking-tight">
+                    {query}
+                  </span>
                 </button>
                 <button
                   onClick={(e) => handleRemoveQuery(e, query)}
-                  className="mr-2 p-1 rounded-md opacity-0 group-hover/item:opacity-100 hover:bg-neutral-700/80 text-neutral-400 hover:text-white transition-all flex-shrink-0"
+                  className="mr-2 p-1 rounded-none opacity-0 group-hover/item:opacity-100 hover:bg-theme-500/30 text-theme-400 hover:text-white transition-all flex-shrink-0 border border-transparent hover:border-theme-500/40"
                   aria-label="履歴を削除"
                 >
                   <IoMdClose size={14} />
@@ -177,6 +183,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
               </li>
             ))}
           </ul>
+          {/* 装飾的なHUDライン */}
+          <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-theme-500/30 to-transparent" />
         </div>
       )}
     </div>

@@ -158,10 +158,10 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
     <div className={twMerge(`flex h-full`, player.activeId && "h-full")}>
       <main
         className={twMerge(
-          "h-full flex-1 overflow-y-auto pr-2",
+          "h-full flex-1 overflow-y-auto bg-[#0a0a0f]",
           // サイドバーが閉じていてトグルボタンが表示される場合は、
           // スクロールバーとトグルボタンが重ならないように右側のマージンを追加
-          shouldShowToggle && "xl:mr-8"
+          shouldShowToggle && "xl:mr-8",
         )}
       >
         {children}
@@ -176,12 +176,12 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
               className={twMerge(
                 "w-8 h-full cursor-pointer",
                 "flex items-center justify-center",
-                "bg-gradient-to-l from-neutral-900/50 to-transparent",
-                "hover:from-neutral-800/70 transition-all duration-300",
-                "border-l border-white/[0.02]"
+                "bg-gradient-to-l from-theme-500/10 to-transparent",
+                "hover:from-theme-500/20 transition-all duration-300",
+                "border-l border-theme-500/20",
               )}
             >
-              <BsChevronLeft className="text-neutral-400 hover:text-white transition-colors" />
+              <BsChevronLeft className="text-theme-500/60 hover:text-white transition-colors" />
             </div>
           )}
 
@@ -189,9 +189,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
           {!isClosed && (
             <div
               {...bind()}
-              className="absolute left-0 top-0 bottom-0 w-6 cursor-ew-resize flex items-center justify-center z-50"
+              className="absolute left-0 top-0 bottom-0 w-6 cursor-ew-resize flex items-center justify-center z-50 group/handle"
             >
-              <BsGripVertical className="text-neutral-400" />
+              <div className="w-0.5 h-12 bg-theme-500/20 group-hover/handle:bg-theme-500/60 transition-colors" />
             </div>
           )}
 
@@ -201,11 +201,14 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
             className={twMerge(
               "h-full overflow-hidden",
               !isClosed && "pl-6 pr-2 pt-2 pb-2",
-              "bg-gradient-to-br from-black/95 via-neutral-900/90 to-neutral-900/85",
-              "backdrop-blur-2xl border-l border-white/[0.02] shadow-2xl shadow-black/20",
-              "z-40"
+              "bg-[#0a0a0f]/95",
+              "backdrop-blur-3xl border-l border-theme-500/20 shadow-[-10px_0_30px_rgba(0,0,0,0.8)]",
+              "z-40 relative font-mono",
             )}
           >
+            {/* スキャンライン装飾 */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[length:100%_4px] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.5)_50%)]" />
+
             {!isClosed && (
               <FullScreenLayout
                 song={currentSong!}

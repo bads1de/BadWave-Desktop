@@ -18,38 +18,46 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = "md",
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <button
         type={type}
         className={twMerge(
-          `relative group flex items-center justify-center rounded-xl font-medium transition-all duration-300`,
+          `relative group flex items-center justify-center rounded-none font-mono uppercase tracking-widest transition-all duration-500 cyber-glitch`,
           variant === "default" &&
-            "bg-gradient-to-br from-theme-500/20 to-theme-900/20 border border-theme-500/30 text-white hover:shadow-lg hover:shadow-theme-500/20 hover:border-theme-500/50",
+            "bg-theme-500/10 border border-theme-500/40 text-theme-300 hover:bg-theme-500/30 hover:text-white hover:shadow-[0_0_20px_rgba(var(--theme-500),0.4)]",
           variant === "outline" &&
-            "border border-neutral-800 hover:border-theme-500/30 bg-transparent hover:bg-neutral-800/50 text-white",
+            "border border-theme-500/20 bg-transparent hover:border-theme-500/60 hover:bg-theme-500/5 text-theme-500 hover:text-white",
           variant === "ghost" &&
-            "bg-transparent hover:bg-neutral-800/50 text-white border border-transparent",
+            "bg-transparent hover:bg-theme-500/10 text-theme-500 hover:text-white border border-transparent",
           variant === "success" &&
-            "bg-gradient-to-br from-green-500/20 to-green-900/20 border border-green-500/30 text-white hover:shadow-lg hover:shadow-green-500/20 hover:border-green-500/50",
+            "bg-green-500/10 border border-green-500/40 text-green-400 hover:bg-green-500/30 hover:text-white hover:shadow-[0_0_20px_rgba(34,197,94,0.4)]",
           variant === "danger" &&
-            "bg-gradient-to-br from-red-500/20 to-red-900/20 border border-red-500/30 text-white hover:shadow-lg hover:shadow-red-500/20 hover:border-red-500/50",
-          size === "sm" && "text-xs px-3 py-1.5",
-          size === "md" && "text-sm px-4 py-2",
-          size === "lg" && "text-base px-6 py-3",
-          size === "icon" && "p-2",
-          className
+            "bg-red-500/10 border border-red-500/40 text-red-400 hover:bg-red-500/30 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.4)]",
+          size === "sm" && "text-[10px] px-3 py-1.5",
+          size === "md" && "text-xs px-5 py-2.5",
+          size === "lg" && "text-sm px-8 py-3.5",
+          size === "icon" && "p-2.5",
+          className,
         )}
         disabled={disabled}
         ref={ref}
         {...props}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-        <div className="relative">{children}</div>
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="relative z-10">{children}</div>
+
+        {/* HUD装飾コーナー (ボタン用) */}
+        {variant !== "ghost" && (
+          <>
+            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-theme-500/40 group-hover:border-theme-500 transition-colors" />
+            <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-b border-l border-theme-500/40 group-hover:border-theme-500 transition-colors" />
+          </>
+        )}
       </button>
     );
-  }
+  },
 );
 
 // displayName を設定
