@@ -109,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
           </Button>
         </div>
 
-        <Box className="bg-neutral-900/40 backdrop-blur-xl border border-white/[0.02] shadow-inner">
+        <Box className="overflow-y-auto flex-1 custom-scrollbar bg-neutral-900/40 backdrop-blur-xl border border-white/[0.02] shadow-inner">
           <div className="flex flex-col gap-y-3 px-4 py-3">
             {routes.map((item) => (
               <SidebarItem
@@ -119,91 +119,89 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
               />
             ))}
             {user && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div
-                    className={twMerge(
-                      "cursor-pointer transition",
-                      isCollapsed
-                        ? "w-full flex items-center justify-center border-b border-transparent"
-                        : "flex h-auto w-full items-center gap-x-4 py-3.5 px-4 rounded-xl",
-                      isLibraryActive
-                        ? isCollapsed
-                          ? "border-theme-500/30"
-                          : "bg-theme-500/20 text-white border border-theme-500/30"
-                        : `border-transparent ${
-                            isCollapsed
-                              ? "border-white/5"
-                              : "text-neutral-400 hover:text-white"
-                          }`
-                    )}
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div
+                      className={twMerge(
+                        "cursor-pointer transition",
+                        isCollapsed
+                          ? "w-full flex items-center justify-center"
+                          : "flex h-auto w-full items-center gap-x-4 py-3.5 px-4 rounded-xl",
+                        isLibraryActive                          ? isCollapsed
+                            ? "border-theme-500/30"
+                            : "bg-theme-500/20 text-white border border-theme-500/30"
+                          : `border-transparent ${
+                              isCollapsed
+                                ? "border-white/5"
+                                : "text-neutral-400 hover:text-white"
+                            }`
+                      )}
+                    >
+                      {isCollapsed ? (
+                        <Hover
+                          description="ライブラリ"
+                          contentSize="w-auto px-3 py-2"
+                          side="right"
+                        >
+                          <div className="p-3 rounded-xl">
+                            <BiLibrary
+                              size={20}
+                              className={twMerge(
+                                isLibraryActive
+                                  ? "text-theme-400"
+                                  : "text-neutral-400"
+                              )}
+                            />
+                          </div>
+                        </Hover>
+                      ) : (
+                        <>
+                          <BiLibrary size={24} />
+                          <p className="truncate text-sm font-medium">
+                            ライブラリ
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    side="right"
+                    align="start"
+                    className="w-52 p-2 bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-xl"
                   >
-                    {isCollapsed ? (
-                      <Hover
-                        description="ライブラリ"
-                        contentSize="w-auto px-3 py-2"
-                        side="right"
+                    <div className="flex flex-col gap-y-1">
+                      <Link
+                        href="/playlists"
+                        className={twMerge(
+                          "flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300",
+                          pathname === "/playlists"
+                            ? "bg-theme-500/20 text-white"
+                            : "text-neutral-400 hover:text-white hover:bg-white/5"
+                        )}
                       >
-                        <div className="p-3 rounded-xl">
-                          <BiLibrary
-                            size={20}
-                            className={twMerge(
-                              isLibraryActive
-                                ? "text-theme-400"
-                                : "text-neutral-400"
-                            )}
-                          />
-                        </div>
-                      </Hover>
-                    ) : (
-                      <>
-                        <BiLibrary size={24} />
-                        <p className="truncate text-sm font-medium">
-                          ライブラリ
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent
-                  side="right"
-                  align="start"
-                  className="w-52 p-2 bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-xl"
-                >
-                  <div className="flex flex-col gap-y-1">
-                    <Link
-                      href="/playlists"
-                      className={twMerge(
-                        "flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300",
-                        pathname === "/playlists"
-                          ? "bg-theme-500/20 text-white"
-                          : "text-neutral-400 hover:text-white hover:bg-white/5"
-                      )}
-                    >
-                      <RiPlayListFill size={20} />
-                      <p className="text-sm font-medium">プレイリスト</p>
-                    </Link>
-                    <Link
-                      href="/liked"
-                      className={twMerge(
-                        "flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300",
-                        pathname === "/liked"
-                          ? "bg-theme-500/20 text-white"
-                          : "text-neutral-400 hover:text-white hover:bg-white/5"
-                      )}
-                    >
-                      <FaHeart size={20} />
-                      <p className="text-sm font-medium">お気に入り</p>
-                    </Link>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                        <RiPlayListFill size={20} />
+                        <p className="text-sm font-medium">プレイリスト</p>
+                      </Link>
+                      <Link
+                        href="/liked"
+                        className={twMerge(
+                          "flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300",
+                          pathname === "/liked"
+                            ? "bg-theme-500/20 text-white"
+                            : "text-neutral-400 hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        <FaHeart size={20} />
+                        <p className="text-sm font-medium">お気に入り</p>
+                      </Link>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <Studio isCollapsed={isCollapsed} />
+              </>
             )}
           </div>
-        </Box>
-
-        <Box className="overflow-y-auto flex-1 custom-scrollbar bg-neutral-900/40 backdrop-blur-xl border border-white/[0.02] shadow-inner">
-          <Studio isCollapsed={isCollapsed} />
         </Box>
 
         <div className=" mb-6">

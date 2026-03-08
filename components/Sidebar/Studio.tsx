@@ -1,8 +1,9 @@
 "use client";
 
-import { AiOutlineBars, AiOutlinePlus } from "react-icons/ai";
-import { RiPlayListFill } from "react-icons/ri";
+import { AiOutlinePlus } from "react-icons/ai";
+import { RiPlayListFill, RiPulseLine } from "react-icons/ri";
 import { GiMicrophone } from "react-icons/gi";
+import { BsWrench } from "react-icons/bs";
 import useAuthModal from "@/hooks/auth/useAuthModal";
 import { useUser } from "@/hooks/auth/useUser";
 import useUploadModal from "@/hooks/modal/useUploadModal";
@@ -13,7 +14,8 @@ import Hover from "../common/Hover";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
-import { RiPulseLine } from "react-icons/ri";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { twMerge } from "tailwind-merge";
 
 interface StudioProps {
   isCollapsed: boolean;
@@ -66,168 +68,94 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
     }
   };
 
-  if (isCollapsed) {
-    return (
-      <div className="flex flex-col gap-3 px-1 pt-4">
-        <Hover
-          contentSize="w-auto px-3 py-2"
-          side="right"
-          description="プレイリストを作成"
-        >
-          <button className="w-full aspect-square rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 flex items-center justify-center group relative overflow-hidden shadow-lg hover:shadow-theme-500/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <AiOutlineBars
-              className="text-neutral-400 group-hover:text-white transition-all duration-300 transform group-hover:scale-110"
-              size={20}
-              onClick={() => openModal("playlist")}
-            />
-          </button>
-        </Hover>
-
-        <Hover
-          contentSize="w-auto px-3 py-2"
-          side="right"
-          description="曲を追加"
-        >
-          <button className="w-full aspect-square rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 flex items-center justify-center group relative overflow-hidden shadow-lg hover:shadow-theme-500/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <AiOutlinePlus
-              className="text-neutral-400 group-hover:text-white transition-all duration-300 transform group-hover:scale-110"
-              size={20}
-              onClick={() => openModal("music")}
-            />
-          </button>
-        </Hover>
-
-        <Hover
-          contentSize="w-auto px-3 py-2"
-          side="right"
-          description="スポットライトを作成"
-        >
-          <button
-            onClick={() => openModal("spotlight")}
-            className="w-full aspect-square rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 flex items-center justify-center group relative overflow-hidden shadow-lg hover:shadow-theme-500/10"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <GiMicrophone
-              className="text-neutral-400 group-hover:text-white transition-all duration-300 transform group-hover:scale-110"
-              size={20}
-            />
-          </button>
-        </Hover>
-
-        <Hover
-          contentSize="w-auto px-3 py-2"
-          side="right"
-          description="Pulseを投稿"
-        >
-          <button
-            onClick={() => openModal("pulse")}
-            className="w-full aspect-square rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 flex items-center justify-center group relative overflow-hidden shadow-lg hover:shadow-theme-500/10"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <RiPulseLine
-              className="text-neutral-400 group-hover:text-white transition-all duration-300 transform group-hover:scale-110"
-              size={20}
-            />
-          </button>
-        </Hover>
-      </div>
-    );
-  }
+  if (!user) return null;
 
   return (
-    <div className="flex flex-col gap-4 px-3 pt-10">
-      <div className="grid grid-cols-1 gap-3">
-        <button
-          onClick={() => openModal("playlist")}
-          className="group w-full p-4 rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 relative overflow-hidden shadow-lg hover:shadow-theme-500/10"
+    <Popover>
+      <PopoverTrigger asChild>
+        <div
+          className={twMerge(
+            "cursor-pointer transition",
+            isCollapsed
+              ? "w-full flex items-center justify-center border-b border-transparent"
+              : "flex h-auto w-full items-center gap-x-4 py-3.5 px-4 rounded-xl",
+            "border-transparent text-neutral-400 hover:text-white"
+          )}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <div className="relative flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-theme-500/10 group-hover:bg-theme-500/20 transition-all duration-500 shadow-inner">
-              <RiPlayListFill
-                className="text-theme-500 group-hover:text-theme-300 transition-all duration-300 transform group-hover:scale-110"
-                size={24}
-              />
+          {isCollapsed ? (
+            <Hover
+              description="スタジオ"
+              contentSize="w-auto px-3 py-2"
+              side="right"
+            >
+              <div className="p-3 rounded-xl">
+                <BsWrench size={20} className="text-neutral-400" />
+              </div>
+            </Hover>
+          ) : (
+            <>
+              <BsWrench size={24} />
+              <p className="truncate text-sm font-medium">スタジオ</p>
+            </>
+          )}
+        </div>
+      </PopoverTrigger>
+      <PopoverContent
+        side="right"
+        align="start"
+        className="w-60 p-2 bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-xl"
+      >
+        <div className="flex flex-col gap-y-1">
+          <button
+            onClick={() => openModal("playlist")}
+            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+          >
+            <div className="p-2 rounded-lg bg-theme-500/10">
+              <RiPlayListFill size={18} className="text-theme-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300">
-                プレイリストを作成
-              </span>
-              <span className="text-xs text-neutral-400">
-                お気に入りの曲をまとめよう
-              </span>
+              <span className="text-sm font-medium">プレイリストを作成</span>
             </div>
-          </div>
-        </button>
+          </button>
 
-        <button
-          onClick={() => openModal("music")}
-          className="group w-full p-4 rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 relative overflow-hidden shadow-lg hover:shadow-theme-500/10"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <div className="relative flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-theme-500/10 group-hover:bg-theme-500/20 transition-all duration-500 shadow-inner">
-              <AiOutlinePlus
-                className="text-theme-500 group-hover:text-theme-300 transition-all duration-300 transform group-hover:scale-110"
-                size={24}
-              />
+          <button
+            onClick={() => openModal("music")}
+            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+          >
+            <div className="p-2 rounded-lg bg-theme-500/10">
+              <AiOutlinePlus size={18} className="text-theme-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300">
-                曲を追加
-              </span>
-              <span className="text-xs text-neutral-400">
-                新しい曲をアップロード
-              </span>
+              <span className="text-sm font-medium">曲を追加</span>
             </div>
-          </div>
-        </button>
+          </button>
 
-        <button
-          onClick={() => openModal("spotlight")}
-          className="group w-full p-4 rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 relative overflow-hidden shadow-lg hover:shadow-theme-500/10"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <div className="relative flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-theme-500/10 group-hover:bg-theme-500/20 transition-all duration-500 shadow-inner">
-              <GiMicrophone
-                className="text-theme-500 group-hover:text-theme-300 transition-all duration-300 transform group-hover:scale-110"
-                size={24}
-              />
+          <button
+            onClick={() => openModal("spotlight")}
+            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+          >
+            <div className="p-2 rounded-lg bg-theme-500/10">
+              <GiMicrophone size={18} className="text-theme-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300">
-                スポットライト
-              </span>
-              <span className="text-xs text-neutral-400">Spotlightを共有</span>
+              <span className="text-sm font-medium">スポットライト</span>
             </div>
-          </div>
-        </button>
+          </button>
 
-        <button
-          onClick={() => openModal("pulse")}
-          className="group w-full p-4 rounded-xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-lg border border-white/5 hover:border-theme-500/30 transition-all duration-500 relative overflow-hidden shadow-lg hover:shadow-theme-500/10"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 via-theme-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <div className="relative flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-theme-500/10 group-hover:bg-theme-500/20 transition-all duration-500 shadow-inner">
-              <RiPulseLine
-                className="text-theme-500 group-hover:text-theme-300 transition-all duration-300 transform group-hover:scale-110"
-                size={24}
-              />
+          <button
+            onClick={() => openModal("pulse")}
+            className="flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 text-neutral-400 hover:text-white hover:bg-white/5 w-full text-left"
+          >
+            <div className="p-2 rounded-lg bg-theme-500/10">
+              <RiPulseLine size={18} className="text-theme-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300">
-                Pulse
-              </span>
-              <span className="text-xs text-neutral-400">Pulseを投稿</span>
+              <span className="text-sm font-medium">Pulseを投稿</span>
             </div>
-          </div>
-        </button>
-      </div>
-    </div>
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
