@@ -183,7 +183,7 @@ describe("components/common/SearchInput", () => {
       const input = screen.getByRole("textbox");
       fireEvent.focus(input);
 
-      fireEvent.click(screen.getByText("全て削除"));
+      fireEvent.click(screen.getByText("Clear_All"));
 
       expect(screen.queryByText("履歴A")).not.toBeInTheDocument();
       expect(screen.queryByText("履歴B")).not.toBeInTheDocument();

@@ -29,7 +29,7 @@ import Link from "next/link";
 import useGetSongById from "@/hooks/data/useGetSongById";
 import { useUser } from "@/hooks/auth/useUser";
 import useGetSongsByGenres from "@/hooks/data/useGetSongGenres";
-import EditModal from "@/components/Modals/EditModal";
+import EditModal from "@/components/modals/EditModal";
 import { downloadFile } from "@/libs/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

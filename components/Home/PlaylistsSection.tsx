@@ -1,15 +1,15 @@
-import React from "react";
+﻿import React from "react";
 import { Playlist } from "@/types";
-import PublicPlaylistBoard from "@/components/Playlist/PublicPlaylistBoard";
+import PublicPlaylistBoard from "@/components/playlist/PublicPlaylistBoard";
 
 interface PlaylistsSectionProps {
   playlists: Playlist[];
 }
 
 /**
- * プレイリストセクションコンポーネント
+ * 繝励Ξ繧､繝ｪ繧ｹ繝医そ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝・
  *
- * @param playlists - プレイリストデータ
+ * @param playlists - 繝励Ξ繧､繝ｪ繧ｹ繝医ョ繝ｼ繧ｿ
  */
 const PlaylistsSection: React.FC<PlaylistsSectionProps> = ({ playlists }) => {
   return (
@@ -27,7 +27,7 @@ const PlaylistsSection: React.FC<PlaylistsSectionProps> = ({ playlists }) => {
       </div>
       <div className="relative">
         <PublicPlaylistBoard playlists={playlists} />
-        {/* HUD装飾背景 */}
+        {/* HUD陬・｣ｾ閭梧勹 */}
         <div className="absolute top-0 right-0 w-32 h-px bg-gradient-to-l from-theme-500/30 to-transparent" />
         <div className="absolute bottom-0 left-0 w-32 h-px bg-gradient-to-r from-theme-500/30 to-transparent" />
       </div>
@@ -36,3 +36,4 @@ const PlaylistsSection: React.FC<PlaylistsSectionProps> = ({ playlists }) => {
 };
 
 export default React.memo(PlaylistsSection);
+

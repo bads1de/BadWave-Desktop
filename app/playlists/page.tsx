@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import Header from "@/components/Header/Header";
+import Header from "@/components/header/Header";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,10 +14,10 @@ import { twMerge } from "tailwind-merge";
 const PlaylistContent: React.FC = memo(() => {
   const router = useRouter();
 
-  // バックグラウンド同期を開始
+  // 繝舌ャ繧ｯ繧ｰ繝ｩ繧ｦ繝ｳ繝牙酔譛溘ｒ髢句ｧ・
   useSyncPlaylists({ autoSync: true });
 
-  // ローカルDBからデータを取得
+  // 繝ｭ繝ｼ繧ｫ繝ｫDB縺九ｉ繝・・繧ｿ繧貞叙蠕・
   const { playlists, isLoading } = useGetPlaylists();
 
   const handlePlaylistClick = useCallback(
@@ -117,7 +117,7 @@ PlaylistContent.displayName = "PlaylistContent";
 const Playlist = () => {
   return (
     <div className="bg-[#0a0a0f] w-full h-full overflow-hidden overflow-y-auto custom-scrollbar relative font-mono">
-      {/* 背景装飾 */}
+      {/* 閭梧勹陬・｣ｾ */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
       <div className="fixed inset-0 pointer-events-none opacity-[0.04] z-0 bg-[length:100%_4px] bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_50%)]" />
 
@@ -163,3 +163,4 @@ const Playlist = () => {
 };
 
 export default Playlist;
+

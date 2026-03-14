@@ -14,6 +14,7 @@ const mockSetSlowedReverbMode = jest.fn();
 const mockSetSpatialMode = jest.fn();
 const mockSet8DAudioMode = jest.fn();
 const mockSetRetroMode = jest.fn();
+const mockSetBassBoostMode = jest.fn();
 const mockEngineState = { isInitialized: true };
 
 jest.mock("@/libs/audio/AudioEngine", () => ({
@@ -27,6 +28,7 @@ jest.mock("@/libs/audio/AudioEngine", () => ({
       setSpatialMode: mockSetSpatialMode,
       set8DAudioMode: mockSet8DAudioMode,
       setRetroMode: mockSetRetroMode,
+      setBassBoostMode: mockSetBassBoostMode,
     })),
   },
 }));
@@ -41,6 +43,7 @@ describe("useAudioEffects", () => {
         is8DAudioEnabled: false,
         rotationSpeed: "medium",
         isRetroEnabled: false,
+        isBassBoostEnabled: false,
       });
       useSpatialStore.setState({ isSpatialEnabled: false });
       usePlaybackRateStore.setState({ rate: 1.0 });
@@ -179,6 +182,25 @@ describe("useAudioEffects", () => {
         result.current.toggle8DAudio();
       });
       expect(mockSet8DAudioMode).not.toHaveBeenCalled();
+    });
+  });
+  describe("Bass Boost", () => {
+    it("should toggle Bass Boost", () => {
+      const { result } = renderHook(() => useAudioEffects());
+
+      act(() => {
+        result.current.toggleBassBoost();
+      });
+
+      expect(result.current.isBassBoostEnabled).toBe(true);
+      expect(mockSetBassBoostMode).toHaveBeenCalledWith(true);
+
+      act(() => {
+        result.current.toggleBassBoost();
+      });
+
+      expect(result.current.isBassBoostEnabled).toBe(false);
+      expect(mockSetBassBoostMode).toHaveBeenCalledWith(false);
     });
   });
 });

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { use } from "react";
-import GenreHeader from "@/components/Genre/GenreHeader";
-import GenreContent from "@/components/Genre/GenreContent";
+import GenreHeader from "@/components/genre/GenreHeader";
+import GenreContent from "@/components/genre/GenreContent";
 
 interface genreProps {
   params: Promise<{

@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import HomeHeader from "@/components/Header/HomeHeader";
+import HomeHeader from "@/components/header/HomeHeader";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/auth/useUser";
 import useAuthModal from "@/hooks/auth/useAuthModal";
@@ -20,7 +20,7 @@ jest.mock("@/libs/supabase/client", () => ({
 }));
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: ({ fill, ...props }: any) => <img {...props} />,
 }));
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -38,9 +38,9 @@ describe("HomeHeader", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue(mockRouter);
-    (useAuthModal as jest.Mock).mockReturnValue(mockAuthModal);
-    (useUser as jest.Mock).mockReturnValue({
+    (useRouter as unknown as jest.Mock).mockReturnValue(mockRouter);
+    (useAuthModal as unknown as jest.Mock).mockReturnValue(mockAuthModal);
+    (useUser as unknown as jest.Mock).mockReturnValue({
       user: null,
       userDetails: null,
     });
@@ -65,7 +65,7 @@ describe("HomeHeader", () => {
   });
 
   it("ログイン時はユーザーアバターが表示される", () => {
-    (useUser as jest.Mock).mockReturnValue({
+    (useUser as unknown as jest.Mock).mockReturnValue({
       user: { id: "user-1" },
       userDetails: { avatar_url: "/avatar.jpg" },
     });
@@ -78,7 +78,7 @@ describe("HomeHeader", () => {
   it("スクロールするとスタイルが変化する", () => {
     render(<HomeHeader />);
 
-    // スクロール前はシャドウがないはず（クラス名に含まれない）
+    // スクロール前のヘッダーを取得
     const header = screen.getByText("BadWave").closest("div.fixed");
     expect(header?.className).not.toContain("shadow-lg");
 

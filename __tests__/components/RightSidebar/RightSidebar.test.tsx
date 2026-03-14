@@ -1,13 +1,13 @@
-import React from "react";
+﻿import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import RightSidebar from "@/components/RightSidebar/RightSidebar";
+import RightSidebar from "@/components/rightsidebar/RightSidebar";
 import usePlayer from "@/hooks/player/usePlayer";
 import useGetSongById from "@/hooks/data/useGetSongById";
 import { store } from "@/libs/electron/index";
 import { ELECTRON_STORE_KEYS } from "@/constants";
 
-// モックの設定
+// 繝｢繝・け縺ｮ險ｭ螳・
 jest.mock("@/hooks/player/usePlayer");
 jest.mock("@/hooks/data/useGetSongById");
 jest.mock("@/libs/electron", () => ({
@@ -28,7 +28,7 @@ jest.mock("@/libs/electron", () => ({
   },
 }));
 
-// use-gestureのモック
+// use-gesture縺ｮ繝｢繝・け
 jest.mock("@use-gesture/react", () => ({
   useDrag: jest.fn(() => () => ({})),
 }));
@@ -145,3 +145,4 @@ describe("RightSidebar - Close Feature", () => {
     });
   });
 });
+

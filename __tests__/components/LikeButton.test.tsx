@@ -21,10 +21,10 @@ describe("LikeButton", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useUser as jest.Mock).mockReturnValue({ user: { id: userId } });
-    (useLikeStatus as jest.Mock).mockReturnValue({ isLiked: false });
-    (useLikeMutation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isPending: false });
-    (useAuthModal as jest.Mock).mockReturnValue({ onOpen: jest.fn() });
+    (useUser as unknown as jest.Mock).mockReturnValue({ user: { id: userId } });
+    (useLikeStatus as unknown as jest.Mock).mockReturnValue({ isLiked: false });
+    (useLikeMutation as unknown as jest.Mock).mockReturnValue({ mutate: jest.fn(), isPending: false });
+    (useAuthModal as unknown as jest.Mock).mockReturnValue({ onOpen: jest.fn() });
   });
 
   it("should render heart icon", () => {
@@ -34,7 +34,7 @@ describe("LikeButton", () => {
 
   it("should call mutate when clicked and logged in", () => {
     const mockMutate = jest.fn();
-    (useLikeMutation as jest.Mock).mockReturnValue({ mutate: mockMutate, isPending: false });
+    (useLikeMutation as unknown as jest.Mock).mockReturnValue({ mutate: mockMutate, isPending: false });
 
     render(<LikeButton songId={songId} songType="regular" />);
     fireEvent.click(screen.getByRole("button"));
@@ -43,9 +43,9 @@ describe("LikeButton", () => {
   });
 
   it("should open auth modal when clicked and not logged in", () => {
-    (useUser as jest.Mock).mockReturnValue({ user: null });
+    (useUser as unknown as jest.Mock).mockReturnValue({ user: null });
     const mockOnOpen = jest.fn();
-    (useAuthModal as jest.Mock).mockReturnValue({ onOpen: mockOnOpen });
+    (useAuthModal as unknown as jest.Mock).mockReturnValue({ onOpen: mockOnOpen });
 
     render(<LikeButton songId={songId} songType="regular" />);
     fireEvent.click(screen.getByRole("button"));
@@ -54,7 +54,7 @@ describe("LikeButton", () => {
   });
 
   it("should show liked state", () => {
-    (useLikeStatus as jest.Mock).mockReturnValue({ isLiked: true });
+    (useLikeStatus as unknown as jest.Mock).mockReturnValue({ isLiked: true });
     render(<LikeButton songId={songId} songType="regular" />);
     
     expect(screen.getByLabelText("Remove like")).toBeInTheDocument();

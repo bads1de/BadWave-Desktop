@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -7,7 +7,7 @@ import { HiOutlineQueueList } from "react-icons/hi2";
 import { Song } from "@/types";
 import useLyricsModalStore from "@/hooks/stores/useLyricsModalStore";
 import useAudioPlayer from "@/hooks/audio/useAudioPlayer";
-import SyncedLyrics from "@/components/Lyrics/SyncedLyrics";
+import SyncedLyrics from "@/components/lyrics/SyncedLyrics";
 import LyricsModalArtwork from "./LyricsModalArtwork";
 import LyricsModalControls from "./LyricsModalControls";
 import { isLocalSong, getPlayablePath } from "@/libs/songUtils";
@@ -19,7 +19,7 @@ interface LyricsModalProps {
 const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
   const { isOpen, closeModal } = useLyricsModalStore();
 
-  // ローカル曲の場合はローカルパスを使用
+  // 繝ｭ繝ｼ繧ｫ繝ｫ譖ｲ縺ｮ蝣ｴ蜷医・繝ｭ繝ｼ繧ｫ繝ｫ繝代せ繧剃ｽｿ逕ｨ
   const playablePath = getPlayablePath(song);
 
   const {
@@ -34,16 +34,16 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
     onPlayPrevious,
   } = useAudioPlayer(playablePath, song);
 
-  // ローカル曲の場合は歌詞がない可能性が高い
+  // 繝ｭ繝ｼ繧ｫ繝ｫ譖ｲ縺ｮ蝣ｴ蜷医・豁瑚ｩ槭′縺ｪ縺・庄閭ｽ諤ｧ縺碁ｫ倥＞
   const isLocal = isLocalSong(song);
   const lyrics = isLocal
-    ? "ローカルファイルの歌詞は利用できません"
-    : (song?.lyrics ?? "歌詞はありません");
+    ? "繝ｭ繝ｼ繧ｫ繝ｫ繝輔ぃ繧､繝ｫ縺ｮ豁瑚ｩ槭・蛻ｩ逕ｨ縺ｧ縺阪∪縺帙ｓ"
+    : (song?.lyrics ?? "豁瑚ｩ槭・縺ゅｊ縺ｾ縺帙ｓ");
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <Dialog.Portal>
-        {/* オーバーレイ */}
+        {/* 繧ｪ繝ｼ繝舌・繝ｬ繧､ */}
         <Dialog.Overlay
           className="
             fixed inset-0 z-[100]
@@ -56,7 +56,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
           "
         />
 
-        {/* メインコンテンツ */}
+        {/* 繝｡繧､繝ｳ繧ｳ繝ｳ繝・Φ繝・*/}
         <Dialog.Content
           className="
             fixed inset-0 z-[101]
@@ -73,12 +73,12 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
             overflow-hidden
           "
         >
-          {/* アクセシビリティ用の非表示タイトル */}
+          {/* 繧｢繧ｯ繧ｻ繧ｷ繝薙Μ繝・ぅ逕ｨ縺ｮ髱櫁｡ｨ遉ｺ繧ｿ繧､繝医Ν */}
           <Dialog.Title className="sr-only">Lyrics</Dialog.Title>
 
-          {/* ヘッダー（右上のボタン） */}
+          {/* 繝倥ャ繝繝ｼ・亥承荳翫・繝懊ち繝ｳ・・*/}
           <div className="absolute top-0 right-0 z-10 p-4 flex items-center gap-2">
-            {/* キューボタン */}
+            {/* 繧ｭ繝･繝ｼ繝懊ち繝ｳ */}
             <button
               className="
                 rounded-full p-2.5
@@ -93,7 +93,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
               <HiOutlineQueueList size={20} />
             </button>
 
-            {/* 閉じるボタン */}
+            {/* 髢峨§繧九・繧ｿ繝ｳ */}
             <Dialog.Close asChild>
               <button
                 className="
@@ -111,30 +111,30 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
             </Dialog.Close>
           </div>
 
-          {/* メインエリア（左：アートワーク、右：歌詞） */}
+          {/* 繝｡繧､繝ｳ繧ｨ繝ｪ繧｢・亥ｷｦ・壹い繝ｼ繝医Ρ繝ｼ繧ｯ縲∝承・壽ｭ瑚ｩ橸ｼ・*/}
           <div className="flex flex-1 overflow-hidden">
-            {/* 左側：アートワーク */}
+            {/* 蟾ｦ蛛ｴ・壹い繝ｼ繝医Ρ繝ｼ繧ｯ */}
             <div className="w-1/2 h-full">
               <LyricsModalArtwork song={song} />
             </div>
 
-            {/* 右側：歌詞 */}
+            {/* 蜿ｳ蛛ｴ・壽ｭ瑚ｩ・*/}
             <div className="w-1/2 h-full flex flex-col bg-black/40 backdrop-blur-sm">
-              {/* LYRICS ラベル */}
+              {/* LYRICS 繝ｩ繝吶Ν */}
               <div className="px-8 pt-6 pb-2">
                 <span className="text-xs font-medium tracking-[0.3em] text-neutral-400 uppercase">
                   Lyrics
                 </span>
               </div>
 
-              {/* 歌詞スクロールエリア */}
+              {/* 豁瑚ｩ槭せ繧ｯ繝ｭ繝ｼ繝ｫ繧ｨ繝ｪ繧｢ */}
               <div className="flex-1 overflow-y-auto custom-scrollbar px-8 pb-8">
                 <SyncedLyrics lyrics={lyrics} />
               </div>
             </div>
           </div>
 
-          {/* 下部：コントロールパネル */}
+          {/* 荳矩Κ・壹さ繝ｳ繝医Ο繝ｼ繝ｫ繝代ロ繝ｫ */}
           <LyricsModalControls
             isPlaying={isPlaying}
             currentTime={currentTime}
@@ -153,3 +153,4 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
 };
 
 export default LyricsModal;
+

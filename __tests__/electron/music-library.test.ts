@@ -56,16 +56,16 @@ describe("音楽ライブラリの永続化機能", () => {
     };
     (Store as unknown as jest.Mock).mockImplementation(() => mockStore);
 
-    (fs.promises.readdir as unknown as jest.Mock).mockResolvedValue([
+    (fs.promises.readdir as any).mockResolvedValue([
       "song1.mp3",
       "song2.mp3",
     ]);
 
-    (fs.promises.stat as unknown as jest.Mock).mockResolvedValue({
+    (fs.promises.stat as any).mockResolvedValue({
       mtimeMs: 123456789,
     });
 
-    (fs.promises.access as unknown as jest.Mock).mockResolvedValue(undefined);
+    (fs.promises.access as any).mockResolvedValue(undefined);
 
     (fs.existsSync as unknown as jest.Mock).mockReturnValue(true);
   });
@@ -99,7 +99,7 @@ describe("音楽ライブラリの永続化機能", () => {
 
   describe("handle-get-saved-music-library (Mocked)", () => {
     it("保存データがある場合は情報を返す", async () => {
-      mockStore.get.mockImplementation((key) => {
+      mockStore.get.mockImplementation((key: string) => {
         if (key === "music_library") {
           return {
             directoryPath: "test-dir",

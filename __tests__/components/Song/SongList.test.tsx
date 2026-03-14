@@ -3,7 +3,7 @@
  */
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import SongList from "@/components/Song/SongList";
+import SongList from "@/components/song/SongList";
 import usePlayer from "@/hooks/player/usePlayer";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import useDownloadSong from "@/hooks/utils/useDownloadSong";
@@ -32,8 +32,9 @@ describe("SongList", () => {
     song_path: "https://example.com/song.mp3",
     image_path: "/test-image.jpg",
     user_id: "user-1",
-    count: 10,
-    like_count: 5,
+    count: "10",
+    like_count: "5",
+    created_at: "2024-01-01",
   };
 
   const mockSetId = jest.fn();

@@ -1,15 +1,15 @@
-"use client";
+﻿"use client";
 
-import Header from "@/components/Header/Header";
-import SongListContent from "@/components/Song/SongListContent";
+import Header from "@/components/header/Header";
+import SongListContent from "@/components/song/SongListContent";
 
 const Liked = () => {
   return (
     <div className="bg-[#0a0a0f] w-full h-full overflow-hidden overflow-y-auto custom-scrollbar relative font-mono">
-      {/* 背景装飾 */}
+      {/* 閭梧勹陬・｣ｾ */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
       
-      {/* 走査線 */}
+      {/* 襍ｰ譟ｻ邱・*/}
       <div className="fixed inset-0 pointer-events-none opacity-[0.05] z-0 bg-[length:100%_3px] bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_50%)]" />
 
       <div className="relative z-10">
@@ -62,3 +62,4 @@ const Liked = () => {
 };
 
 export default Liked;
+

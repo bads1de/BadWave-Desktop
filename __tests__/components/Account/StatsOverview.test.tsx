@@ -1,17 +1,17 @@
-/**
+﻿/**
  * @jest-environment jsdom
  */
 import { render, screen, fireEvent } from "@testing-library/react";
-import StatsOverview from "@/components/Account/StatsOverview";
+import StatsOverview from "@/components/account/StatsOverview";
 import useStats from "@/hooks/data/useStats";
 import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
 
-// モック
+// 繝｢繝・け
 jest.mock("@/hooks/data/useStats");
 jest.mock("@/hooks/stores/useColorSchemeStore");
-jest.mock("@/components/Account/ContributionHeatmap", () => () => <div data-testid="heatmap" />);
+jest.mock("@/components/account/ContributionHeatmap", () => () => <div data-testid="heatmap" />);
 
-// Recharts のモック
+// Recharts 縺ｮ繝｢繝・け
 jest.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: any) => <div data-testid="responsive-container">{children}</div>,
   BarChart: ({ children }: any) => <div data-testid="bar-chart">{children}</div>,
@@ -37,9 +37,9 @@ describe("StatsOverview", () => {
       { genre: "Rock", count: 10 },
     ],
     weekly_activity: [
-      { day_of_week: 1, count: 15 }, // 月曜
+      { day_of_week: 1, count: 15 }, // 譛域屆
     ],
-    top_songs: [{}, {}, {}], // 3曲
+    top_songs: [{}, {}, {}], // 3譖ｲ
   };
 
   beforeEach(() => {
@@ -71,8 +71,7 @@ describe("StatsOverview", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
     
     expect(screen.getByTestId("heatmap")).toBeInTheDocument();
-    // チャートがレンダリングされているか
-    expect(screen.getAllByTestId("responsive-container").length).toBeGreaterThan(0);
+    // 繝√Ε繝ｼ繝医′繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ縺輔ｌ縺ｦ縺・ｋ縺・    expect(screen.getAllByTestId("responsive-container").length).toBeGreaterThan(0);
   });
 
   it("changes period when clicking buttons", () => {

@@ -16,6 +16,9 @@ jest.mock("@/libs/electron", () => ({
       checkStatus: jest.fn().mockResolvedValue({ isDownloaded: false }),
       getSongs: jest.fn().mockResolvedValue([]),
     },
+    cache: {
+      getSongById: jest.fn().mockResolvedValue(null),
+    },
   },
 }));
 

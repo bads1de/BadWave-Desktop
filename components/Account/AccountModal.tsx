@@ -6,7 +6,7 @@ import { Camera, User, Lock } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { createClient } from "@/libs/supabase/client";
 import useUpdateUserProfileMutation from "@/hooks/mutations/useUpdateUserProfileMutation";
-import Modal from "@/components/Modals/Modal";
+import Modal from "@/components/modals/Modal";
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -91,7 +91,7 @@ export const AccountModal = ({ isOpen, onClose, user }: AccountModalProps) => {
   return (
     <Modal
       title="プロフィール編集"
-      description="プロフィール情報を編集できます"
+      description="プロフィール情報を編集できます。"
       isOpen={isOpen}
       onChange={onClose}
     >
@@ -109,7 +109,7 @@ export const AccountModal = ({ isOpen, onClose, user }: AccountModalProps) => {
               <div className="flex flex-col items-center gap-2">
                 <Camera className="w-6 h-6 text-theme-400" />
                 <span className="text-white text-sm font-medium">
-                  画像を変更
+                  画像を更新
                 </span>
               </div>
               <input

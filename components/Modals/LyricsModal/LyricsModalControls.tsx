@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
-import SeekBar from "@/components/Player/Seekbar";
+import SeekBar from "@/components/player/Seekbar";
 
 interface LyricsModalControlsProps {
   isPlaying: boolean;
@@ -32,7 +32,7 @@ const LyricsModalControls: React.FC<LyricsModalControlsProps> = ({
 
   return (
     <div className="w-full px-8 py-4 bg-black/60 backdrop-blur-xl border-t border-white/5">
-      {/* シークバー */}
+      {/* 繧ｷ繝ｼ繧ｯ繝舌・ */}
       <div className="flex items-center gap-3 mb-4">
         <span className="text-xs text-neutral-400 w-10 text-right tabular-nums">
           {formattedCurrentTime}
@@ -48,9 +48,9 @@ const LyricsModalControls: React.FC<LyricsModalControlsProps> = ({
         </span>
       </div>
 
-      {/* コントロールボタン */}
+      {/* 繧ｳ繝ｳ繝医Ο繝ｼ繝ｫ繝懊ち繝ｳ */}
       <div className="flex items-center justify-center gap-8">
-        {/* 前の曲 */}
+        {/* 蜑阪・譖ｲ */}
         <button
           onClick={onPlayPrevious}
           className="text-neutral-400 hover:text-white transition-all duration-200 hover:scale-110"
@@ -59,7 +59,7 @@ const LyricsModalControls: React.FC<LyricsModalControlsProps> = ({
           <AiFillStepBackward size={28} />
         </button>
 
-        {/* 再生/一時停止 */}
+        {/* 蜀咲函/荳譎ょ●豁｢ */}
         <button
           onClick={handlePlay}
           className="w-14 h-14 flex items-center justify-center rounded-full bg-white hover:bg-neutral-200 transition-all duration-200 hover:scale-105 shadow-lg shadow-white/20"
@@ -68,7 +68,7 @@ const LyricsModalControls: React.FC<LyricsModalControlsProps> = ({
           <Icon size={28} className="text-black" />
         </button>
 
-        {/* 次の曲 */}
+        {/* 谺｡縺ｮ譖ｲ */}
         <button
           onClick={onPlayNext}
           className="text-neutral-400 hover:text-white transition-all duration-200 hover:scale-110"
@@ -82,3 +82,4 @@ const LyricsModalControls: React.FC<LyricsModalControlsProps> = ({
 };
 
 export default LyricsModalControls;
+

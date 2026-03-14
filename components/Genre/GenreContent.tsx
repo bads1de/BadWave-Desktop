@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import useOnPlay from "@/hooks/player/useOnPlay";
 import { useUser } from "@/hooks/auth/useUser";
 import { Song } from "@/types";
 import React, { memo, useCallback } from "react";
-import SongList from "@/components/Song/SongList";
-import SongOptionsPopover from "@/components/Song/SongOptionsPopover";
+import SongList from "@/components/song/SongList";
+import SongOptionsPopover from "@/components/song/SongOptionsPopover";
 import useGetSongsByGenre from "@/hooks/data/useGetSongsByGenre";
 
 interface Props {
@@ -13,12 +13,12 @@ interface Props {
 }
 
 const GenreContent: React.FC<Props> = memo(({ genre }) => {
-  // クライアントサイドでデータを取得（オフライン対応付き）
+  // 繧ｯ繝ｩ繧､繧｢繝ｳ繝医し繧､繝峨〒繝・・繧ｿ繧貞叙蠕暦ｼ医が繝輔Λ繧､繝ｳ蟇ｾ蠢應ｻ倥″・・
   const { songs, isLoading } = useGetSongsByGenre(genre);
   const onPlay = useOnPlay(songs);
   const { user } = useUser();
 
-  // 再生ハンドラをメモ化
+  // 蜀咲函繝上Φ繝峨Λ繧偵Γ繝｢蛹・
   const handlePlay = useCallback(
     (id: string) => {
       onPlay(id);
@@ -26,7 +26,7 @@ const GenreContent: React.FC<Props> = memo(({ genre }) => {
     [onPlay]
   );
 
-  // ローディング中
+  // 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ荳ｭ
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -38,7 +38,7 @@ const GenreContent: React.FC<Props> = memo(({ genre }) => {
   if (songs.length === 0) {
     return (
       <div className="flex flex-col gap-y-2 w-full px-6 text-neutral-400">
-        <h1>該当の曲が見つかりませんでした</h1>
+        <h1>隧ｲ蠖薙・譖ｲ縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆</h1>
       </div>
     );
   }
@@ -61,7 +61,8 @@ const GenreContent: React.FC<Props> = memo(({ genre }) => {
   );
 });
 
-// displayName を設定
+// displayName 繧定ｨｭ螳・
 GenreContent.displayName = "GenreContent";
 
 export default GenreContent;
+

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { SlidersVertical } from "lucide-react";
 import {
   Popover,
@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useEqualizerStore from "@/hooks/stores/useEqualizerStore";
-import EqualizerControl from "../Equalizer/EqualizerControl";
+import EqualizerControl from "../equalizer/EqualizerControl";
 
 const EqualizerButton: React.FC = () => {
   const isEqualizerEnabled = useEqualizerStore((state) => state.isEnabled);
@@ -37,3 +37,4 @@ const EqualizerButton: React.FC = () => {
 };
 
 export default EqualizerButton;
+

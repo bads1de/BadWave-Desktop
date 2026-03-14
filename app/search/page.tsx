@@ -1,22 +1,22 @@
-"use client";
+﻿"use client";
 
-import Header from "@/components/Header/Header";
+import Header from "@/components/header/Header";
 import SearchInput from "@/components/common/SearchInput";
-import HeaderNav from "@/components/Header/HeaderNav";
+import HeaderNav from "@/components/header/HeaderNav";
 import { useSearchParams, useRouter } from "next/navigation";
 import useOnPlay from "@/hooks/player/useOnPlay";
 import { useUser } from "@/hooks/auth/useUser";
 import { Playlist, Song } from "@/types";
 import usePlayer from "@/hooks/player/usePlayer";
-import SongOptionsPopover from "@/components/Song/SongOptionsPopover";
-import SongList from "@/components/Song/SongList";
+import SongOptionsPopover from "@/components/song/SongOptionsPopover";
+import SongList from "@/components/song/SongList";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useCallback, memo, use } from "react";
 import useGetSongsByTitle from "@/hooks/data/useGetSongsByTitle";
 import useGetPlaylistsByTitle from "@/hooks/data/useGetPlaylistsByTitle";
 
-// 曲リストセクションコンポーネント（メモ化）
+// 譖ｲ繝ｪ繧ｹ繝医そ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝茨ｼ医Γ繝｢蛹厄ｼ・
 const SongListSection = memo(
   ({
     songs,
@@ -72,7 +72,7 @@ const SongListSection = memo(
   }
 );
 
-// プレイリストセクションコンポーネント（メモ化）
+// 繝励Ξ繧､繝ｪ繧ｹ繝医そ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝茨ｼ医Γ繝｢蛹厄ｼ・
 const PlaylistSection = memo(
   ({ playlists, isLoading }: { playlists: Playlist[]; isLoading: boolean }) => {
     const router = useRouter();
@@ -128,7 +128,7 @@ const PlaylistSection = memo(
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                {/* 装飾用グリッド */}
+                {/* 陬・｣ｾ逕ｨ繧ｰ繝ｪ繝・ラ */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none bg-[length:20px_20px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
               </div>
               <div className="space-y-1 font-mono">
@@ -139,7 +139,7 @@ const PlaylistSection = memo(
                   {playlist.title}
                 </h3>
               </div>
-              {/* HUDコーナー */}
+              {/* HUD繧ｳ繝ｼ繝翫・ */}
               <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-theme-500/20 group-hover:border-theme-500 transition-colors" />
               <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-theme-500/20 group-hover:border-theme-500 transition-colors" />
             </div>
@@ -181,7 +181,7 @@ const Search = (props: SearchProps) => {
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto pb-[80px] custom-scrollbar relative font-mono">
-      {/* 背景装飾 */}
+      {/* 閭梧勹陬・｣ｾ */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
 
       <div className="relative z-10">
@@ -231,3 +231,4 @@ const Search = (props: SearchProps) => {
 };
 
 export default Search;
+

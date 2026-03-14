@@ -1,9 +1,9 @@
-/**
+﻿/**
  * @jest-environment jsdom
  */
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import SpotlightModal from "@/components/Modals/SpotlightModal";
+import SpotlightModal from "@/components/modals/SpotlightModal";
 import useSpotlightModal from "@/hooks/modal/useSpotlightModal";
 import useVolumeStore from "@/hooks/stores/useVolumeStore";
 
@@ -84,3 +84,4 @@ describe("SpotlightModal", () => {
     expect(container.firstChild).toBeNull();
   });
 });
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -10,31 +10,31 @@ import { useSyncAllSongs } from "@/hooks/sync/useSyncAllSongs";
 import useOnPlay from "@/hooks/player/useOnPlay";
 import usePlayer from "@/hooks/player/usePlayer";
 
-import SongItem from "@/components/Song/SongItem";
-import SongItemSkeleton from "@/components/Song/SongItemSkeleton";
+import SongItem from "@/components/song/SongItem";
+import SongItemSkeleton from "@/components/song/SongItemSkeleton";
 import Pagination from "@/components/common/Pagination";
 
 const PAGE_SIZE = 24;
 
 /**
- * 全曲一覧ページ
+ * 蜈ｨ譖ｲ荳隕ｧ繝壹・繧ｸ
  *
- * Latest Releases の「全てを表示」から遷移する詳細ページ
- * ページネーション対応で全曲を閲覧可能
+ * Latest Releases 縺ｮ縲悟・縺ｦ繧定｡ｨ遉ｺ縲阪°繧蛾・遘ｻ縺吶ｋ隧ｳ邏ｰ繝壹・繧ｸ
+ * 繝壹・繧ｸ繝阪・繧ｷ繝ｧ繝ｳ蟇ｾ蠢懊〒蜈ｨ譖ｲ繧帝夢隕ｧ蜿ｯ閭ｽ
  */
 export default function AllSongsPage() {
   const [page, setPage] = useState(0);
 
-  // データ取得（ローカルDBから）
+  // 繝・・繧ｿ蜿門ｾ暦ｼ医Ο繝ｼ繧ｫ繝ｫDB縺九ｉ・・
   const { songs, totalPages, isLoading } = useGetAllSongsPaginated(
     page,
     PAGE_SIZE
   );
 
-  // バックグラウンド同期
+  // 繝舌ャ繧ｯ繧ｰ繝ｩ繧ｦ繝ｳ繝牙酔譛・
   useSyncAllSongs();
 
-  // 再生機能
+  // 蜀咲函讖溯・
   const player = usePlayer();
   const onPlay = useOnPlay(songs);
 
@@ -45,7 +45,7 @@ export default function AllSongsPage() {
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    // ページ変更時にトップにスクロール
+    // 繝壹・繧ｸ螟画峩譎ゅ↓繝医ャ繝励↓繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ
     const scrollContainer = document.querySelector('.overflow-y-auto');
     if (scrollContainer) {
       scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
@@ -64,12 +64,12 @@ export default function AllSongsPage() {
 
   return (
     <div className="flex bg-[#0a0a0f] h-full overflow-hidden font-mono relative">
-      {/* 背景装飾 */}
+      {/* 閭梧勹陬・｣ｾ */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none z-0 bg-[length:100px_100px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.5)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.5)_1px,transparent_1px)]" />
 
       <div className="w-full h-full overflow-y-auto custom-scrollbar relative z-10">
         <main className="px-8 py-12 pb-32 max-w-[1600px] mx-auto">
-          {/* ヘッダー (HUD Style) */}
+          {/* 繝倥ャ繝繝ｼ (HUD Style) */}
           <div className="mb-12 border-l-4 border-theme-500 pl-6 relative">
             <div className="absolute -top-4 -left-1 text-[8px] text-theme-500/40 uppercase tracking-[0.5em]">
                archive_access: authorized
@@ -90,11 +90,11 @@ export default function AllSongsPage() {
               // DECRYPTING_ALL_RECENT_BINARY_STREAMS_IN_THIS_SECTOR
             </p>
             
-            {/* 装飾用HUDパーツ */}
+            {/* 陬・｣ｾ逕ｨHUD繝代・繝・*/}
             <div className="absolute top-0 right-0 w-24 h-px bg-gradient-to-l from-theme-500/40 to-transparent" />
           </div>
 
-          {/* 曲一覧 */}
+          {/* 譖ｲ荳隕ｧ */}
           {isLoading && songs.length === 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -126,7 +126,7 @@ export default function AllSongsPage() {
             </motion.div>
           )}
 
-          {/* ページネーション (HUD Style) */}
+          {/* 繝壹・繧ｸ繝阪・繧ｷ繝ｧ繝ｳ (HUD Style) */}
           {totalPages > 1 && (
             <div className="mt-20 pt-10 border-t border-theme-500/10">
               <div className="flex justify-between items-center mb-4">
@@ -147,3 +147,4 @@ export default function AllSongsPage() {
     </div>
   );
 }
+

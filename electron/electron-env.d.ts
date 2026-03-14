@@ -141,6 +141,20 @@ interface ElectronAPI {
       playlistId: string;
       songId: string;
     }) => Promise<{ success: boolean; error?: string }>;
+    // Spotlight and Section caching
+    syncSpotlightsMetadata: (
+      spotlights: any[],
+    ) => Promise<{ success: boolean; count: number; error?: string }>;
+    syncSection: (data: {
+      key: string;
+      data: any[];
+    }) => Promise<{ success: boolean; count: number; error?: string }>;
+    getSectionData: (key: string, table: string) => Promise<any[]>;
+    // Specialized queries
+    getSongById: (id: string) => Promise<any>;
+    getPlaylistById: (id: string) => Promise<any>;
+    getSongsPaginated: (limit: number, offset: number) => Promise<any[]>;
+    getSongsTotalCount: () => Promise<number>;
   };
 
   // 認証キャッシュ

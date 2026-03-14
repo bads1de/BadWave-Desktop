@@ -39,6 +39,10 @@ const mockAudioContext = {
   createGain: jest.fn(() => createMockAudioNode()),
   createConvolver: jest.fn(() => createMockAudioNode()),
   createStereoPanner: jest.fn(() => createMockAudioNode()),
+  createWaveShaper: jest.fn(() => ({
+    ...createMockAudioNode(),
+    curve: null,
+  })),
   createOscillator: jest.fn(() => ({
     ...createMockAudioNode(),
     type: "sine",

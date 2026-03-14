@@ -1,7 +1,7 @@
-import React from "react";
+﻿import React from "react";
 import Link from "next/link";
 import { Song } from "@/types";
-import LatestBoard from "@/components/Latest/LatestBoard";
+import LatestBoard from "@/components/latest/LatestBoard";
 import { ChevronRight } from "lucide-react";
 
 interface LatestSectionProps {
@@ -9,9 +9,9 @@ interface LatestSectionProps {
 }
 
 /**
- * 最新リリースセクションコンポーネント
+ * 譛譁ｰ繝ｪ繝ｪ繝ｼ繧ｹ繧ｻ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝・
  *
- * @param songs - 曲データ
+ * @param songs - 譖ｲ繝・・繧ｿ
  */
 const LatestSection: React.FC<LatestSectionProps> = ({ songs }) => {
   return (
@@ -40,7 +40,7 @@ const LatestSection: React.FC<LatestSectionProps> = ({ songs }) => {
         </Link>
       </div>
       <div className="relative">
-        {/* 背景装飾 */}
+        {/* 閭梧勹陬・｣ｾ */}
         <div className="absolute -left-6 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-theme-500/20 to-transparent" />
         <LatestBoard songs={songs} />
       </div>
@@ -49,3 +49,4 @@ const LatestSection: React.FC<LatestSectionProps> = ({ songs }) => {
 };
 
 export default React.memo(LatestSection);
+

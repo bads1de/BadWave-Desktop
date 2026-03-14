@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import SongItem from "@/components/Song/SongItem";
+import SongItem from "@/components/song/SongItem";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import useDownloadSong from "@/hooks/utils/useDownloadSong";
 import { Song } from "@/types";
@@ -10,7 +10,7 @@ jest.mock("@/hooks/utils/useNetworkStatus");
 jest.mock("@/hooks/utils/useDownloadSong");
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: ({ fill, ...props }: any) => <img {...props} />,
 }));
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -48,9 +48,9 @@ describe("SongItem", () => {
     render(<SongItem data={mockData} onClick={mockOnClick} />);
 
     expect(screen.getByText("Test Song")).toBeInTheDocument();
-    expect(screen.getByText("Test Author")).toBeInTheDocument();
-    expect(screen.getByText("100")).toBeInTheDocument(); // 再生回数
-    expect(screen.getByText("50")).toBeInTheDocument(); // いいね数
+    expect(screen.getByText(/Test Author/)).toBeInTheDocument();
+    expect(screen.getByText(/100/)).toBeInTheDocument(); // 再生回数
+    expect(screen.getByText(/50/)).toBeInTheDocument(); // いいね数
   });
 
   it("クリックすると onClick が呼ばれる", () => {
@@ -62,7 +62,7 @@ describe("SongItem", () => {
     expect(mockOnClick).toHaveBeenCalledWith(mockData.id);
   });
 
-  it("オフラインかつダウンロードされていない場合は、再生不可のオーバーレイが表示される", () => {
+  it("オフラインかつダウンロードされていない場合、再生不可のオーバーレイが表示される", () => {
     (useNetworkStatus as jest.Mock).mockReturnValue({
       isOnline: false,
       isInitialized: true,
@@ -73,7 +73,7 @@ describe("SongItem", () => {
 
     render(<SongItem data={mockData} onClick={mockOnClick} />);
 
-    expect(screen.getByText("オフライン時は再生不可")).toBeInTheDocument();
+    expect(screen.getByText("[ OFFLINE_LOCKED ]")).toBeInTheDocument();
 
     // クリックしても onClick が呼ばれないことを確認
     const item = screen.getByAltText("Image");
@@ -81,7 +81,7 @@ describe("SongItem", () => {
     expect(mockOnClick).not.toHaveBeenCalled();
   });
 
-  it("オフラインでもダウンロード済みの場合は、再生可能である", () => {
+  it("オフラインでもダウンロード済みの場合は再生可能である", () => {
     (useNetworkStatus as jest.Mock).mockReturnValue({
       isOnline: false,
       isInitialized: true,
@@ -93,7 +93,7 @@ describe("SongItem", () => {
     render(<SongItem data={mockData} onClick={mockOnClick} />);
 
     expect(
-      screen.queryByText("オフライン時は再生不可")
+      screen.queryByText("[ OFFLINE_LOCKED ]")
     ).not.toBeInTheDocument();
 
     // クリックしたら onClick が呼ばれる

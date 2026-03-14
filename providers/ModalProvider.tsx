@@ -1,12 +1,12 @@
-"use client";
+﻿"use client";
 
-import AuthModal from "@/components/Modals/AuthModal";
-import PlaylistModal from "@/components/Modals/PlaylistModal";
-import SpotlightModal from "@/components/Modals/SpotlightModal";
-import UploadModal from "@/components/Modals/UploadModal";
+import AuthModal from "@/components/modals/AuthModal";
+import PlaylistModal from "@/components/modals/PlaylistModal";
+import SpotlightModal from "@/components/modals/SpotlightModal";
+import UploadModal from "@/components/modals/UploadModal";
 import { useEffect, useState } from "react";
-import SpotlightUploadModal from "@/components/Modals/SpotlightUploadModal";
-import PulseUploadModal from "@/components/Modals/PulseUploadModal";
+import SpotlightUploadModal from "@/components/modals/SpotlightUploadModal";
+import PulseUploadModal from "@/components/modals/PulseUploadModal";
 
 const ModalProvider: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -32,3 +32,4 @@ const ModalProvider: React.FC = () => {
 };
 
 export default ModalProvider;
+

@@ -32,7 +32,7 @@ describe("useSyncHomeAll", () => {
   it("すべてのホームセクションの同期を呼び出す", async () => {
     const { result } = renderHook(() => useSyncHomeAll());
 
-    let syncResult;
+    let syncResult: any;
     await act(async () => {
       syncResult = await result.current.sync();
     });
@@ -49,7 +49,7 @@ describe("useSyncHomeAll", () => {
 
     const { result } = renderHook(() => useSyncHomeAll());
 
-    let syncResult;
+    let syncResult: any;
     await act(async () => {
       syncResult = await result.current.sync();
     });

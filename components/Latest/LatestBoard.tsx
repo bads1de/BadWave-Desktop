@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, memo } from "react";
-import SongItem from "@/components/Song/SongItem";
+import SongItem from "@/components/song/SongItem";
 import useOnPlay from "@/hooks/player/useOnPlay";
 import { Song } from "@/types";
 import usePlayer from "@/hooks/player/usePlayer";
@@ -27,7 +27,7 @@ const LatestBoard: React.FC<LatestBoardProps> = ({ songs }) => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
-  // メモ化された再生処理関数
+  // 繝｡繝｢蛹悶＆繧後◆蜀咲函蜃ｦ逅・未謨ｰ
   const handlePlay = useCallback(
     (id: string) => {
       onPlay(id);
@@ -74,5 +74,6 @@ const LatestBoard: React.FC<LatestBoardProps> = ({ songs }) => {
   );
 };
 
-// メモ化されたコンポーネントをエクスポート
+// 繝｡繝｢蛹悶＆繧後◆繧ｳ繝ｳ繝昴・繝阪Φ繝医ｒ繧ｨ繧ｯ繧ｹ繝昴・繝・
 export default memo(LatestBoard);
+

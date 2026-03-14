@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useState, memo, useCallback } from "react";
 import { Song } from "@/types";
 import { motion } from "framer-motion";
 import useOnPlay from "@/hooks/player/useOnPlay";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
-import SongItem from "@/components/Song/SongItem";
+import SongItem from "@/components/song/SongItem";
 
 interface ForYouBoardProps {
   className?: string;
@@ -19,7 +19,7 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
   const [showArrows, setShowArrows] = useState(false);
   const onPlay = useOnPlay(recommendations);
 
-  // クリックハンドラをメモ化
+  // 繧ｯ繝ｪ繝・け繝上Φ繝峨Λ繧偵Γ繝｢蛹・
   const handlePlay = useCallback(
     (id: string) => {
       onPlay(id);
@@ -78,8 +78,9 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
   );
 };
 
-// 表示名を設定
+// 陦ｨ遉ｺ蜷阪ｒ險ｭ螳・
 ForYouBoard.displayName = "ForYouBoard";
 
-// メモ化されたコンポーネントをエクスポート
+// 繝｡繝｢蛹悶＆繧後◆繧ｳ繝ｳ繝昴・繝阪Φ繝医ｒ繧ｨ繧ｯ繧ｹ繝昴・繝・
 export default memo(ForYouBoard);
+

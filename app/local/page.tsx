@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import Header from "@/components/Header/Header";
+import Header from "@/components/header/Header";
 import { Button } from "@/components/ui/button";
 import { mapFileToSong } from "@/libs/localFileMappers";
 import { formatDistanceToNow } from "date-fns";
@@ -84,7 +84,7 @@ const LocalPage = () => {
     }
   };
 
-  // 強制的に完全スキャンを実行
+  // 強制的に完全なスキャンを実行
   const handleForceFullScan = useCallback(async () => {
     await forceRescan();
   }, [forceRescan]);
@@ -126,7 +126,7 @@ const LocalPage = () => {
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto pb-[80px] custom-scrollbar relative font-mono">
-      {/* 背景装飾 */}
+      {/* 閭梧勹陬・｣ｾ */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
       
       <div className="relative z-10">
@@ -273,7 +273,7 @@ const LocalPage = () => {
               </span>
             </div>
 
-            {/* プログレスバー */}
+            {/* 繝励Ο繧ｰ繝ｬ繧ｹ繝舌・ */}
             {scanProgress.total > 0 && (
               <div className="space-y-3">
                 <div className="w-full bg-theme-500/5 h-1 border border-theme-500/10 overflow-hidden rounded-full">
@@ -298,7 +298,7 @@ const LocalPage = () => {
           </div>
         )}
 
-        {/* ローディング表示（進捗情報がない場合） */}
+        {/* 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ陦ｨ遉ｺ・磯ｲ謐玲ュ蝣ｱ縺後↑縺・ｴ蜷茨ｼ・*/}
         {isLoading && !scanProgress && (
           <div className="py-24 flex flex-col items-center justify-center gap-6 border border-theme-500/10 mb-8 rounded-xl">
             <div className="relative w-16 h-16">
@@ -312,7 +312,7 @@ const LocalPage = () => {
           </div>
         )}
 
-        {/* スキャン結果の表示 */}
+        {/* 繧ｹ繧ｭ繝｣繝ｳ邨先棡縺ｮ陦ｨ遉ｺ */}
         {lastScanInfo && !isLoading && mp3Files.length > 0 && (
           <div className="bg-theme-500/5 border-y border-theme-500/20 p-4 mb-8 flex items-center justify-between text-[8px] uppercase tracking-[0.3em] font-mono rounded-xl">
             <div className="flex gap-8">
@@ -351,7 +351,7 @@ const LocalPage = () => {
             </div>
           )}
 
-        {/* テーブルコンポーネントを使用 */}
+        {/* 繝・・繝悶Ν繧ｳ繝ｳ繝昴・繝阪Φ繝医ｒ菴ｿ逕ｨ */}
         {mp3Files.length > 0 && !isLoading && (
           <div className="mt-6 mb-4">
             <LocalFileTable mp3Files={mp3Files} onPlayFile={handlePlayFile} />

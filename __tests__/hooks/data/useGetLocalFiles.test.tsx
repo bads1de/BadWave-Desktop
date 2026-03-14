@@ -36,7 +36,7 @@ const createWrapper = () => {
 
 describe("useGetLocalFiles", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it("ディレクトリが指定されていない場合は空の配列を返す", async () => {
@@ -83,7 +83,14 @@ describe("useGetLocalFiles", () => {
 
     mockInvoke
       .mockResolvedValueOnce({ exists: false, files: [] }) // handle-get-cached-files-with-metadata
-      .mockResolvedValueOnce(mockScanResult) // handle-scan-mp3-files
+      .mockResolvedValueOnce({
+        ...mockScanResult,
+        filesWithMetadata: mockFilePaths.map((p, i) => ({
+          path: p,
+          metadata: i === 0 ? mockMetadata1.metadata : mockMetadata2.metadata,
+          needsMetadata: false
+        }))
+      }) // handle-scan-mp3-files
       .mockResolvedValueOnce(mockMetadata1) // handle-get-mp3-metadata for song1
       .mockResolvedValueOnce(mockMetadata2); // handle-get-mp3-metadata for song2
 
@@ -115,11 +122,15 @@ describe("useGetLocalFiles", () => {
   });
 
   it("スキャン時にエラーが発生した場合、エラーを返す", async () => {
-    mockInvoke
-      .mockResolvedValueOnce({ exists: false, files: [] }) // handle-get-cached-files-with-metadata
-      .mockResolvedValueOnce({
-        error: "ディレクトリが見つかりません",
-      });
+    mockInvoke.mockImplementation(async (channel) => {
+      if (channel === "handle-get-cached-files-with-metadata") {
+        return { exists: false, files: [] };
+      }
+      if (channel === "handle-scan-mp3-files") {
+        return { error: "ディレクトリが見つかりません" };
+      }
+      return {};
+    });
 
     const wrapper = createWrapper();
     const { result } = renderHook(
@@ -130,11 +141,12 @@ describe("useGetLocalFiles", () => {
     await waitFor(
       () => {
         expect(result.current.isLoading).toBe(false);
+        expect(result.current.error).toBeTruthy();
       },
       { timeout: 5000 }
     );
 
-    expect(result.current.error).toBeTruthy();
+    expect((result.current.error as Error).message).toContain("ディレクトリが見つかりません");
   });
 
   it("forceFullScan で強制スキャンを実行できる", async () => {

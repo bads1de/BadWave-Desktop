@@ -1,9 +1,9 @@
-/**
+﻿/**
  * @jest-environment jsdom
  */
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import PublicPlaylistBoard from "@/components/Playlist/PublicPlaylistBoard";
+import PublicPlaylistBoard from "@/components/playlist/PublicPlaylistBoard";
 import { useRouter } from "next/navigation";
 
 // Mock next/navigation
@@ -65,3 +65,4 @@ describe("PublicPlaylistBoard", () => {
     // In JSDOM, classes are there but we don't usually test CSS visibility unless using computed styles.
   });
 });
+

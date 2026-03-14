@@ -8,9 +8,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import LikeButton from "@/components/LikeButton";
-import DeletePlaylistSongsBtn from "@/components/Playlist/DeletePlaylistSongsBtn";
+import DeletePlaylistSongsBtn from "@/components/playlist/DeletePlaylistSongsBtn";
 import { useState, memo, useCallback } from "react";
-import PreviewDownloadModal from "@/components/Modals/DownloadPreviewModal";
+import PreviewDownloadModal from "@/components/modals/DownloadPreviewModal";
 import useDownload from "@/hooks/data/useDownload";
 import { Download } from "lucide-react";
 import { downloadFile } from "@/libs/utils";
@@ -35,7 +35,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
     const { fileUrl: audioUrl } = useDownload(song.song_path);
     const [isLoading, setIsLoading] = useState(false);
 
-    // オフラインダウンロードフック
+    // ダウンロードフック
     const { download, remove, isDownloaded, isDownloading } =
       useDownloadSong(song);
 
@@ -65,12 +65,12 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
     const isPlaylistCreator =
       playlistId && playlistUserId && user?.id === playlistUserId;
 
-    // オフライン時はメニューを表示しない
+    // オフライン時のメニューを表示しない
     if (!isOnline) {
       return null;
     }
 
-    // ダウンロード以外のオプションが表示されるかどうかを確認
+    // ダウンロード以外のオプションが表示されるか確認
     const hasOtherOptions = user || isPlaylistCreator;
 
     return (
@@ -131,7 +131,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
                 </button>
               </div>
 
-              {/* オフライン機能 (Phase 2追加 - ローカル曲以外のみ) */}
+              {/* 繧ｪ繝輔Λ繧､繝ｳ讖溯・ (Phase 2霑ｽ蜉 - 繝ｭ繝ｼ繧ｫ繝ｫ譖ｲ莉･螟悶・縺ｿ) */}
               {!isLocal && (
                 <div className="px-4 py-3 border-t border-theme-500/10">
                   {isDownloaded ? (
@@ -182,3 +182,4 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
 SongOptionsPopover.displayName = "SongOptionsPopover";
 
 export default SongOptionsPopover;
+

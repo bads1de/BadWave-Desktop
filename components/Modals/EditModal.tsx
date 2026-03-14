@@ -8,7 +8,7 @@ import { Song } from "@/types";
 import Modal from "./Modal";
 import Input from "../common/Input";
 import { Textarea } from "../ui/textarea";
-import GenreSelect from "../Genre/GenreSelect";
+import GenreSelect from "../genre/GenreSelect";
 import Button from "../common/Button";
 import useEditSongMutation from "@/hooks/mutations/useEditSongMutation";
 import { toast } from "react-hot-toast";
@@ -130,7 +130,7 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
 
       // 成功時の処理はミューテーションのonSuccessで行われる
     } catch (error) {
-      // エラー処理はミューテーション内で行われる
+      // エラー処理はミューテーション内で行われるため、ここでは何もしない
       console.error("Edit error:", error);
     }
   };
@@ -216,7 +216,7 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
         </div>
 
         <div>
-          <div className="pb-1">ビデオを選択（5MB以下）</div>
+          <div className="pb-1">ビデオを選択（50MB以下）</div>
           <Input
             disabled={isLoading}
             type="file"

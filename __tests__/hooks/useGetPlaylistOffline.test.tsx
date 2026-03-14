@@ -16,6 +16,7 @@ jest.mock("@/libs/electron/index", () => ({
     },
     cache: {
       getCachedPlaylists: jest.fn().mockResolvedValue([]),
+      getPlaylistById: jest.fn().mockResolvedValue(null),
     },
   },
 }));

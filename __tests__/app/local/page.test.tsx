@@ -4,7 +4,6 @@ import "@testing-library/jest-dom";
 import {
   describe,
   it,
-  expect,
   beforeEach,
   afterEach,
   jest,
@@ -20,7 +19,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Header コンポーネントのモック
-jest.mock("@/components/Header/Header", () => {
+jest.mock("@/components/header/Header", () => {
   return function MockHeader({ children }: { children?: React.ReactNode }) {
     return <div data-testid="mock-header">{children}</div>;
   };

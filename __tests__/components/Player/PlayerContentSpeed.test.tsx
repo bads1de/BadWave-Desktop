@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import PlayerContent from "@/components/Player/PlayerContent";
+import PlayerContent from "@/components/player/PlayerContent";
 import useAudioPlayer from "@/hooks/audio/useAudioPlayer";
 import usePlaybackRateStore from "@/hooks/stores/usePlaybackRateStore";
 import { Song, Playlist } from "@/types";
@@ -20,8 +20,13 @@ jest.mock("@/hooks/audio/useAudioEqualizer", () => ({
   default: () => {},
 }));
 jest.mock("@/libs/electron", () => ({
+  isElectron: jest.fn().mockReturnValue(true),
   mediaControls: {
     onMediaControl: jest.fn(() => () => {}),
+  },
+  miniPlayer: {
+    onRequestState: jest.fn(() => () => {}),
+    updateState: jest.fn(),
   },
 }));
 
@@ -30,15 +35,15 @@ jest.mock("@/components/LikeButton", () => ({
   __esModule: true,
   default: () => <button data-testid="like-button">Like</button>,
 }));
-jest.mock("@/components/Song/MediaItem", () => ({
+jest.mock("@/components/song/MediaItem", () => ({
   __esModule: true,
   default: () => <div data-testid="media-item">Song Info</div>,
 }));
-jest.mock("@/components/Playlist/AddPlaylist", () => ({
+jest.mock("@/components/playlist/AddPlaylist", () => ({
   __esModule: true,
   default: () => <button data-testid="add-playlist">Add Playlist</button>,
 }));
-jest.mock("@/components/Equalizer/EqualizerControl", () => ({
+jest.mock("@/components/equalizer/EqualizerControl", () => ({
   __esModule: true,
   default: () => <div data-testid="equalizer-control">Equalizer Control</div>,
 }));
@@ -51,6 +56,7 @@ describe("PlayerContent Playback Speed", () => {
     song_path: "http://example.com/song.mp3",
     image_path: "http://example.com/image.jpg",
     user_id: "user1",
+    created_at: "2024-01-01",
   };
   const mockPlaylists: Playlist[] = [];
 
@@ -85,18 +91,19 @@ describe("PlayerContent Playback Speed", () => {
     usePlaybackRateStore.setState({ rate: 1.0 });
   });
 
-  it("should render playback speed button with default rate", () => {
+  it("should render settings button", () => {
     render(<PlayerContent song={mockSong} playlists={mockPlaylists} />);
-    expect(screen.getByText("1x")).toBeInTheDocument();
+    expect(screen.getByTestId("audio-settings-button")).toBeInTheDocument();
   });
 
   it("should open popover and show options when clicked", async () => {
     render(<PlayerContent song={mockSong} playlists={mockPlaylists} />);
 
-    const trigger = screen.getByText("1x");
-    fireEvent.click(trigger);
+    const settingsButton = screen.getByTestId("audio-settings-button");
+    fireEvent.click(settingsButton);
 
     // PlaybackSpeedButton has: [0.9, 0.95, 1, 1.05, 1.1, 1.25]
+    // Note: It's now formatted as "1.00x" in some places but buttons might be "1x"
     expect(await screen.findByText("1.25x")).toBeInTheDocument();
     expect(screen.getByText("0.9x")).toBeInTheDocument();
   });
@@ -104,7 +111,8 @@ describe("PlayerContent Playback Speed", () => {
   it("should change playback rate when option is clicked", async () => {
     render(<PlayerContent song={mockSong} playlists={mockPlaylists} />);
 
-    fireEvent.click(screen.getByText("1x"));
+    const settingsButton = screen.getByTestId("audio-settings-button");
+    fireEvent.click(settingsButton);
 
     const speed125 = await screen.findByText("1.25x");
     fireEvent.click(speed125);

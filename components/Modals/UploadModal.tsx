@@ -20,7 +20,7 @@ import useUploadSongMutation from "@/hooks/mutations/useUploadSongMutation";
 import Modal from "./Modal";
 import Input from "../common/Input";
 import { Textarea } from "../ui/textarea";
-import GenreSelect from "../Genre/GenreSelect";
+import GenreSelect from "../genre/GenreSelect";
 import Button from "../common/Button";
 import { RiUploadCloud2Line, RiMusic2Line } from "react-icons/ri";
 
@@ -153,7 +153,7 @@ const UploadModal: React.FC = memo(() => {
           imageFile,
         });
 
-        // 成功時の処理（ミューテーションのonSuccessで処理されるため、ここでは最小限の処理のみ）
+        // 成功時の処理はミューテーションのonSuccessで行われるため、ここでは最小限の処理のみ。
         reset();
         setImagePreview(null);
         setAudioPreview(null);
@@ -273,7 +273,7 @@ const UploadModal: React.FC = memo(() => {
               <div className="aspect-square relative overflow-hidden rounded-lg border border-zinc-700/50">
                 <Image
                   src={imagePreview}
-                  alt="アップロードされた画像のプレビュー"
+                  alt="アップロードされたプレビュー"
                   className="object-cover"
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
@@ -331,7 +331,6 @@ const UploadModal: React.FC = memo(() => {
   );
 });
 
-// displayName を設定
 UploadModal.displayName = "UploadModal";
 
 export default UploadModal;

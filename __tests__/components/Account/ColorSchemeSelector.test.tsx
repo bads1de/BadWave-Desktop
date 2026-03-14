@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ColorSchemeSelector } from "@/components/Account/ColorSchemeSelector";
+import { ColorSchemeSelector } from "@/components/account/ColorSchemeSelector";
 import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
 import { colorSchemes } from "@/constants/colorSchemes";
 
@@ -52,7 +52,6 @@ describe("ColorSchemeSelector", () => {
     render(<ColorSchemeSelector />);
     
     // framer-motion のアニメーション要素などは data-testid や特定が難しい場合があるが、
-    // ここでは単純にレンダリングを確認
-    // ※ 実際には内部の motion.div が描画される
+    // ここでは単純にレンダリングを確認。
   });
 });

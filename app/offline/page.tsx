@@ -1,12 +1,12 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Song } from "@/types";
 import { electronAPI } from "@/libs/electron";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
-import SongItem from "@/components/Song/SongItem";
-import Header from "@/components/Header/Header";
+import SongItem from "@/components/song/SongItem";
+import Header from "@/components/header/Header";
 import usePlayer from "@/hooks/player/usePlayer";
 
 const OfflinePage = () => {
@@ -16,21 +16,21 @@ const OfflinePage = () => {
   const [offlineSongs, setOfflineSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // オンライン時はホームにリダイレクト
+  // 繧ｪ繝ｳ繝ｩ繧､繝ｳ譎ゅ・繝帙・繝縺ｫ繝ｪ繝繧､繝ｬ繧ｯ繝・
   useEffect(() => {
     if (isOnline) {
       router.push("/");
     }
   }, [isOnline, router]);
 
-  // オフライン曲の取得
+  // 繧ｪ繝輔Λ繧､繝ｳ譖ｲ縺ｮ蜿門ｾ・
   useEffect(() => {
     const fetchOfflineSongs = async () => {
       setIsLoading(true);
       try {
         if (electronAPI.isElectron()) {
           const songs = await electronAPI.offline.getSongs();
-          // OfflineSong[] を Song[] にキャスト（構造が似ているため）
+          // OfflineSong[] 繧・Song[] 縺ｫ繧ｭ繝｣繧ｹ繝茨ｼ域ｧ矩縺御ｼｼ縺ｦ縺・ｋ縺溘ａ・・
           setOfflineSongs(songs as unknown as Song[]);
         }
       } catch (error) {
@@ -47,21 +47,21 @@ const OfflinePage = () => {
     const song = offlineSongs.find((s) => s.id === id);
     if (!song) return;
 
-    // プレイヤーに全オフライン曲をセット
+    // 繝励Ξ繧､繝､繝ｼ縺ｫ蜈ｨ繧ｪ繝輔Λ繧､繝ｳ譖ｲ繧偵そ繝・ヨ
     player.setIds(offlineSongs.map((s) => s.id));
 
-    // 全てのオフライン曲をローカル曲として登録（IDはそのままで良い）
+    // 蜈ｨ縺ｦ縺ｮ繧ｪ繝輔Λ繧､繝ｳ譖ｲ繧偵Ο繝ｼ繧ｫ繝ｫ譖ｲ縺ｨ縺励※逋ｻ骭ｲ・・D縺ｯ縺昴・縺ｾ縺ｾ縺ｧ濶ｯ縺・ｼ・
     offlineSongs.forEach((s) => {
       player.setLocalSong(s);
     });
 
-    // 再生開始
+    // 蜀咲函髢句ｧ・
     player.setId(id);
   };
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto relative font-mono custom-scrollbar">
-      {/* 背景装飾 */}
+      {/* 閭梧勹陬・｣ｾ */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
       
       <div className="relative z-10">
@@ -123,3 +123,4 @@ const OfflinePage = () => {
 };
 
 export default OfflinePage;
+

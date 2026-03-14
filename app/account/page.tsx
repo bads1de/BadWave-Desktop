@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,11 +10,11 @@ import { useUser } from "@/hooks/auth/useUser";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Palette, Database, Activity, BarChart2 } from "lucide-react";
-import { AccountModal } from "@/components/Account/AccountModal";
-import { ColorSchemeSelector } from "@/components/Account/ColorSchemeSelector";
-import TopPlayedSongs from "@/components/Account/TopPlayedSongs";
-import StatsOverview from "@/components/Account/StatsOverview";
-import { SyncSection } from "@/components/Account/SyncSection";
+import { AccountModal } from "@/components/account/AccountModal";
+import { ColorSchemeSelector } from "@/components/account/ColorSchemeSelector";
+import TopPlayedSongs from "@/components/account/TopPlayedSongs";
+import StatsOverview from "@/components/account/StatsOverview";
+import { SyncSection } from "@/components/account/SyncSection";
 
 const AccountPage = () => {
   const router = useRouter();
@@ -28,9 +28,9 @@ const AccountPage = () => {
     try {
       await supabaseClient.auth.signOut();
       router.push("/");
-      toast.success("ログアウトしました");
+      toast.success("繝ｭ繧ｰ繧｢繧ｦ繝医＠縺ｾ縺励◆");
     } catch (error) {
-      toast.error("エラーが発生しました");
+      toast.error("繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆");
     } finally {
       setIsLoading(false);
     }
@@ -38,7 +38,7 @@ const AccountPage = () => {
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto custom-scrollbar relative font-mono">
-      {/* 背景装飾 */}
+      {/* 閭梧勹陬・｣ｾ */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
       
       <div className="relative z-10 px-6 py-8 md:px-10 lg:px-12 space-y-10">
@@ -55,9 +55,9 @@ const AccountPage = () => {
         </div>
 
         <div className="space-y-12">
-          {/* プロフィールセクション (HUDスタイル) */}
+          {/* 繝励Ο繝輔ぅ繝ｼ繝ｫ繧ｻ繧ｯ繧ｷ繝ｧ繝ｳ (HUD繧ｹ繧ｿ繧､繝ｫ) */}
           <div className="relative bg-[#0a0a0f] border border-theme-500/10 p-8 rounded-none overflow-hidden group">
-            {/* HUD装飾 */}
+            {/* HUD陬・｣ｾ */}
             <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-theme-500/40 group-hover:border-theme-500 transition-all" />
             <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-theme-500/40 group-hover:border-theme-500 transition-all" />
             
@@ -181,3 +181,4 @@ const AccountPage = () => {
 };
 
 export default AccountPage;
+

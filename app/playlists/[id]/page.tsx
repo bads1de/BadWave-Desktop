@@ -8,9 +8,9 @@ import { ja } from "date-fns/locale";
 import { Globe, Lock, Clock, Database, User } from "lucide-react";
 import { notFound } from "next/navigation";
 
-import PlaylistOptionsPopover from "@/components/Playlist/PlaylistOptionsPopover";
+import PlaylistOptionsPopover from "@/components/playlist/PlaylistOptionsPopover";
 import { useUser } from "@/hooks/auth/useUser";
-import SongListContent from "@/components/Song/SongListContent";
+import SongListContent from "@/components/song/SongListContent";
 import useGetPlaylist from "@/hooks/data/useGetPlaylist";
 import useGetPlaylistSongs from "@/hooks/data/useGetPlaylistSongs";
 import { useSyncPlaylistSongs } from "@/hooks/sync/useSyncPlaylistSongs";

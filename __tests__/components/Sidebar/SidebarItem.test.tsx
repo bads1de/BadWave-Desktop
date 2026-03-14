@@ -1,9 +1,9 @@
-/**
+﻿/**
  * @jest-environment jsdom
  */
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import SidebarItem from "@/components/Sidebar/SidebarItem";
+import SidebarItem from "@/components/sidebar/SidebarItem";
 import { HiHome } from "react-icons/hi";
 
 // Mock Hover component to avoid TooltipProvider issues in tests

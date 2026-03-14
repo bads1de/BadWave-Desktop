@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Figtree, Syncopate, Space_Mono } from "next/font/google";
 
-import Player from "@/components/Player/Player";
-import RightSidebar from "@/components/RightSidebar/RightSidebar";
-import Sidebar from "@/components/Sidebar/Sidebar";
+import Player from "@/components/player/Player";
+import RightSidebar from "@/components/rightsidebar/RightSidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import WindowControls from "@/components/electron/WindowControls";
 import OfflineIndicator from "@/components/common/OfflineIndicator";
 import OfflineRedirector from "@/components/common/OfflineRedirector";
@@ -73,3 +73,4 @@ export default function RootLayout({
     </html>
   );
 }
+

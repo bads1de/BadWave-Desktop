@@ -23,7 +23,7 @@ jest.mock("@/hooks/player/usePlayer");
 
 // Mock child components to verify integration
 jest.mock(
-  "@/components/Header/Header",
+  "@/components/header/Header",
   () =>
     ({ children, className }: any) =>
       (
@@ -33,7 +33,7 @@ jest.mock(
       )
 );
 
-jest.mock("@/components/Song/SongItem", () => ({ data, onClick }: any) => (
+jest.mock("@/components/song/SongItem", () => ({ data, onClick }: any) => (
   <div data-testid="mock-song-item" onClick={() => onClick(data.id)}>
     {data.title}
   </div>
@@ -54,7 +54,7 @@ describe("OfflinePage", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
+    (useRouter as unknown as jest.Mock).mockReturnValue({
       push: mockRouterPush,
     });
     (usePlayer as unknown as jest.Mock).mockReturnValue(mockPlayer);
@@ -73,11 +73,11 @@ describe("OfflinePage", () => {
 
     render(<OfflinePage />);
 
-    expect(screen.getByText("Offline Mode")).toBeInTheDocument();
+    expect(screen.getByText("OFFLINE_PROTOCOL")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(
-        screen.getByText("No downloaded songs found.")
+        screen.getByText(/NO_DOWNLOADED_STREAMS_DETECTED/)
       ).toBeInTheDocument();
     });
   });
@@ -118,7 +118,7 @@ describe("OfflinePage", () => {
 
     fireEvent.click(screen.getByText("Offline Song 1"));
 
-    // プレイヤーへのセットアップを検証
+    // プレイヤーへのセットアップを等検証
     expect(mockPlayer.setIds).toHaveBeenCalledWith(["song-1"]);
     expect(mockPlayer.setLocalSong).toHaveBeenCalledWith(mockSongs[0]);
     expect(mockPlayer.setId).toHaveBeenCalledWith("song-1");
