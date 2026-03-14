@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Header from "@/components/header/Header";
 import SearchInput from "@/components/common/SearchInput";
@@ -16,7 +16,7 @@ import { useCallback, memo, use } from "react";
 import useGetSongsByTitle from "@/hooks/data/useGetSongsByTitle";
 import useGetPlaylistsByTitle from "@/hooks/data/useGetPlaylistsByTitle";
 
-// 譖ｲ繝ｪ繧ｹ繝医そ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝茨ｼ医Γ繝｢蛹厄ｼ・
+// 曲リストセクションコンポーネント（メモ化）
 const SongListSection = memo(
   ({
     songs,
@@ -47,8 +47,12 @@ const SongListSection = memo(
     if (songs.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-24 gap-2 text-theme-500/40 font-mono">
-          <h1 className="text-lg uppercase tracking-widest">[ NO_RESULTS_FOUND ]</h1>
-          <p className="text-[10px] uppercase tracking-widest">ERROR_CODE: 404_NOT_FOUND</p>
+          <h1 className="text-lg uppercase tracking-widest">
+            [ NO_RESULTS_FOUND ]
+          </h1>
+          <p className="text-[10px] uppercase tracking-widest">
+            ERROR_CODE: 404_NOT_FOUND
+          </p>
         </div>
       );
     }
@@ -56,7 +60,10 @@ const SongListSection = memo(
     return (
       <div className="flex flex-col gap-y-3 w-full p-6">
         {songs.map((song) => (
-          <div key={song.id} className="flex items-center gap-x-4 w-full group/item">
+          <div
+            key={song.id}
+            className="flex items-center gap-x-4 w-full group/item"
+          >
             <div className="flex-1 min-w-0">
               <SongList data={song} onClick={(id: string) => onPlay(id)} />
             </div>
@@ -69,10 +76,10 @@ const SongListSection = memo(
         ))}
       </div>
     );
-  }
+  },
 );
 
-// 繝励Ξ繧､繝ｪ繧ｹ繝医そ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝茨ｼ医Γ繝｢蛹厄ｼ・
+// プレイリストセクションコンポーネント（メモ化）
 const PlaylistSection = memo(
   ({ playlists, isLoading }: { playlists: Playlist[]; isLoading: boolean }) => {
     const router = useRouter();
@@ -95,8 +102,12 @@ const PlaylistSection = memo(
     if (playlists.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-24 gap-2 text-theme-500/40 font-mono">
-          <h1 className="text-lg uppercase tracking-widest">[ PLAYLISTS_EMPTY ]</h1>
-          <p className="text-[10px] uppercase tracking-widest">SYSTEM_INFO: NO_MATCHING_DATA</p>
+          <h1 className="text-lg uppercase tracking-widest">
+            [ PLAYLISTS_EMPTY ]
+          </h1>
+          <p className="text-[10px] uppercase tracking-widest">
+            SYSTEM_INFO: NO_MATCHING_DATA
+          </p>
         </div>
       );
     }
@@ -113,8 +124,8 @@ const PlaylistSection = memo(
             onClick={() =>
               router.push(
                 `/playlists/${playlist.id}?title=${encodeURIComponent(
-                  playlist.title
-                )}`
+                  playlist.title,
+                )}`,
               )
             }
           >
@@ -128,7 +139,7 @@ const PlaylistSection = memo(
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                {/* 陬・｣ｾ逕ｨ繧ｰ繝ｪ繝・ラ */}
+                {/* 装飾用グリッド */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none bg-[length:20px_20px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
               </div>
               <div className="space-y-1 font-mono">
@@ -139,7 +150,7 @@ const PlaylistSection = memo(
                   {playlist.title}
                 </h3>
               </div>
-              {/* HUD繧ｳ繝ｼ繝翫・ */}
+              {/* HUDコーナー */}
               <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-theme-500/20 group-hover:border-theme-500 transition-colors" />
               <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-theme-500/20 group-hover:border-theme-500 transition-colors" />
             </div>
@@ -147,7 +158,7 @@ const PlaylistSection = memo(
         ))}
       </div>
     );
-  }
+  },
 );
 
 SongListSection.displayName = "SongListSection";
@@ -176,12 +187,12 @@ const Search = (props: SearchProps) => {
       onPlay(id);
       player.setId(id);
     },
-    [onPlay, player]
+    [onPlay, player],
   );
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto pb-[80px] custom-scrollbar relative font-mono">
-      {/* 閭梧勹陬・｣ｾ */}
+      {/* 背景装飾 */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
 
       <div className="relative z-10">
@@ -195,19 +206,26 @@ const Search = (props: SearchProps) => {
                 <div className="flex items-center gap-4 text-[8px] text-theme-500/60 uppercase tracking-[0.3em] font-mono mt-1">
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(var(--theme-500),0.5)]" />
-                    QUERY_STATUS: {songsLoading || playlistsLoading ? "PENDING..." : "RESOLVED"}
+                    QUERY_STATUS:{" "}
+                    {songsLoading || playlistsLoading
+                      ? "PENDING..."
+                      : "RESOLVED"}
                   </span>
                   <span>// TARGET: DEEP_NET_RECORDS</span>
                 </div>
               </div>
               <div className="hidden md:flex items-center gap-8 border-l border-theme-500/10 pl-8 font-mono">
                 <div className="flex flex-col items-end">
-                  <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Active_Node</span>
-                  <span className="text-xs text-theme-300 font-bold tracking-widest uppercase">SEARCH_V7</span>
+                  <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">
+                    Active_Node
+                  </span>
+                  <span className="text-xs text-theme-300 font-bold tracking-widest uppercase">
+                    SEARCH_V7
+                  </span>
                 </div>
               </div>
             </div>
-            
+
             <SearchInput />
             <HeaderNav className="mt-2" />
           </div>
@@ -222,7 +240,10 @@ const Search = (props: SearchProps) => {
             />
           )}
           {activeTab === "playlists" && (
-            <PlaylistSection playlists={playlists} isLoading={playlistsLoading} />
+            <PlaylistSection
+              playlists={playlists}
+              isLoading={playlistsLoading}
+            />
           )}
         </div>
       </div>
@@ -231,4 +252,3 @@ const Search = (props: SearchProps) => {
 };
 
 export default Search;
-

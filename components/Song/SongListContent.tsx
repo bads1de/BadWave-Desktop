@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Song } from "@/types";
 import useOnPlay from "@/hooks/player/useOnPlay";
@@ -26,11 +26,11 @@ const SongListContent: React.FC<SongListContentProps> = memo(
   }) => {
     const { user } = useUser();
 
-    // 繝舌ャ繧ｯ繧ｰ繝ｩ繧ｦ繝ｳ繝牙酔譛溘ｒ髢句ｧ具ｼ・ropSongs縺後↑縺・ｴ蜷茨ｼ昴♀豌励↓蜈･繧翫・繝ｼ繧ｸ・・
-    // autoSync: true 縺ｫ繧医ｊ縲√・繧ｦ繝ｳ繝域凾縺翫ｈ縺ｳ繧ｪ繝ｳ繝ｩ繧､繝ｳ蠕ｩ蟶ｰ譎ゅ↓閾ｪ蜍募酔譛・
+    // バックグラウンド同期を開始（propSongsがない場合＝お気に入りページ等）
+    // autoSync: true により、マウント時およびオンライン復帰時に自動同期
     useSyncLikedSongs({ autoSync: !propSongs });
 
-    // 繧ｯ繝ｩ繧､繧｢繝ｳ繝医し繧､繝峨〒繝・・繧ｿ繧貞叙蠕暦ｼ医Ο繝ｼ繧ｫ繝ｫDB縺九ｉ隱ｭ縺ｿ霎ｼ縺ｿ・・
+    // クライアントサイドでデータを取得（ローカルDBから読み込み）
     const { likedSongs, isLoading } = useGetLikedSongs(
       propSongs ? undefined : user?.id
     );
@@ -39,7 +39,7 @@ const SongListContent: React.FC<SongListContentProps> = memo(
     const onPlay = useOnPlay(songs);
     const displayedSongs = playlistId ? [...songs].reverse() : songs;
 
-    // 蜀咲函繝上Φ繝峨Λ繧偵Γ繝｢蛹・
+    // 再生ハンドラをメモ化
     const handlePlay = useCallback(
       (id: string) => {
         onPlay(id);
@@ -47,7 +47,7 @@ const SongListContent: React.FC<SongListContentProps> = memo(
       [onPlay]
     );
 
-    // 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ荳ｭ・・rops縺ｧsongs縺梧ｸ｡縺輔ｌ縺溷ｴ蜷医・繧ｹ繧ｭ繝・・・・
+    // ローディング中（propsでsongsが渡された場合はスキップ）
     if (!propSongs && isLoading) {
       return (
         <div className="flex flex-col items-center justify-center py-24 gap-4 font-mono">
@@ -76,7 +76,7 @@ const SongListContent: React.FC<SongListContentProps> = memo(
 
     return (
       <div className="flex flex-col w-full px-4 sm:px-8 pb-32">
-        {/* 繝・・繝ｫ繝舌・ / 繧｢繧ｯ繧ｷ繝ｧ繝ｳ繧ｨ繝ｪ繧｢ */}
+        {/* ツールバー / アクションエリア */}
         {showDownloadButton && (
           <div className="flex items-center justify-between py-6 px-4 sticky top-0 z-20 bg-[#0a0a0f]/60 backdrop-blur-xl border-y border-theme-500/10 -mx-4 mb-8 font-mono">
             <div className="flex flex-col gap-1">

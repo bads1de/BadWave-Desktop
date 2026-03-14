@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -19,7 +19,7 @@ interface LyricsModalProps {
 const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
   const { isOpen, closeModal } = useLyricsModalStore();
 
-  // 繝ｭ繝ｼ繧ｫ繝ｫ譖ｲ縺ｮ蝣ｴ蜷医・繝ｭ繝ｼ繧ｫ繝ｫ繝代せ繧剃ｽｿ逕ｨ
+  // ローカル曲の場合はローカルパスを使用
   const playablePath = getPlayablePath(song);
 
   const {
@@ -34,11 +34,11 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
     onPlayPrevious,
   } = useAudioPlayer(playablePath, song);
 
-  // 繝ｭ繝ｼ繧ｫ繝ｫ譖ｲ縺ｮ蝣ｴ蜷医・豁瑚ｩ槭′縺ｪ縺・庄閭ｽ諤ｧ縺碁ｫ倥＞
+  // ローカル曲の場合は歌詞がない可能性が高い
   const isLocal = isLocalSong(song);
   const lyrics = isLocal
-    ? "繝ｭ繝ｼ繧ｫ繝ｫ繝輔ぃ繧､繝ｫ縺ｮ豁瑚ｩ槭・蛻ｩ逕ｨ縺ｧ縺阪∪縺帙ｓ"
-    : (song?.lyrics ?? "豁瑚ｩ槭・縺ゅｊ縺ｾ縺帙ｓ");
+    ? "ローカルファイルの歌詞は利用できません"
+    : (song?.lyrics ?? "歌詞はありません");
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && closeModal()}>
@@ -78,7 +78,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
 
           {/* 繝倥ャ繝繝ｼ・亥承荳翫・繝懊ち繝ｳ・・*/}
           <div className="absolute top-0 right-0 z-10 p-4 flex items-center gap-2">
-            {/* 繧ｭ繝･繝ｼ繝懊ち繝ｳ */}
+            {/* キューボタン */}
             <button
               className="
                 rounded-full p-2.5
@@ -93,7 +93,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
               <HiOutlineQueueList size={20} />
             </button>
 
-            {/* 髢峨§繧九・繧ｿ繝ｳ */}
+            {/* 閉じるボタン */}
             <Dialog.Close asChild>
               <button
                 className="
@@ -113,14 +113,14 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
 
           {/* 繝｡繧､繝ｳ繧ｨ繝ｪ繧｢・亥ｷｦ・壹い繝ｼ繝医Ρ繝ｼ繧ｯ縲∝承・壽ｭ瑚ｩ橸ｼ・*/}
           <div className="flex flex-1 overflow-hidden">
-            {/* 蟾ｦ蛛ｴ・壹い繝ｼ繝医Ρ繝ｼ繧ｯ */}
+            {/* 左側：アートワーク */}
             <div className="w-1/2 h-full">
               <LyricsModalArtwork song={song} />
             </div>
 
-            {/* 蜿ｳ蛛ｴ・壽ｭ瑚ｩ・*/}
+            {/* 右側：歌詞 */}
             <div className="w-1/2 h-full flex flex-col bg-black/40 backdrop-blur-sm">
-              {/* LYRICS 繝ｩ繝吶Ν */}
+              {/* LYRICS ラベル */}
               <div className="px-8 pt-6 pb-2">
                 <span className="text-xs font-medium tracking-[0.3em] text-neutral-400 uppercase">
                   Lyrics

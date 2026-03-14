@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { memo } from "react";
 import TrendBoard from "@/components/trend/TrendBoard";
@@ -12,11 +12,11 @@ interface TrendSectionProps {
 }
 
 /**
- * 繝医Ξ繝ｳ繝峨そ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝・
+ * トレンドセクションコンポーネント
  *
- * @param selectedPeriod - 驕ｸ謚槭＆繧後◆譛滄俣
- * @param onPeriodChange - 譛滄俣螟画峩譎ゅ・繧ｳ繝ｼ繝ｫ繝舌ャ繧ｯ
- * @param songs - 繝医Ξ繝ｳ繝峨ョ繝ｼ繧ｿ
+ * @param selectedPeriod - 選択された期間
+ * @param onPeriodChange - 期間変更時のコールバック
+ * @param songs - トレンドデータ
  */
 const TrendSection: React.FC<TrendSectionProps> = ({
   selectedPeriod,
@@ -43,7 +43,7 @@ const TrendSection: React.FC<TrendSectionProps> = ({
         />
       </div>
       <div className="relative p-6 bg-[#0a0a0f]/40 border border-theme-500/10 rounded-2xl shadow-[inset_0_0_30px_rgba(var(--theme-500),0.05)]">
-        {/* HUD陬・｣ｾ繧ｳ繝ｼ繝翫・ */}
+        {/* HUD装飾コーナー */}
         <div className="absolute top-0 right-0 w-12 h-12 border-t border-r border-theme-500/20 pointer-events-none rounded-tr-2xl" />
         <div className="absolute bottom-0 left-0 w-12 h-12 border-b border-l border-theme-500/20 pointer-events-none rounded-bl-2xl" />
 
@@ -53,7 +53,7 @@ const TrendSection: React.FC<TrendSectionProps> = ({
   );
 };
 
-// 繝｡繝｢蛹悶＆繧後◆繧ｳ繝ｳ繝昴・繝阪Φ繝医ｒ繧ｨ繧ｯ繧ｹ繝昴・繝・
+// メモ化されたコンポーネントをエクスポート
 TrendSection.displayName = "TrendSection";
 export default memo(TrendSection);
 

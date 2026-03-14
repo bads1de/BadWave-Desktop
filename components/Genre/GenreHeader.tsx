@@ -9,32 +9,6 @@ interface GenreHeaderProps {
 }
 
 const GenreHeader: React.FC<GenreHeaderProps> = ({ genre }) => {
-  const getGradient = () => {
-    // 大文字小文字を区別せずに比較するために小文字に変換
-    const genreLower = genre.toLowerCase();
-
-    switch (genreLower) {
-      case "retro wave":
-        return "bg-gradient-to-br from-[#FF0080] via-[#7928CA] to-[#4A00E0]";
-      case "electro house":
-        return "bg-gradient-to-r from-[#00F5A0] to-[#00D9F5]";
-      case "nu disco":
-        return "bg-gradient-to-r from-[#FFD700] via-[#FF6B6B] to-[#FF1493]";
-      case "city pop":
-        return "bg-gradient-to-br from-[#6366F1] via-[#A855F7] to-[#EC4899]";
-      case "tropical house":
-        return "bg-gradient-to-r from-[#00B4DB] to-[#0083B0]";
-      case "vapor wave":
-        return "bg-gradient-to-br from-[#FF61D2] via-[#FE9090] to-[#FF9C7D]";
-      case "r&b":
-        return "bg-gradient-to-r from-[#6A0DAD] via-[#9370DB] to-[#D4AF37]";
-      case "chill house":
-        return "bg-gradient-to-r from-[#43cea2] via-[#185a9d] to-[#6DD5FA]";
-      default:
-        return "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900";
-    }
-  };
-
   const getIcon = () => {
     // 大文字小文字を区別せずに比較するために小文字に変換
     const genreLower = genre.toLowerCase();
@@ -120,7 +94,9 @@ const GenreHeader: React.FC<GenreHeaderProps> = ({ genre }) => {
                     [ GENRE_TAG_ANALYZED ]
                   </p>
                   <div className="flex items-center gap-4">
-                    <span className="text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">{getIcon()}</span>
+                    <span className="text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+                      {getIcon()}
+                    </span>
                     <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter cyber-glitch">
                       {genre}
                     </h1>
@@ -131,13 +107,21 @@ const GenreHeader: React.FC<GenreHeaderProps> = ({ genre }) => {
 
             <div className="flex flex-col items-end gap-2 border-l border-theme-500/10 pl-6 md:pl-12">
               <div className="flex flex-col items-end">
-                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Network_Index</span>
-                <span className="text-xs text-theme-300 font-bold tabular-nums">0x{genre.length.toString(16).toUpperCase().padStart(4, '0')}</span>
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">
+                  Network_Index
+                </span>
+                <span className="text-xs text-theme-300 font-bold tabular-nums">
+                  0x{genre.length.toString(16).toUpperCase().padStart(4, "0")}
+                </span>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Signal_Status</span>
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">
+                  Signal_Status
+                </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-theme-500 font-black">LOCKED</span>
+                  <span className="text-xs text-theme-500 font-black">
+                    LOCKED
+                  </span>
                   <div className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-ping" />
                 </div>
               </div>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,21 +16,21 @@ const OfflinePage = () => {
   const [offlineSongs, setOfflineSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 繧ｪ繝ｳ繝ｩ繧､繝ｳ譎ゅ・繝帙・繝縺ｫ繝ｪ繝繧､繝ｬ繧ｯ繝・
+  // オフラインモードでオンラインになった場合、ホームに戻る
   useEffect(() => {
     if (isOnline) {
       router.push("/");
     }
   }, [isOnline, router]);
 
-  // 繧ｪ繝輔Λ繧､繝ｳ譖ｲ縺ｮ蜿門ｾ・
+  // オフライン曲の取得命令
   useEffect(() => {
     const fetchOfflineSongs = async () => {
       setIsLoading(true);
       try {
         if (electronAPI.isElectron()) {
           const songs = await electronAPI.offline.getSongs();
-          // OfflineSong[] 繧・Song[] 縺ｫ繧ｭ繝｣繧ｹ繝茨ｼ域ｧ矩縺御ｼｼ縺ｦ縺・ｋ縺溘ａ・・
+          // OfflineSong[] を Song[] に変換してセット
           setOfflineSongs(songs as unknown as Song[]);
         }
       } catch (error) {
@@ -47,23 +47,23 @@ const OfflinePage = () => {
     const song = offlineSongs.find((s) => s.id === id);
     if (!song) return;
 
-    // 繝励Ξ繧､繝､繝ｼ縺ｫ蜈ｨ繧ｪ繝輔Λ繧､繝ｳ譖ｲ繧偵そ繝・ヨ
+    // プレイヤーに全オフライン曲をセット
     player.setIds(offlineSongs.map((s) => s.id));
 
-    // 蜈ｨ縺ｦ縺ｮ繧ｪ繝輔Λ繧､繝ｳ譖ｲ繧偵Ο繝ｼ繧ｫ繝ｫ譖ｲ縺ｨ縺励※逋ｻ骭ｲ・・D縺ｯ縺昴・縺ｾ縺ｾ縺ｧ濶ｯ縺・ｼ・
+    // オフライン曲をプレイヤーにセット
     offlineSongs.forEach((s) => {
       player.setLocalSong(s);
     });
 
-    // 蜀咲函髢句ｧ・
+    // 再生開始
     player.setId(id);
   };
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto relative font-mono custom-scrollbar">
-      {/* 閭梧勹陬・｣ｾ */}
+      {/* 背景装飾 */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
-      
+
       <div className="relative z-10">
         <Header className="sticky top-0 z-20">
           <div className="flex items-center justify-between w-full px-4 lg:px-8 py-2">
@@ -77,14 +77,20 @@ const OfflinePage = () => {
                   NETWORK: LOST
                 </span>
                 <span>// SECTOR: CACHE_BLOCK_A</span>
-                <span className="hidden sm:inline">// DECRYPTION: LOCAL_ONLY</span>
+                <span className="hidden sm:inline">
+                  // DECRYPTION: LOCAL_ONLY
+                </span>
               </div>
             </div>
 
             <div className="hidden md:flex items-center gap-8 border-l border-theme-500/10 pl-8 font-mono">
               <div className="flex flex-col items-end">
-                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">Protocol_Mode</span>
-                <span className="text-xs text-red-400 font-bold tracking-widest">EMERGENCY_ACCESS</span>
+                <span className="text-[8px] text-theme-500/40 uppercase tracking-widest">
+                  Protocol_Mode
+                </span>
+                <span className="text-xs text-red-400 font-bold tracking-widest">
+                  EMERGENCY_ACCESS
+                </span>
               </div>
             </div>
           </div>
@@ -104,9 +110,12 @@ const OfflinePage = () => {
             </div>
           ) : offlineSongs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 gap-6 border border-theme-500/10">
-              <h2 className="text-xl uppercase tracking-[0.5em] font-black text-theme-500/40">[ CACHE_MISS ]</h2>
+              <h2 className="text-xl uppercase tracking-[0.5em] font-black text-theme-500/40">
+                [ CACHE_MISS ]
+              </h2>
               <p className="text-[10px] uppercase tracking-widest text-center mt-2 max-w-sm px-6 text-theme-500/20">
-                // NO_DOWNLOADED_STREAMS_DETECTED. DOWNLOAD_FAVORITES_TO_ACCESS_DURING_OUTAGE.
+                // NO_DOWNLOADED_STREAMS_DETECTED.
+                DOWNLOAD_FAVORITES_TO_ACCESS_DURING_OUTAGE.
               </p>
             </div>
           ) : (
@@ -123,4 +132,3 @@ const OfflinePage = () => {
 };
 
 export default OfflinePage;
-

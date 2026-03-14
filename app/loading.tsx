@@ -1,7 +1,5 @@
 "use client";
 
-import { PulseLoader } from "react-spinners";
-import Box from "@/components/common/Box";
 import { motion } from "framer-motion";
 
 const Loading = () => {
@@ -9,7 +7,7 @@ const Loading = () => {
     <div className="h-full w-full flex items-center justify-center bg-[#0a0a0f] font-mono relative overflow-hidden">
       {/* 背景装飾 */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
-      
+
       {/* 走査線 */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-0 bg-[length:100%_4px] bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_50%)]" />
 
@@ -25,19 +23,23 @@ const Loading = () => {
         >
           {/* サイバーパンク・ローディングアニメーション */}
           <div className="relative w-24 h-24">
-            <motion.div 
+            <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               className="absolute inset-0 border-t-2 border-r-2 border-theme-500/40 rounded-full"
             />
-            <motion.div 
+            <motion.div
               animate={{ rotate: -360 }}
               transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               className="absolute inset-2 border-b-2 border-l-2 border-theme-500/20 rounded-full"
             />
-            <motion.div 
+            <motion.div
               animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
               className="absolute inset-8 bg-theme-500 shadow-[0_0_20px_rgba(var(--theme-500),0.8)] rounded-full"
             />
           </div>

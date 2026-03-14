@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, memo, useCallback } from "react";
 import { Song } from "@/types";
@@ -19,7 +19,7 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
   const [showArrows, setShowArrows] = useState(false);
   const onPlay = useOnPlay(recommendations);
 
-  // 繧ｯ繝ｪ繝・け繝上Φ繝峨Λ繧偵Γ繝｢蛹・
+  // クリックハンドラをメモ化
   const handlePlay = useCallback(
     (id: string) => {
       onPlay(id);
@@ -78,9 +78,9 @@ const ForYouBoard: React.FC<ForYouBoardProps> = ({
   );
 };
 
-// 陦ｨ遉ｺ蜷阪ｒ險ｭ螳・
+// 表示名を設定
 ForYouBoard.displayName = "ForYouBoard";
 
-// 繝｡繝｢蛹悶＆繧後◆繧ｳ繝ｳ繝昴・繝阪Φ繝医ｒ繧ｨ繧ｯ繧ｹ繝昴・繝・
+// メモ化されたコンポーネントをエクスポート
 export default memo(ForYouBoard);
 

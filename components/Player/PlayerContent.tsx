@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from "react";
+import React, { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill, BsRepeat1 } from "react-icons/bs";
@@ -33,13 +33,13 @@ interface PlayerContentProps {
 
 const PlayerContent: React.FC<PlayerContentProps> = React.memo(
   ({ song, playlists }) => {
-    // 繝ｭ繝ｼ繧ｫ繝ｫ譖ｲ縺九←縺・°繧貞愛螳・
+    // ローカル曲かどうかを判定
     const isLocalFile = isLocalSong(song);
 
     // 繝繧ｦ繝ｳ繝ｭ繝ｼ繝画ｸ医∩縺ｮ蝣ｴ蜷医・繝ｭ繝ｼ繧ｫ繝ｫ繝代せ繧貞━蜈・
     const playablePath = getPlayablePath(song);
 
-    // 繧ｫ繝ｩ繝ｼ繧ｹ繧ｭ繝ｼ繝槭ｒ蜿門ｾ・
+    // カラースキームを取得
     const { getColorScheme, hasHydrated } = useColorSchemeStore();
     const colorScheme = getColorScheme();
 
@@ -66,7 +66,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
       isShuffling,
     } = useAudioPlayer(playablePath, song);
 
-    // Discord Rich Presence 縺ｮ譖ｴ譁ｰ
+    // Discord Rich Presence の更新
     useDiscordRpc({
       song,
       isPlaying,
@@ -76,13 +76,12 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
 
     const Icon = isPlaying ? BsPauseFill : BsPlayFill;
 
-    // 繧､繧ｳ繝ｩ繧､繧ｶ繝ｼ縺ｨ蜀咲函騾溷ｺｦ縲√◎縺ｮ莉悶お繝輔ぉ繧ｯ繝医ｒ驕ｩ逕ｨ・・udioEngine繧剃ｽｿ逕ｨ・・
+    // イコライザーと再生速度、その他エフェクトを適用（AudioEngineを使用）
     useAudioEqualizer();
     usePlaybackRate();
     useAudioEffects();
 
-    // 繝溘ル繝励Ξ繧､繝､繝ｼ縺ｫ譖ｲ諠・ｱ繧貞酔譛・
-    // 繝溘ル繝励Ξ繧､繝､繝ｼ縺ｫ譖ｲ諠・ｱ繧貞酔譛・
+    // ミニプレイヤーに曲情報を同期
     useMiniPlayerSync({ song, isPlaying });
 
     const { toggleLyrics } = useLyricsStore();
@@ -147,7 +146,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
                     className="text-white group-hover/play:drop-shadow-[0_0_8px_white] transition-all duration-300"
                   />
                 </div>
-                {/* 繧ｳ繝ｼ繝翫・陬・｣ｾ */}
+                {/* コーナー装飾 */}
                 <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-theme-500/40 group-hover/play:border-theme-500" />
                 <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-theme-500/40 group-hover/play:border-theme-500" />
               </div>
@@ -227,13 +226,13 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
                 </button>
               </DisabledOverlay>
 
-              {/* 繧ｪ繝ｼ繝・ぅ繧ｪ險ｭ螳・(騾溷ｺｦ繝ｻ繧ｨ繝輔ぉ繧ｯ繝医・繧､繧ｳ繝ｩ繧､繧ｶ繝ｼ) */}
+              {/* オーディオ設定 (速度・エフェクト・イコライザー) */}
               <AudioSettingsButton />
 
-              {/* 繝溘ル繝励Ξ繧､繝､繝ｼ繝懊ち繝ｳ */}
+              {/* ミニプレイヤーボタン */}
               <MiniPlayerButton />
 
-              {/* 髻ｳ驥上さ繝ｳ繝医Ο繝ｼ繝ｫ */}
+              {/* 音量コントロール */}
               <VolumeControl />
             </div>
           </div>

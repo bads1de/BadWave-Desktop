@@ -2,7 +2,7 @@
 import GenreBoard from "@/components/genre/GenreBoard";
 
 /**
- * 繧ｸ繝｣繝ｳ繝ｫ繧ｻ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝・
+ * ジャンル探索セクション
  */
 const GenreSection: React.FC = () => {
   return (
@@ -19,15 +19,14 @@ const GenreSection: React.FC = () => {
         </div>
       </div>
       <div className="relative p-8 bg-[#0a0a0f]/60 border-y border-theme-500/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-         {/* 繧ｹ繧ｭ繝｣繝ｳ繝ｩ繧､繝ｳ逧・↑讓ｪ邱・*/}
-         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-theme-500/30 to-transparent pointer-events-none" />
-         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-theme-500/30 to-transparent pointer-events-none" />
-         
-         <GenreBoard />
+        {/* 上下のグラデーション */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-theme-500/30 to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-theme-500/30 to-transparent pointer-events-none" />
+
+        <GenreBoard />
       </div>
     </section>
   );
 };
 
 export default React.memo(GenreSection);
-

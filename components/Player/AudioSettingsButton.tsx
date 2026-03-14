@@ -19,7 +19,7 @@ type Tab = "effects" | "equalizer";
 const AudioSettingsButton: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>("effects");
 
-  // 繧ｪ繝ｼ繝・ぅ繧ｪ險ｭ螳壹′譛牙柑縺九←縺・°繧偵メ繧ｧ繝・け縺励※繧｢繧､繧ｳ繝ｳ縺ｮ濶ｲ繧貞､峨∴繧九◆繧√・state
+  // オーディオ設定が有効かどうかをチェックしてアイコンの色を変えるためのstate
   const playbackRate = usePlaybackRateStore((state) => state.rate);
   const isEqualizerEnabled = useEqualizerStore((state) => state.isEnabled);
   const isSpatialEnabled = useSpatialStore((state) => state.isSpatialEnabled);
@@ -60,11 +60,11 @@ const AudioSettingsButton: React.FC = () => {
         sideOffset={10}
         className="w-[380px] p-0 bg-[#0a0a0f]/95 backdrop-blur-2xl border border-theme-500/20 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-xl overflow-hidden relative"
       >
-        {/* HUD陬・｣ｾ繧ｳ繝ｼ繝翫・ */}
+        {/* HUD装飾コーナー */}
         <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-theme-500/20 pointer-events-none z-20" />
         <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-theme-500/20 pointer-events-none z-20" />
 
-        {/* 繧ｿ繝悶・繝・ム繝ｼ */}
+        {/* タブヘッダー */}
         <div className="flex border-b border-theme-500/10 font-mono relative z-10">
           <button
             onClick={() => setActiveTab("effects")}
@@ -90,7 +90,7 @@ const AudioSettingsButton: React.FC = () => {
           </button>
         </div>
 
-        {/* 繧ｳ繝ｳ繝・Φ繝・お繝ｪ繧｢ */}
+        {/* コンテンツエリア */}
         <div className="p-6 max-h-[450px] overflow-y-auto custom-scrollbar relative z-10">
           {activeTab === "effects" ? (
             <SpeedAndEffectsControl />

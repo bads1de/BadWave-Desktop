@@ -28,9 +28,9 @@ const AccountPage = () => {
     try {
       await supabaseClient.auth.signOut();
       router.push("/");
-      toast.success("繝ｭ繧ｰ繧｢繧ｦ繝医＠縺ｾ縺励◆");
+      toast.success("ログアウトしました");
     } catch (error) {
-      toast.error("繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆");
+      toast.error("ログアウトに失敗しました");
     } finally {
       setIsLoading(false);
     }
@@ -38,9 +38,9 @@ const AccountPage = () => {
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto custom-scrollbar relative font-mono">
-      {/* 閭梧勹陬・｣ｾ */}
+      {/* 背景装飾 */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
-      
+
       <div className="relative z-10 px-6 py-8 md:px-10 lg:px-12 space-y-10">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
@@ -55,19 +55,19 @@ const AccountPage = () => {
         </div>
 
         <div className="space-y-12">
-          {/* 繝励Ο繝輔ぅ繝ｼ繝ｫ繧ｻ繧ｯ繧ｷ繝ｧ繝ｳ (HUD繧ｹ繧ｿ繧､繝ｫ) */}
+          {/* プレイヤーHUD */}
           <div className="relative bg-[#0a0a0f] border border-theme-500/10 p-8 rounded-none overflow-hidden group">
-            {/* HUD陬・｣ｾ */}
+            {/* HUD装飾 */}
             <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-theme-500/40 group-hover:border-theme-500 transition-all" />
             <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-theme-500/40 group-hover:border-theme-500 transition-all" />
-            
+
             <div className="relative flex flex-col md:flex-row items-start md:items-center gap-10">
               <div className="relative group/avatar">
                 <div className="relative w-32 h-32 md:w-40 md:h-40 border border-theme-500/30 p-1 bg-black/40">
-                   {/* Avatar corners */}
+                  {/* Avatar装飾 */}
                   <div className="absolute -top-0.5 -right-0.5 w-3 h-3 border-t border-r border-theme-500" />
                   <div className="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b border-l border-theme-500" />
-                  
+
                   <div className="relative w-full h-full overflow-hidden grayscale-[30%] group-hover/avatar:grayscale-0 transition-all duration-500">
                     <Image
                       src={user?.avatar_url || "/images/default-avatar.png"}
@@ -77,8 +77,8 @@ const AccountPage = () => {
                     />
                   </div>
                 </div>
-                
-                {/* Tech info floating */}
+
+                {/* ID表示 */}
                 <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-full text-center">
                   <span className="text-[8px] text-theme-500/60 uppercase tracking-[0.3em] font-black">
                     ID: 0x{user?.id?.substring(0, 8).toUpperCase() || "NULL"}
@@ -181,4 +181,3 @@ const AccountPage = () => {
 };
 
 export default AccountPage;
-

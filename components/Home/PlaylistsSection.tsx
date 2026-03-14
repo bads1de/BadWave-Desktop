@@ -7,9 +7,9 @@ interface PlaylistsSectionProps {
 }
 
 /**
- * 繝励Ξ繧､繝ｪ繧ｹ繝医そ繧ｯ繧ｷ繝ｧ繝ｳ繧ｳ繝ｳ繝昴・繝阪Φ繝・
+ * おすすめプレイリストセクションコンポーネント
  *
- * @param playlists - 繝励Ξ繧､繝ｪ繧ｹ繝医ョ繝ｼ繧ｿ
+ * @param playlists - おすすめプレイリスト一覧
  */
 const PlaylistsSection: React.FC<PlaylistsSectionProps> = ({ playlists }) => {
   return (
@@ -27,7 +27,7 @@ const PlaylistsSection: React.FC<PlaylistsSectionProps> = ({ playlists }) => {
       </div>
       <div className="relative">
         <PublicPlaylistBoard playlists={playlists} />
-        {/* HUD陬・｣ｾ閭梧勹 */}
+        {/* HUDのグラデーション */}
         <div className="absolute top-0 right-0 w-32 h-px bg-gradient-to-l from-theme-500/30 to-transparent" />
         <div className="absolute bottom-0 left-0 w-32 h-px bg-gradient-to-r from-theme-500/30 to-transparent" />
       </div>
@@ -36,4 +36,3 @@ const PlaylistsSection: React.FC<PlaylistsSectionProps> = ({ playlists }) => {
 };
 
 export default React.memo(PlaylistsSection);
-

@@ -1,7 +1,6 @@
 "use client";
 
 import usePlaylistModal from "@/hooks/modal/usePlaylistModal";
-import { useUser } from "@/hooks/auth/useUser";
 import React from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import Modal from "./Modal";

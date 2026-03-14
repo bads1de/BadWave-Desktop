@@ -4,7 +4,6 @@ import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
 import { RiPulseLine } from "react-icons/ri";
 
-import { useUser } from "@/hooks/auth/useUser";
 import usePulseUploadModal from "@/hooks/modal/usePulseUploadModal";
 import usePulseUploadMutation from "@/hooks/mutations/usePulseUploadMutation";
 
@@ -17,7 +16,6 @@ const PulseUploadModal: React.FC = memo(() => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const pulseUploadModal = usePulseUploadModal();
-  const { user } = useUser();
 
   const { mutateAsync, isPending: isLoading } =
     usePulseUploadMutation(pulseUploadModal);
@@ -55,7 +53,7 @@ const PulseUploadModal: React.FC = memo(() => {
         setAudioPreview(URL.createObjectURL(file));
       }
     },
-    [setValue]
+    [setValue],
   );
 
   const onChange = useCallback(
@@ -66,7 +64,7 @@ const PulseUploadModal: React.FC = memo(() => {
         pulseUploadModal.onClose();
       }
     },
-    [reset, pulseUploadModal]
+    [reset, pulseUploadModal],
   );
 
   const onSubmit: SubmitHandler<FieldValues> = useCallback(
@@ -84,7 +82,7 @@ const PulseUploadModal: React.FC = memo(() => {
         console.error("Pulse upload error:", error);
       }
     },
-    [mutateAsync, reset]
+    [mutateAsync, reset],
   );
 
   return (
