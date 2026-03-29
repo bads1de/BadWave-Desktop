@@ -1,17 +1,8 @@
-import { create } from "zustand";
+import { createModal } from "@/hooks/utils/createModal";
 
-// AuthModalの状態を管理するインターフェース
-interface AuthModalStore {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}
-
-// Zustandフックを使用してAuthModalの状態を管理するカスタムフック
-export const useAuthModal = create<AuthModalStore>((set) => ({
-  isOpen: false,
-  onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
-}));
+/**
+ * AuthModalの状態を管理するカスタムフック
+ */
+export const useAuthModal = createModal();
 
 export default useAuthModal;

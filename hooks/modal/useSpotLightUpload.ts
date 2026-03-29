@@ -1,15 +1,5 @@
-import { create } from "zustand";
+import { createModal } from "@/hooks/utils/createModal";
 
-interface SpotLightUploadModalStore {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}
-
-const useSpotLightUploadModal = create<SpotLightUploadModalStore>((set) => ({
-  isOpen: false,
-  onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
-}));
+const useSpotLightUploadModal = createModal();
 
 export default useSpotLightUploadModal;

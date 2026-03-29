@@ -8,9 +8,10 @@ import { CiHeart, CiPlay1 } from "react-icons/ci";
 import ScrollingText from "../common/ScrollingText";
 import { memo, useCallback, useState, useEffect, useMemo } from "react";
 import useDownloadSong from "@/hooks/utils/useDownloadSong";
-import { IoCloudDone, IoCloudOffline } from "react-icons/io5";
+import { IoCloudOffline } from "react-icons/io5";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { getPlayableImagePath } from "@/libs/songUtils";
+import DownloadIndicator from "../common/DownloadIndicator";
 
 interface SongItemProps {
   onClick: (id: string) => void;
@@ -155,20 +156,6 @@ const SongItem: React.FC<SongItemProps> = memo(({ onClick, data }) => {
     </div>
   );
 });
-
-const DownloadIndicator = ({ song }: { song: Song }) => {
-  // まずプロパティを確認、なければフックにフォールバック
-  const { isDownloaded: hookIsDownloaded } = useDownloadSong(song);
-  const isDownloaded = song.is_downloaded ?? hookIsDownloaded;
-
-  if (!isDownloaded) return null;
-
-  return (
-    <div className="flex items-center text-theme-500 drop-shadow-[0_0_8px_rgba(var(--theme-500),0.6)]">
-      <IoCloudDone size={12} />
-    </div>
-  );
-};
 
 // 表示名を設定
 SongItem.displayName = "SongItem";

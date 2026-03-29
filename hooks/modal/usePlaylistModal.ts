@@ -1,10 +1,4 @@
-import { create } from "zustand";
-
-interface PlaylistModalStore {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}
+import { createModal } from "@/hooks/utils/createModal";
 
 /**
  * プレイリストモーダルの状態を管理するカスタムフック
@@ -14,10 +8,6 @@ interface PlaylistModalStore {
  * @property {function} onOpen - モーダルを開く関数
  * @property {function} onClose - モーダルを閉じる関数
  */
-const usePlaylistModal = create<PlaylistModalStore>((set) => ({
-  isOpen: false,
-  onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
-}));
+const usePlaylistModal = createModal();
 
 export default usePlaylistModal;

@@ -1,17 +1,7 @@
 "use client";
 
-import { create } from "zustand";
+import { createModal } from "@/hooks/utils/createModal";
 
-interface PulseUploadModalStore {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}
-
-const usePulseUploadModal = create<PulseUploadModalStore>((set) => ({
-  isOpen: false,
-  onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
-}));
+const usePulseUploadModal = createModal();
 
 export default usePulseUploadModal;

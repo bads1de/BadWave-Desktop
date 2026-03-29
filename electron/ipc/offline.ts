@@ -4,7 +4,7 @@ import path from "path";
 import https from "https";
 import http from "http";
 import { fileURLToPath } from "url";
-import { toLocalPath } from "../utils";
+import { toLocalPath, mapDbSongToResponse } from "../utils";
 import { getDb } from "../db/client";
 import { songs } from "../db/schema";
 import { eq, isNotNull } from "drizzle-orm";

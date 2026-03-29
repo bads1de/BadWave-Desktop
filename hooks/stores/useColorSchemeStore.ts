@@ -1,5 +1,4 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createPersistedStore } from "@/hooks/utils/createPersistedStore";
 import {
   DEFAULT_COLOR_SCHEME_ID,
   getColorSchemeById,
@@ -8,28 +7,17 @@ import {
 
 interface ColorSchemeStore {
   colorSchemeId: string;
-  hasHydrated: boolean;
   getColorScheme: () => ColorScheme;
   setColorScheme: (id: string) => void;
-  setHasHydrated: (state: boolean) => void;
 }
 
-const useColorSchemeStore = create<ColorSchemeStore>()(
-  persist(
-    (set, get) => ({
-      colorSchemeId: DEFAULT_COLOR_SCHEME_ID,
-      hasHydrated: false,
-      getColorScheme: () => getColorSchemeById(get().colorSchemeId),
-      setColorScheme: (id: string) => set({ colorSchemeId: id }),
-      setHasHydrated: (state: boolean) => set({ hasHydrated: state }),
-    }),
-    {
-      name: "badwave-color-scheme",
-      onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
-      },
-    }
-  )
+const useColorSchemeStore = createPersistedStore<ColorSchemeStore>(
+  (set, get) => ({
+    colorSchemeId: DEFAULT_COLOR_SCHEME_ID,
+    getColorScheme: () => getColorSchemeById(get().colorSchemeId),
+    setColorScheme: (id: string) => set({ colorSchemeId: id }),
+  }),
+  "badwave-color-scheme",
 );
 
 export default useColorSchemeStore;

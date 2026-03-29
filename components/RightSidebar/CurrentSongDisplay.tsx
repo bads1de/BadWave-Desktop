@@ -3,12 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { CiPlay1 } from "react-icons/ci";
 import { AiOutlineHeart } from "react-icons/ai";
-import { BiChevronRight } from "react-icons/bi";
 import { Song } from "@/types";
 import { splitTags } from "@/libs/utils";
 import ScrollingText from "../common/ScrollingText";
-import useDownloadSong from "@/hooks/utils/useDownloadSong";
-import { IoCloudDone } from "react-icons/io5";
+import DownloadIndicator from "../common/DownloadIndicator";
 
 interface CurrentSongDisplayProps {
   song: Song;
@@ -102,7 +100,7 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
                 <span>AFF: {song.like_count}</span>
               </div>
               <div className="ml-auto">
-                <DownloadIndicator song={song} />
+                <DownloadIndicator song={song} size={20} />
               </div>
             </div>
           </div>
@@ -111,18 +109,6 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
     );
   },
 );
-
-const DownloadIndicator = ({ song }: { song: Song }) => {
-  const { isDownloaded } = useDownloadSong(song);
-
-  if (!isDownloaded) return null;
-
-  return (
-    <div className="flex items-center text-theme-500 drop-shadow-[0_0_8px_rgba(var(--theme-500),0.6)]">
-      <IoCloudDone size={20} />
-    </div>
-  );
-};
 
 CurrentSongDisplay.displayName = "CurrentSongDisplay";
 

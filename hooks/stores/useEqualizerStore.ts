@@ -19,41 +19,16 @@ export type EqBand = {
 export type EqPreset = {
   id: string;
   name: string;
-  gains: number[]; // 各バンドのゲイン値 (6要素)
+  gains: number[];
 };
 
-// プリセット定義
 export const EQ_PRESETS: EqPreset[] = [
-  {
-    id: "flat",
-    name: "Flat",
-    gains: [0, 0, 0, 0, 0, 0],
-  },
-  {
-    id: "bass-boost",
-    name: "Bass Boost",
-    gains: [8, 6, 2, 0, 0, 0],
-  },
-  {
-    id: "vocal",
-    name: "Vocal",
-    gains: [-2, 0, 4, 6, 4, 0],
-  },
-  {
-    id: "treble-boost",
-    name: "Treble Boost",
-    gains: [0, 0, 0, 2, 6, 8],
-  },
-  {
-    id: "rock",
-    name: "Rock",
-    gains: [5, 3, 0, 2, 4, 6],
-  },
-  {
-    id: "electronic",
-    name: "Electronic",
-    gains: [6, 4, 0, -2, 4, 6],
-  },
+  { id: "flat", name: "Flat", gains: [0, 0, 0, 0, 0, 0] },
+  { id: "bass-boost", name: "Bass Boost", gains: [8, 6, 2, 0, 0, 0] },
+  { id: "vocal", name: "Vocal", gains: [-2, 0, 4, 6, 4, 0] },
+  { id: "treble-boost", name: "Treble Boost", gains: [0, 0, 0, 2, 6, 8] },
+  { id: "rock", name: "Rock", gains: [5, 3, 0, 2, 4, 6] },
+  { id: "electronic", name: "Electronic", gains: [6, 4, 0, -2, 4, 6] },
 ];
 
 const DEFAULT_BANDS: EqBand[] = EQ_BANDS.map((band) => ({
@@ -74,7 +49,6 @@ interface EqualizerStore {
   setHasHydrated: (state: boolean) => void;
 }
 
-// ゲインを-12 ~ +12の範囲に制限
 const clampGain = (gain: number): number => {
   return Math.max(-12, Math.min(12, gain));
 };

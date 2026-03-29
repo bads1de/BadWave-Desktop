@@ -1,29 +1,17 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createPersistedStore } from "@/hooks/utils/createPersistedStore";
 
 interface SpatialStore {
   isSpatialEnabled: boolean;
   toggleSpatialEnabled: () => void;
-  hasHydrated: boolean;
-  setHasHydrated: (state: boolean) => void;
 }
 
-const useSpatialStore = create<SpatialStore>()(
-  persist(
-    (set) => ({
-      isSpatialEnabled: false,
-      toggleSpatialEnabled: () =>
-        set((state) => ({ isSpatialEnabled: !state.isSpatialEnabled })),
-      hasHydrated: false,
-      setHasHydrated: (state) => set({ hasHydrated: state }),
-    }),
-    {
-      name: "badwave-spatial-store",
-      onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
-      },
-    }
-  )
+const useSpatialStore = createPersistedStore<SpatialStore>(
+  (set) => ({
+    isSpatialEnabled: false,
+    toggleSpatialEnabled: () =>
+      set((state) => ({ isSpatialEnabled: !state.isSpatialEnabled })),
+  }),
+  "badwave-spatial-store",
 );
 
 export default useSpatialStore;

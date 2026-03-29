@@ -66,3 +66,57 @@ export function debugLog(message: string, ...args: any[]): void {
     console.log(message, ...args);
   }
 }
+
+/**
+ * DBの songs テーブルレコードをレンダラープロセス向けのレスポンス形式に変換する
+ *
+ * cache.ts・offline.ts の複数箇所で重複していたマッピングロジックを共通化。
+ *
+ * @param song - DBから取得した songs テーブルのレコード
+ * @param overrides - created_at など、呼び出し元ごとに異なるフィールドの上書き
+ * @returns レンダラープロセス向けの Song レスポンスオブジェクト
+ */
+export function mapDbSongToResponse(
+  song: {
+    id: string;
+    userId: string | null;
+    title: string;
+    author: string;
+    originalSongPath?: string | null;
+    originalImagePath?: string | null;
+    originalVideoPath?: string | null;
+    songPath?: string | null;
+    imagePath?: string | null;
+    videoPath?: string | null;
+    duration?: number | null;
+    genre?: string | null;
+    playCount?: number | null;
+    likeCount?: number | null;
+    lyrics?: string | null;
+    createdAt?: string | null;
+  },
+  overrides?: {
+    created_at?: string | null;
+    user_id?: string;
+  },
+) {
+  return {
+    id: song.id,
+    user_id: overrides?.user_id ?? song.userId ?? "",
+    title: song.title,
+    author: song.author,
+    song_path: song.originalSongPath || null,
+    image_path: song.originalImagePath || null,
+    video_path: song.originalVideoPath || null,
+    is_downloaded: !!song.songPath,
+    local_song_path: song.songPath || null,
+    local_image_path: song.imagePath || null,
+    local_video_path: song.videoPath || null,
+    duration: song.duration,
+    genre: song.genre,
+    count: String(song.playCount || 0),
+    like_count: String(song.likeCount || 0),
+    lyrics: song.lyrics || null,
+    created_at: overrides?.created_at ?? song.createdAt ?? null,
+  };
+}

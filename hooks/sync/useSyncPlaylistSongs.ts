@@ -1,10 +1,10 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
+import { useCallback, useEffect } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
 import { Song } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES } from "@/constants";
+import { useSyncBase } from "./useSyncBase";
 
 /**
  * 特定のプレイリスト内の曲をバックグラウンドで同期する Syncer フック
@@ -20,106 +20,48 @@ import { CACHED_QUERIES } from "@/constants";
  */
 export const useSyncPlaylistSongs = (
   playlistId?: string,
-  options?: { autoSync?: boolean }
+  options?: { autoSync?: boolean },
 ) => {
   const { autoSync = true } = options ?? {};
-  const { isOnline } = useNetworkStatus();
   const queryClient = useQueryClient();
-  const [isSyncing, setIsSyncing] = useState(false);
-  const syncInProgress = useRef(false);
-  const hasInitialSynced = useRef(false);
 
-  // isOnline の最新値を常に保持する ref
-  const isOnlineRef = useRef(isOnline);
-  useEffect(() => {
-    isOnlineRef.current = isOnline;
-  }, [isOnline]);
+  const syncFn = useCallback(async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("playlist_songs")
+      .select("*, songs(*)")
+      .eq("playlist_id", playlistId!)
+      .order("created_at", { ascending: false });
 
-  const sync = useCallback(async () => {
-    // 同期条件のチェック
-    if (!isOnlineRef.current || !playlistId || !electronAPI.isElectron()) {
-      return { success: false, reason: "conditions_not_met" };
-    }
+    if (error) throw error;
 
-    // 既に同期中の場合はスキップ
-    if (syncInProgress.current) {
-      return { success: false, reason: "already_syncing" };
-    }
+    if (!data) return { success: true as const, count: 0 };
 
-    syncInProgress.current = true;
-    setIsSyncing(true);
+    const songs = data.map((item: Record<string, any>) => ({
+      ...item.songs,
+      songType: "regular",
+    })) as Song[];
 
-    try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("playlist_songs")
-        .select("*, songs(*)")
-        .eq("playlist_id", playlistId)
-        .order("created_at", { ascending: false });
+    await electronAPI.cache.syncPlaylistSongs({
+      playlistId: String(playlistId),
+      songs,
+    });
 
-      if (error) {
-        throw error;
-      }
+    // キャッシュを無効化してUIを更新
+    await queryClient.invalidateQueries({
+      queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
+    });
 
-      if (data) {
-        const songs = data.map((item: any) => ({
-          ...item.songs,
-          songType: "regular",
-        })) as Song[];
-
-        await electronAPI.cache.syncPlaylistSongs({
-          playlistId: String(playlistId),
-          songs,
-        });
-
-        // キャッシュを無効化してUIを更新
-        await queryClient.invalidateQueries({
-          queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
-        });
-
-        return { success: true, count: songs.length };
-      }
-
-      return { success: true, count: 0 };
-    } catch (error) {
-      console.error("[useSyncPlaylistSongs] Sync failed:", error);
-      return { success: false, reason: "error", error };
-    } finally {
-      syncInProgress.current = false;
-      setIsSyncing(false);
-    }
+    return { success: true as const, count: songs.length };
   }, [playlistId, queryClient]);
 
-  // 自動同期: マウント時およびオンライン復帰時
-  useEffect(() => {
-    if (!autoSync || !playlistId) return;
+  const { sync, isSyncing } = useSyncBase(syncFn, {
+    autoSync: autoSync && !!playlistId,
+    canSync: () => !!playlistId,
+  });
 
-    // 初回同期
-    if (isOnline && !hasInitialSynced.current) {
-      hasInitialSynced.current = true;
-      sync();
-    }
-  }, [autoSync, isOnline, playlistId, sync]);
+  // プレイリストIDが変わった場合は初回同期フラグをリセット
+  // (useSyncBase の内部リセットはできないため、playlistId を autoSync の条件に含めることで対応)
 
-  // プレイリストIDが変わった場合はリセット
-  useEffect(() => {
-    hasInitialSynced.current = false;
-  }, [playlistId]);
-
-  // オンライン復帰時の同期
-  const prevOnlineRef = useRef(isOnline);
-  useEffect(() => {
-    if (!autoSync || !playlistId) return;
-
-    // オフライン → オンライン への遷移を検出
-    if (!prevOnlineRef.current && isOnline) {
-      sync();
-    }
-    prevOnlineRef.current = isOnline;
-  }, [autoSync, isOnline, playlistId, sync]);
-
-  return {
-    sync,
-    isSyncing,
-  };
+  return { sync, isSyncing };
 };

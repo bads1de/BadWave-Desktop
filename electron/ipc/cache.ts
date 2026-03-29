@@ -9,6 +9,7 @@ import {
   spotlights,
 } from "../db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
+import { mapDbSongToResponse } from "../utils";
 
 /**
  * IDを文字列に強制変換し、".0" などの浮動小数点表記を除去する
@@ -193,25 +194,31 @@ export function setupCacheHandlers() {
       return results.map((row) => {
         const liked_songs = row.liked_songs;
         const song = row.songs;
-        return {
-          id: song?.id || liked_songs.songId,
-          user_id: liked_songs.userId,
-          title: song?.title || "Unknown Title",
-          author: song?.author || "Unknown Author",
-          song_path: song?.originalSongPath || null,
-          image_path: song?.originalImagePath || null,
-          video_path: song?.originalVideoPath || null,
-          is_downloaded: !!song?.songPath,
-          local_song_path: song?.songPath || null,
-          local_image_path: song?.imagePath || null,
-          local_video_path: song?.videoPath || null,
-          count: String(song?.playCount || 0),
-          like_count: String(song?.likeCount || 0),
+        if (!song) {
+          return {
+            id: liked_songs.songId,
+            user_id: liked_songs.userId,
+            title: "Unknown Title",
+            author: "Unknown Author",
+            song_path: null,
+            image_path: null,
+            video_path: null,
+            is_downloaded: false,
+            local_song_path: null,
+            local_image_path: null,
+            local_video_path: null,
+            count: "0",
+            like_count: "0",
+            created_at: liked_songs.likedAt,
+            duration: null,
+            genre: null,
+            lyrics: null,
+          };
+        }
+        return mapDbSongToResponse(song, {
           created_at: liked_songs.likedAt,
-          duration: song?.duration || null,
-          genre: song?.genre || null,
-          lyrics: song?.lyrics || null,
-        };
+          user_id: liked_songs.userId,
+        });
       });
     } catch (error) {
       console.error("[IPC] get-cached-liked-songs error:", error);
@@ -251,25 +258,30 @@ export function setupCacheHandlers() {
       return results.map((row) => {
         const playlist_songs = row.playlist_songs;
         const song = row.songs;
-        return {
-          id: song?.id || playlist_songs.songId,
-          user_id: song?.userId || "",
-          title: song?.title || "Unknown Title",
-          author: song?.author || "Unknown Author",
-          song_path: song?.originalSongPath || null,
-          image_path: song?.originalImagePath || null,
-          video_path: song?.originalVideoPath || null,
-          is_downloaded: !!song?.songPath,
-          local_song_path: song?.songPath || null,
-          local_image_path: song?.imagePath || null,
-          local_video_path: song?.videoPath || null,
-          count: String(song?.playCount || 0),
-          like_count: String(song?.likeCount || 0),
+        if (!song) {
+          return {
+            id: playlist_songs.songId,
+            user_id: "",
+            title: "Unknown Title",
+            author: "Unknown Author",
+            song_path: null,
+            image_path: null,
+            video_path: null,
+            is_downloaded: false,
+            local_song_path: null,
+            local_image_path: null,
+            local_video_path: null,
+            count: "0",
+            like_count: "0",
+            created_at: playlist_songs.addedAt,
+            duration: null,
+            genre: null,
+            lyrics: null,
+          };
+        }
+        return mapDbSongToResponse(song, {
           created_at: playlist_songs.addedAt,
-          duration: song?.duration || null,
-          genre: song?.genre || null,
-          lyrics: song?.lyrics || null,
-        };
+        });
       });
     } catch (error) {
       return [];
@@ -418,25 +430,7 @@ export function setupCacheHandlers() {
             .where(inArray(songs.id, itemIds));
 
           results.forEach((s) =>
-            idMap.set(s.id, {
-              id: s.id,
-              user_id: s.userId,
-              title: s.title,
-              author: s.author,
-              song_path: s.originalSongPath || null,
-              image_path: s.originalImagePath || null,
-              video_path: s.originalVideoPath || null,
-              is_downloaded: !!s.songPath,
-              local_song_path: s.songPath || null,
-              local_image_path: s.imagePath || null,
-              local_video_path: s.videoPath || null,
-              duration: s.duration,
-              genre: s.genre,
-              count: String(s.playCount || 0),
-              like_count: String(s.likeCount || 0),
-              lyrics: s.lyrics,
-              created_at: s.createdAt || new Date().toISOString(),
-            })
+            idMap.set(s.id, mapDbSongToResponse(s))
           );
         }
 
@@ -468,25 +462,7 @@ export function setupCacheHandlers() {
           .limit(limit)
           .offset(offset);
 
-        return results.map((s) => ({
-          id: s.id,
-          user_id: s.userId,
-          title: s.title,
-          author: s.author,
-          song_path: s.originalSongPath || null,
-          image_path: s.originalImagePath || null,
-          video_path: s.originalVideoPath || null,
-          is_downloaded: !!s.songPath,
-          local_song_path: s.songPath || null,
-          local_image_path: s.imagePath || null,
-          local_video_path: s.videoPath || null,
-          duration: s.duration,
-          genre: s.genre,
-          count: String(s.playCount || 0),
-          like_count: String(s.likeCount || 0),
-          lyrics: s.lyrics,
-          created_at: s.createdAt || new Date().toISOString(),
-        }));
+        return results.map((s) => mapDbSongToResponse(s));
       } catch (error) {
         console.error("[IPC] get-songs-paginated error:", error);
         return [];
@@ -661,25 +637,7 @@ export function setupCacheHandlers() {
         return null;
       }
 
-      return {
-        id: song.id,
-        user_id: song.userId,
-        title: song.title,
-        author: song.author,
-        song_path: song.originalSongPath || "",
-        image_path: song.originalImagePath || "",
-        video_path: song.originalVideoPath || "",
-        is_downloaded: !!song.songPath,
-        local_song_path: song.songPath || undefined,
-        local_image_path: song.imagePath || undefined,
-        local_video_path: song.videoPath || undefined,
-        duration: song.duration,
-        genre: song.genre,
-        count: String(song.playCount || 0),
-        like_count: String(song.likeCount || 0),
-        lyrics: song.lyrics || undefined,
-        created_at: song.createdAt || new Date().toISOString(),
-      };
+      return mapDbSongToResponse(song);
     } catch (error: any) {
       console.error(`[IPC] get-song-by-id(${songId}) error:`, error);
       return null;

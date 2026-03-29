@@ -1,10 +1,4 @@
-import { create } from "zustand";
-
-interface UploadModalStore {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}
+import { createModal } from "@/hooks/utils/createModal";
 
 /**
  * アップロードモーダルの状態を管理するカスタムフック
@@ -14,10 +8,6 @@ interface UploadModalStore {
  * @property {function} onOpen - モーダルを開く関数
  * @property {function} onClose - モーダルを閉じる関数
  */
-export const useUploadModal = create<UploadModalStore>((set) => ({
-  isOpen: false,
-  onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
-}));
+export const useUploadModal = createModal();
 
 export default useUploadModal;
