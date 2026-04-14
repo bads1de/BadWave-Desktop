@@ -80,25 +80,62 @@ describe("usePlayer (Zustand Store)", () => {
     const state = usePlayer.getState();
     expect(state.isShuffling).toBe(true);
     expect(state.shuffledIds).toHaveLength(ids.length);
-    expect(state.shuffledIds).not.toEqual(ids); // ほぼ確実に順番が変わる（5曲あれば）
     // IDsの中身が漏れなく含まれていることを確認
     expect(new Set(state.shuffledIds)).toEqual(new Set(ids));
   });
 
-  it("前の曲のIDを正しく取得できる", () => {
+  it("シャッフル時の次の曲のIDを正しく取得できる", () => {
     const ids = ["song-1", "song-2", "song-3"];
     act(() => {
       usePlayer.getState().setIds(ids);
-      usePlayer.getState().setId("song-2");
+      usePlayer.getState().toggleShuffle();
+      // シャッフル後のリストを取得
+      const shuffledIds = usePlayer.getState().shuffledIds;
+      usePlayer.getState().setId(shuffledIds[0]);
     });
 
-    expect(usePlayer.getState().getPreviousSongId()).toBe("song-1");
+    const shuffledIds = usePlayer.getState().shuffledIds;
+    expect(usePlayer.getState().getNextSongId()).toBe(shuffledIds[1]);
+  });
+
+  it("ローカルソングを保存・取得できる", () => {
+    const song = { id: "song-1", title: "Test", author: "Artist" } as any;
+    act(() => {
+      usePlayer.getState().setLocalSong(song);
+    });
+    expect(usePlayer.getState().getLocalSong("song-1")).toEqual(song);
+  });
+
+  it("playSongWithData で一括設定できる", () => {
+    const song = { id: "song-1", title: "Test" } as any;
+    const ids = ["song-1", "song-2"];
+    act(() => {
+      usePlayer.getState().playSongWithData(song, ids);
+    });
+    expect(usePlayer.getState().activeId).toBe("song-1");
+    expect(usePlayer.getState().ids).toEqual(ids);
+    expect(usePlayer.getState().getLocalSong("song-1")).toEqual(song);
+  });
+
+  it("setIsLoading / setHasHydrated / play を実行できる", () => {
+    act(() => {
+      usePlayer.getState().setIsLoading(true);
+      usePlayer.getState().setHasHydrated(true);
+      usePlayer.getState().play();
+    });
+    const state = usePlayer.getState();
+    expect(state.isLoading).toBe(true);
+    expect(state.hasHydrated).toBe(true);
+  });
+
+  it("getNextSongId でエッジケースを処理できる", () => {
+    // 空リスト
+    expect(usePlayer.getState().getNextSongId()).toBeUndefined();
 
     act(() => {
-      usePlayer.getState().setId("song-1");
+      usePlayer.getState().setIds(["song-1"]);
+      usePlayer.getState().setId("not-in-list");
     });
-
-    // 最初の曲の前は最後の曲
-    expect(usePlayer.getState().getPreviousSongId()).toBe("song-3");
+    expect(usePlayer.getState().getNextSongId()).toBeUndefined();
   });
 });

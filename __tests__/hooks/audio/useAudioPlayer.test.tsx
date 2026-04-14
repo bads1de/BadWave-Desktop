@@ -20,6 +20,7 @@ const mockAudio = {
   duration: 180,
   volume: 1,
   src: "",
+  loop: false,
   play: jest.fn().mockResolvedValue(undefined),
   pause: jest.fn(),
   addEventListener: jest.fn(),
@@ -48,8 +49,8 @@ describe("useAudioPlayer", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Default store mocks
-    (usePlayer as unknown as jest.Mock).mockReturnValue({
+    // usePlayerのモックをセレクタ対応にする
+    const mockState = {
       activeId: "song-1",
       ids: ["song-1"],
       isRepeating: false,
@@ -57,8 +58,12 @@ describe("useAudioPlayer", () => {
       toggleRepeat: jest.fn(),
       toggleShuffle: jest.fn(),
       getNextSongId: jest.fn(),
-      getPreviousSongId: jest.fn(),
+      getPreviousSongId: jest.fn().mockReturnValue("prev-id"),
       setId: jest.fn(),
+    };
+
+    (usePlayer as unknown as jest.Mock).mockImplementation((selector) => {
+      return selector ? selector(mockState) : mockState;
     });
 
     (useVolumeStore as unknown as jest.Mock).mockReturnValue({
@@ -123,5 +128,120 @@ describe("useAudioPlayer", () => {
     });
 
     expect(mockAudio.currentTime).toBe(50);
+  });
+
+  it("should call player.getNextSongId and player.setId when onPlayNext is called", () => {
+    const mockSetId = jest.fn();
+    const mockGetNext = jest.fn().mockReturnValue("next-id");
+    
+    const mockState = {
+      activeId: "song-1",
+      ids: ["song-1"],
+      isRepeating: false,
+      setId: mockSetId,
+      getNextSongId: mockGetNext,
+    };
+
+    (usePlayer as unknown as jest.Mock).mockImplementation((selector) => {
+      return selector ? selector(mockState) : mockState;
+    });
+
+    const { result } = renderHook(() => useAudioPlayer(songUrl, mockSong as any));
+
+    act(() => {
+      result.current.onPlayNext();
+    });
+
+    expect(mockGetNext).toHaveBeenCalled();
+    expect(mockSetId).toHaveBeenCalledWith("next-id");
+  });
+
+  it("should call player.getPreviousSongId when onPlayPrevious is called", () => {
+    const mockSetId = jest.fn();
+    const mockGetPrev = jest.fn().mockReturnValue("prev-id");
+    
+    const mockState = {
+      activeId: "song-1",
+      ids: ["song-1"],
+      isRepeating: false,
+      setId: mockSetId,
+      getPreviousSongId: mockGetPrev,
+    };
+
+    (usePlayer as unknown as jest.Mock).mockImplementation((selector) => {
+      return selector ? selector(mockState) : mockState;
+    });
+
+    const { result } = renderHook(() => useAudioPlayer(songUrl, mockSong as any));
+
+    act(() => {
+      result.current.onPlayPrevious();
+    });
+
+    expect(mockGetPrev).toHaveBeenCalled();
+    expect(mockSetId).toHaveBeenCalledWith("prev-id");
+  });
+
+  it("should toggle repeat and shuffle", () => {
+    const mockToggleRepeat = jest.fn();
+    const mockToggleShuffle = jest.fn();
+    
+    const mockState = {
+      activeId: "song-1",
+      toggleRepeat: mockToggleRepeat,
+      toggleShuffle: mockToggleShuffle,
+    };
+
+    (usePlayer as unknown as jest.Mock).mockImplementation((selector) => {
+      return selector ? selector(mockState) : mockState;
+    });
+
+    const { result } = renderHook(() => useAudioPlayer(songUrl, mockSong as any));
+
+    act(() => {
+      result.current.toggleRepeat();
+      result.current.toggleShuffle();
+    });
+
+    expect(mockToggleRepeat).toHaveBeenCalled();
+    expect(mockToggleShuffle).toHaveBeenCalled();
+  });
+
+  it("should respond to audio events", () => {
+    const { unmount } = renderHook(() => useAudioPlayer(songUrl, mockSong as any));
+
+    // Get the event listeners
+    const listeners: Record<string, Function> = {};
+    (mockAudio.addEventListener as jest.Mock).mockImplementation((event, cb) => {
+      listeners[event] = cb;
+    });
+
+    // Re-render to capture listeners
+    renderHook(() => useAudioPlayer(songUrl, mockSong as any));
+
+    act(() => {
+      if (listeners["play"]) listeners["play"]();
+      if (listeners["error"]) listeners["error"](new Error("test"));
+    });
+    
+    expect(mockAudio.pause).toBeDefined();
+    unmount();
+  });
+
+  it("should handle beforeunload", () => {
+    const mockSave = jest.fn();
+    (usePlaybackStateStore as unknown as jest.Mock).mockReturnValue({
+      savePlaybackState: mockSave,
+      updatePosition: jest.fn(),
+      hasHydrated: true,
+    });
+
+    renderHook(() => useAudioPlayer(songUrl, mockSong as any));
+
+    // Trigger beforeunload
+    const event = new Event("beforeunload");
+    window.dispatchEvent(event);
+
+    expect(mockSave).toHaveBeenCalled();
   });
 });

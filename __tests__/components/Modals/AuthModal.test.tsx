@@ -41,9 +41,12 @@ describe("AuthModal", () => {
     await act(async () => {
       render(<AuthModal />);
     });
-    expect(screen.getByText("おかえりなさい")).toBeInTheDocument();
-    expect(screen.getByText("ログインしてください")).toBeInTheDocument();
+    // 「おかえりなさい」
+    expect(screen.getByText(/\u304a\u304b\u3048\u308a\u306a\u3055\u3044/i)).toBeInTheDocument();
+    // 「ログインしてください」
+    expect(screen.getByText(/\u30ed\u30b0\u30a4\u30f3\u3057\u3066\u304f\u3060\u3055\u3044/i)).toBeInTheDocument();
   });
+
 
   it("renders Supabase Auth component", async () => {
     await act(async () => {

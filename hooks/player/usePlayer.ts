@@ -113,22 +113,19 @@ const usePlayer = create<PlayerStore>()(
           return undefined;
         }
 
-        const currentIndex = ids.findIndex((id) => id === activeId);
-        if (currentIndex === -1) {
-          return undefined;
-        }
-
         if (isRepeating) {
           return activeId;
         }
 
-        let nextIndex: number;
-
         if (isShuffling) {
-          nextIndex = (currentIndex + 1) % shuffledIds.length;
+          const currentIndex = shuffledIds.findIndex((id) => id === activeId);
+          if (currentIndex === -1) return undefined;
+          const nextIndex = (currentIndex + 1) % shuffledIds.length;
           return shuffledIds[nextIndex];
         } else {
-          nextIndex = (currentIndex + 1) % ids.length;
+          const currentIndex = ids.findIndex((id) => id === activeId);
+          if (currentIndex === -1) return undefined;
+          const nextIndex = (currentIndex + 1) % ids.length;
           return ids[nextIndex];
         }
       },
@@ -139,26 +136,22 @@ const usePlayer = create<PlayerStore>()(
           return undefined;
         }
 
-        const currentIndex = ids.findIndex((id) => id === activeId);
-        if (currentIndex === -1) {
-          return undefined;
-        }
-
         if (isRepeating) {
           return activeId;
         }
 
-        let prevIndex: number;
-
         if (isShuffling) {
-          prevIndex =
+          const currentIndex = shuffledIds.findIndex((id) => id === activeId);
+          if (currentIndex === -1) return undefined;
+          const prevIndex =
             (currentIndex - 1 + shuffledIds.length) % shuffledIds.length;
           return shuffledIds[prevIndex];
         } else {
-          prevIndex = (currentIndex - 1 + ids.length) % ids.length;
+          const currentIndex = ids.findIndex((id) => id === activeId);
+          if (currentIndex === -1) return undefined;
+          const prevIndex = (currentIndex - 1 + ids.length) % ids.length;
+          return ids[prevIndex];
         }
-
-        return ids[prevIndex];
       },
       setIsLoading: (isLoading: boolean) => set({ isLoading }),
       setHasHydrated: (state: boolean) => set({ hasHydrated: state }),

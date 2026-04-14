@@ -52,7 +52,7 @@ const AuthModal = () => {
   return (
     <Modal
       title="おかえりなさい"
-      description="ログインしてください"
+      description="ログインしてください"
       isOpen={isOpen}
       onChange={onChange}
     >

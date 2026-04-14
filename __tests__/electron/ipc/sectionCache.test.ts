@@ -11,6 +11,11 @@ jest.mock("electron", () => ({
       mockHandlers.set(channel, listener);
     },
   },
+  app: {
+    isPackaged: false,
+    getAppPath: jest.fn().mockReturnValue("/test/path"),
+    getPath: jest.fn().mockReturnValue("/test/path"),
+  },
 }));
 
 // Mock db client
