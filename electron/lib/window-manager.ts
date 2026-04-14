@@ -87,7 +87,30 @@ export async function createMainWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "../preload/index.js"),
-      webSecurity: false, // ローカルファイルの読み込みを許可
+      // =========================================================================
+      // ✅ webSecurity: true（カスタムプロトコル方式に移行済み）
+      // =========================================================================
+      //
+      // 以前の課題:
+      //   webSecurity: false でローカルファイルを直接読み込んでいた
+      //   → 同一生成元ポリシー無効化、CORSスキップ、ローカルファイルアクセス可能
+      //
+      // 現在の解決策:
+      //   カスタムプロトコル `badwave://` を使用して安全にローカルファイルにアクセス
+      //   例: <audio src="badwave://C:/Users/buti3/Music/song.mp3" />
+      //
+      // プロトコル登録:
+      //   electron/lib/protocol.ts で `badwave://` プロトコルを登録済み
+      //   パストラバーサル攻撃防止（".." を含むパスを拒否）
+      //   プロトコルは `secure: true`, `supportFetchAPI: true` で登録
+      //
+      // 使用方法（Rendererプロセス）:
+      //   1. ローカルファイルパスを badwave:// に変換
+      //      const badwaveUrl = `badwave://${encodeURIComponent(filePath)}`;
+      //   2. <audio> タグで使用
+      //      <audio src={badwaveUrl} />
+      // =========================================================================
+      webSecurity: true, // カスタムプロトコル方式のため有効
       backgroundThrottling: false, // バックグラウンドでのスロットリングを無効化（オーディオ再生を維持）
     },
     // macOSでは背景色を設定しないとタイトルバーが白くなる
