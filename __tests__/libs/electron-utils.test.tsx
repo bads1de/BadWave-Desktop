@@ -14,8 +14,7 @@ describe("libs/electron", () => {
 
   beforeEach(() => {
     // windowオブジェクトのモックをリセット
-    // @ts-ignore
-    delete global.window.electron;
+    delete (global.window as any).electron;
   });
 
   afterEach(() => {
@@ -99,8 +98,7 @@ describe("libs/electron", () => {
     describe("in Web environment (Non-Electron)", () => {
       beforeEach(() => {
         // window.electron を undefined にする
-        // @ts-ignore
-        global.window.electron = undefined;
+        (global.window as any).electron = undefined;
       });
 
       it("getSongs should return empty array", async () => {

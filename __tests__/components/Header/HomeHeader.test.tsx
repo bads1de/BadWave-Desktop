@@ -84,8 +84,7 @@ describe("HomeHeader", () => {
 
     // スクロールをシミュレート
     act(() => {
-      // @ts-ignore
-      window.scrollY = 20;
+      (window as any).scrollY = 20;
       window.dispatchEvent(new Event("scroll"));
     });
 

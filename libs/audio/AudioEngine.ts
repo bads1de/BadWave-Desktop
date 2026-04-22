@@ -299,10 +299,8 @@ class AudioEngine {
 
     this.audio.preservesPitch = preserve;
     // クロスブラウザ対応
-    // @ts-ignore
-    this.audio.mozPreservesPitch = preserve;
-    // @ts-ignore
-    this.audio.webkitPreservesPitch = preserve;
+    (this.audio as any).mozPreservesPitch = preserve;
+    (this.audio as any).webkitPreservesPitch = preserve;
   }
 
   // ========================================
