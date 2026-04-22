@@ -37,8 +37,8 @@ export function isLocalFilePath(songPath: string | null | undefined): boolean {
     return false;
   }
 
-  // file://で始まる場合はローカルファイルパス
-  if (songPath.startsWith("file://")) {
+  // file:// または badwave:// で始まる場合はローカルファイルパス
+  if (songPath.startsWith("file://") || songPath.startsWith("badwave://")) {
     return true;
   }
 
@@ -50,27 +50,26 @@ export function isLocalFilePath(songPath: string | null | undefined): boolean {
 }
 
 /**
- * ローカルファイルパスをfile://スキーマ付きのURLに変換する
+ * ローカルファイルパスをbadwave://スキーマ付きのURLに変換する
  *
  * @param filePath - ローカルファイルパス
- * @returns file://スキーマ付きのURL
+ * @returns badwave://スキーマ付きのURL
  */
 export function toFileUrl(filePath: string): string {
-  if (filePath.startsWith("file://")) {
+  if (filePath.startsWith("badwave://")) {
     return filePath;
   }
 
-  // Windowsパスの場合
-  if (/^[A-Za-z]:\\/.test(filePath)) {
-    return `file:///${filePath.replace(/\\/g, "/")}`;
+  if (filePath.startsWith("file://")) {
+    // file:// を badwave:// に変換する
+    let rawPath = filePath.replace("file://", "");
+    if (rawPath.startsWith("/") && /^[A-Za-z]:/.test(rawPath.substring(1))) {
+      rawPath = rawPath.substring(1);
+    }
+    return `badwave://file/${encodeURIComponent(decodeURIComponent(rawPath))}`;
   }
 
-  // Unixパスの場合
-  if (filePath.startsWith("/")) {
-    return `file://${filePath}`;
-  }
-
-  return filePath;
+  return `badwave://file/${encodeURIComponent(filePath)}`;
 }
 
 /**
@@ -138,7 +137,7 @@ export function getPlayablePath(song: Song | null | undefined): string {
 
   // ダウンロード済みかつローカルパスが存在する場合はローカルパスを使用
   if (song.is_downloaded && song.local_song_path) {
-    return song.local_song_path;
+    return toFileUrl(song.local_song_path);
   }
 
   // それ以外の場合はリモートURLを使用
@@ -162,7 +161,7 @@ export function getPlayableImagePath(song: Song | null | undefined): string {
 
   // ダウンロード済みかつローカル画像パスが存在する場合はそれを使用
   if (song.is_downloaded && song.local_image_path) {
-    return song.local_image_path;
+    return toFileUrl(song.local_image_path);
   }
 
   // それ以外の場合はリモートURLを使用

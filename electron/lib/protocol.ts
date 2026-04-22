@@ -10,6 +10,8 @@ export function registerSchemes() {
         standard: true,
         secure: true,
         supportFetchAPI: true,
+        bypassCSP: true,
+        corsEnabled: true,
       },
     },
   ]);
@@ -73,6 +75,25 @@ function registerBadwaveProtocol() {
           HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"),
           { headers: { "Content-Type": "text/html" } }
         );
+      }
+    }
+
+    // ローカルファイルへのアクセス
+    if (urlObj.hostname === "file") {
+      try {
+        const encodedPath = urlObj.pathname.slice(1); // 先頭の '/' を削除
+        const filePath = decodeURIComponent(encodedPath);
+
+        // ディレクトリトラバーサル対策
+        if (filePath.includes("..")) {
+          return new Response("Forbidden", { status: 403 });
+        }
+
+        const { net } = require("electron");
+        return await net.fetch(url.pathToFileURL(filePath).toString());
+      } catch (err) {
+        console.error("Local file fetch error:", err);
+        return new Response("Not Found", { status: 404 });
       }
     }
 

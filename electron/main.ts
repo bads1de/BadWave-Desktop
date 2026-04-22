@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut } from "electron";
+import { app, BrowserWindow, globalShortcut, session } from "electron";
 import * as http from "http";
 import * as path from "path";
 import * as fs from "fs";
@@ -126,6 +126,24 @@ app.on("ready", async () => {
 
   // OAuthコールバック用のHTTPサーバーを起動
   startOAuthServer();
+
+  // 外部リソース（R2ストレージなど）のCORSヘッダーを強制追加
+  // 本番ではNext.jsが動的ポート（13000など）で起動するため、
+  // Cloudflare R2のCORSポリシーにブロックされる問題を回避する
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const headers = { ...details.responseHeaders };
+
+    // セキュリティ向上のため、Supabase/R2ストレージのドメインに対してのみCORSを許可する
+    const isR2Resource = details.url.includes(".r2.dev");
+
+    if (isR2Resource) {
+      // 既存のヘッダーがあっても強制的に書き換える（キャッシュによるポート不一致などを防ぐため）
+      headers["Access-Control-Allow-Origin"] = ["*"];
+      headers["Access-Control-Allow-Methods"] = ["GET, HEAD, OPTIONS"];
+      headers["Access-Control-Allow-Headers"] = ["*"];
+    }
+    callback({ responseHeaders: headers });
+  });
 
   const isDev = !app.isPackaged;
   debugLog(

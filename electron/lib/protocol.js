@@ -82,6 +82,8 @@ function registerSchemes() {
                 standard: true,
                 secure: true,
                 supportFetchAPI: true,
+                bypassCSP: true,
+                corsEnabled: true,
             },
         },
     ]);
@@ -104,31 +106,51 @@ function registerAppProtocol() {
 function registerBadwaveProtocol() {
     var _this = this;
     electron_1.protocol.handle("badwave", function (request) { return __awaiter(_this, void 0, void 0, function () {
-        var urlObj, code, error, BrowserWindow, mainWindow, BrowserWindow, mainWindow;
+        var urlObj, code, error, BrowserWindow, mainWindow, BrowserWindow, mainWindow, encodedPath, filePath, net, err_1;
         return __generator(this, function (_a) {
-            urlObj = new URL(request.url);
-            // 認証コールバックを処理
-            if (urlObj.pathname === "/auth/callback") {
-                code = urlObj.searchParams.get("code");
-                error = urlObj.searchParams.get("error");
-                if (error) {
-                    BrowserWindow = require("electron").BrowserWindow;
-                    mainWindow = BrowserWindow.getAllWindows()[0];
-                    if (mainWindow && !mainWindow.isDestroyed()) {
-                        mainWindow.webContents.send("auth-callback", { error: error });
+            switch (_a.label) {
+                case 0:
+                    urlObj = new URL(request.url);
+                    // 認証コールバックを処理
+                    if (urlObj.pathname === "/auth/callback") {
+                        code = urlObj.searchParams.get("code");
+                        error = urlObj.searchParams.get("error");
+                        if (error) {
+                            BrowserWindow = require("electron").BrowserWindow;
+                            mainWindow = BrowserWindow.getAllWindows()[0];
+                            if (mainWindow && !mainWindow.isDestroyed()) {
+                                mainWindow.webContents.send("auth-callback", { error: error });
+                            }
+                            return [2 /*return*/, new Response(HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } })];
+                        }
+                        if (code) {
+                            BrowserWindow = require("electron").BrowserWindow;
+                            mainWindow = BrowserWindow.getAllWindows()[0];
+                            if (mainWindow && !mainWindow.isDestroyed()) {
+                                mainWindow.webContents.send("auth-callback", { code: code });
+                            }
+                            return [2 /*return*/, new Response(HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } })];
+                        }
                     }
-                    return [2 /*return*/, new Response(HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } })];
-                }
-                if (code) {
-                    BrowserWindow = require("electron").BrowserWindow;
-                    mainWindow = BrowserWindow.getAllWindows()[0];
-                    if (mainWindow && !mainWindow.isDestroyed()) {
-                        mainWindow.webContents.send("auth-callback", { code: code });
+                    if (!(urlObj.hostname === "file")) return [3 /*break*/, 4];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    encodedPath = urlObj.pathname.slice(1);
+                    filePath = decodeURIComponent(encodedPath);
+                    // ディレクトリトラバーサル対策
+                    if (filePath.includes("..")) {
+                        return [2 /*return*/, new Response("Forbidden", { status: 403 })];
                     }
-                    return [2 /*return*/, new Response(HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } })];
-                }
+                    net = require("electron").net;
+                    return [4 /*yield*/, net.fetch(url.pathToFileURL(filePath).toString())];
+                case 2: return [2 /*return*/, _a.sent()];
+                case 3:
+                    err_1 = _a.sent();
+                    console.error("Local file fetch error:", err_1);
+                    return [2 /*return*/, new Response("Not Found", { status: 404 })];
+                case 4: return [2 /*return*/, new Response("Not Found", { status: 404 })];
             }
-            return [2 /*return*/, new Response("Not Found", { status: 404 })];
         });
     }); });
 }
