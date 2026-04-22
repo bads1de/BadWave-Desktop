@@ -123,18 +123,23 @@ export function DataTable<TData, TValue>({
                       onRowClick ? "cursor-pointer" : ""
                     } ${
                       index % 2 === 0 ? "bg-transparent" : "bg-theme-500/[0.02]"
-                    } hover:bg-theme-500/10 group/row relative overflow-hidden`}
+                    } hover:bg-theme-500/10 group/row relative`}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-4 relative z-10">
+                    {row.getVisibleCells().map((cell, cellIndex) => (
+                      <TableCell 
+                        key={cell.id} 
+                        className="py-4 relative"
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
                         )}
+                        {/* 行ホバー時のスキャンライン効果 - placed in first cell */}
+                        {cellIndex === 0 && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-theme-500/0 via-theme-500/[0.05] to-theme-500/0 translate-x-[-100%] group-hover/row:translate-x-[100%] transition-transform duration-1000 pointer-events-none -z-10" />
+                        )}
                       </TableCell>
                     ))}
-                    {/* 行ホバー時のスキャンライン効果 */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-theme-500/0 via-theme-500/[0.05] to-theme-500/0 translate-x-[-100%] group-hover/row:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
                   </TableRow>
                 ))
               ) : (
