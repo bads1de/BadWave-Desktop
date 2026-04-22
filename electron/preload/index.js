@@ -67,6 +67,8 @@ var AUTH_CHANNELS = [
     "save-cached-user",
     "get-cached-user",
     "clear-cached-user",
+    "auth:start-google-oauth",
+    "auth:open-oauth-window",
 ];
 var EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
 var TRANSCRIBE_CHANNELS = ["transcribe:generate-lrc"];
@@ -86,6 +88,8 @@ var ALLOWED_ON_CHANNELS = [
     "scan-progress",
     "mini-player:state-changed",
     "mini-player:request-state",
+    "auth-callback",
+    "auth-window-closed",
 ];
 var ALLOWED_SEND_CHANNELS = ["log", "player-state-change"];
 // Electronの機能をウィンドウオブジェクトに安全に公開
@@ -226,6 +230,14 @@ electron_1.contextBridge.exposeInMainWorld("electron", {
     },
     // 認証キャッシュ
     auth: {
+        // 外部ブラウザでGoogle認証を開始
+        startGoogleOAuth: function (authUrl) {
+            return electron_1.ipcRenderer.invoke("auth:start-google-oauth", authUrl);
+        },
+        // 認証用BrowserWindowを開く
+        openOAuthWindow: function (authUrl) {
+            return electron_1.ipcRenderer.invoke("auth:open-oauth-window", authUrl);
+        },
         // ユーザー情報を保存
         saveCachedUser: function (user) { return electron_1.ipcRenderer.invoke("save-cached-user", user); },
         // ユーザー情報を取得

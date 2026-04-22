@@ -46,6 +46,74 @@ var store = new electron_store_1.default();
 function setupAuthHandlers() {
     var _this = this;
     /**
+     * 外部ブラウザでGoogle認証を開始
+     */
+    electron_1.ipcMain.handle("auth:start-google-oauth", function (_, authUrl) { return __awaiter(_this, void 0, void 0, function () {
+        var error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    // デフォルトブラウザで認証URLを開く
+                    return [4 /*yield*/, electron_1.shell.openExternal(authUrl)];
+                case 1:
+                    // デフォルトブラウザで認証URLを開く
+                    _a.sent();
+                    return [2 /*return*/, { success: true }];
+                case 2:
+                    error_1 = _a.sent();
+                    console.error("[Auth] Failed to open auth URL:", error_1);
+                    return [2 /*return*/, { success: false, error: error_1.message }];
+                case 3: return [2 /*return*/];
+            }
+        });
+    }); });
+    /**
+     * 認証用BrowserWindowを開く
+     */
+    electron_1.ipcMain.handle("auth:open-oauth-window", function (_, authUrl) { return __awaiter(_this, void 0, void 0, function () {
+        var mainWindow_1, authWindow_1;
+        return __generator(this, function (_a) {
+            try {
+                mainWindow_1 = electron_1.BrowserWindow.getAllWindows()[0];
+                if (!mainWindow_1) {
+                    throw new Error("メインウィンドウが見つかりません");
+                }
+                authWindow_1 = new electron_1.BrowserWindow({
+                    parent: mainWindow_1,
+                    modal: true,
+                    show: false,
+                    width: 500,
+                    height: 600,
+                    webPreferences: {
+                        nodeIntegration: false,
+                        contextIsolation: true,
+                    },
+                });
+                authWindow_1.once("ready-to-show", function () {
+                    authWindow_1.show();
+                });
+                authWindow_1.loadURL(authUrl);
+                // 認証完了時にウィンドウを閉じる
+                authWindow_1.webContents.on("will-navigate", function (event, url) {
+                    if (url.includes("/auth/callback")) {
+                        authWindow_1.close();
+                    }
+                });
+                authWindow_1.on("closed", function () {
+                    // セッションをリフレッシュして認証完了を検知
+                    mainWindow_1.webContents.send("auth-window-closed");
+                });
+                return [2 /*return*/, { success: true }];
+            }
+            catch (error) {
+                console.error("[Auth] Failed to open auth window:", error);
+                return [2 /*return*/, { success: false, error: error.message }];
+            }
+            return [2 /*return*/];
+        });
+    }); });
+    /**
      * ユーザー情報をローカルに保存
      */
     electron_1.ipcMain.handle("save-cached-user", function (_, user) { return __awaiter(_this, void 0, void 0, function () {

@@ -65,6 +65,8 @@ const AUTH_CHANNELS = [
   "save-cached-user",
   "get-cached-user",
   "clear-cached-user",
+  "auth:start-google-oauth",
+  "auth:open-oauth-window",
 ];
 
 const EXTERNAL_CHANNELS = ["discord:set-activity", "discord:clear-activity"];
@@ -98,6 +100,8 @@ const ALLOWED_ON_CHANNELS = [
   "scan-progress",
   "mini-player:state-changed",
   "mini-player:request-state",
+  "auth-callback",
+  "auth-window-closed",
 ];
 
 const ALLOWED_SEND_CHANNELS = ["log", "player-state-change"];
@@ -225,6 +229,12 @@ contextBridge.exposeInMainWorld("electron", {
 
   // 認証キャッシュ
   auth: {
+    // 外部ブラウザでGoogle認証を開始
+    startGoogleOAuth: (authUrl: string) =>
+      ipcRenderer.invoke("auth:start-google-oauth", authUrl),
+    // 認証用BrowserWindowを開く
+    openOAuthWindow: (authUrl: string) =>
+      ipcRenderer.invoke("auth:open-oauth-window", authUrl),
     // ユーザー情報を保存
     saveCachedUser: (user: {
       id: string;

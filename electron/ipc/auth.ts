@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { ipcMain, shell, BrowserWindow } from "electron";
 import Store from "electron-store";
 
 interface CachedUser {
@@ -10,6 +10,68 @@ interface CachedUser {
 const store = new Store<{ cachedUser: CachedUser | null }>();
 
 export function setupAuthHandlers() {
+  /**
+   * 外部ブラウザでGoogle認証を開始
+   */
+  ipcMain.handle("auth:start-google-oauth", async (_, authUrl: string) => {
+    try {
+      // デフォルトブラウザで認証URLを開く
+      await shell.openExternal(authUrl);
+      return { success: true };
+    } catch (error: any) {
+      console.error("[Auth] Failed to open auth URL:", error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  /**
+   * 認証用BrowserWindowを開く
+   */
+  ipcMain.handle("auth:open-oauth-window", async (_, authUrl: string) => {
+    try {
+      const mainWindow = BrowserWindow.getAllWindows()[0];
+      if (!mainWindow) {
+        throw new Error("メインウィンドウが見つかりません");
+      }
+
+      // 認証用の小さなBrowserWindowを作成
+      const authWindow = new BrowserWindow({
+        parent: mainWindow,
+        modal: true,
+        show: false,
+        width: 500,
+        height: 600,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+        },
+      });
+
+      authWindow.once("ready-to-show", () => {
+        authWindow.show();
+      });
+
+      authWindow.loadURL(authUrl);
+
+      // 認証完了時にウィンドウを閉じる
+      authWindow.webContents.on("will-navigate", (event, url) => {
+        if (url.includes("/auth/callback")) {
+          authWindow.close();
+        }
+      });
+
+      authWindow.on("closed", () => {
+        // セッションをリフレッシュして認証完了を検知
+        mainWindow.webContents.send("auth-window-closed");
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      console.error("[Auth] Failed to open auth window:", error);
+      return { success: false, error: error.message };
+    }
+  });
+
   /**
    * ユーザー情報をローカルに保存
    */
