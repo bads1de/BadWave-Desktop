@@ -42,13 +42,13 @@ describe("useSyncTrends", () => {
   it("トレンド曲を同期する", async () => {
     const mockData = [{ id: "s-1", title: "Trend Song", count: 100 }];
     
-    const mockFilter = jest.fn().mockReturnThis();
+    const mockGte = jest.fn().mockReturnThis();
     const mockOrder = jest.fn().mockReturnThis();
     const mockLimit = jest.fn().mockResolvedValue({ data: mockData, error: null });
     
     mockFrom.mockReturnValue({
       select: jest.fn().mockReturnThis(),
-      filter: mockFilter,
+      gte: mockGte,
       order: mockOrder,
       limit: mockLimit,
     });
@@ -66,7 +66,7 @@ describe("useSyncTrends", () => {
     });
 
     expect(syncResult).toEqual({ success: true, count: 1 });
-    expect(mockFilter).toHaveBeenCalled();
+    expect(mockGte).toHaveBeenCalled();
     expect(window.electron.cache.syncSongsMetadata).toHaveBeenCalledWith(mockData);
     expect(window.electron.cache.syncSection).toHaveBeenCalledWith({
       key: "trend_day",
@@ -77,13 +77,13 @@ describe("useSyncTrends", () => {
   it("期間指定なし(all)の場合はフィルタなしで同期する", async () => {
     const mockData = [{ id: "s-1", title: "Trend All", count: 200 }];
     
-    const mockFilter = jest.fn().mockReturnThis();
+    const mockGte = jest.fn().mockReturnThis();
     const mockOrder = jest.fn().mockReturnThis();
     const mockLimit = jest.fn().mockResolvedValue({ data: mockData, error: null });
     
     mockFrom.mockReturnValue({
       select: jest.fn().mockReturnThis(),
-      filter: mockFilter,
+      gte: mockGte,
       order: mockOrder,
       limit: mockLimit,
     });
@@ -97,7 +97,7 @@ describe("useSyncTrends", () => {
       await result.current.sync();
     });
 
-    expect(mockFilter).not.toHaveBeenCalled();
+    expect(mockGte).not.toHaveBeenCalled();
     expect(mockOrder).toHaveBeenCalled();
   });
 });

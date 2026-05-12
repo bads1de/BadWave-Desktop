@@ -52,17 +52,17 @@ describe("songUtils", () => {
   });
 
   describe("toFileUrl", () => {
-    it("既にfile://で始まる場合はそのまま返す", () => {
-      const path = "file:///C:/path/song.mp3";
+    it("既にbadwave://で始まる場合はそのまま返す", () => {
+      const path = "badwave://file/C%3A%2Fpath%2Fsong.mp3";
       expect(toFileUrl(path)).toBe(path);
     });
 
-    it("Windowsパスをfile:// URLに変換する", () => {
-      expect(toFileUrl("C:\\path\\song.mp3")).toBe("file:///C:/path/song.mp3");
+    it("Windowsパスをbadwave:// URLに変換する", () => {
+      expect(toFileUrl("C:\\path\\song.mp3")).toBe("badwave://file/C%3A%5Cpath%5Csong.mp3");
     });
 
-    it("Unixパスをfile:// URLに変換する", () => {
-      expect(toFileUrl("/path/song.mp3")).toBe("file:///path/song.mp3");
+    it("Unixパスをbadwave:// URLに変換する", () => {
+      expect(toFileUrl("/path/song.mp3")).toBe("badwave://file/%2Fpath%2Fsong.mp3");
     });
   });
 
