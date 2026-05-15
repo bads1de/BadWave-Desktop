@@ -2,6 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Song } from "@/types";
 
+// Map <-> 配列 の変換ヘルパー（JSON永続化用）
+type LocalSongEntry = [string, Song];
+
 interface PlayerStore {
   ids: string[];
   activeId?: string;
@@ -159,14 +162,27 @@ const usePlayer = create<PlayerStore>()(
     }),
     {
       name: "badwave-player",
-      // localSongs, isLoading, hasHydrated は永続化から除外
+      // isLoading, hasHydrated は永続化から除外
       partialize: (state) => ({
         ids: state.ids,
         activeId: state.activeId,
         isRepeating: state.isRepeating,
         isShuffling: state.isShuffling,
         shuffledIds: state.shuffledIds,
+        // Mapを配列に変換して永続化
+        localSongs: Array.from(state.localSongs.entries()) as LocalSongEntry[],
       }),
+      // 復元時に配列をMapに変換
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as any;
+        return {
+          ...currentState,
+          ...persisted,
+          localSongs: persisted?.localSongs
+            ? new Map<string, Song>(persisted.localSongs as LocalSongEntry[])
+            : currentState.localSongs,
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

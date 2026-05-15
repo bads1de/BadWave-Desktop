@@ -49,11 +49,43 @@ export function isLocalFilePath(songPath: string | null | undefined): boolean {
   return isWindowsPath || isUnixPath;
 }
 
+// 許可されるメディアファイルの拡張子
+const ALLOWED_MEDIA_EXTENSIONS = new Set([
+  ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
+  ".m4a", ".wma", ".alac", ".aiff", ".webm",
+  ".mp4", ".m4v", ".avi", ".mkv",
+]);
+
+/**
+ * ローカルファイルパスが安全かどうかを検証する
+ *
+ * @param filePath - 検証するファイルパス
+ * @returns 安全な場合true
+ */
+export function isValidLocalFilePath(filePath: string): boolean {
+  // ディレクトリトラバーサル対策
+  if (filePath.includes("..")) {
+    return false;
+  }
+
+  // 拡張子チェック（音声/動画ファイルのみ許可）
+  const extMatch = filePath.match(/\.[^.]+$/);
+  if (!extMatch) {
+    return false;
+  }
+  const ext = extMatch[0].toLowerCase();
+  if (!ALLOWED_MEDIA_EXTENSIONS.has(ext)) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * ローカルファイルパスをbadwave://スキーマ付きのURLに変換する
  *
  * @param filePath - ローカルファイルパス
- * @returns badwave://スキーマ付きのURL
+ * @returns badwave://スキーマ付きのURL（検証失敗時は空文字）
  */
 export function toFileUrl(filePath: string): string {
   if (filePath.startsWith("badwave://")) {
@@ -66,7 +98,17 @@ export function toFileUrl(filePath: string): string {
     if (rawPath.startsWith("/") && /^[A-Za-z]:/.test(rawPath.substring(1))) {
       rawPath = rawPath.substring(1);
     }
-    return `badwave://file/${encodeURIComponent(decodeURIComponent(rawPath))}`;
+    if (!isValidLocalFilePath(rawPath)) {
+      console.warn("Blocked invalid local file path:", rawPath);
+      return "";
+    }
+    return `badwave://file/${encodeURIComponent(rawPath)}`;
+  }
+
+  // パス検証
+  if (!isValidLocalFilePath(filePath)) {
+    console.warn("Blocked invalid local file path:", filePath);
+    return "";
   }
 
   return `badwave://file/${encodeURIComponent(filePath)}`;
@@ -137,7 +179,8 @@ export function getPlayablePath(song: Song | null | undefined): string {
 
   // ダウンロード済みかつローカルパスが存在する場合はローカルパスを使用
   if (song.is_downloaded && song.local_song_path) {
-    return toFileUrl(song.local_song_path);
+    const localUrl = toFileUrl(song.local_song_path);
+    if (localUrl) return localUrl;
   }
 
   // それ以外の場合はリモートURLを使用
@@ -161,7 +204,8 @@ export function getPlayableImagePath(song: Song | null | undefined): string {
 
   // ダウンロード済みかつローカル画像パスが存在する場合はそれを使用
   if (song.is_downloaded && song.local_image_path) {
-    return toFileUrl(song.local_image_path);
+    const localUrl = toFileUrl(song.local_image_path);
+    if (localUrl) return localUrl;
   }
 
   // それ以外の場合はリモートURLを使用

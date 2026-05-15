@@ -157,7 +157,13 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
       }
     };
     const handleError = (e: Event) => {
-      console.error("Audio error:", e);
+      const mediaError = audio.error;
+      console.error("Audio error:", {
+        code: mediaError?.code,
+        message: mediaError?.message,
+        src: audio.src,
+        event: e,
+      });
       setIsPlaying(false);
     };
 
@@ -202,7 +208,12 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
     audio.currentTime = 0;
 
     if (isLocalFile) {
-      audio.src = toFileUrl(songUrl);
+      const localUrl = toFileUrl(songUrl);
+      if (!localUrl) {
+        console.error("Invalid local file path:", songUrl);
+        return;
+      }
+      audio.src = localUrl;
     } else {
       audio.src = songUrl;
     }

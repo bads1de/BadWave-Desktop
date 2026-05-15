@@ -8,6 +8,9 @@ jest.mock("electron", () => ({
   ipcMain: {
     handle: jest.fn(),
   },
+  app: {
+    getPath: jest.fn().mockReturnValue("/tmp/userData"),
+  },
 }));
 
 const mockStore = {

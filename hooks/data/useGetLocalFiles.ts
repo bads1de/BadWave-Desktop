@@ -61,6 +61,7 @@ interface CachedFilesResult {
  */
 interface MetadataResult {
   metadata?: any;
+  albumArtPath?: string;
   fromCache?: boolean;
   error?: string;
 }
@@ -80,10 +81,16 @@ interface LocalFilesData {
  */
 const BATCH_SIZE = 10;
 
+interface MetadataWithArt {
+  metadata: any;
+  image_path?: string;
+  error?: string;
+}
+
 async function fetchMissingMetadataInBatches(
   filesNeedingMetadata: string[]
-): Promise<Map<string, any>> {
-  const metadataMap = new Map<string, any>();
+): Promise<Map<string, MetadataWithArt>> {
+  const metadataMap = new Map<string, MetadataWithArt>();
 
   if (filesNeedingMetadata.length === 0) {
     return metadataMap;
@@ -92,22 +99,23 @@ async function fetchMissingMetadataInBatches(
   for (let i = 0; i < filesNeedingMetadata.length; i += BATCH_SIZE) {
     const batch = filesNeedingMetadata.slice(i, i + BATCH_SIZE);
     const batchResults = await Promise.all(
-      batch.map(async (path: string) => {
+      batch.map(async (filePath: string) => {
         try {
-          const metadataResult: MetadataResult =
-            await window.electron.ipc.invoke("handle-get-mp3-metadata", path);
+          const result: MetadataResult =
+            await window.electron.ipc.invoke("handle-get-mp3-metadata", filePath);
           return {
-            path,
-            metadata: metadataResult.metadata,
-            error: metadataResult.error,
+            path: filePath,
+            metadata: result.metadata,
+            image_path: result.albumArtPath,
+            error: result.error,
           };
         } catch (err: any) {
-          return { path, metadata: null, error: err.message };
+          return { path: filePath, metadata: null, error: err.message };
         }
       })
     );
-    batchResults.forEach(({ path, metadata }) => {
-      metadataMap.set(path, metadata);
+    batchResults.forEach(({ path, metadata, image_path }) => {
+      metadataMap.set(path, { metadata, image_path });
     });
   }
 
@@ -273,9 +281,11 @@ const useGetLocalFiles = (directoryPath: string | null) => {
           if (fileInfo.metadata) {
             return { path: fileInfo.path, metadata: fileInfo.metadata };
           } else if (fetchedMetadata.has(fileInfo.path)) {
+            const fetched = fetchedMetadata.get(fileInfo.path)!;
             return {
               path: fileInfo.path,
-              metadata: fetchedMetadata.get(fileInfo.path),
+              metadata: fetched.metadata,
+              image_path: fetched.image_path,
             };
           } else {
             return {

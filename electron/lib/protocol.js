@@ -73,6 +73,7 @@ exports.registerSchemes = registerSchemes;
 exports.registerProtocolHandlers = registerProtocolHandlers;
 var electron_1 = require("electron");
 var url = __importStar(require("url"));
+var localFileHandler_1 = require("./localFileHandler");
 // カスタムプロトコルのスキームを登録（app ready前に呼び出す必要あり）
 function registerSchemes() {
     electron_1.protocol.registerSchemesAsPrivileged([
@@ -84,15 +85,14 @@ function registerSchemes() {
                 supportFetchAPI: true,
                 bypassCSP: true,
                 corsEnabled: true,
+                stream: true,
             },
         },
     ]);
 }
 // プロトコルハンドラーの登録
 function registerProtocolHandlers() {
-    // appプロトコルのハンドラー
     registerAppProtocol();
-    // badwaveプロトコルのハンドラー（認証コールバック用）
     registerBadwaveProtocol();
 }
 // appプロトコルのハンドラーを登録
@@ -102,59 +102,45 @@ function registerAppProtocol() {
         callback(filePath);
     });
 }
-// badwaveプロトコルのハンドラーを登録（認証コールバック用）
+// badwaveプロトコルのハンドラーを登録
 function registerBadwaveProtocol() {
     var _this = this;
     electron_1.protocol.handle("badwave", function (request) { return __awaiter(_this, void 0, void 0, function () {
-        var urlObj, code, error, BrowserWindow, mainWindow, BrowserWindow, mainWindow, encodedPath, filePath, net, err_1;
+        var urlObj;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    urlObj = new URL(request.url);
-                    // 認証コールバックを処理
-                    if (urlObj.pathname === "/auth/callback") {
-                        code = urlObj.searchParams.get("code");
-                        error = urlObj.searchParams.get("error");
-                        if (error) {
-                            BrowserWindow = require("electron").BrowserWindow;
-                            mainWindow = BrowserWindow.getAllWindows()[0];
-                            if (mainWindow && !mainWindow.isDestroyed()) {
-                                mainWindow.webContents.send("auth-callback", { error: error });
-                            }
-                            return [2 /*return*/, new Response(HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } })];
-                        }
-                        if (code) {
-                            BrowserWindow = require("electron").BrowserWindow;
-                            mainWindow = BrowserWindow.getAllWindows()[0];
-                            if (mainWindow && !mainWindow.isDestroyed()) {
-                                mainWindow.webContents.send("auth-callback", { code: code });
-                            }
-                            return [2 /*return*/, new Response(HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } })];
-                        }
-                    }
-                    if (!(urlObj.hostname === "file")) return [3 /*break*/, 4];
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    encodedPath = urlObj.pathname.slice(1);
-                    filePath = decodeURIComponent(encodedPath);
-                    // ディレクトリトラバーサル対策
-                    if (filePath.includes("..")) {
-                        return [2 /*return*/, new Response("Forbidden", { status: 403 })];
-                    }
-                    net = require("electron").net;
-                    return [4 /*yield*/, net.fetch(url.pathToFileURL(filePath).toString())];
-                case 2: return [2 /*return*/, _a.sent()];
-                case 3:
-                    err_1 = _a.sent();
-                    console.error("Local file fetch error:", err_1);
-                    return [2 /*return*/, new Response("Not Found", { status: 404 })];
-                case 4: return [2 /*return*/, new Response("Not Found", { status: 404 })];
+            urlObj = new URL(request.url);
+            // 認証コールバック
+            if (urlObj.pathname === "/auth/callback") {
+                return [2 /*return*/, handleAuthCallback(urlObj)];
             }
+            // ローカルファイルへのアクセス
+            if (urlObj.hostname === "file") {
+                return [2 /*return*/, (0, localFileHandler_1.serveLocalFile)(request, urlObj)];
+            }
+            return [2 /*return*/, new Response("Not Found", { status: 404 })];
         });
     }); });
+}
+// 認証コールバックの処理
+function handleAuthCallback(urlObj) {
+    var code = urlObj.searchParams.get("code");
+    var error = urlObj.searchParams.get("error");
+    var BrowserWindow = require("electron").BrowserWindow;
+    var mainWindow = BrowserWindow.getAllWindows()[0];
+    if (error) {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send("auth-callback", { error: error });
+        }
+        return new Response(HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } });
+    }
+    if (code) {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send("auth-callback", { code: code });
+        }
+        return new Response(HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"), { headers: { "Content-Type": "text/html" } });
+    }
+    return new Response("Bad Request", { status: 400 });
 }
 function HTMLResponse(message) {
     return "\n    <!DOCTYPE html>\n    <html>\n    <head>\n      <meta charset=\"UTF-8\">\n      <title>\u8A8D\u8A3C\u5B8C\u4E86</title>\n      <style>\n        body {\n          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n          display: flex;\n          justify-content: center;\n          align-items: center;\n          height: 100vh;\n          margin: 0;\n          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n          color: white;\n        }\n        .container {\n          text-align: center;\n          padding: 40px;\n          background: rgba(255, 255, 255, 0.1);\n          border-radius: 20px;\n          backdrop-filter: blur(10px);\n        }\n        h1 { margin-bottom: 20px; }\n        p { font-size: 18px; }\n      </style>\n    </head>\n    <body>\n      <div class=\"container\">\n        <h1>\uD83C\uDF89</h1>\n        <p>".concat(message, "</p>\n      </div>\n    </body>\n    </html>\n  ");
 }
-//# sourceMappingURL=protocol.js.map

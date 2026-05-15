@@ -1,5 +1,6 @@
-import { protocol, app } from "electron";
+import { protocol } from "electron";
 import * as url from "url";
+import { serveLocalFile } from "./localFileHandler";
 
 // カスタムプロトコルのスキームを登録（app ready前に呼び出す必要あり）
 export function registerSchemes() {
@@ -12,6 +13,7 @@ export function registerSchemes() {
         supportFetchAPI: true,
         bypassCSP: true,
         corsEnabled: true,
+        stream: true,
       },
     },
   ]);
@@ -19,9 +21,7 @@ export function registerSchemes() {
 
 // プロトコルハンドラーの登録
 export function registerProtocolHandlers() {
-  // appプロトコルのハンドラー
   registerAppProtocol();
-  // badwaveプロトコルのハンドラー（認証コールバック用）
   registerBadwaveProtocol();
 }
 
@@ -29,10 +29,7 @@ export function registerProtocolHandlers() {
 function registerAppProtocol() {
   protocol.registerFileProtocol(
     "app",
-    (
-      request: Electron.ProtocolRequest,
-      callback: (response: string) => void
-    ) => {
+    (request, callback) => {
       const filePath = url.fileURLToPath(
         "file://" + request.url.slice("app://".length)
       );
@@ -41,64 +38,54 @@ function registerAppProtocol() {
   );
 }
 
-// badwaveプロトコルのハンドラーを登録（認証コールバック用）
+// badwaveプロトコルのハンドラーを登録
 function registerBadwaveProtocol() {
   protocol.handle("badwave", async (request) => {
     const urlObj = new URL(request.url);
 
-    // 認証コールバックを処理
+    // 認証コールバック
     if (urlObj.pathname === "/auth/callback") {
-      const code = urlObj.searchParams.get("code");
-      const error = urlObj.searchParams.get("error");
-
-      if (error) {
-        // メインウィンドウにエラーを送信
-        const { BrowserWindow } = require("electron");
-        const mainWindow = BrowserWindow.getAllWindows()[0];
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("auth-callback", { error });
-        }
-        return new Response(
-          HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"),
-          { headers: { "Content-Type": "text/html" } }
-        );
-      }
-
-      if (code) {
-        // 認証コードをIPC経由でレンダラープロセスに送信
-        const { BrowserWindow } = require("electron");
-        const mainWindow = BrowserWindow.getAllWindows()[0];
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("auth-callback", { code });
-        }
-        return new Response(
-          HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"),
-          { headers: { "Content-Type": "text/html" } }
-        );
-      }
+      return handleAuthCallback(urlObj);
     }
 
     // ローカルファイルへのアクセス
     if (urlObj.hostname === "file") {
-      try {
-        const encodedPath = urlObj.pathname.slice(1); // 先頭の '/' を削除
-        const filePath = decodeURIComponent(encodedPath);
-
-        // ディレクトリトラバーサル対策
-        if (filePath.includes("..")) {
-          return new Response("Forbidden", { status: 403 });
-        }
-
-        const { net } = require("electron");
-        return await net.fetch(url.pathToFileURL(filePath).toString());
-      } catch (err) {
-        console.error("Local file fetch error:", err);
-        return new Response("Not Found", { status: 404 });
-      }
+      return serveLocalFile(request, urlObj);
     }
 
     return new Response("Not Found", { status: 404 });
   });
+}
+
+// 認証コールバックの処理
+function handleAuthCallback(urlObj: URL): Response {
+  const code = urlObj.searchParams.get("code");
+  const error = urlObj.searchParams.get("error");
+
+  const { BrowserWindow } = require("electron");
+  const mainWindow = BrowserWindow.getAllWindows()[0];
+
+  if (error) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("auth-callback", { error });
+    }
+    return new Response(
+      HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"),
+      { headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  if (code) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("auth-callback", { code });
+    }
+    return new Response(
+      HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"),
+      { headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  return new Response("Bad Request", { status: 400 });
 }
 
 function HTMLResponse(message: string): string {

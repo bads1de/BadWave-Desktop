@@ -5,6 +5,7 @@ import {
   generateLocalSongId,
   extractFilePathFromLocalId,
   getDownloadFilename,
+  isValidLocalFilePath,
 } from "@/libs/songUtils";
 import { Song } from "@/types";
 
@@ -48,6 +49,31 @@ describe("songUtils", () => {
     it("nullやundefinedの場合はfalseを返す", () => {
       expect(isLocalFilePath(null)).toBe(false);
       expect(isLocalFilePath(undefined)).toBe(false);
+    });
+  });
+
+  describe("isValidLocalFilePath", () => {
+    it("音声ファイルの拡張子は許可する", () => {
+      expect(isValidLocalFilePath("C:\\Music\\song.mp3")).toBe(true);
+      expect(isValidLocalFilePath("C:\\Music\\song.wav")).toBe(true);
+      expect(isValidLocalFilePath("C:\\Music\\song.flac")).toBe(true);
+      expect(isValidLocalFilePath("C:\\Music\\song.ogg")).toBe(true);
+      expect(isValidLocalFilePath("C:\\Music\\song.m4a")).toBe(true);
+    });
+
+    it("ディレクトリトラバーサルを拒否する", () => {
+      expect(isValidLocalFilePath("C:\\Music\\..\\Windows\\system32\\file.mp3")).toBe(false);
+      expect(isValidLocalFilePath("/music/../../../etc/passwd.mp3")).toBe(false);
+    });
+
+    it("許可されない拡張子を拒否する", () => {
+      expect(isValidLocalFilePath("C:\\Music\\file.exe")).toBe(false);
+      expect(isValidLocalFilePath("C:\\Music\\file.bat")).toBe(false);
+      expect(isValidLocalFilePath("C:\\Music\\file.js")).toBe(false);
+    });
+
+    it("拡張子なしを拒否する", () => {
+      expect(isValidLocalFilePath("C:\\Music\\noext")).toBe(false);
     });
   });
 

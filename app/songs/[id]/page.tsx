@@ -39,7 +39,7 @@ import { getRandomColor } from "@/libs/utils";
 import useAudioWaveStore from "@/hooks/audio/useAudioWave";
 import useDownloadSong from "@/hooks/utils/useDownloadSong";
 import { electronAPI } from "@/libs/electron";
-import { isLocalSong } from "@/libs/songUtils";
+import { isLocalSong, getPlayableImagePath } from "@/libs/songUtils";
 
 interface SongPageProps {
   params: Promise<{
@@ -180,7 +180,7 @@ const SongPage = (props: SongPageProps) => {
         {/* Hero Section */}
         <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
           <Image
-            src={song?.image_path || "/images/loading.gif"}
+            src={song ? getPlayableImagePath(song) : "/images/loading.gif"}
             alt="Song Cover"
             fill
             className="object-cover opacity-20 grayscale scale-110 blur-[10px]"
@@ -200,7 +200,7 @@ const SongPage = (props: SongPageProps) => {
               onEnded={handlePlaybackEnded}
               primaryColor={primaryColor}
               secondaryColor={secondaryColor}
-              imageUrl={song.image_path!}
+              imageUrl={getPlayableImagePath(song)}
               songId={songId}
             />
           </div>
@@ -228,7 +228,7 @@ const SongPage = (props: SongPageProps) => {
                     
                     <div className="relative w-full h-full overflow-hidden border border-theme-500/40">
                       <Image
-                        src={song?.image_path || "/images/wait.jpg"}
+                        src={song ? getPlayableImagePath(song) : "/images/wait.jpg"}
                         alt="Song Cover"
                         fill
                         className="object-cover transition-all duration-1000 group-hover:scale-125"

@@ -1,10 +1,57 @@
-import { ipcMain } from "electron";
+import { ipcMain, app } from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import * as mm from "music-metadata";
+import * as crypto from "crypto";
 import store from "../lib/store";
 import { debugLog } from "../utils";
 import { getMainWindow } from "../lib/window-manager";
+
+// サポートされている音声ファイルの拡張子
+const SUPPORTED_AUDIO_EXTENSIONS = new Set([
+  ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
+  ".m4a", ".wma", ".alac", ".aiff", ".webm",
+]);
+
+function isSupportedAudioFile(fileName: string): boolean {
+  const ext = path.extname(fileName).toLowerCase();
+  return SUPPORTED_AUDIO_EXTENSIONS.has(ext);
+}
+
+// アルバムアート保存先ディレクトリ
+const ALBUM_ART_DIR = path.join(app.getPath("userData"), "album_art");
+
+/**
+ * アルバムアートを保存してパスを返す
+ */
+async function saveAlbumArt(filePath: string, picture: mm.IPicture): Promise<string | null> {
+  try {
+    // 保存先ディレクトリが存在しない場合は作成
+    await fs.promises.mkdir(ALBUM_ART_DIR, { recursive: true });
+
+    // ファイルパスからユニークなファイル名を生成
+    const hash = crypto.createHash("md5").update(filePath).digest("hex");
+    const ext = picture.format === "image/png" ? ".png" : ".jpg";
+    const artFileName = `${hash}${ext}`;
+    const artFilePath = path.join(ALBUM_ART_DIR, artFileName);
+
+    // 既に存在する場合はスキップ
+    try {
+      await fs.promises.access(artFilePath);
+      return artFilePath;
+    } catch {
+      // ファイルが存在しない場合は作成
+    }
+
+    // 画像データを保存
+    await fs.promises.writeFile(artFilePath, picture.data);
+    debugLog(`[AlbumArt] 保存完了: ${artFilePath}`);
+    return artFilePath;
+  } catch (err) {
+    debugLog(`[AlbumArt] 保存失敗: ${filePath}`, err);
+    return null;
+  }
+}
 
 // 音楽ライブラリのデータを保存するためのストアキー
 const MUSIC_LIBRARY_KEY = "music_library";
@@ -90,11 +137,8 @@ export function setupLibraryHandlers() {
               // サブディレクトリを再帰的にスキャン
               const subFiles = await scanDirectory(fullPath);
               files.push(...subFiles);
-            } else if (
-              entry.isFile() &&
-              path.extname(entry.name).toLowerCase() === ".mp3"
-            ) {
-              // MP3ファイルのみを追加
+            } else if (entry.isFile() && isSupportedAudioFile(entry.name)) {
+              // サポートされている音声ファイルを追加
               files.push(fullPath);
             }
           }
@@ -360,13 +404,19 @@ export function setupLibraryHandlers() {
       // メタデータを取得
       const metadata = await mm.parseFile(filePath);
 
+      // アルバムアートを保存
+      let albumArtPath: string | null = null;
+      if (metadata.common.picture && metadata.common.picture.length > 0) {
+        albumArtPath = await saveAlbumArt(filePath, metadata.common.picture[0]);
+      }
+
       // ペンディングキューに追加（即座に保存しない）
       pendingMetadataUpdates.set(filePath, { metadata, lastModified });
 
       // 遅延保存をスケジュール
       debouncedSaveLibrary();
 
-      return { metadata, fromCache: false };
+      return { metadata, albumArtPath, fromCache: false };
     } catch (error: any) {
       debugLog(`[Error] メタデータの取得に失敗: ${filePath}`, error);
 
