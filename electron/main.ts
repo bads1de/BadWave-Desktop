@@ -74,6 +74,7 @@ import { setupDiscordHandlers } from "./ipc/discord";
 import { setupTranscriptionHandlers } from "./ipc/transcribe";
 import { setupMiniPlayerHandlers } from "./ipc/mini-player";
 import { setupDevShortcuts } from "./shortcuts";
+import { setupThumbBarHandlers } from "./lib/thumbbar";
 import { runMigrations } from "./db/migrate";
 
 // 環境変数を読み込む
@@ -116,6 +117,9 @@ function setupIPC() {
 
   // ミニプレイヤーハンドラーのセットアップ
   setupMiniPlayerHandlers();
+
+  // サムネイルツールバー（タスクバー再生コントロール）ハンドラーのセットアップ
+  setupThumbBarHandlers();
 }
 
 // アプリケーションの準備完了時の処理
@@ -155,8 +159,8 @@ app.on("ready", async () => {
     debugLog("ローカル開発サーバー(http://localhost:3000)に接続を試みます...");
   } else {
     debugLog("本番モードで起動しています");
-    createMainWindow();
   }
+  createMainWindow();
 
   setupTray();
   setupDevShortcuts();

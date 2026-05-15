@@ -2,6 +2,7 @@ import { BrowserWindow, shell, app, screen } from "electron";
 import * as path from "path";
 import { isDev, debugLog } from "../utils";
 import { startNextServer, stopNextServer } from "./server";
+import { setupThumbBar } from "./thumbbar";
 
 // グローバル参照を保持（ガベージコレクションを防ぐため）
 let mainWindow: BrowserWindow | null = null;
@@ -202,6 +203,9 @@ export async function createMainWindow() {
       stopNextServer();
     }
   });
+
+  // Windowsタスクバーのサムネイルツールバーを設定
+  setupThumbBar(mainWindow);
 
   return mainWindow;
 }

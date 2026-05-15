@@ -41,6 +41,13 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
     });
   }, []);
 
+  // 再生状態をメインプロセスに送信（タスクバーサムネイルツールバー用）
+  useEffect(() => {
+    if (!isElectron()) return;
+
+    window.electron.ipc.send("player-state-change", { isPlaying });
+  }, [isPlaying]);
+
   // 状態再送信リクエストのリスナーを登録
   useEffect(() => {
     if (!isElectron()) return;

@@ -78,6 +78,7 @@ var electron_1 = require("electron");
 var path = __importStar(require("path"));
 var utils_1 = require("../utils");
 var server_1 = require("./server");
+var thumbbar_1 = require("./thumbbar");
 // グローバル参照を保持（ガベージコレクションを防ぐため）
 var mainWindow = null;
 var miniPlayerWindow = null;
@@ -264,6 +265,8 @@ function createMainWindow() {
                             (0, server_1.stopNextServer)();
                         }
                     });
+                    // Windowsタスクバーのサムネイルツールバーを設定
+                    (0, thumbbar_1.setupThumbBar)(mainWindow);
                     return [2 /*return*/, mainWindow];
             }
         });
