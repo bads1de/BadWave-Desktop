@@ -161,9 +161,9 @@ class AudioEngine {
       currentNode.connect(this.stereoPanner);
       currentNode = this.stereoPanner;
 
-      // Retro Filters 接続
+      // Retro Filters 接続 (HighPass -> LowPass -> Distortion)
       currentNode.connect(this.retroHighPass);
-      currentNode.connect(this.retroLowPass);
+      this.retroHighPass.connect(this.retroLowPass);
       currentNode = this.retroLowPass;
 
       // Distortion 接続

@@ -86,9 +86,19 @@ var electron_1 = require("electron");
 var fs = __importStar(require("fs"));
 var path = __importStar(require("path"));
 var mm = __importStar(require("music-metadata"));
+var crypto = __importStar(require("crypto"));
 var store_1 = __importDefault(require("../lib/store"));
 var utils_1 = require("../utils");
 var window_manager_1 = require("../lib/window-manager");
+// サポートされている音声ファイルの拡張子
+var SUPPORTED_AUDIO_EXTENSIONS = new Set([
+    ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
+    ".m4a", ".wma", ".alac", ".aiff", ".webm",
+]);
+function isSupportedAudioFile(fileName) {
+    var ext = path.extname(fileName).toLowerCase();
+    return SUPPORTED_AUDIO_EXTENSIONS.has(ext);
+}
 // 音楽ライブラリのデータを保存するためのストアキー
 var MUSIC_LIBRARY_KEY = "music_library";
 var MUSIC_LIBRARY_LAST_SCAN_KEY = "music_library_last_scan";
@@ -155,9 +165,8 @@ function setupLibraryHandlers() {
                                         files.push.apply(files, subFiles);
                                         return [3 /*break*/, 5];
                                     case 4:
-                                        if (entry.isFile() &&
-                                            path.extname(entry.name).toLowerCase() === ".mp3") {
-                                            // MP3ファイルのみを追加
+                                        if (entry.isFile() && isSupportedAudioFile(entry.name)) {
+                                            // サポートされている音声ファイルを追加
                                             files.push(fullPath);
                                         }
                                         _a.label = 5;
@@ -255,6 +264,7 @@ function setupLibraryHandlers() {
                             return {
                                 path: filePath,
                                 metadata: (fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata) || null,
+                                albumArtData: (fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.albumArtData) || null,
                                 needsMetadata: !(fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata), // メタデータ取得が必要かどうか
                             };
                         });
@@ -336,6 +346,7 @@ function setupLibraryHandlers() {
                     return ({
                         path: filePath,
                         metadata: fileInfo.metadata || null,
+                        albumArtData: fileInfo.albumArtData || null,
                     });
                 });
                 return [2 /*return*/, {
@@ -372,6 +383,7 @@ function setupLibraryHandlers() {
                             };
                         }
                         savedLibrary_1.files[filePath].metadata = update.metadata;
+                        savedLibrary_1.files[filePath].albumArtData = update.albumArtData;
                         savedLibrary_1.files[filePath].lastModified = update.lastModified;
                         delete savedLibrary_1.files[filePath].error;
                     });
@@ -384,7 +396,7 @@ function setupLibraryHandlers() {
         }, 1000); // 1秒間の遅延でバッチ保存
     };
     electron_1.ipcMain.handle("handle-get-mp3-metadata", function (_, filePath) { return __awaiter(_this, void 0, void 0, function () {
-        var savedLibrary, stats, lastModified, metadata, error_3, savedLibrary;
+        var savedLibrary, stats, lastModified, metadata, albumArtData, picture, base64, error_3, savedLibrary;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -401,18 +413,26 @@ function setupLibraryHandlers() {
                         savedLibrary.files[filePath].lastModified === lastModified) {
                         return [2 /*return*/, {
                                 metadata: savedLibrary.files[filePath].metadata,
+                                albumArtData: savedLibrary.files[filePath].albumArtData || null,
                                 fromCache: true,
                             }];
                     }
                     return [4 /*yield*/, mm.parseFile(filePath)];
                 case 2:
                     metadata = _a.sent();
+                    // アルバムアートをbase64 data URLに変換
+                    albumArtData = null;
+                    if (metadata.common.picture && metadata.common.picture.length > 0) {
+                        picture = metadata.common.picture[0];
+                        base64 = picture.data.toString("base64");
+                        albumArtData = "data:".concat(picture.format, ";base64,").concat(base64);
+                    }
                     // ペンディングキューに追加（即座に保存しない）
-                    pendingMetadataUpdates.set(filePath, { metadata: metadata, lastModified: lastModified });
+                    pendingMetadataUpdates.set(filePath, { metadata: metadata, albumArtData: albumArtData, lastModified: lastModified });
                     // 遅延保存をスケジュール
                     debouncedSaveLibrary();
-                    return [2 /*return*/, { metadata: metadata, fromCache: false }];
-                case 3:
+                    return [2 /*return*/, { metadata: metadata, albumArtData: albumArtData, fromCache: false }];
+                case 5:
                     error_3 = _a.sent();
                     (0, utils_1.debugLog)("[Error] \u30E1\u30BF\u30C7\u30FC\u30BF\u306E\u53D6\u5F97\u306B\u5931\u6557: ".concat(filePath), error_3);
                     savedLibrary = store_1.default.get(MUSIC_LIBRARY_KEY);
@@ -421,7 +441,7 @@ function setupLibraryHandlers() {
                         store_1.default.set(MUSIC_LIBRARY_KEY, savedLibrary);
                     }
                     return [2 /*return*/, { error: error_3.message }];
-                case 4: return [2 /*return*/];
+                case 6: return [2 /*return*/];
             }
         });
     }); });

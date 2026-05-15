@@ -88,7 +88,16 @@ export function isValidLocalFilePath(filePath: string): boolean {
  * @returns badwave://スキーマ付きのURL（検証失敗時は空文字）
  */
 export function toFileUrl(filePath: string): string {
+  if (!filePath) {
+    return "";
+  }
+
   if (filePath.startsWith("badwave://")) {
+    return filePath;
+  }
+
+  // data URLの場合はそのまま返す
+  if (filePath.startsWith("data:")) {
     return filePath;
   }
 

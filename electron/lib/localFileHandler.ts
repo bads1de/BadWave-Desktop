@@ -18,6 +18,11 @@ const MIME_TYPES: Record<string, string> = {
   ".m4v": "video/mp4",
   ".avi": "video/x-msvideo",
   ".mkv": "video/x-matroska",
+  // オフラインDL用画像
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
 };
 
 /**
@@ -34,6 +39,12 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
       return new Response("Forbidden", { status: 403 });
     }
 
+    // 拡張子チェック（メディアファイルのみ許可）
+    const ext = path.extname(filePath).toLowerCase();
+    if (!ext || !MIME_TYPES[ext]) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
     // ファイルの存在確認
     if (!fs.existsSync(filePath)) {
       return new Response("Not Found", { status: 404 });
@@ -41,8 +52,7 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
 
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || "application/octet-stream";
+    const contentType = MIME_TYPES[ext];
 
     // Rangeリクエストの処理
     const rangeHeader = request.headers.get("Range");

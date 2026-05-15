@@ -4,10 +4,22 @@ import path from "path";
 describe("toLocalPath", () => {
   const isWindows = process.platform === "win32";
 
-  it("should return the original string if it does not start with file:", () => {
+  it("should return the original string if it does not start with file: or badwave://", () => {
     expect(toLocalPath("/some/path")).toBe("/some/path");
     expect(toLocalPath("C:\\some\\path")).toBe("C:\\some\\path");
     expect(toLocalPath("http://example.com")).toBe("http://example.com");
+  });
+
+  it("should convert badwave://file/ URL to local path", () => {
+    const encoded = encodeURIComponent("C:/Users/test/Music/song.mp3");
+    const url = `badwave://file/${encoded}`;
+    expect(toLocalPath(url)).toBe("C:/Users/test/Music/song.mp3");
+  });
+
+  it("should handle badwave:// with encoded spaces", () => {
+    const encoded = encodeURIComponent("C:/Users/test/My Music/song.mp3");
+    const url = `badwave://file/${encoded}`;
+    expect(toLocalPath(url)).toBe("C:/Users/test/My Music/song.mp3");
   });
 
   it("should convert simple file:// URL to path", () => {

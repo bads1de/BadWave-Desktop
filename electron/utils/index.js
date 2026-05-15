@@ -52,19 +52,24 @@ var fs = __importStar(require("fs"));
 var dotenv = __importStar(require("dotenv"));
 var url_1 = require("url");
 /**
- * file:// URLをローカルパスに変換するヘルパー
- * Node.jsの標準機能を使用してクロスプラットフォーム対応
+ * file:// または badwave:// URLをローカルパスに変換するヘルパー
  *
  * @param {string} fileUrl - 変換するファイルURL
  * @returns {string} ローカルファイルパス
  */
 var toLocalPath = function (fileUrl) {
     try {
-        // file:// プロトコルでない場合はそのまま返す
-        if (!fileUrl.startsWith("file:")) {
+        if (fileUrl.startsWith("badwave://")) {
+            var urlObj = new URL(fileUrl);
+            if (urlObj.hostname === "file") {
+                return decodeURIComponent(urlObj.pathname.slice(1));
+            }
             return fileUrl;
         }
-        return (0, url_1.fileURLToPath)(fileUrl);
+        if (fileUrl.startsWith("file:")) {
+            return (0, url_1.fileURLToPath)(fileUrl);
+        }
+        return fileUrl;
     }
     catch (e) {
         console.error("Error converting file URL to path: ".concat(fileUrl), e);

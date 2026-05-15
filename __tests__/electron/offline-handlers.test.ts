@@ -21,8 +21,8 @@ describe("Offline IPC Handlers - DB Operations", () => {
     userId: "user-123",
     title: "Downloaded Song 1",
     author: "Artist 1",
-    songPath: "file://C:/Users/test/offline_storage/songs/offline-song-1.mp3",
-    imagePath: "file://C:/Users/test/offline_storage/images/offline-song-1.jpg",
+    songPath: "badwave://file/C%3A%2FUsers%2Ftest%2Foffline_storage%2Fsongs%2Foffline-song-1.mp3",
+    imagePath: "badwave://file/C%3A%2FUsers%2Ftest%2Foffline_storage%2Fimages%2Foffline-song-1.jpg",
     originalSongPath: "https://supabase.co/storage/songs/song1.mp3",
     originalImagePath: "https://supabase.co/storage/images/song1.jpg",
     duration: 180,
@@ -37,8 +37,8 @@ describe("Offline IPC Handlers - DB Operations", () => {
     userId: "user-123",
     title: "Downloaded Song 2",
     author: "Artist 2",
-    songPath: "file://C:/Users/test/offline_storage/songs/offline-song-2.mp3",
-    imagePath: "file://C:/Users/test/offline_storage/images/offline-song-2.jpg",
+    songPath: "badwave://file/C%3A%2FUsers%2Ftest%2Foffline_storage%2Fsongs%2Foffline-song-2.mp3",
+    imagePath: "badwave://file/C%3A%2FUsers%2Ftest%2Foffline_storage%2Fimages%2Foffline-song-2.jpg",
     originalSongPath: "https://supabase.co/storage/songs/song2.mp3",
     originalImagePath: "https://supabase.co/storage/images/song2.jpg",
     duration: 240,
@@ -113,8 +113,8 @@ describe("Offline IPC Handlers - DB Operations", () => {
       expect(song1?.duration).toBe(180);
       expect(song1?.genre).toBe("Pop");
       expect(song1?.lyrics).toBe("Test lyrics 1");
-      expect(song1?.songPath).toContain("file://");
-      expect(song1?.imagePath).toContain("file://");
+      expect(song1?.songPath).toContain("badwave://");
+      expect(song1?.imagePath).toContain("badwave://");
     });
 
     test("should return empty array when no songs are downloaded", async () => {
@@ -212,8 +212,8 @@ describe("Offline IPC Handlers - DB Operations", () => {
         userId: "user-123",
         title: "New Downloaded Song",
         author: "New Artist",
-        songPath: "file://C:/Users/test/offline_storage/songs/new-song.mp3",
-        imagePath: "file://C:/Users/test/offline_storage/images/new-song.jpg",
+        songPath: "badwave://file/C%3A%2FUsers%2Ftest%2Foffline_storage%2Fsongs%2Fnew-song.mp3",
+        imagePath: "badwave://file/C%3A%2FUsers%2Ftest%2Foffline_storage%2Fimages%2Fnew-song.jpg",
         originalSongPath: "https://supabase.co/storage/songs/new.mp3",
         originalImagePath: "https://supabase.co/storage/images/new.jpg",
         duration: 300,
@@ -234,7 +234,7 @@ describe("Offline IPC Handlers - DB Operations", () => {
 
       expect(inserted).toBeDefined();
       expect(inserted?.title).toBe("New Downloaded Song");
-      expect(inserted?.songPath).toContain("file://");
+      expect(inserted?.songPath).toContain("badwave://");
     });
 
     test("should update existing song when re-downloading", async () => {

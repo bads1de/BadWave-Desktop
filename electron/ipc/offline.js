@@ -134,7 +134,7 @@ var setupOfflineDownloadHandlers = function () {
                     finalLocalImagePath_1 = null;
                     if (song.image_path) {
                         downloadTasks.push(downloadFile_1(song.image_path, localImagePath_1).then(function () {
-                            finalLocalImagePath_1 = "file://".concat(localImagePath_1);
+                            finalLocalImagePath_1 = "badwave://file/".concat(encodeURIComponent(localImagePath_1));
                         }));
                     }
                     return [4 /*yield*/, Promise.all(downloadTasks)];
@@ -146,7 +146,7 @@ var setupOfflineDownloadHandlers = function () {
                         title: song.title,
                         author: song.author,
                         // ローカルパス (独自のプロトコル形式)
-                        songPath: "file://".concat(localSongPath),
+                        songPath: "badwave://file/".concat(encodeURIComponent(localSongPath)),
                         imagePath: finalLocalImagePath_1,
                         // 元のリモートURL (再ダウンロードなどの参照用)
                         originalSongPath: song.song_path,

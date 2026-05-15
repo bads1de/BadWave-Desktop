@@ -126,7 +126,7 @@ export const setupOfflineDownloadHandlers = () => {
       if (song.image_path) {
         downloadTasks.push(
           downloadFile(song.image_path, localImagePath).then(() => {
-            finalLocalImagePath = `file://${localImagePath}`;
+            finalLocalImagePath = `badwave://file/${encodeURIComponent(localImagePath)}`;
           }),
         );
       }
@@ -141,7 +141,7 @@ export const setupOfflineDownloadHandlers = () => {
         author: song.author,
 
         // ローカルパス (独自のプロトコル形式)
-        songPath: `file://${localSongPath}`,
+        songPath: `badwave://file/${encodeURIComponent(localSongPath)}`,
         imagePath: finalLocalImagePath,
 
         // 元のリモートURL (再ダウンロードなどの参照用)

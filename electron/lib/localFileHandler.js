@@ -53,6 +53,11 @@ var MIME_TYPES = {
     ".m4v": "video/mp4",
     ".avi": "video/x-msvideo",
     ".mkv": "video/x-matroska",
+    // オフラインDL用画像
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
 };
 /**
  * ローカルファイルへのリクエストを処理する
@@ -66,14 +71,18 @@ function serveLocalFile(request, urlObj) {
         if (filePath.includes("..")) {
             return new Response("Forbidden", { status: 403 });
         }
+        // 拡張子チェック（メディアファイルのみ許可）
+        var ext = path.extname(filePath).toLowerCase();
+        if (!ext || !MIME_TYPES[ext]) {
+            return new Response("Forbidden", { status: 403 });
+        }
         // ファイルの存在確認
         if (!fs.existsSync(filePath)) {
             return new Response("Not Found", { status: 404 });
         }
         var stat = fs.statSync(filePath);
         var fileSize = stat.size;
-        var ext = path.extname(filePath).toLowerCase();
-        var contentType = MIME_TYPES[ext] || "application/octet-stream";
+        var contentType = MIME_TYPES[ext];
         // Rangeリクエストの処理
         var rangeHeader = request.headers.get("Range");
         if (rangeHeader) {
@@ -122,3 +131,4 @@ function serveLocalFile(request, urlObj) {
         return new Response("Not Found", { status: 404 });
     }
 }
+//# sourceMappingURL=localFileHandler.js.map

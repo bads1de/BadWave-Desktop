@@ -1,6 +1,6 @@
 import { Song } from "@/types";
 
-import { generateLocalSongId, toFileUrl } from "./songUtils";
+import { generateLocalSongId } from "./songUtils";
 import { LocalFile } from "@/types/local";
 
 /**
@@ -15,8 +15,8 @@ export function mapFileToSong(file: LocalFile): Song {
     ? file.path.split(/[\\/]/).pop() || "不明なタイトル"
     : "不明なタイトル";
 
-  // アルバムアートのパスを設定（badwave://プロトコル経由でアクセス）
-  const imagePath = file.image_path ? toFileUrl(file.image_path) : "";
+  // アルバムアート: data URLの場合はそのまま使用
+  const imagePath = file.image_path || "";
 
   return {
     id: generateLocalSongId(file.path),
