@@ -45,11 +45,16 @@ beforeEach(() => {
     clearRect: jest.fn(),
     fillRect: jest.fn(),
     beginPath: jest.fn(),
+    closePath: jest.fn(),
     moveTo: jest.fn(),
     lineTo: jest.fn(),
     stroke: jest.fn(),
     fill: jest.fn(),
     arc: jest.fn(),
+    save: jest.fn(),
+    restore: jest.fn(),
+    translate: jest.fn(),
+    rotate: jest.fn(),
     createLinearGradient: jest.fn(() => ({
       addColorStop: jest.fn(),
     })),
@@ -58,6 +63,7 @@ beforeEach(() => {
     lineWidth: 0,
     shadowBlur: 0,
     shadowColor: "",
+    globalCompositeOperation: "source-over",
     font: "",
     textAlign: "",
     fillText: jest.fn(),
@@ -74,13 +80,29 @@ describe("CyberArtFallback", () => {
   it("should have correct canvas classes", () => {
     const { container } = render(<CyberArtFallback />);
     const canvas = container.querySelector("canvas");
-    expect(canvas).toHaveClass("w-full", "h-full", "object-cover", "opacity-80");
+    expect(canvas).toHaveClass("w-full", "h-full", "object-cover", "opacity-95");
   });
 
   it("should render scanline overlay", () => {
     const { container } = render(<CyberArtFallback />);
-    const overlay = container.querySelector(".pointer-events-none");
+    const overlay = container.querySelector("[data-testid='cyber-art-scanline']");
     expect(overlay).toBeInTheDocument();
+  });
+
+  it("should render decorative fallback layers without intercepting clicks", () => {
+    const { container } = render(<CyberArtFallback />);
+    const root = container.querySelector("[data-testid='cyber-art-fallback']");
+    const vignette = container.querySelector("[data-testid='cyber-art-vignette']");
+    const frame = container.querySelector("[data-testid='cyber-art-frame']");
+    const radarGlow = container.querySelector("[data-testid='cyber-art-radar-glow']");
+    const hudCorners = container.querySelector("[data-testid='cyber-art-hud-corners']");
+
+    expect(root).toHaveClass("pointer-events-none", "isolate");
+    expect(root).toHaveAttribute("aria-hidden", "true");
+    expect(vignette).toBeInTheDocument();
+    expect(frame).toBeInTheDocument();
+    expect(radarGlow).toBeInTheDocument();
+    expect(hudCorners).toBeInTheDocument();
   });
 
   it("should request animation frame on mount", () => {

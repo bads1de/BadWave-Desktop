@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useRef, useEffect, memo } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import useMainAnalyser from "@/hooks/audio/useMainAnalyser";
 
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 800;
+
 /**
- * 画像がない曲用のサイバーパンク風ビジュアライザー
- * メイン AudioEngine の AnalyserNode と連動してリアルタイム描画
+ * Premium, generative abstract artwork shown when a cover image is missing.
+ * Replaces the old radar with a sleek, glowing, music-reactive organic aura.
  */
 const CyberArtFallback = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -15,275 +18,164 @@ const CyberArtFallback = memo(() => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    const W = 600;
-    const H = 800;
+    const W = CANVAS_WIDTH;
+    const H = CANVAS_HEIGHT;
     canvas.width = W;
     canvas.height = H;
 
-    // パーティクル
-    interface Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      alpha: number;
-      hue: number;
-    }
+    // Extract theme colors or use vibrant fallbacks (cyan and pink)
+    const styles = getComputedStyle(document.documentElement);
+    const primaryStr = styles.getPropertyValue("--theme-500").trim() || "6, 182, 212";
+    const secondaryStr = styles.getPropertyValue("--theme-600").trim() || "219, 39, 119";
 
-    const particles: Particle[] = [];
-    const PARTICLE_COUNT = 50;
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: -Math.random() * 0.8 - 0.2,
-        size: Math.random() * 2 + 1,
-        alpha: Math.random() * 0.5 + 0.3,
-        hue: Math.random() > 0.5 ? 160 : 280,
-      });
-    }
+    // Dust particles
+    const particles = Array.from({ length: 50 }).map(() => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size: Math.random() * 2 + 0.5,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4 - 0.3,
+      baseAlpha: Math.random() * 0.4 + 0.1,
+    }));
 
-    const GRID_SPACING = 40;
-    const gridCols = Math.ceil(W / GRID_SPACING) + 1;
-    const gridRows = Math.ceil(H / GRID_SPACING) + 1;
-
-    let scanY = 0;
-    let time = 0;
-
-    // 周波数データバッファ
     const bufferLength = analyser ? analyser.frequencyBinCount : 128;
     const dataArray = new Uint8Array(bufferLength);
 
-    const draw = () => {
-      time += 0.016;
-      ctx.clearRect(0, 0, W, H);
+    let time = 0;
 
-      // 背景
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-      bgGrad.addColorStop(0, "#050510");
-      bgGrad.addColorStop(0.5, "#0a0a1a");
-      bgGrad.addColorStop(1, "#0f0520");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, W, H);
+    const render = () => {
+      time += 0.008;
 
-      // グリッド
-      ctx.strokeStyle = "rgba(0, 255, 200, 0.04)";
-      ctx.lineWidth = 0.5;
-      for (let row = 0; row < gridRows; row++) {
-        ctx.beginPath();
-        for (let col = 0; col < gridCols; col++) {
-          const x = col * GRID_SPACING;
-          const wave = Math.sin(x * 0.01 + time * 0.5) * 3;
-          const y =
-            (row * GRID_SPACING + time * 10) % (GRID_SPACING * 2) + wave;
-          if (col === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
+      let bass = 0;
+      let mid = 0;
+      let treble = 0;
+      let hasAudio = false;
 
-      // 周波数データ取得
-      let hasAudioData = false;
       if (analyser && isPlaying) {
         analyser.getByteFrequencyData(dataArray);
-        // データがあるか確認（無音でなければ）
-        let sum = 0;
-        for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
-        hasAudioData = sum > 0;
+        for (let i = 0; i < bufferLength; i++) {
+          if (dataArray[i] > 0) hasAudio = true;
+          if (i < bufferLength * 0.1) bass += dataArray[i];
+          else if (i < bufferLength * 0.5) mid += dataArray[i];
+          else treble += dataArray[i];
+        }
+        bass /= bufferLength * 0.1 * 255;
+        mid /= bufferLength * 0.4 * 255;
+        treble /= bufferLength * 0.5 * 255;
       }
 
-      const centerY = H * 0.55;
-      const barCount = 48;
-      const barW = W / barCount / 2;
+      const activePulse = hasAudio ? bass : (Math.sin(time * 2) + 1) * 0.1;
 
-      if (hasAudioData) {
-        // === 再生中: 実データ描画 ===
-        // 低域〜中域を使う（音楽的に変化が大きい）
-        const step = Math.floor(bufferLength / barCount);
+      // 1. Deep Space Background
+      ctx.fillStyle = "#030305";
+      ctx.fillRect(0, 0, W, H);
 
-        for (let i = 0; i < barCount; i++) {
-          // 周波数ビンをサンプリング（低域寄り）
-          const idx = Math.min(i * step, bufferLength - 1);
-          const val = dataArray[idx] / 255;
-          const barH = val * H * 0.35;
+      // 2. Ambient Glowing Orbs
+      ctx.globalCompositeOperation = "screen";
 
-          const x = W / 2 + (i - barCount / 2) * barW * 2;
-
-          // グラデーション（音量で明度変化）
-          const alpha = 0.15 + val * 0.5;
-          const grad = ctx.createLinearGradient(
-            x,
-            centerY - barH,
-            x,
-            centerY + barH
-          );
-          grad.addColorStop(0, `rgba(0, 255, 200, 0)`);
-          grad.addColorStop(0.3, `rgba(0, 255, 200, ${alpha * 0.4})`);
-          grad.addColorStop(0.5, `rgba(0, 255, 200, ${alpha})`);
-          grad.addColorStop(0.7, `rgba(120, 0, 255, ${alpha * 0.4})`);
-          grad.addColorStop(1, `rgba(120, 0, 255, 0)`);
-
-          ctx.fillStyle = grad;
-          ctx.fillRect(x - barW / 2, centerY - barH, barW, barH * 2);
-
-          // バー上部にグロー
-          if (val > 0.3) {
-            ctx.shadowBlur = 12 * val;
-            ctx.shadowColor = "rgba(0, 255, 200, 0.6)";
-            ctx.fillStyle = `rgba(0, 255, 200, ${val * 0.3})`;
-            ctx.fillRect(x - barW / 2, centerY - barH, barW, 2);
-            ctx.fillRect(x - barW / 2, centerY + barH - 2, barW, 2);
-            ctx.shadowBlur = 0;
-          }
-        }
-
-        // 中央の波形ライン（time-domain）
-        const timeData = new Uint8Array(analyser!.frequencyBinCount);
-        analyser!.getByteTimeDomainData(timeData);
+      const drawOrb = (x: number, y: number, r: number, colorStr: string, alpha: number) => {
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+        grad.addColorStop(0, `rgba(${colorStr}, ${alpha})`);
+        grad.addColorStop(0.5, `rgba(${colorStr}, ${alpha * 0.4})`);
+        grad.addColorStop(1, `rgba(${colorStr}, 0)`);
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.strokeStyle = "rgba(0, 255, 200, 0.25)";
-        ctx.lineWidth = 1.5;
-        const sliceW = W / timeData.length;
-        for (let i = 0; i < timeData.length; i++) {
-          const v = timeData[i] / 128.0;
-          const y = centerY + (v - 1) * H * 0.1;
-          if (i === 0) ctx.moveTo(0, y);
-          else ctx.lineTo(i * sliceW, y);
-        }
-        ctx.stroke();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      };
 
-        // パーティクル速度を音量に連動
-        const avgVol =
-          dataArray.reduce((a, b) => a + b, 0) / bufferLength / 255;
-        for (const p of particles) {
-          p.vy = -(0.2 + avgVol * 2);
-          p.alpha = 0.3 + avgVol * 0.5;
-        }
-      } else {
-        // === 停止中: アンビエントアニメーション ===
-        const waveOffset = time * 0.5;
-        for (let i = 0; i < barCount; i++) {
-          const val = Math.abs(
-            Math.sin(i * 0.3 + waveOffset) *
-              Math.cos(i * 0.15 + waveOffset * 0.7) *
-              0.4
-          );
-          const barH = val * H * 0.1;
-          const x = W / 2 + (i - barCount / 2) * barW * 2;
+      // Primary Orb
+      const orb1X = W * 0.5 + Math.sin(time * 1.1) * 120;
+      const orb1Y = H * 0.4 + Math.cos(time * 0.8) * 120;
+      drawOrb(orb1X, orb1Y, 350 + activePulse * 150, primaryStr, 0.25 + activePulse * 0.2);
 
-          const grad = ctx.createLinearGradient(
-            x,
-            centerY - barH,
-            x,
-            centerY + barH
-          );
-          grad.addColorStop(0, "rgba(0, 255, 200, 0.0)");
-          grad.addColorStop(0.5, "rgba(0, 255, 200, 0.08)");
-          grad.addColorStop(1, "rgba(0, 255, 200, 0.0)");
+      // Secondary Orb
+      const orb2X = W * 0.5 + Math.sin(time * 1.3 + Math.PI) * 140;
+      const orb2Y = H * 0.6 + Math.cos(time * 0.9 + Math.PI) * 140;
+      drawOrb(orb2X, orb2Y, 300 + mid * 100, secondaryStr, 0.2 + mid * 0.2);
 
-          ctx.fillStyle = grad;
-          ctx.fillRect(x - barW / 2, centerY - barH, barW, barH * 2);
-        }
-      }
+      ctx.globalCompositeOperation = "source-over";
 
-      // 中心ライン
-      ctx.shadowBlur = hasAudioData ? 20 : 10;
-      ctx.shadowColor = "rgba(0, 255, 200, 0.4)";
-      ctx.strokeStyle = hasAudioData
-        ? "rgba(0, 255, 200, 0.25)"
-        : "rgba(0, 255, 200, 0.1)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(W * 0.15, centerY);
-      ctx.lineTo(W * 0.85, centerY);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-
-      // パーティクル
-      for (const p of particles) {
+      // 3. Particles
+      particles.forEach((p) => {
         p.x += p.vx;
-        p.y += p.vy;
-        if (p.y < -10) {
-          p.y = H + 10;
-          p.x = Math.random() * W;
-        }
+        p.y += p.vy - activePulse * 1.5;
+
+        if (p.y < -10) p.y = H + 10;
+        if (p.y > H + 10) p.y = -10;
         if (p.x < -10) p.x = W + 10;
         if (p.x > W + 10) p.x = -10;
 
+        const pulseAlpha = hasAudio ? treble * 0.6 : Math.sin(time * 4 + p.x) * 0.2 + 0.1;
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, p.baseAlpha + pulseAlpha)})`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle =
-          p.hue === 160
-            ? `rgba(0, 255, 200, ${p.alpha})`
-            : `rgba(180, 100, 255, ${p.alpha})`;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor =
-          p.hue === 160 ? "rgba(0,255,200,0.5)" : "rgba(180,100,255,0.5)";
+        ctx.arc(p.x, p.y, p.size + (hasAudio ? treble * 1.5 : 0), 0, Math.PI * 2);
         ctx.fill();
+      });
+
+      // 4. Center Audio Ring (Smooth Organic Morphing)
+      const cx = W / 2;
+      const cy = H / 2;
+      const baseRadius = 140;
+      const numPoints = 64;
+      const points = [];
+
+      for (let i = 0; i < numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
+        // Mirror data for symmetrical shape
+        const dataIdx = Math.floor(
+          (Math.abs(i - numPoints / 2) / (numPoints / 2)) * (bufferLength * 0.6)
+        );
+        const val = hasAudio
+          ? dataArray[dataIdx] / 255
+          : (Math.sin(i * 0.3 + time * 3) + 1) * 0.05;
+
+        const r = baseRadius + val * 80;
+        points.push({
+          x: cx + Math.cos(angle) * r,
+          y: cy + Math.sin(angle) * r,
+        });
       }
-      ctx.shadowBlur = 0;
 
-      // 走査ライン
-      const scanSpeed = hasAudioData ? 2.5 : 1.2;
-      scanY = (scanY + scanSpeed) % H;
-      const scanAlpha = hasAudioData ? 0.12 : 0.05;
-      const scanGrad = ctx.createLinearGradient(0, scanY - 30, 0, scanY + 30);
-      scanGrad.addColorStop(0, `rgba(0, 255, 200, 0)`);
-      scanGrad.addColorStop(0.5, `rgba(0, 255, 200, ${scanAlpha})`);
-      scanGrad.addColorStop(1, `rgba(0, 255, 200, 0)`);
-      ctx.fillStyle = scanGrad;
-      ctx.fillRect(0, scanY - 30, W, 60);
+      // Draw smooth curve
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 0; i < numPoints; i++) {
+        const p1 = points[i];
+        const p2 = points[(i + 1) % numPoints];
+        const xc = (p1.x + p2.x) / 2;
+        const yc = (p1.y + p2.y) / 2;
+        ctx.quadraticCurveTo(p1.x, p1.y, xc, yc);
+      }
+      ctx.closePath();
 
-      // HUD コーナー
-      const cornerLen = 30;
-      const cornerAlpha = hasAudioData ? 0.5 : 0.3;
-      ctx.strokeStyle = `rgba(0, 255, 200, ${cornerAlpha})`;
+      // Outer Glow
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = `rgba(255, 255, 255, 0.9)`;
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = `rgba(${primaryStr}, 0.8)`;
+      ctx.stroke();
+
+      // Inner Fill (slight translucency)
+      ctx.fillStyle = `rgba(0, 0, 0, 0.3)`;
+      ctx.fill();
+
+      ctx.shadowBlur = 0; // reset shadow
+
+      // Inner subtle core ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, baseRadius - 20 - activePulse * 10, 0, Math.PI * 2);
       ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, cornerLen);
-      ctx.lineTo(0, 0);
-      ctx.lineTo(cornerLen, 0);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(W - cornerLen, 0);
-      ctx.lineTo(W, 0);
-      ctx.lineTo(W, cornerLen);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, H - cornerLen);
-      ctx.lineTo(0, H);
-      ctx.lineTo(cornerLen, H);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(W - cornerLen, H);
-      ctx.lineTo(W, H);
-      ctx.lineTo(W, H - cornerLen);
+      ctx.strokeStyle = `rgba(${secondaryStr}, ${0.4 + activePulse * 0.4})`;
       ctx.stroke();
 
-      // テキスト
-      ctx.font = "10px monospace";
-      ctx.fillStyle = "rgba(0, 255, 200, 0.2)";
-      ctx.textAlign = "center";
-      ctx.fillText(
-        isPlaying ? "[ VISUALIZING ]" : "[ NO_ARTWORK ]",
-        W / 2,
-        H * 0.42
-      );
-      ctx.fillText(
-        `[ ${new Date().toISOString().slice(11, 19)} ]`,
-        W / 2,
-        H * 0.42 + 16
-      );
-
-      animRef.current = requestAnimationFrame(draw);
+      animRef.current = requestAnimationFrame(render);
     };
 
-    animRef.current = requestAnimationFrame(draw);
+    animRef.current = requestAnimationFrame(render);
 
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
@@ -291,12 +183,21 @@ const CyberArtFallback = memo(() => {
   }, [analyser, isPlaying]);
 
   return (
-    <div className="absolute inset-0 bg-black overflow-hidden">
+    <div
+      data-testid="cyber-art-fallback"
+      className="absolute inset-0 isolate overflow-hidden bg-[#030305] pointer-events-none rounded-md"
+    >
       <canvas
         ref={canvasRef}
-        className="w-full h-full object-cover opacity-80"
+        className="w-full h-full object-cover transition-opacity duration-1000"
       />
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[length:100%_4px] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.5)_50%)]" />
+
+      {/* Premium Glassmorphism Vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_30%,rgba(0,0,0,0.6)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/40" />
+
+      {/* Sleek Minimalist Border Overlay */}
+      <div className="absolute inset-4 rounded-xl border border-white/[0.06] shadow-[inset_0_0_40px_rgba(0,0,0,0.5)]" />
     </div>
   );
 });
@@ -304,3 +205,4 @@ const CyberArtFallback = memo(() => {
 CyberArtFallback.displayName = "CyberArtFallback";
 
 export default CyberArtFallback;
+
