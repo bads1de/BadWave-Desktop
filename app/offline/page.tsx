@@ -47,13 +47,9 @@ const OfflinePage = () => {
     const song = offlineSongs.find((s) => s.id === id);
     if (!song) return;
 
-    // プレイヤーに全オフライン曲をセット
+    // オフライン曲を一括でプレイヤーにセット
+    player.setLocalSongs(offlineSongs);
     player.setIds(offlineSongs.map((s) => s.id));
-
-    // オフライン曲をプレイヤーにセット
-    offlineSongs.forEach((s) => {
-      player.setLocalSong(s);
-    });
 
     // 再生開始
     player.setId(id);

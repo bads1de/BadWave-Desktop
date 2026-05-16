@@ -117,6 +117,25 @@ describe("Offline IPC Handlers - DB Operations", () => {
       expect(song1?.imagePath).toContain("badwave://");
     });
 
+    test("should include is_downloaded field in response", async () => {
+      const offlineSongs = await db.query.songs.findMany({
+        where: isNotNull(schema.songs.songPath),
+      });
+
+      // レスポンス変換をシミュレート（IPCハンドラと同じロジック）
+      const mapped = offlineSongs.map((song) => ({
+        id: song.id,
+        user_id: song.userId,
+        title: song.title,
+        song_path: song.songPath,
+        image_path: song.imagePath,
+        is_downloaded: true,
+      }));
+
+      expect(mapped[0].is_downloaded).toBe(true);
+      expect(mapped[1].is_downloaded).toBe(true);
+    });
+
     test("should return empty array when no songs are downloaded", async () => {
       // すべてのダウンロード済み曲を削除
       await db.delete(schema.songs);

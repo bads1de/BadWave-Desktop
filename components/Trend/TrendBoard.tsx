@@ -3,6 +3,7 @@
 import { useState, memo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getPlayableImagePath } from "@/libs/songUtils";
 import { motion } from "framer-motion";
 import useOnPlay from "@/hooks/player/useOnPlay";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
@@ -65,7 +66,7 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
                   <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-theme-500/40 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                   <Image
-                    src={song.image_path}
+                    src={getPlayableImagePath(song)}
                     alt={song.title}
                     fill
                     className="group-hover:scale-125 group-hover:opacity-60 transition-all duration-700 ease-out"

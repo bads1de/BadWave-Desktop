@@ -6,6 +6,8 @@ import {
   extractFilePathFromLocalId,
   getDownloadFilename,
   isValidLocalFilePath,
+  getPlayablePath,
+  getPlayableImagePath,
 } from "@/libs/songUtils";
 import { Song } from "@/types";
 
@@ -103,6 +105,87 @@ describe("songUtils", () => {
     it("不正な形式のIDの場合はnullを返す", () => {
       expect(extractFilePathFromLocalId("notlocal_123")).toBe(null);
       expect(extractFilePathFromLocalId("local_!!!")).toBe(null); // 不正なbase64
+    });
+  });
+
+  describe("getPlayablePath", () => {
+    it("null/undefinedの場合は空文字を返す", () => {
+      expect(getPlayablePath(null)).toBe("");
+      expect(getPlayablePath(undefined)).toBe("");
+    });
+
+    it("ダウンロード済みでlocal_song_pathがある場合はbadwave:// URLを返す", () => {
+      const song = {
+        id: "1",
+        is_downloaded: true,
+        local_song_path: "C:\\Music\\song.mp3",
+        song_path: "https://example.com/song.mp3",
+      } as Song;
+      const result = getPlayablePath(song);
+      expect(result).toMatch(/^badwave:\/\//);
+    });
+
+    it("ダウンロード済みでもlocal_song_pathがない場合はリモートURLを返す", () => {
+      const song = {
+        id: "1",
+        is_downloaded: true,
+        local_song_path: null,
+        song_path: "https://example.com/song.mp3",
+      } as Song;
+      expect(getPlayablePath(song)).toBe("https://example.com/song.mp3");
+    });
+
+    it("未ダウンロードの場合はリモートURLを返す", () => {
+      const song = {
+        id: "1",
+        is_downloaded: false,
+        song_path: "https://example.com/song.mp3",
+      } as Song;
+      expect(getPlayablePath(song)).toBe("https://example.com/song.mp3");
+    });
+  });
+
+  describe("getPlayableImagePath", () => {
+    it("null/undefinedの場合は空文字を返す", () => {
+      expect(getPlayableImagePath(null)).toBe("");
+      expect(getPlayableImagePath(undefined)).toBe("");
+    });
+
+    it("ダウンロード済みでlocal_image_pathがある場合はbadwave:// URLを返す", () => {
+      const song = {
+        id: "1",
+        is_downloaded: true,
+        local_image_path: "C:\\Music\\cover.png",
+        image_path: "https://example.com/cover.png",
+      } as Song;
+      const result = getPlayableImagePath(song);
+      expect(result).toMatch(/^badwave:\/\//);
+    });
+
+    it("ダウンロード済みでもlocal_image_pathがない場合はリモートURLを返す", () => {
+      const song = {
+        id: "1",
+        is_downloaded: true,
+        local_image_path: null,
+        image_path: "https://example.com/cover.jpg",
+      } as Song;
+      expect(getPlayableImagePath(song)).toBe("https://example.com/cover.jpg");
+    });
+
+    it("file://パスの場合は空文字を返す（セキュリティエラー回避）", () => {
+      const song = {
+        id: "1",
+        image_path: "file:///C:/path/to/image.jpg",
+      } as Song;
+      expect(getPlayableImagePath(song)).toBe("");
+    });
+
+    it("Windows絶対パスの場合は空文字を返す（セキュリティエラー回避）", () => {
+      const song = {
+        id: "1",
+        image_path: "C:\\path\\to\\image.jpg",
+      } as Song;
+      expect(getPlayableImagePath(song)).toBe("");
     });
   });
 

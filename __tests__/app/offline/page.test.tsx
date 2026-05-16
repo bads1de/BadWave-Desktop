@@ -49,6 +49,7 @@ describe("OfflinePage", () => {
     setId: jest.fn(),
     setIds: jest.fn(),
     setLocalSong: jest.fn(),
+    setLocalSongs: jest.fn(),
     activeId: undefined,
   };
 
@@ -119,8 +120,8 @@ describe("OfflinePage", () => {
     fireEvent.click(screen.getByText("Offline Song 1"));
 
     // プレイヤーへのセットアップを等検証
+    expect(mockPlayer.setLocalSongs).toHaveBeenCalledWith(mockSongs);
     expect(mockPlayer.setIds).toHaveBeenCalledWith(["song-1"]);
-    expect(mockPlayer.setLocalSong).toHaveBeenCalledWith(mockSongs[0]);
     expect(mockPlayer.setId).toHaveBeenCalledWith("song-1");
   });
 });

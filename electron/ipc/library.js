@@ -141,41 +141,55 @@ function setupLibraryHandlers() {
                             directoryPath: directoryPath,
                             files: {},
                         };
-                        scanDirectory_1 = function (dir) { return __awaiter(_this, void 0, void 0, function () {
-                            var entries, files, _i, entries_1, entry, fullPath, subFiles;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0: return [4 /*yield*/, fs.promises.readdir(dir, {
-                                            withFileTypes: true,
-                                        })];
-                                    case 1:
-                                        entries = _a.sent();
-                                        files = [];
-                                        _i = 0, entries_1 = entries;
-                                        _a.label = 2;
-                                    case 2:
-                                        if (!(_i < entries_1.length)) return [3 /*break*/, 6];
-                                        entry = entries_1[_i];
-                                        fullPath = path.join(dir, entry.name);
-                                        if (!entry.isDirectory()) return [3 /*break*/, 4];
-                                        return [4 /*yield*/, scanDirectory_1(fullPath)];
-                                    case 3:
-                                        subFiles = _a.sent();
-                                        files.push.apply(files, subFiles);
-                                        return [3 /*break*/, 5];
-                                    case 4:
-                                        if (entry.isFile() && isSupportedAudioFile(entry.name)) {
-                                            // サポートされている音声ファイルを追加
-                                            files.push(fullPath);
-                                        }
-                                        _a.label = 5;
-                                    case 5:
-                                        _i++;
-                                        return [3 /*break*/, 2];
-                                    case 6: return [2 /*return*/, files];
-                                }
+                        scanDirectory_1 = function (dir_1) {
+                            var args_2 = [];
+                            for (var _i = 1; _i < arguments.length; _i++) {
+                                args_2[_i - 1] = arguments[_i];
+                            }
+                            return __awaiter(_this, __spreadArray([dir_1], args_2, true), void 0, function (dir, visited) {
+                                var realDir, entries, files, _a, entries_1, entry, fullPath, subFiles;
+                                if (visited === void 0) { visited = new Set(); }
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0: return [4 /*yield*/, fs.promises.realpath(dir)];
+                                        case 1:
+                                            realDir = _b.sent();
+                                            if (visited.has(realDir)) {
+                                                return [2 /*return*/, []];
+                                            }
+                                            visited.add(realDir);
+                                            return [4 /*yield*/, fs.promises.readdir(dir, {
+                                                    withFileTypes: true,
+                                                })];
+                                        case 2:
+                                            entries = _b.sent();
+                                            files = [];
+                                            _a = 0, entries_1 = entries;
+                                            _b.label = 3;
+                                        case 3:
+                                            if (!(_a < entries_1.length)) return [3 /*break*/, 7];
+                                            entry = entries_1[_a];
+                                            fullPath = path.join(dir, entry.name);
+                                            if (!entry.isDirectory()) return [3 /*break*/, 5];
+                                            return [4 /*yield*/, scanDirectory_1(fullPath, visited)];
+                                        case 4:
+                                            subFiles = _b.sent();
+                                            files.push.apply(files, subFiles);
+                                            return [3 /*break*/, 6];
+                                        case 5:
+                                            if (entry.isFile() && isSupportedAudioFile(entry.name)) {
+                                                // サポートされている音声ファイルを追加
+                                                files.push(fullPath);
+                                            }
+                                            _b.label = 6;
+                                        case 6:
+                                            _a++;
+                                            return [3 /*break*/, 3];
+                                        case 7: return [2 /*return*/, files];
+                                    }
+                                });
                             });
-                        }); };
+                        };
                         return [4 /*yield*/, scanDirectory_1(directoryPath)];
                     case 1:
                         allFiles = _a.sent();

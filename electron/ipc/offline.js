@@ -236,6 +236,7 @@ var setupOfflineDownloadHandlers = function () {
                             lyrics: song.lyrics,
                             created_at: song.createdAt,
                             downloaded_at: song.downloadedAt,
+                            is_downloaded: true,
                         }); })];
                 case 2:
                     error_3 = _a.sent();

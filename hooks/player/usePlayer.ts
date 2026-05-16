@@ -17,6 +17,7 @@ interface PlayerStore {
   setId: (id: string) => void;
   setIds: (ids: string[]) => void;
   setLocalSong: (song: Song) => void;
+  setLocalSongs: (songs: Song[]) => void;
   getLocalSong: (id: string) => Song | undefined;
   /** 曲データ、アクティブID、IDリストを同時に設定（オフライン再生用） */
   playSongWithData: (song: Song, ids: string[]) => void;
@@ -67,6 +68,14 @@ const usePlayer = create<PlayerStore>()(
         set((state) => {
           const newLocalSongs = new Map(state.localSongs);
           newLocalSongs.set(song.id, song);
+          return { localSongs: newLocalSongs };
+        }),
+      setLocalSongs: (songs: Song[]) =>
+        set((state) => {
+          const newLocalSongs = new Map(state.localSongs);
+          for (const song of songs) {
+            newLocalSongs.set(song.id, song);
+          }
           return { localSongs: newLocalSongs };
         }),
       getLocalSong: (id: string) => {

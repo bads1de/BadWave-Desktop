@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import usePlayer from "@/hooks/player/usePlayer";
 import useGetSongById from "@/hooks/data/useGetSongById";
 import FullScreenLayout from "./FullScreenLayout";
+import { getPlayableImagePath } from "@/libs/songUtils";
 import { twMerge } from "tailwind-merge";
 import { motion, useSpring } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
@@ -213,9 +214,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
               <FullScreenLayout
                 song={currentSong!}
                 videoPath={currentSong?.video_path}
-                imagePath={currentSong?.image_path}
+                imagePath={currentSong ? getPlayableImagePath(currentSong) : undefined}
                 nextSong={nextTrack}
-                nextImagePath={nextTrack?.image_path}
+                nextImagePath={nextTrack ? getPlayableImagePath(nextTrack) : undefined}
               />
             )}
           </motion.div>

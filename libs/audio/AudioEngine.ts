@@ -48,7 +48,6 @@ class AudioEngine {
     // ブラウザ環境でのみ audio 要素を作成
     if (typeof window !== "undefined") {
       this.audio = new Audio();
-      this.audio.crossOrigin = "anonymous";
     }
   }
 

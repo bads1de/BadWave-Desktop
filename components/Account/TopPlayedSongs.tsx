@@ -6,6 +6,7 @@ import { twMerge } from "tailwind-merge";
 import useGetTopPlayedSongs from "@/hooks/data/useGetTopPlayedSongs";
 import useOnPlay from "@/hooks/player/useOnPlay";
 import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
+import { getPlayableImagePath } from "@/libs/songUtils";
 
 interface TopPlayedSongsProps {
   user: {
@@ -105,7 +106,7 @@ const TopPlayedSongs: React.FC<TopPlayedSongsProps> = memo(({ user }) => {
                   <div className="relative w-full h-full overflow-hidden grayscale-[30%] group-hover:grayscale-0 transition-all">
                     <Image
                       fill
-                      src={song.image_path || "/images/music.jpeg"}
+                      src={getPlayableImagePath(song) || "/images/music.jpeg"}
                       alt={song.title}
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
                     />

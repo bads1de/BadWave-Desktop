@@ -1,6 +1,7 @@
 import { Song } from "@/types";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI, isNetworkError } from "@/libs/electron/index";
+import { toFileUrl } from "@/libs/songUtils";
 import {
   useQuery,
   keepPreviousData,
@@ -56,6 +57,9 @@ const useGetSongById = (id?: string | number) => {
               return {
                 ...localSong,
                 song_path: localSong.local_song_path,
+                image_path: localSong.local_image_path
+                  ? toFileUrl(localSong.local_image_path) || localSong.image_path
+                  : localSong.image_path,
               } as Song;
             }
             return localSong as Song;
@@ -115,9 +119,13 @@ const useGetSongById = (id?: string | number) => {
 
         if (isDownloaded && localPath) {
           if (isMounted) {
+            const localImageUrl = localImagePath
+              ? toFileUrl(localImagePath) || song.image_path
+              : song.image_path;
             setFinalSong({
               ...song,
               song_path: localPath,
+              image_path: localImageUrl,
               is_downloaded: true,
               local_song_path: localPath,
               local_image_path: localImagePath,

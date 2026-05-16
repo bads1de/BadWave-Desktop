@@ -97,20 +97,15 @@ const LocalPage = () => {
     (file: LocalFile) => {
       if (file.path) {
         const song = mapFileToSong(file);
-        // ローカル曲をプレイヤーストアに保存
-        player.setLocalSong(song);
 
-        // 全てのローカル曲をプレイヤーストアに保存し、IDリストを作成
-        const songIds: string[] = [];
-        mp3Files.forEach((f) => {
-          if (f.path) {
-            const localSong = mapFileToSong(f);
-            player.setLocalSong(localSong);
-            songIds.push(localSong.id);
-          }
-        });
+        // 全てのローカル曲を一括でプレイヤーストアに保存
+        const localSongs = mp3Files
+          .filter((f) => f.path)
+          .map(mapFileToSong);
+        player.setLocalSongs(localSongs);
 
         // プレイリストを設定
+        const songIds = localSongs.map((s) => s.id);
         player.setIds(songIds);
         // 現在の曲を設定
         player.setId(song.id);

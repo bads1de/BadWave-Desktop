@@ -87,8 +87,14 @@ export function setupLibraryHandlers() {
           files: {},
         };
 
-        // ディレクトリ内のファイルを再帰的に取得する関数
-        const scanDirectory = async (dir: string): Promise<string[]> => {
+        // ディレクトリ内のファイルを再帰的に取得する関数（シンボリックリンクループ保護付き）
+        const scanDirectory = async (dir: string, visited = new Set<string>()): Promise<string[]> => {
+          const realDir = await fs.promises.realpath(dir);
+          if (visited.has(realDir)) {
+            return [];
+          }
+          visited.add(realDir);
+
           const entries = await fs.promises.readdir(dir, {
             withFileTypes: true,
           });
@@ -99,7 +105,7 @@ export function setupLibraryHandlers() {
 
             if (entry.isDirectory()) {
               // サブディレクトリを再帰的にスキャン
-              const subFiles = await scanDirectory(fullPath);
+              const subFiles = await scanDirectory(fullPath, visited);
               files.push(...subFiles);
             } else if (entry.isFile() && isSupportedAudioFile(entry.name)) {
               // サポートされている音声ファイルを追加

@@ -228,8 +228,10 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
         return;
       }
       audio.src = localUrl;
+      audio.crossOrigin = null;
     } else {
       audio.src = songUrl;
+      audio.crossOrigin = "anonymous";
     }
   }, [songUrl, isLocalFile, song?.id, audio, engine]);
 

@@ -228,6 +228,24 @@ describe("useAudioPlayer", () => {
     unmount();
   });
 
+  it("should not set crossOrigin for badwave:// local URLs", () => {
+    const localUrl = "badwave://file/C%3A%5CMusic%5Csong.mp3";
+    mockAudio.crossOrigin = null as any;
+
+    renderHook(() => useAudioPlayer(localUrl, mockSong as any));
+
+    expect(mockAudio.crossOrigin).toBeNull();
+  });
+
+  it("should set crossOrigin for remote URLs", () => {
+    const remoteUrl = "https://example.com/song.mp3";
+    mockAudio.crossOrigin = null as any;
+
+    renderHook(() => useAudioPlayer(remoteUrl, mockSong as any));
+
+    expect(mockAudio.crossOrigin).toBe("anonymous");
+  });
+
   it("should handle beforeunload", () => {
     const mockSave = jest.fn();
     (usePlaybackStateStore as unknown as jest.Mock).mockReturnValue({

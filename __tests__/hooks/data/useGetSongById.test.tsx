@@ -88,6 +88,41 @@ describe("useGetSongById", () => {
     });
   });
 
+  it("ダウンロード済みの場合はimage_pathもローカルパスに差し替える", async () => {
+    const mockSong = {
+      id: "song-1",
+      title: "Test Song",
+      song_path: "remote/path",
+      image_path: "https://example.com/cover.jpg",
+    };
+
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      maybeSingle: jest.fn().mockResolvedValue({ data: mockSong, error: null }),
+    });
+
+    // ダウンロード済み（ローカル画像パスあり）
+    (window.electron.offline.checkStatus as jest.Mock).mockResolvedValue({
+      isDownloaded: true,
+      localPath: "local/path.mp3",
+      localImagePath: "C:\\Music\\cover.jpg",
+    });
+
+    const { result } = renderHook(() => useGetSongById("song-1"), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.song?.song_path).toBe("local/path.mp3");
+    });
+
+    // image_path が badwave:// URL に差し替えられていること
+    await waitFor(() => {
+      expect(result.current.song?.image_path).toMatch(/^badwave:\/\//);
+    });
+  });
+
   it("local_で始まるIDの場合はSupabaseを呼ばない", async () => {
     const { result } = renderHook(() => useGetSongById("local_123"), {
       wrapper: createWrapper(),

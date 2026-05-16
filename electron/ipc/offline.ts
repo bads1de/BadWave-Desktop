@@ -222,6 +222,7 @@ export const setupOfflineDownloadHandlers = () => {
         lyrics: song.lyrics,
         created_at: song.createdAt,
         downloaded_at: song.downloadedAt,
+        is_downloaded: true,
       }));
     } catch (error: any) {
       console.error("[IPC] Failed to get offline songs:", error);

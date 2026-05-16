@@ -54,6 +54,7 @@ const ALLOWED_MEDIA_EXTENSIONS = new Set([
   ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
   ".m4a", ".wma", ".alac", ".aiff", ".webm",
   ".mp4", ".m4v", ".avi", ".mkv",
+  ".jpg", ".jpeg", ".png", ".webp",
 ]);
 
 /**

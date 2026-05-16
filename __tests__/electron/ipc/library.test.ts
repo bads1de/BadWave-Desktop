@@ -24,6 +24,7 @@ jest.mock("fs", () => ({
     readdir: jest.fn(),
     stat: jest.fn(),
     access: jest.fn(),
+    realpath: jest.fn((p: string) => Promise.resolve(p)),
   },
 }));
 
@@ -105,6 +106,38 @@ describe("IPC: Library", () => {
       expect(result.files).toContain("/music/subdir/song2.mp3");
       
       expect(mockStore.set).toHaveBeenCalled();
+    });
+  });
+
+  describe("symlink loop protection", () => {
+    it("should not infinite loop on circular directory references", async () => {
+      const dirA = "/music/dirA";
+      const dirB = "/music/dirA/dirB";
+
+      // dirA contains dirB, dirB contains dirA (circular)
+      (fs.promises.readdir as jest.Mock).mockImplementation(async (dir) => {
+        if (dir === dirA) {
+          return [
+            { name: "song.mp3", isDirectory: () => false, isFile: () => true },
+            { name: "dirB", isDirectory: () => true, isFile: () => false },
+          ];
+        }
+        if (dir === dirB) {
+          return [
+            { name: "dirA", isDirectory: () => true, isFile: () => false },
+          ];
+        }
+        return [];
+      });
+
+      (fs.promises.stat as jest.Mock).mockResolvedValue({ mtimeMs: 1000 });
+      mockStore.get.mockReturnValue(null);
+
+      const result = await invoke("handle-scan-mp3-files", dirA);
+
+      // Should find 1 file without infinite loop
+      expect(result.files).toHaveLength(1);
+      expect(result.files).toContain("/music/dirA/song.mp3");
     });
   });
 

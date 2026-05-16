@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Song } from "@/types";
 import Modal from "./Modal";
 import Input from "../common/Input";
+import { getPlayableImagePath } from "@/libs/songUtils";
 import { Textarea } from "../ui/textarea";
 import GenreSelect from "../genre/GenreSelect";
 import Button from "../common/Button";
@@ -205,7 +206,7 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
           {song.image_path && (
             <div className="mt-2 relative w-32 h-32">
               <Image
-                src={song.image_path}
+                src={getPlayableImagePath(song)}
                 alt="現在の画像"
                 fill
                 className="object-cover rounded-md"

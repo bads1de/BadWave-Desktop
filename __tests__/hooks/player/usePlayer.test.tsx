@@ -128,6 +128,20 @@ describe("usePlayer (Zustand Store)", () => {
     expect(state.hasHydrated).toBe(true);
   });
 
+  it("setLocalSongs で複数曲を一括保存できる", () => {
+    const songs = [
+      { id: "song-1", title: "Test 1" },
+      { id: "song-2", title: "Test 2" },
+      { id: "song-3", title: "Test 3" },
+    ] as any[];
+    act(() => {
+      usePlayer.getState().setLocalSongs(songs);
+    });
+    expect(usePlayer.getState().getLocalSong("song-1")).toEqual(songs[0]);
+    expect(usePlayer.getState().getLocalSong("song-2")).toEqual(songs[1]);
+    expect(usePlayer.getState().getLocalSong("song-3")).toEqual(songs[2]);
+  });
+
   it("getNextSongId でエッジケースを処理できる", () => {
     // 空リスト
     expect(usePlayer.getState().getNextSongId()).toBeUndefined();
