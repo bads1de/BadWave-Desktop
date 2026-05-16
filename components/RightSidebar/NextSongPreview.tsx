@@ -11,6 +11,10 @@ const NextSongPreview: React.FC<NextSongPreviewProps> = React.memo(
   ({ nextSong, nextImagePath }) => {
     if (!nextSong) return null;
 
+    const onlineImagePath =
+      nextImagePath &&
+      (nextImagePath.startsWith("http") || nextImagePath.startsWith("/"));
+
     return (
       <div className="absolute bottom-6 left-4 right-4 z-20 transition-all duration-700 transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 font-mono">
         <div className="bg-[#0a0a0f]/90 backdrop-blur-xl border border-theme-500/40 p-4 rounded-none shadow-[0_0_30px_rgba(0,0,0,0.8),0_0_15px_rgba(var(--theme-500),0.1)] hover:bg-[#0a0a0f] transition-all duration-300 relative group/next cyber-glitch">
@@ -21,7 +25,7 @@ const NextSongPreview: React.FC<NextSongPreviewProps> = React.memo(
           <div className="flex items-center gap-4">
             <div className="relative w-12 h-12 rounded-none overflow-hidden shrink-0 border border-theme-500/30 group-hover/next:border-theme-500 transition-colors shadow-[0_0_10px_rgba(var(--theme-500),0.2)]">
               <Image
-                src={nextImagePath || "/images/playlist.png"}
+                src={onlineImagePath ? nextImagePath : "/images/playlist.png"}
                 alt="Next Song"
                 fill
                 className="object-cover transition-all duration-700 group-hover/next:scale-125 opacity-80"

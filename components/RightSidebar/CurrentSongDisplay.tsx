@@ -27,6 +27,8 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
       ? uniqueTags
       : uniqueTags.slice(0, MAX_VISIBLE_TAGS);
     const hasMoreGenres = tags.length > MAX_VISIBLE_TAGS;
+    const onlineImagePath =
+      imagePath && (imagePath.startsWith("http") || imagePath.startsWith("/"));
 
     return (
       <div className="relative w-full h-full group font-mono">
@@ -38,7 +40,7 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
             muted
             className="z-0 h-full w-full object-cover transition-all duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-40"
           />
-        ) : imagePath ? (
+        ) : onlineImagePath ? (
           <Image
             src={imagePath}
             alt="Song Image"
@@ -59,8 +61,8 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
         <div className="absolute bottom-28 left-0 right-0 px-6 flex flex-col justify-end space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[8px] text-theme-500 tracking-[0.5em] uppercase animate-pulse">
-              <span className="w-1.5 h-1.5 bg-theme-500 rounded-full" />
-              [ LIVE_STREAM_DATA ]
+              <span className="w-1.5 h-1.5 bg-theme-500 rounded-full" />[
+              LIVE_STREAM_DATA ]
             </div>
             <h1 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-[0_0_10px_rgba(var(--theme-500),0.8)] cyber-glitch">
               <Link href={`/songs/${song.id}`}>

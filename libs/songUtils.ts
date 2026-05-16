@@ -196,16 +196,6 @@ export function getPlayablePath(song: Song | null | undefined): string {
   return song.song_path || "";
 }
 
-/**
- * 曲の画像パスを取得する
- *
- * ダウンロード済みの場合はローカル画像パスを優先し、
- * そうでなければリモートURLを返す。
- * オフライン時に通信を発生させないための重要な関数。
- *
- * @param song - 曲オブジェクト
- * @returns 画像パス（ローカルまたはリモート）
- */
 export function getPlayableImagePath(song: Song | null | undefined): string {
   if (!song) {
     return "";
@@ -217,6 +207,13 @@ export function getPlayableImagePath(song: Song | null | undefined): string {
     if (localUrl) return localUrl;
   }
 
-  // それ以外の場合はリモートURLを使用
-  return song.image_path || "";
+  const imagePath = song.image_path || "";
+
+  // 以前のストア等に残っている file:/// パスなどを無効化（セキュリティエラー回避）
+  // data:image/... (base64) や http:// はそのまま通す
+  if (imagePath.startsWith("file://") || /^[A-Za-z]:\\/.test(imagePath)) {
+    return "";
+  }
+
+  return imagePath;
 }
