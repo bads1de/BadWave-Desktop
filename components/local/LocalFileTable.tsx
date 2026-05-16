@@ -7,11 +7,14 @@ import {
   Disc,
   User,
   Play,
+  Calendar,
 } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatTime } from "@/libs/utils";
 import { LocalFile } from "@/types/local";
+import { formatDistanceToNow } from "date-fns";
+import { ja } from "date-fns/locale";
 
 interface LocalFileTableProps {
   mp3Files: LocalFile[];
@@ -153,6 +156,26 @@ const LocalFileTable: React.FC<LocalFileTableProps> = ({
             </div>
           ) : (
             <span className="text-theme-500/10 text-[10px] font-mono">---</span>
+          );
+        },
+      },
+      {
+        id: "date",
+        accessorFn: (row) => row.lastModified || 0,
+        header: () => (
+          <div className="flex items-center gap-2 font-mono text-[10px] tracking-widest text-theme-500/60 uppercase">
+            <Calendar className="h-3 w-3" />
+            <span>Date</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const ts = row.original.lastModified;
+          return (
+            <div className="text-xs text-theme-400 font-mono tracking-wider">
+              {ts
+                ? formatDistanceToNow(ts, { addSuffix: true, locale: ja })
+                : "—"}
+            </div>
           );
         },
       },

@@ -264,7 +264,7 @@ function setupLibraryHandlers() {
                             return {
                                 path: filePath,
                                 metadata: (fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata) || null,
-                                albumArtData: (_a = fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.albumArtData) !== null && _a !== void 0 ? _a : null,
+                                lastModified: (_a = fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.lastModified) !== null && _a !== void 0 ? _a : null,
                                 needsMetadata: !(fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata), // メタデータ取得が必要かどうか
                             };
                         });
@@ -347,7 +347,7 @@ function setupLibraryHandlers() {
                     return ({
                         path: filePath,
                         metadata: fileInfo.metadata || null,
-                        albumArtData: (_b = fileInfo.albumArtData) !== null && _b !== void 0 ? _b : null,
+                        lastModified: (_b = fileInfo.lastModified) !== null && _b !== void 0 ? _b : null,
                     });
                 });
                 return [2 /*return*/, {
@@ -384,7 +384,6 @@ function setupLibraryHandlers() {
                             };
                         }
                         savedLibrary_1.files[filePath].metadata = update.metadata;
-                        savedLibrary_1.files[filePath].albumArtData = update.albumArtData;
                         savedLibrary_1.files[filePath].lastModified = update.lastModified;
                         delete savedLibrary_1.files[filePath].error;
                     });
@@ -397,16 +396,15 @@ function setupLibraryHandlers() {
         }, 1000); // 1秒間の遅延でバッチ保存
     };
     electron_1.ipcMain.handle("handle-get-mp3-metadata", function (_, filePath) { return __awaiter(_this, void 0, void 0, function () {
-        var savedLibrary, stats, lastModified, metadata, albumArtData, picture, base64, error_3, savedLibrary;
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var savedLibrary, stats, lastModified, metadata, error_3, savedLibrary;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
-                    _b.trys.push([0, 3, , 4]);
+                    _a.trys.push([0, 3, , 4]);
                     savedLibrary = store_1.default.get(MUSIC_LIBRARY_KEY);
                     return [4 /*yield*/, fs.promises.stat(filePath)];
                 case 1:
-                    stats = _b.sent();
+                    stats = _a.sent();
                     lastModified = stats.mtimeMs;
                     // 保存されているメタデータがあり、ファイルが変更されていない場合は保存されているメタデータを返す
                     if (savedLibrary &&
@@ -415,26 +413,19 @@ function setupLibraryHandlers() {
                         savedLibrary.files[filePath].lastModified === lastModified) {
                         return [2 /*return*/, {
                                 metadata: savedLibrary.files[filePath].metadata,
-                                albumArtData: (_a = savedLibrary.files[filePath].albumArtData) !== null && _a !== void 0 ? _a : null,
                                 fromCache: true,
                             }];
                     }
                     return [4 /*yield*/, mm.parseFile(filePath)];
                 case 2:
-                    metadata = _b.sent();
-                    albumArtData = null;
-                    if (metadata.common.picture && metadata.common.picture.length > 0) {
-                        picture = metadata.common.picture[0];
-                        base64 = picture.data.toString("base64");
-                        albumArtData = "data:".concat(picture.format, ";base64,").concat(base64);
-                    }
+                    metadata = _a.sent();
                     // ペンディングキューに追加（即座に保存しない）
-                    pendingMetadataUpdates.set(filePath, { metadata: metadata, albumArtData: albumArtData, lastModified: lastModified });
+                    pendingMetadataUpdates.set(filePath, { metadata: metadata, lastModified: lastModified });
                     // 遅延保存をスケジュール
                     debouncedSaveLibrary();
-                    return [2 /*return*/, { metadata: metadata, albumArtData: albumArtData, fromCache: false }];
+                    return [2 /*return*/, { metadata: metadata, fromCache: false }];
                 case 3:
-                    error_3 = _b.sent();
+                    error_3 = _a.sent();
                     (0, utils_1.debugLog)("[Error] \u30E1\u30BF\u30C7\u30FC\u30BF\u306E\u53D6\u5F97\u306B\u5931\u6557: ".concat(filePath), error_3);
                     savedLibrary = store_1.default.get(MUSIC_LIBRARY_KEY);
                     if (savedLibrary && savedLibrary.files[filePath]) {

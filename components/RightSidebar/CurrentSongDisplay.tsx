@@ -46,7 +46,6 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
             alt="Song Image"
             fill
             className="z-0 object-cover transition-all duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-40"
-            unoptimized
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
           />
         ) : (

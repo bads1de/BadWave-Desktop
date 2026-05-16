@@ -179,14 +179,13 @@ const SongPage = (props: SongPageProps) => {
 
         {/* Hero Section */}
         <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
-          <Image
-            src={song ? getPlayableImagePath(song) : "/images/loading.gif"}
-            alt="Song Cover"
-            fill
-            className="object-cover opacity-20 grayscale scale-110 blur-[10px]"
-            unoptimized
-            sizes="100vw"
-          />
+<Image
+  src={song ? getPlayableImagePath(song) : "/images/loading.gif"}
+  alt="Song Cover"
+  fill
+  className="object-cover opacity-20 grayscale scale-110 blur-[10px]"
+  sizes="100vw"
+/>
           
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/40 via-[#0a0a0f]/80 to-[#0a0a0f]" />
           

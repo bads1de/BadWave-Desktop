@@ -32,7 +32,7 @@ export interface ScanProgress {
 interface FileWithMetadataInfo {
   path: string;
   metadata: any | null;
-  albumArtData?: string | null;
+  lastModified?: number | null;
   needsMetadata: boolean;
 }
 
@@ -52,7 +52,7 @@ interface ScanResult {
 interface CachedFilesResult {
   exists: boolean;
   directoryPath?: string;
-  files: { path: string; metadata: any | null; albumArtData?: string | null }[];
+  files: { path: string; metadata: any | null; lastModified?: number | null }[];
   lastScan?: string;
   error?: string;
 }
@@ -62,7 +62,6 @@ interface CachedFilesResult {
  */
 interface MetadataResult {
   metadata?: any;
-  albumArtData?: string | null;
   fromCache?: boolean;
   error?: string;
 }
@@ -84,7 +83,6 @@ const BATCH_SIZE = 10;
 
 interface MetadataWithArt {
   metadata: any;
-  image_path?: string;
   error?: string;
 }
 
@@ -107,7 +105,6 @@ async function fetchMissingMetadataInBatches(
           return {
             path: filePath,
             metadata: result.metadata,
-            image_path: result.albumArtData || undefined,
             error: result.error,
           };
         } catch (err: any) {
@@ -115,8 +112,8 @@ async function fetchMissingMetadataInBatches(
         }
       })
     );
-    batchResults.forEach(({ path, metadata, image_path }) => {
-      metadataMap.set(path, { metadata, image_path });
+    batchResults.forEach(({ path, metadata }) => {
+      metadataMap.set(path, { metadata });
     });
   }
 
@@ -238,7 +235,7 @@ const useGetLocalFiles = (directoryPath: string | null) => {
               (f) => ({
                 path: f.path,
                 metadata: f.metadata,
-                image_path: f.albumArtData || undefined,
+                lastModified: f.lastModified || undefined,
               })
             );
 
@@ -284,19 +281,20 @@ const useGetLocalFiles = (directoryPath: string | null) => {
             return {
               path: fileInfo.path,
               metadata: fileInfo.metadata,
-              image_path: fileInfo.albumArtData || undefined,
+              lastModified: fileInfo.lastModified || undefined,
             };
           } else if (fetchedMetadata.has(fileInfo.path)) {
             const fetched = fetchedMetadata.get(fileInfo.path)!;
             return {
               path: fileInfo.path,
               metadata: fetched.metadata,
-              image_path: fetched.image_path,
+              lastModified: fileInfo.lastModified || undefined,
             };
           } else {
             return {
               path: fileInfo.path,
               error: "メタデータを取得できませんでした",
+              lastModified: fileInfo.lastModified || undefined,
             };
           }
         }

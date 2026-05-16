@@ -96,11 +96,6 @@ export function toFileUrl(filePath: string): string {
     return filePath;
   }
 
-  // data URLの場合はそのまま返す
-  if (filePath.startsWith("data:")) {
-    return filePath;
-  }
-
   if (filePath.startsWith("file://")) {
     // file:// を badwave:// に変換する
     let rawPath = filePath.replace("file://", "");
@@ -210,7 +205,7 @@ export function getPlayableImagePath(song: Song | null | undefined): string {
   const imagePath = song.image_path || "";
 
   // 以前のストア等に残っている file:/// パスなどを無効化（セキュリティエラー回避）
-  // data:image/... (base64) や http:// はそのまま通す
+  // http:// はそのまま通す
   if (imagePath.startsWith("file://") || /^[A-Za-z]:\\/.test(imagePath)) {
     return "";
   }

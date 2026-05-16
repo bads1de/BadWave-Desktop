@@ -16,7 +16,6 @@ const nextConfig = {
         hostname: "pub-5cf6f4d1134946fc9b0ae6736c735478.r2.dev",
       },
     ],
-    unoptimized: true,
   },
   experimental: {
     forceSwcTransforms: true,

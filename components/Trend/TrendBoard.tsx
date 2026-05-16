@@ -68,7 +68,6 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
                     src={song.image_path}
                     alt={song.title}
                     fill
-                    unoptimized
                     className="group-hover:scale-125 group-hover:opacity-60 transition-all duration-700 ease-out"
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
                     style={{

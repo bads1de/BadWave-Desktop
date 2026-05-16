@@ -130,7 +130,7 @@ const LocalPage = () => {
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
       
       <div className="relative z-10">
-        <Header className="sticky top-0 z-20">
+        <Header className="relative z-20">
           <div className="flex items-center justify-between w-full px-4 lg:px-8 py-2">
             <div className="flex flex-col">
               <h1 className="text-4xl font-black tracking-[0.2em] text-white uppercase cyber-glitch">

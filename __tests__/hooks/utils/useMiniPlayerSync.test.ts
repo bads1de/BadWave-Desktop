@@ -40,7 +40,7 @@ describe("useMiniPlayerSync", () => {
         id: "song-1",
         title: "Test Song",
         author: "Test Author",
-        image_path: "/test.jpg",
+        image_path: "",
       },
       isPlaying: true,
     });

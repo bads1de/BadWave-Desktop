@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { Song } from "@/types";
 import { miniPlayer, isElectron } from "@/libs/electron";
+import { isLocalFilePath } from "@/libs/songUtils";
 
 interface UseMiniPlayerSyncProps {
   song: Song | null;
@@ -34,7 +35,9 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
             id: currentSong.id,
             title: currentSong.title,
             author: currentSong.author,
-            image_path: currentSong.image_path,
+            image_path: isLocalFilePath(currentSong.song_path)
+              ? ""
+              : currentSong.image_path,
           }
         : null,
       isPlaying: currentIsPlaying,

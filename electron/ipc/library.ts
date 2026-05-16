@@ -27,7 +27,6 @@ interface MusicLibrary {
   files: {
     [filePath: string]: {
       metadata?: any;
-      albumArtData?: string | null;
       lastModified: number;
       error?: string;
     };
@@ -204,7 +203,7 @@ export function setupLibraryHandlers() {
           return {
             path: filePath,
             metadata: fileInfo?.metadata || null,
-            albumArtData: fileInfo?.albumArtData ?? null,
+            lastModified: fileInfo?.lastModified ?? null,
             needsMetadata: !fileInfo?.metadata, // メタデータ取得が必要かどうか
           };
         });
@@ -288,7 +287,7 @@ export function setupLibraryHandlers() {
         ([filePath, fileInfo]) => ({
           path: filePath,
           metadata: fileInfo.metadata || null,
-          albumArtData: fileInfo.albumArtData ?? null,
+          lastModified: fileInfo.lastModified ?? null,
         })
       );
 
@@ -309,7 +308,7 @@ export function setupLibraryHandlers() {
   // ストアへの書き込みは遅延させてバッチ処理する
   let pendingMetadataUpdates: Map<
     string,
-    { metadata: any; albumArtData: string | null; lastModified: number }
+    { metadata: any; lastModified: number }
   > = new Map();
   let saveTimeout: NodeJS.Timeout | null = null;
 
@@ -330,7 +329,6 @@ export function setupLibraryHandlers() {
               };
             }
             savedLibrary.files[filePath].metadata = update.metadata;
-            savedLibrary.files[filePath].albumArtData = update.albumArtData;
             savedLibrary.files[filePath].lastModified = update.lastModified;
             delete savedLibrary.files[filePath].error;
           });
@@ -365,7 +363,6 @@ export function setupLibraryHandlers() {
       ) {
         return {
           metadata: savedLibrary.files[filePath].metadata,
-          albumArtData: savedLibrary.files[filePath].albumArtData ?? null,
           fromCache: true,
         };
       }
@@ -373,21 +370,13 @@ export function setupLibraryHandlers() {
       // メタデータを取得
       const metadata = await mm.parseFile(filePath);
 
-      // アルバムアートをbase64 data URLに変換
-      let albumArtData: string | null = null;
-      if (metadata.common.picture && metadata.common.picture.length > 0) {
-        const picture = metadata.common.picture[0];
-        const base64 = picture.data.toString("base64");
-        albumArtData = `data:${picture.format};base64,${base64}`;
-      }
-
       // ペンディングキューに追加（即座に保存しない）
-      pendingMetadataUpdates.set(filePath, { metadata, albumArtData, lastModified });
+      pendingMetadataUpdates.set(filePath, { metadata, lastModified });
 
       // 遅延保存をスケジュール
       debouncedSaveLibrary();
 
-      return { metadata, albumArtData, fromCache: false };
+      return { metadata, fromCache: false };
     } catch (error: any) {
       debugLog(`[Error] メタデータの取得に失敗: ${filePath}`, error);
 

@@ -11,6 +11,7 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
 } from "@tanstack/react-table";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 import {
   Table,
@@ -95,17 +96,32 @@ export function DataTable<TData, TValue>({
                   className="border-b-theme-500/10 hover:bg-transparent"
                 >
                   {headerGroup.headers.map((header) => {
+                    const canSort = header.column.getCanSort();
                     return (
                       <TableHead
                         key={header.id}
-                        className="text-theme-500 font-black uppercase tracking-widest text-[10px] py-4 h-auto"
+                        className={`text-theme-500 font-black uppercase tracking-widest text-[10px] py-4 h-auto ${
+                          canSort ? "cursor-pointer select-none hover:text-theme-300 transition-colors" : ""
+                        }`}
+                        onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                       >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
+                        {header.isPlaceholder ? null : (
+                          <div className="flex items-center gap-1">
+                            {flexRender(
                               header.column.columnDef.header,
                               header.getContext()
                             )}
+                            {canSort && (
+                              header.column.getIsSorted() === "asc" ? (
+                                <ArrowUp className="h-3 w-3 text-theme-400" />
+                              ) : header.column.getIsSorted() === "desc" ? (
+                                <ArrowDown className="h-3 w-3 text-theme-400" />
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                              )
+                            )}
+                          </div>
+                        )}
                       </TableHead>
                     );
                   })}
