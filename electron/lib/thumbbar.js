@@ -235,7 +235,6 @@ function updateThumbBarState(playing) {
     if (mainWindow && !mainWindow.isDestroyed()) {
         try {
             mainWindow.setThumbarButtons(buildThumbBarButtons());
-            (0, utils_1.debugLog)("[ThumbBar] \u72B6\u614B\u66F4\u65B0: ".concat(playing ? "再生中" : "停止中"));
         }
         catch (error) {
             console.error("[ThumbBar] 状態更新に失敗:", error);

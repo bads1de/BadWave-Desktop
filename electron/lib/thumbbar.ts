@@ -234,7 +234,6 @@ export function updateThumbBarState(playing: boolean) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     try {
       mainWindow.setThumbarButtons(buildThumbBarButtons());
-      debugLog(`[ThumbBar] 状態更新: ${playing ? "再生中" : "停止中"}`);
     } catch (error) {
       console.error("[ThumbBar] 状態更新に失敗:", error);
     }

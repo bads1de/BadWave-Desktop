@@ -13,6 +13,7 @@ import { dev } from "./dev";
 import { cache } from "./cache";
 import { auth } from "./auth";
 import { miniPlayer, MiniPlayerSong, MiniPlayerState } from "./miniPlayer";
+import { checkLocalFileExists } from "./files";
 
 /**
  * Electronの機能をまとめたオブジェクト
@@ -30,6 +31,7 @@ export const electronAPI = {
   cache,
   auth,
   miniPlayer,
+  checkLocalFileExists,
 };
 
 // 個別のエクスポートも提供
@@ -47,6 +49,7 @@ export {
   cache,
   auth,
   miniPlayer,
+  checkLocalFileExists,
 };
 
 // 型のエクスポート

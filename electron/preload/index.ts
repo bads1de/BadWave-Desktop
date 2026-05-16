@@ -20,6 +20,7 @@ const FILE_CHANNELS = [
   "handle-get-mp3-metadata",
   "handle-get-saved-music-library",
   "check-file-exists",
+  "check-local-file-exists",
   "get-local-file-path",
   "handle-get-cached-files-with-metadata",
 ];

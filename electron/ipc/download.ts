@@ -84,6 +84,16 @@ export function setupDownloadHandlers() {
     }
   });
 
+  // ローカルファイルの存在確認（任意パス）
+  ipcMain.handle("check-local-file-exists", async (_, filePath: string) => {
+    try {
+      await fs.promises.access(filePath, fs.constants.F_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
   // ローカルファイルのパスを取得
   ipcMain.handle("get-local-file-path", (_, filename: string) => {
     const userDataPath = app.getPath("userData");

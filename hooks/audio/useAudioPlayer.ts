@@ -8,6 +8,7 @@ import { isLocalFilePath, toFileUrl } from "@/libs/songUtils";
 import { Song } from "@/types";
 import { AudioEngine } from "@/libs/audio/AudioEngine";
 import useLatestRef from "@/hooks/utils/useLatestRef";
+import { createAudioErrorHandler } from "@/hooks/audio/audioErrorHandler";
 
 /**
  * AudioEngineシングルトンを使用するオーディオプレイヤーフック
@@ -52,8 +53,6 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
 
   const lastSaveTimeRef = useRef<number>(0);
   const hasRestoredRef = useRef<boolean>(false);
-  const consecutiveErrorsRef = useRef<number>(0);
-  const MAX_CONSECUTIVE_ERRORS = 3;
 
   // useLatestRef: イベントリスナー内から最新の状態を参照するため
   const isPlayingRef = useLatestRef(isPlaying);
@@ -98,6 +97,16 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
   useEffect(() => {
     onPlayNextRef.current = onPlayNext;
   }, [onPlayNext]);
+
+  // エラーハンドラー（テスト可能な純粋関数に分離）
+  const errorHandlerRef = useRef(
+    createAudioErrorHandler({
+      maxConsecutiveErrors: 3,
+      skipDelayMs: 500,
+      setIsPlaying,
+      onPlayNext: () => onPlayNextRef.current(),
+    })
+  );
 
   const onPlayPrevious = useCallback(() => {
     if (isRepeating && audio) {
@@ -146,7 +155,7 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
     };
     const handleCanPlayThrough = () => {
       // 連続エラーカウンターをリセット
-      consecutiveErrorsRef.current = 0;
+      errorHandlerRef.current.resetErrors();
       // アプリ起動時の復元中は自動再生しない
       if (isRestoringRef.current) return;
       // 曲がロードされたら再生開始
@@ -168,15 +177,7 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
         src: audio.src,
         event: e,
       });
-      setIsPlaying(false);
-
-      // 連続エラーが閾値未満なら次曲へスキップ
-      consecutiveErrorsRef.current++;
-      if (consecutiveErrorsRef.current < MAX_CONSECUTIVE_ERRORS) {
-        setTimeout(() => {
-          onPlayNextRef.current();
-        }, 500);
-      }
+      errorHandlerRef.current.handleError();
     };
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
@@ -218,7 +219,7 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
 
     engine.currentSongId = newSongId;
     audio.currentTime = 0;
-    consecutiveErrorsRef.current = 0;
+    errorHandlerRef.current.resetErrors();
 
     if (isLocalFile) {
       const localUrl = toFileUrl(songUrl);

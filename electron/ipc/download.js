@@ -159,6 +159,24 @@ function setupDownloadHandlers() {
             }
         });
     }); });
+    // ローカルファイルの存在確認（任意パス）
+    electron_1.ipcMain.handle("check-local-file-exists", function (_, filePath) { return __awaiter(_this, void 0, void 0, function () {
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, fs.promises.access(filePath, fs.constants.F_OK)];
+                case 1:
+                    _b.sent();
+                    return [2 /*return*/, true];
+                case 2:
+                    _a = _b.sent();
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
+            }
+        });
+    }); });
     // ローカルファイルのパスを取得
     electron_1.ipcMain.handle("get-local-file-path", function (_, filename) {
         var userDataPath = electron_1.app.getPath("userData");

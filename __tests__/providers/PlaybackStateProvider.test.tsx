@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import PlaybackStateProvider from "@/providers/PlaybackStateProvider";
 import usePlayer from "@/hooks/player/usePlayer";
 import usePlaybackStateStore from "@/hooks/stores/usePlaybackStateStore";
@@ -11,6 +11,13 @@ import usePlaybackStateStore from "@/hooks/stores/usePlaybackStateStore";
 jest.mock("@/hooks/player/usePlayer");
 jest.mock("@/hooks/stores/usePlaybackStateStore");
 
+// filterStaleLocalSongs をモック（非同期処理を同期的に扱う）
+const mockFilterStaleLocalSongs = jest.fn((ids: string[]) => Promise.resolve(ids));
+jest.mock("@/libs/electron/files", () => ({
+  filterStaleLocalSongs: (...args: any[]) => mockFilterStaleLocalSongs(...args),
+  checkLocalFileExists: jest.fn(),
+}));
+
 describe("PlaybackStateProvider", () => {
   const mockSetIds = jest.fn();
   const mockSetId = jest.fn();
@@ -18,10 +25,11 @@ describe("PlaybackStateProvider", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     (usePlayer as unknown as jest.Mock).mockReturnValue({
       setIds: mockSetIds,
       setId: mockSetId,
+      localSongs: new Map(),
     });
 
     (usePlaybackStateStore as unknown as jest.Mock).mockReturnValue({
@@ -32,12 +40,14 @@ describe("PlaybackStateProvider", () => {
     });
   });
 
-  it("should restore playback state when hydrated and songId exists", () => {
-    render(
-      <PlaybackStateProvider>
-        <div>Child</div>
-      </PlaybackStateProvider>
-    );
+  it("should restore playback state when hydrated and songId exists", async () => {
+    await act(async () => {
+      render(
+        <PlaybackStateProvider>
+          <div>Child</div>
+        </PlaybackStateProvider>
+      );
+    });
 
     expect(mockSetIsRestoring).toHaveBeenCalledWith(true);
     expect(mockSetIds).toHaveBeenCalledWith(["song-1", "song-2"]);
@@ -76,5 +86,21 @@ describe("PlaybackStateProvider", () => {
     );
 
     expect(mockSetId).not.toHaveBeenCalled();
+  });
+
+  it("should fall back to original playlist when filterStaleLocalSongs fails", async () => {
+    mockFilterStaleLocalSongs.mockRejectedValueOnce(new Error("IPC failed"));
+
+    await act(async () => {
+      render(
+        <PlaybackStateProvider>
+          <div>Child</div>
+        </PlaybackStateProvider>
+      );
+    });
+
+    // フォールバック：元のプレイリストで復元
+    expect(mockSetIds).toHaveBeenCalledWith(["song-1", "song-2"]);
+    expect(mockSetId).toHaveBeenCalledWith("song-1");
   });
 });
