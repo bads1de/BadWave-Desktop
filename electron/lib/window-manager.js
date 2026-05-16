@@ -123,7 +123,7 @@ function createMiniPlayer() {
                             nodeIntegration: false,
                             contextIsolation: true,
                             preload: path.join(__dirname, "../preload/index.js"),
-                            backgroundThrottling: false,
+                            backgroundThrottling: true,
                         },
                     });
                     htmlPath = path.join(electron_1.app.getAppPath(), "public", "mini-player.html");
@@ -187,7 +187,7 @@ function createMainWindow() {
                             //      <audio src={badwaveUrl} />
                             // =========================================================================
                             webSecurity: true, // カスタムプロトコル方式のため有効
-                            backgroundThrottling: false, // バックグラウンドでのスロットリングを無効化（オーディオ再生を維持）
+                            backgroundThrottling: true, // JSタイマー/rAFのみスロットリング（<audio>再生には影響なし）
                         },
                         // macOSでは背景色を設定しないとタイトルバーが白くなる
                         backgroundColor: "#121212",
