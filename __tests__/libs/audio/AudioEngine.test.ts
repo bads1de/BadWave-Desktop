@@ -47,6 +47,15 @@ const mockAudioContext = {
     ...createMockAudioNode(),
     type: "sine",
   })),
+  createAnalyser: jest.fn(() => ({
+    fftSize: 0,
+    smoothingTimeConstant: 0,
+    frequencyBinCount: 128,
+    connect: mockConnect,
+    disconnect: mockDisconnect,
+    getByteFrequencyData: jest.fn(),
+    getByteTimeDomainData: jest.fn(),
+  })),
   createBuffer: jest.fn(() => ({
     getChannelData: jest.fn(() => new Float32Array(100)),
   })),
@@ -94,6 +103,37 @@ describe("AudioEngine", () => {
 
     engine.initialize();
     expect(mockAudioContext.createMediaElementSource).not.toHaveBeenCalled();
+  });
+
+  describe("AnalyserNode", () => {
+    it("should have null analyser before initialization", () => {
+      expect(engine.analyser).toBeNull();
+    });
+
+    it("should create analyser during initialization", () => {
+      engine.initialize();
+      expect(mockAudioContext.createAnalyser).toHaveBeenCalled();
+      expect(engine.analyser).toBeDefined();
+    });
+
+    it("should set correct fftSize on analyser", () => {
+      engine.initialize();
+      expect(engine.analyser!.fftSize).toBe(256);
+    });
+
+    it("should set correct smoothingTimeConstant on analyser", () => {
+      engine.initialize();
+      expect(engine.analyser!.smoothingTimeConstant).toBe(0.8);
+    });
+
+    it("should route gainNode through analyser to destination", () => {
+      engine.initialize();
+      // gainNode -> analyser -> destination の接続確認
+      expect(mockConnect).toHaveBeenCalledWith(engine.analyser);
+      expect(engine.analyser!.connect).toHaveBeenCalledWith(
+        mockAudioContext.destination
+      );
+    });
   });
 
   describe("Effect Controls", () => {

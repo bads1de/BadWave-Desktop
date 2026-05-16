@@ -37,6 +37,9 @@ class AudioEngine {
   public bassBoostFilter: BiquadFilterNode | null = null;
   private isBassBoostActive = false;
 
+  // Analyser ノード（ビジュアライザー用）
+  public analyser: AnalyserNode | null = null;
+
   // 状態管理
   public currentSongId: string | null = null;
   public isInitialized = false;
@@ -144,6 +147,11 @@ class AudioEngine {
       this.bassBoostFilter.frequency.value = 100; // 100Hzを中心に
       this.bassBoostFilter.gain.value = 0; // 初期はOFF (0dB)
 
+      // --- Analyser ノード作成（ビジュアライザー用） ---
+      this.analyser = this.context.createAnalyser();
+      this.analyser.fftSize = 256;
+      this.analyser.smoothingTimeConstant = 0.8;
+
       // --- 接続 (Routing) ---
       // Main Path: Source -> EQ -> Spatial -> 8D Panner -> Retro(HighPass->LowPass->Distortion) -> MasterGain -> Dest
       let currentNode: AudioNode = this.sourceNode;
@@ -175,7 +183,8 @@ class AudioEngine {
       currentNode = this.bassBoostFilter;
 
       currentNode.connect(this.gainNode);
-      this.gainNode.connect(this.context.destination);
+      this.gainNode.connect(this.analyser);
+      this.analyser.connect(this.context.destination);
 
       // Reverb Path: (After effects) -> ReverbGain -> Convolver -> Dest
       this.stereoPanner.connect(this.reverbGainNode);

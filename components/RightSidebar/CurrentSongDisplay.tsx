@@ -7,6 +7,7 @@ import { Song } from "@/types";
 import { splitTags } from "@/libs/utils";
 import ScrollingText from "../common/ScrollingText";
 import DownloadIndicator from "../common/DownloadIndicator";
+import CyberArtFallback from "../common/CyberArtFallback";
 
 interface CurrentSongDisplayProps {
   song: Song;
@@ -37,15 +38,17 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
             muted
             className="z-0 h-full w-full object-cover transition-all duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-40"
           />
-        ) : (
+        ) : imagePath ? (
           <Image
-            src={imagePath || "/images/loading.jpg"}
+            src={imagePath}
             alt="Song Image"
             fill
             className="z-0 object-cover transition-all duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-40"
             unoptimized
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
           />
+        ) : (
+          <CyberArtFallback />
         )}
 
         {/* 背景装飾 */}
