@@ -86,7 +86,6 @@ var electron_1 = require("electron");
 var fs = __importStar(require("fs"));
 var path = __importStar(require("path"));
 var mm = __importStar(require("music-metadata"));
-var crypto = __importStar(require("crypto"));
 var store_1 = __importDefault(require("../lib/store"));
 var utils_1 = require("../utils");
 var window_manager_1 = require("../lib/window-manager");
@@ -260,11 +259,12 @@ function setupLibraryHandlers() {
                             message: "\u30B9\u30AD\u30E3\u30F3\u5B8C\u4E86: ".concat(allFiles.length, "\u30D5\u30A1\u30A4\u30EB\u3092\u51E6\u7406\u3057\u307E\u3057\u305F"),
                         });
                         filesWithMetadata = allFiles.map(function (filePath) {
+                            var _a;
                             var fileInfo = currentLibrary_1.files[filePath];
                             return {
                                 path: filePath,
                                 metadata: (fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata) || null,
-                                albumArtData: (fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.albumArtData) || null,
+                                albumArtData: (_a = fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.albumArtData) !== null && _a !== void 0 ? _a : null,
                                 needsMetadata: !(fileInfo === null || fileInfo === void 0 ? void 0 : fileInfo.metadata), // メタデータ取得が必要かどうか
                             };
                         });
@@ -342,11 +342,12 @@ function setupLibraryHandlers() {
                     return [2 /*return*/, { exists: false, files: [] }];
                 }
                 filesWithMetadata = Object.entries(savedLibrary.files).map(function (_a) {
+                    var _b;
                     var filePath = _a[0], fileInfo = _a[1];
                     return ({
                         path: filePath,
                         metadata: fileInfo.metadata || null,
-                        albumArtData: fileInfo.albumArtData || null,
+                        albumArtData: (_b = fileInfo.albumArtData) !== null && _b !== void 0 ? _b : null,
                     });
                 });
                 return [2 /*return*/, {
@@ -397,14 +398,15 @@ function setupLibraryHandlers() {
     };
     electron_1.ipcMain.handle("handle-get-mp3-metadata", function (_, filePath) { return __awaiter(_this, void 0, void 0, function () {
         var savedLibrary, stats, lastModified, metadata, albumArtData, picture, base64, error_3, savedLibrary;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _b.trys.push([0, 3, , 4]);
                     savedLibrary = store_1.default.get(MUSIC_LIBRARY_KEY);
                     return [4 /*yield*/, fs.promises.stat(filePath)];
                 case 1:
-                    stats = _a.sent();
+                    stats = _b.sent();
                     lastModified = stats.mtimeMs;
                     // 保存されているメタデータがあり、ファイルが変更されていない場合は保存されているメタデータを返す
                     if (savedLibrary &&
@@ -413,14 +415,13 @@ function setupLibraryHandlers() {
                         savedLibrary.files[filePath].lastModified === lastModified) {
                         return [2 /*return*/, {
                                 metadata: savedLibrary.files[filePath].metadata,
-                                albumArtData: savedLibrary.files[filePath].albumArtData || null,
+                                albumArtData: (_a = savedLibrary.files[filePath].albumArtData) !== null && _a !== void 0 ? _a : null,
                                 fromCache: true,
                             }];
                     }
                     return [4 /*yield*/, mm.parseFile(filePath)];
                 case 2:
-                    metadata = _a.sent();
-                    // アルバムアートをbase64 data URLに変換
+                    metadata = _b.sent();
                     albumArtData = null;
                     if (metadata.common.picture && metadata.common.picture.length > 0) {
                         picture = metadata.common.picture[0];
@@ -432,8 +433,8 @@ function setupLibraryHandlers() {
                     // 遅延保存をスケジュール
                     debouncedSaveLibrary();
                     return [2 /*return*/, { metadata: metadata, albumArtData: albumArtData, fromCache: false }];
-                case 5:
-                    error_3 = _a.sent();
+                case 3:
+                    error_3 = _b.sent();
                     (0, utils_1.debugLog)("[Error] \u30E1\u30BF\u30C7\u30FC\u30BF\u306E\u53D6\u5F97\u306B\u5931\u6557: ".concat(filePath), error_3);
                     savedLibrary = store_1.default.get(MUSIC_LIBRARY_KEY);
                     if (savedLibrary && savedLibrary.files[filePath]) {
@@ -441,7 +442,7 @@ function setupLibraryHandlers() {
                         store_1.default.set(MUSIC_LIBRARY_KEY, savedLibrary);
                     }
                     return [2 /*return*/, { error: error_3.message }];
-                case 6: return [2 /*return*/];
+                case 4: return [2 /*return*/];
             }
         });
     }); });
