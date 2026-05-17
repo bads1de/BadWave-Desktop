@@ -107,8 +107,8 @@ const useOnPlay = (songs: Song[]) => {
     [lastPlayTime, player, songs, supabase, processPlay]
   );
 
-  // デバウンスされた再生関数を返す
-  return useDebouncedCallback(onPlay, DEFAULT_COOLDOWN);
+  // デバウンスされた再生関数を返す（初回は即時実行、以降はデバウンス）
+  return useDebouncedCallback(onPlay, DEFAULT_COOLDOWN, { leading: true, trailing: false });
 };
 
 export default useOnPlay;

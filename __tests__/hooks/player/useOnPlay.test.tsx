@@ -108,18 +108,17 @@ describe("useOnPlay", () => {
     expect(mockPlayer.playSongWithData).not.toHaveBeenCalled();
   });
 
-  it("should debounce play calls", async () => {
+  it("should debounce play calls — first call immediate, rapid calls dropped", async () => {
     const { result } = renderHook(() => useOnPlay(mockSongs));
     const onPlay = result.current;
 
     await act(async () => {
       onPlay("1");
       onPlay("2");
-      jest.advanceTimersByTime(1000);
     });
 
-    // デバウンスにより最後の呼び出しのみが実行される
+    // leading: true により初回が即時実行、2回目はデバウンスでドロップ
     expect(mockPlayer.playSongWithData).toHaveBeenCalledTimes(1);
-    expect(mockPlayer.playSongWithData).toHaveBeenCalledWith(mockSongs[1], expect.any(Array));
+    expect(mockPlayer.playSongWithData).toHaveBeenCalledWith(mockSongs[0], expect.any(Array));
   });
 });
