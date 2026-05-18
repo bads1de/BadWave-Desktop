@@ -74,3 +74,35 @@ export interface Pulse {
   genre: string;
   music_path: string;
 }
+
+// renderer/main間で共有する型定義
+
+export interface OfflineSong {
+  id: string;
+  user_id: string;
+  title: string;
+  author: string;
+  song_path: string;
+  image_path: string | null;
+  original_song_path: string | null;
+  original_image_path: string | null;
+  duration: number | null;
+  genre: string | null;
+  lyrics: string | null;
+  created_at: string | null;
+  downloaded_at: Date | null;
+}
+
+export interface SongDownloadPayload {
+  id: string;
+  userId: string;
+  title: string;
+  author: string;
+  song_path: string;
+  image_path: string;
+  duration?: number;
+  genre?: string;
+  lyrics?: string;
+  video_path?: string;
+  created_at: string;
+}

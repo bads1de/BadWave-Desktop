@@ -1,35 +1,7 @@
 import { isElectron } from "./common";
+import type { OfflineSong, SongDownloadPayload } from "@/types";
 
-// オフライン曲の型定義
-export interface OfflineSong {
-  id: string;
-  user_id: string;
-  title: string;
-  author: string;
-  song_path: string; // ローカルファイルパス (file://...)
-  image_path: string | null;
-  original_song_path: string | null;
-  original_image_path: string | null;
-  duration: number | null;
-  genre: string | null;
-  lyrics: string | null;
-  created_at: string | null;
-  downloaded_at: Date | null;
-}
-
-// ダウンロード時に渡される曲データの型定義
-export interface SongDownloadPayload {
-  id: string;
-  userId: string;
-  title: string;
-  author: string;
-  song_path: string; // リモートURL
-  image_path: string; // リモートURL
-  duration?: number;
-  genre?: string;
-  lyrics?: string;
-  created_at: string;
-}
+export type { OfflineSong, SongDownloadPayload };
 
 /**
  * オフライン機能（ダウンロード管理など）

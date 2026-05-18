@@ -9,7 +9,7 @@ import {
   spotlights,
 } from "../db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
-import { mapDbSongToResponse } from "../utils";
+import { mapDbSongToResponse, createUnknownSongFallback } from "../utils";
 
 /**
  * IDを文字列に強制変換し、".0" などの浮動小数点表記を除去する
@@ -195,25 +195,11 @@ export function setupCacheHandlers() {
         const liked_songs = row.liked_songs;
         const song = row.songs;
         if (!song) {
-          return {
-            id: liked_songs.songId,
-            user_id: liked_songs.userId,
-            title: "Unknown Title",
-            author: "Unknown Author",
-            song_path: null,
-            image_path: null,
-            video_path: null,
-            is_downloaded: false,
-            local_song_path: null,
-            local_image_path: null,
-            local_video_path: null,
-            count: "0",
-            like_count: "0",
-            created_at: liked_songs.likedAt,
-            duration: null,
-            genre: null,
-            lyrics: null,
-          };
+          return createUnknownSongFallback(
+            liked_songs.songId,
+            liked_songs.userId,
+            liked_songs.likedAt,
+          );
         }
         return mapDbSongToResponse(song, {
           created_at: liked_songs.likedAt,
@@ -259,25 +245,11 @@ export function setupCacheHandlers() {
         const playlist_songs = row.playlist_songs;
         const song = row.songs;
         if (!song) {
-          return {
-            id: playlist_songs.songId,
-            user_id: "",
-            title: "Unknown Title",
-            author: "Unknown Author",
-            song_path: null,
-            image_path: null,
-            video_path: null,
-            is_downloaded: false,
-            local_song_path: null,
-            local_image_path: null,
-            local_video_path: null,
-            count: "0",
-            like_count: "0",
-            created_at: playlist_songs.addedAt,
-            duration: null,
-            genre: null,
-            lyrics: null,
-          };
+          return createUnknownSongFallback(
+            playlist_songs.songId,
+            "",
+            playlist_songs.addedAt,
+          );
         }
         return mapDbSongToResponse(song, {
           created_at: playlist_songs.addedAt,

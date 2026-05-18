@@ -8,24 +8,7 @@ import { toLocalPath, mapDbSongToResponse } from "../utils";
 import { getDb } from "../db/client";
 import { songs } from "../db/schema";
 import { eq, isNotNull } from "drizzle-orm";
-
-/**
- * DBスキーマと互換性のある楽曲データ型
- * IPC通信時の型安全性を確保しつつ、フィールドのバリデーションに使用
- */
-interface SongDownloadPayload {
-  id: string;
-  userId: string;
-  title: string;
-  author: string;
-  song_path: string;
-  image_path: string;
-  duration?: number;
-  genre?: string;
-  lyrics?: string;
-  video_path?: string;
-  created_at: string;
-}
+import type { SongDownloadPayload } from "../../types";
 
 export const setupOfflineDownloadHandlers = () => {
   const db = getDb();

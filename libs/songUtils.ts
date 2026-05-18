@@ -1,4 +1,5 @@
-import { Song } from "@/types";
+import { Song, SongWithRecommendation } from "@/types";
+import { SUPPORTED_AUDIO_EXTENSIONS } from "@/constants";
 
 /**
  * 曲がローカルファイルかどうかを判定する
@@ -49,13 +50,13 @@ export function isLocalFilePath(songPath: string | null | undefined): boolean {
   return isWindowsPath || isUnixPath;
 }
 
-// 許可されるメディアファイルの拡張子
-const ALLOWED_MEDIA_EXTENSIONS = new Set([
-  ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
-  ".m4a", ".wma", ".alac", ".aiff", ".webm",
-  ".mp4", ".m4v", ".avi", ".mkv",
-  ".jpg", ".jpeg", ".png", ".webp",
-]);
+// 許可されるメディアファイルの拡張子（音声 + 動画 + 画像）
+const ALLOWED_MEDIA_EXTENSIONS = new Set(
+  SUPPORTED_AUDIO_EXTENSIONS.concat([
+    ".mp4", ".m4v", ".avi", ".mkv",
+    ".jpg", ".jpeg", ".png", ".webp",
+  ]),
+);
 
 /**
  * ローカルファイルパスが安全かどうかを検証する
@@ -212,4 +213,47 @@ export function getPlayableImagePath(song: Song | null | undefined): string {
   }
 
   return imagePath;
+}
+
+/**
+ * SongWithRecommendation を Song に変換する
+ *
+ * useGetRecommendations と useSyncRecommendations で重複していたマッピングを共通化。
+ *
+ * @param item - おすすめ曲データ
+ * @param userId - ユーザーID
+ * @returns Song オブジェクト
+ */
+export function mapRecommendationToSong(
+  item: SongWithRecommendation,
+  userId: string,
+): Song {
+  return {
+    id: item.id,
+    title: item.title,
+    author: item.author,
+    song_path: item.song_path,
+    image_path: item.image_path,
+    genre: item.genre,
+    count: item.count,
+    like_count: item.like_count,
+    created_at: item.created_at,
+    user_id: userId,
+  };
+}
+
+/**
+ * JOIN クエリ（liked_songs / playlist_songs と songs の JOIN）の結果から Song 配列を抽出する
+ *
+ * useGetLikedSongs, useGetPlaylistSongs, useSyncLikedSongs, useSyncPlaylistSongs で
+ * 重複していた `data.map((item) => ({ ...item.songs, songType: "regular" }))` を共通化。
+ *
+ * @param data - Supabase JOIN クエリの結果
+ * @returns Song 配列
+ */
+export function extractSongsFromJoin(data: Record<string, any>[]): Song[] {
+  return data.map((item) => ({
+    ...item.songs,
+    songType: "regular" as const,
+  })) as Song[];
 }

@@ -2,6 +2,7 @@
 
 import { FaPlay, FaPause, FaStepBackward, FaStepForward } from "react-icons/fa";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
+import { formatTime } from "@/libs/utils";
 
 interface RetroPlayerProps {
   audioRef: React.RefObject<HTMLAudioElement>;
@@ -36,14 +37,6 @@ const RetroPlayer: React.FC<RetroPlayerProps> = ({
   nextTrackTitle = "Coming Soon",
   nextTrackGenre = "...",
 }) => {
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto z-10 relative">
       <div className="flex items-center gap-4 md:gap-8 mb-16 z-20 mt-20">

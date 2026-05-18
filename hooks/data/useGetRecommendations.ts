@@ -4,6 +4,7 @@ import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useUser } from "@/hooks/auth/useUser";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
+import { mapRecommendationToSong } from "@/libs/songUtils";
 
 /**
  * おすすめ曲を取得するカスタムフック (クライアントサイド)
@@ -69,18 +70,9 @@ const useGetRecommendations = (initialData?: Song[], limit: number = 10) => {
 
         if (!data) return [];
 
-        const result: Song[] = data.map((item: SongWithRecommendation) => ({
-          id: item.id,
-          title: item.title,
-          author: item.author,
-          song_path: item.song_path,
-          image_path: item.image_path,
-          genre: item.genre,
-          count: item.count,
-          like_count: item.like_count,
-          created_at: item.created_at,
-          user_id: user.id,
-        }));
+        const result: Song[] = data.map((item: SongWithRecommendation) =>
+          mapRecommendationToSong(item, user.id),
+        );
 
         return result;
       } catch (e) {

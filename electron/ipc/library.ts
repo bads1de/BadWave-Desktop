@@ -7,14 +7,15 @@ import { debugLog } from "../utils";
 import { getMainWindow } from "../lib/window-manager";
 
 // サポートされている音声ファイルの拡張子
-const SUPPORTED_AUDIO_EXTENSIONS = new Set([
+// 注: electron tsconfig の rootDir 制約により、constants/ からインポートできないため直接定義
+const SUPPORTED_AUDIO_EXTENSIONS = [
   ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
   ".m4a", ".wma", ".alac", ".aiff", ".webm",
-]);
+];
 
 function isSupportedAudioFile(fileName: string): boolean {
   const ext = path.extname(fileName).toLowerCase();
-  return SUPPORTED_AUDIO_EXTENSIONS.has(ext);
+  return SUPPORTED_AUDIO_EXTENSIONS.includes(ext);
 }
 
 // 音楽ライブラリのデータを保存するためのストアキー

@@ -5,6 +5,7 @@ import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES } from "@/constants";
 import { Song, SongWithRecommendation } from "@/types";
+import { mapRecommendationToSong } from "@/libs/songUtils";
 import { useSyncBase } from "./useSyncBase";
 
 /**
@@ -28,18 +29,9 @@ export const useSyncRecommendations = (
     if (error) throw error;
     if (!data) return { success: true as const, count: 0 };
 
-    const songs: Song[] = data.map((item: SongWithRecommendation) => ({
-      id: item.id,
-      title: item.title,
-      author: item.author,
-      song_path: item.song_path,
-      image_path: item.image_path,
-      genre: item.genre,
-      count: item.count,
-      like_count: item.like_count,
-      created_at: item.created_at,
-      user_id: user!.id,
-    }));
+    const songs: Song[] = data.map((item: SongWithRecommendation) =>
+      mapRecommendationToSong(item, user!.id),
+    );
 
     // 1. メタデータを保存
     await electronAPI.cache.syncSongsMetadata(songs);

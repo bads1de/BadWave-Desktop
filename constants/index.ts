@@ -1,3 +1,12 @@
+/**
+ * サポートされている音声ファイルの拡張子
+ * 注: 配列として定義し、Set への変換は各利用側で行う（es5 target 対応）
+ */
+export const SUPPORTED_AUDIO_EXTENSIONS = [
+  ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
+  ".m4a", ".wma", ".alac", ".aiff", ".webm",
+];
+
 export const videoIds = [
   { id: 1, name: "synthwave radio", videoId: "4xDzrJKXOOY" },
   { id: 2, name: "lofi hip hop radio", videoId: "jfKfPfyJRdk" },

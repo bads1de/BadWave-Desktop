@@ -5,6 +5,7 @@ import usePlaybackStateStore, {
   POSITION_SAVE_INTERVAL_MS,
 } from "@/hooks/stores/usePlaybackStateStore";
 import { isLocalFilePath, toFileUrl } from "@/libs/songUtils";
+import { formatTime } from "@/libs/utils";
 import { Song } from "@/types";
 import { AudioEngine } from "@/libs/audio/AudioEngine";
 import useLatestRef from "@/hooks/utils/useLatestRef";
@@ -297,21 +298,13 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
     player.activeId,
   ]);
 
-  const formatTime = useMemo(() => {
-    return (time: number) => {
-      const minutes = Math.floor(time / 60);
-      const seconds = Math.floor(time % 60);
-      return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-    };
-  }, []);
-
   const formattedCurrentTime = useMemo(
     () => formatTime(currentTime),
-    [currentTime, formatTime]
+    [currentTime]
   );
   const formattedDuration = useMemo(
     () => formatTime(duration),
-    [duration, formatTime]
+    [duration]
   );
 
   return {

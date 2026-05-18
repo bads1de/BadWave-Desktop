@@ -81,6 +81,43 @@ export function debugLog(message: string, ...args: any[]): void {
  * @param overrides - created_at など、呼び出し元ごとに異なるフィールドの上書き
  * @returns レンダラープロセス向けの Song レスポンスオブジェクト
  */
+/**
+ * 存在しない曲のフォールバックオブジェクトを生成する
+ *
+ * cache.ts の get-cached-liked-songs と get-cached-playlist-songs で
+ * 重複していた Unknown Song オブジェクトを共通化。
+ *
+ * @param id - 曲ID
+ * @param userId - ユーザーID
+ * @param createdAt - 作成日時
+ * @returns フォールバック用のSongレスポンスオブジェクト
+ */
+export function createUnknownSongFallback(
+  id: string,
+  userId: string,
+  createdAt: string | null,
+) {
+  return {
+    id,
+    user_id: userId,
+    title: "Unknown Title",
+    author: "Unknown Author",
+    song_path: null,
+    image_path: null,
+    video_path: null,
+    is_downloaded: false,
+    local_song_path: null,
+    local_image_path: null,
+    local_video_path: null,
+    count: "0",
+    like_count: "0",
+    created_at: createdAt,
+    duration: null,
+    genre: null,
+    lyrics: null,
+  };
+}
+
 export function mapDbSongToResponse(
   song: {
     id: string;

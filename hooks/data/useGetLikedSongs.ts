@@ -3,6 +3,7 @@ import { createClient } from "@/libs/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { electronAPI } from "@/libs/electron/index";
+import { extractSongsFromJoin } from "@/libs/songUtils";
 
 /**
  * ユーザーがいいねした曲を取得するカスタムフック (ローカルファースト)
@@ -50,10 +51,7 @@ const useGetLikedSongs = (userId?: string) => {
 
       if (!data) return [];
 
-      return data.map((item) => ({
-        ...item.songs,
-        songType: "regular" as const,
-      })) as Song[];
+      return extractSongsFromJoin(data);
     },
     staleTime: CACHE_CONFIG.staleTime,
     gcTime: CACHE_CONFIG.gcTime,

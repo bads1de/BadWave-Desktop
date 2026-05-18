@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
-import { Song } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES } from "@/constants";
+import { extractSongsFromJoin } from "@/libs/songUtils";
 import { useSyncBase } from "./useSyncBase";
 
 /**
@@ -37,10 +37,7 @@ export const useSyncPlaylistSongs = (
 
     if (!data) return { success: true as const, count: 0 };
 
-    const songs = data.map((item: Record<string, any>) => ({
-      ...item.songs,
-      songType: "regular",
-    })) as Song[];
+    const songs = extractSongsFromJoin(data);
 
     await electronAPI.cache.syncPlaylistSongs({
       playlistId: String(playlistId),
