@@ -68,7 +68,9 @@ import { setupWindowHandlers } from "./ipc/window";
 import { setupDialogHandlers } from "./ipc/dialog";
 import { setupLibraryHandlers } from "./ipc/library";
 import { setupDownloadHandlers as setupSystemDownloadHandlers } from "./ipc/download";
-import { setupCacheHandlers } from "./ipc/cache";
+import { setupSyncHandlers } from "./ipc/sync";
+import { setupQueryHandlers } from "./ipc/queries";
+import { setupMutationHandlers } from "./ipc/mutations";
 import { setupAuthHandlers } from "./ipc/auth";
 import { setupDiscordHandlers } from "./ipc/discord";
 import { setupTranscriptionHandlers } from "./ipc/transcribe";
@@ -104,7 +106,9 @@ function setupIPC() {
   setupOfflineDownloadHandlers();
 
   // キャッシュハンドラーのセットアップ（オフラインライブラリ表示用）
-  setupCacheHandlers();
+  setupSyncHandlers();
+  setupQueryHandlers();
+  setupMutationHandlers();
 
   // 認証キャッシュハンドラーのセットアップ
   setupAuthHandlers();

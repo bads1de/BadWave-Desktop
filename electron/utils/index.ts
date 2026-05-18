@@ -55,6 +55,18 @@ export function loadEnvVariables(): boolean {
 }
 
 /**
+ * IDを文字列に強制変換し、".0" などの浮動小数点表記を除去する
+ *
+ * @param id - 正規化するID
+ * @returns 正規化された文字列ID
+ */
+export function normalizeId(id: any): string {
+  if (id === null || id === undefined) return "";
+  const s = String(id);
+  return s.includes(".") ? s.split(".")[0] : s;
+}
+
+/**
  * 開発モードかどうかを判定
  */
 export const isDev = !app.isPackaged;

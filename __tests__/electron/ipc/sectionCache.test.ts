@@ -1,7 +1,8 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "../../../electron/db/schema";
-import { setupCacheHandlers } from "../../../electron/ipc/cache";
+import { setupSyncHandlers } from "../../../electron/ipc/sync";
+import { setupQueryHandlers } from "../../../electron/ipc/queries";
 
 // Mock electron
 const mockHandlers = new Map();
@@ -82,7 +83,8 @@ describe("Section Cache IPC", () => {
       );
     `);
 
-    setupCacheHandlers();
+    setupSyncHandlers();
+    setupQueryHandlers();
   });
 
   afterEach(() => {
