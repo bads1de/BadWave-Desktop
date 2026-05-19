@@ -44,7 +44,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isDev = exports.toLocalPath = void 0;
 exports.loadEnvVariables = loadEnvVariables;
+exports.normalizeId = normalizeId;
 exports.debugLog = debugLog;
+exports.createUnknownSongFallback = createUnknownSongFallback;
 exports.mapDbSongToResponse = mapDbSongToResponse;
 var electron_1 = require("electron");
 var path = __importStar(require("path"));
@@ -104,6 +106,18 @@ function loadEnvVariables() {
     }
 }
 /**
+ * IDを文字列に強制変換し、".0" などの浮動小数点表記を除去する
+ *
+ * @param id - 正規化するID
+ * @returns 正規化された文字列ID
+ */
+function normalizeId(id) {
+    if (id === null || id === undefined)
+        return "";
+    var s = String(id);
+    return s.includes(".") ? s.split(".")[0] : s;
+}
+/**
  * 開発モードかどうかを判定
  */
 exports.isDev = !electron_1.app.isPackaged;
@@ -132,6 +146,38 @@ function debugLog(message) {
  * @param overrides - created_at など、呼び出し元ごとに異なるフィールドの上書き
  * @returns レンダラープロセス向けの Song レスポンスオブジェクト
  */
+/**
+ * 存在しない曲のフォールバックオブジェクトを生成する
+ *
+ * cache.ts の get-cached-liked-songs と get-cached-playlist-songs で
+ * 重複していた Unknown Song オブジェクトを共通化。
+ *
+ * @param id - 曲ID
+ * @param userId - ユーザーID
+ * @param createdAt - 作成日時
+ * @returns フォールバック用のSongレスポンスオブジェクト
+ */
+function createUnknownSongFallback(id, userId, createdAt) {
+    return {
+        id: id,
+        user_id: userId,
+        title: "Unknown Title",
+        author: "Unknown Author",
+        song_path: null,
+        image_path: null,
+        video_path: null,
+        is_downloaded: false,
+        local_song_path: null,
+        local_image_path: null,
+        local_video_path: null,
+        count: "0",
+        like_count: "0",
+        created_at: createdAt,
+        duration: null,
+        genre: null,
+        lyrics: null,
+    };
+}
 function mapDbSongToResponse(song, overrides) {
     var _a, _b, _c, _d;
     return {

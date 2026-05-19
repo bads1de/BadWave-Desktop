@@ -90,13 +90,14 @@ var store_1 = __importDefault(require("../lib/store"));
 var utils_1 = require("../utils");
 var window_manager_1 = require("../lib/window-manager");
 // サポートされている音声ファイルの拡張子
-var SUPPORTED_AUDIO_EXTENSIONS = new Set([
+// 注: electron tsconfig の rootDir 制約により、constants/ からインポートできないため直接定義
+var SUPPORTED_AUDIO_EXTENSIONS = [
     ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
     ".m4a", ".wma", ".alac", ".aiff", ".webm",
-]);
+];
 function isSupportedAudioFile(fileName) {
     var ext = path.extname(fileName).toLowerCase();
-    return SUPPORTED_AUDIO_EXTENSIONS.has(ext);
+    return SUPPORTED_AUDIO_EXTENSIONS.includes(ext);
 }
 // 音楽ライブラリのデータを保存するためのストアキー
 var MUSIC_LIBRARY_KEY = "music_library";
