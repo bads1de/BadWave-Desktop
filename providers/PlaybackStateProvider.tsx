@@ -13,7 +13,6 @@ import { filterStaleLocalSongs } from "@/libs/electron/files";
  * 復元時にファイルの存在確認を行い、存在しないものをキューから除外する
  */
 const PlaybackStateProvider = ({ children }: { children: React.ReactNode }) => {
-  const player = usePlayer();
   const {
     songId: savedSongId,
     playlist: savedPlaylist,
@@ -34,33 +33,38 @@ const PlaybackStateProvider = ({ children }: { children: React.ReactNode }) => {
       // 復元中フラグを設定（自動再生を防止）
       setIsRestoring(true);
 
+      // getState() で最新のストア状態を取得（依存配列に入れずに済む）
+      const player = usePlayer.getState();
+
       // プレイリストを復元（ローカルファイルの存在確認付き）
       if (savedPlaylist.length > 0) {
         const localSongs = player.localSongs;
         filterStaleLocalSongs(savedPlaylist, localSongs)
           .then((validIds) => {
-            player.setIds(validIds);
+            const p = usePlayer.getState();
+            p.setIds(validIds);
 
             // activeId が有効なキューに含まれていない場合は除外
             if (!validIds.includes(savedSongId)) {
               // 有効な曲がない場合は復元しない
               if (validIds.length === 0) {
-                player.setId("");
+                p.setId("");
                 setIsRestoring(false);
                 return;
               }
               // 先頭の曲にフォールバック
-              player.setId(validIds[0]);
+              p.setId(validIds[0]);
             } else {
-              player.setId(savedSongId);
+              p.setId(savedSongId);
             }
 
             hasRestoredRef.current = true;
           })
           .catch(() => {
+            const p = usePlayer.getState();
             // フィルタリングに失敗した場合、元のプレイリストで復元
-            player.setIds(savedPlaylist);
-            player.setId(savedSongId);
+            p.setIds(savedPlaylist);
+            p.setId(savedSongId);
             hasRestoredRef.current = true;
           });
       } else {
@@ -68,7 +72,7 @@ const PlaybackStateProvider = ({ children }: { children: React.ReactNode }) => {
         hasRestoredRef.current = true;
       }
     }
-  }, [hasHydrated, savedSongId, savedPlaylist, player, setIsRestoring]);
+  }, [hasHydrated, savedSongId, savedPlaylist, setIsRestoring]);
 
   return <>{children}</>;
 };
