@@ -96,12 +96,12 @@ const SongListContent: React.FC<SongListContentProps> = memo(
         )}
 
         <div className="grid grid-cols-1 gap-y-3">
-          {displayedSongs.map((song: Song) => (
+          {displayedSongs.map((song: Song, index: number) => (
             <div
               key={song.id}
               className="flex items-center gap-x-4 w-full animate-fade-in"
               style={{
-                animationDelay: `${displayedSongs.indexOf(song) * 50}ms`,
+                animationDelay: `${index * 50}ms`,
               }}
             >
               <div className="flex-1 min-w-0">
