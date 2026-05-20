@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.serveLocalFile = serveLocalFile;
 var fs = __importStar(require("fs"));
 var path = __importStar(require("path"));
+var stream_1 = require("stream");
 // メディアファイルのMIMEタイプ
 var MIME_TYPES = {
     ".mp3": "audio/mpeg",
@@ -90,14 +91,8 @@ function serveLocalFile(request, urlObj) {
             var start = parseInt(parts[0], 10);
             var end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
             var chunkSize = end - start + 1;
-            var stream_1 = fs.createReadStream(filePath, { start: start, end: end });
-            var readable_1 = new ReadableStream({
-                start: function (controller) {
-                    stream_1.on("data", function (chunk) { return controller.enqueue(chunk); });
-                    stream_1.on("end", function () { return controller.close(); });
-                    stream_1.on("error", function (err) { return controller.error(err); });
-                },
-            });
+            var stream_2 = fs.createReadStream(filePath, { start: start, end: end });
+            var readable_1 = stream_1.Readable.toWeb(stream_2);
             return new Response(readable_1, {
                 status: 206,
                 headers: {
@@ -109,14 +104,8 @@ function serveLocalFile(request, urlObj) {
             });
         }
         // 通常のリクエスト
-        var stream_2 = fs.createReadStream(filePath);
-        var readable = new ReadableStream({
-            start: function (controller) {
-                stream_2.on("data", function (chunk) { return controller.enqueue(chunk); });
-                stream_2.on("end", function () { return controller.close(); });
-                stream_2.on("error", function (err) { return controller.error(err); });
-            },
-        });
+        var stream = fs.createReadStream(filePath);
+        var readable = stream_1.Readable.toWeb(stream);
         return new Response(readable, {
             status: 200,
             headers: {

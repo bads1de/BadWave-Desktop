@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { Readable } from "stream";
 
 // メディアファイルのMIMEタイプ
 const MIME_TYPES: Record<string, string> = {
@@ -63,13 +64,7 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
       const chunkSize = end - start + 1;
 
       const stream = fs.createReadStream(filePath, { start, end });
-      const readable = new ReadableStream({
-        start(controller) {
-          stream.on("data", (chunk) => controller.enqueue(chunk));
-          stream.on("end", () => controller.close());
-          stream.on("error", (err) => controller.error(err));
-        },
-      });
+      const readable = Readable.toWeb(stream) as ReadableStream;
 
       return new Response(readable, {
         status: 206,
@@ -84,13 +79,7 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
 
     // 通常のリクエスト
     const stream = fs.createReadStream(filePath);
-    const readable = new ReadableStream({
-      start(controller) {
-        stream.on("data", (chunk) => controller.enqueue(chunk));
-        stream.on("end", () => controller.close());
-        stream.on("error", (err) => controller.error(err));
-      },
-    });
+    const readable = Readable.toWeb(stream) as ReadableStream;
 
     return new Response(readable, {
       status: 200,
