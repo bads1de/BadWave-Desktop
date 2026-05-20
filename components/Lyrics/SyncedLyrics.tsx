@@ -20,6 +20,19 @@ const parseTime = (timeStr: string): number => {
   return min * 60 + sec;
 };
 
+// 秒を [mm:ss] 形式に変換（表示用）
+const formatTime = (seconds: number): string => {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+};
+
+// ライン番号をHUD形式に
+const formatLineNum = (n: number, total: number): string => {
+  const digits = String(total).length;
+  return String(n + 1).padStart(digits, "0");
+};
+
 const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
   const [currentTime, setCurrentTime] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,14 +54,17 @@ const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
       // [00:00.00]Text
       const match = line.match(/^\[(\d{2}:\d{2}\.\d{2,3})\](.*)/);
       if (match) {
-        result.push({
-          time: parseTime(match[1]),
-          text: match[2].trim(),
-        });
+        const text = match[2].trim();
+        // メタデータ行（[ti:...], [ar:...] など）はスキップ
+        if (text && !text.startsWith("[")) {
+          result.push({
+            time: parseTime(match[1]),
+            text,
+          });
+        }
       }
     }
 
-    // パース結果が空、または行数が少なすぎる場合はプレーンテキスト扱いにする判定も検討
     return result;
   }, [lyrics]);
 
@@ -70,7 +86,6 @@ const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
 
   // 3. アクティブ行の探索
   const activeIndex = useMemo(() => {
-    // 現在時刻より前で、最も近い行を探す
     let index = -1;
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].time <= currentTime) {
@@ -87,7 +102,6 @@ const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
     isUserScrolling.current = true;
     if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
 
-    // 2秒間スクロールがなければ自動スクロール再開
     scrollTimeout.current = setTimeout(() => {
       isUserScrolling.current = false;
     }, 2000);
@@ -119,17 +133,18 @@ const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
     }
   };
 
+  // プログレス計算
+  const progressPercent = lines.length > 0
+    ? Math.round(((activeIndex + 1) / lines.length) * 100)
+    : 0;
+
   // LRCでない、またはパース失敗時はプレーンテキスト表示
   if (lines.length === 0) {
     return (
-      <div className="relative w-full h-full bg-black/20 backdrop-blur-sm rounded-xl border border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/40 pointer-events-none" />
+      <div className="relative w-full h-full">
         <div className="flex items-center justify-center h-full py-8 px-6">
           <div className="w-full max-h-full overflow-y-auto custom-scrollbar pr-2">
-            <p
-              className="whitespace-pre-wrap text-neutral-200 text-lg font-medium leading-relaxed tracking-wide text-center"
-              style={{ textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}
-            >
+            <p className="whitespace-pre-wrap text-theme-500/60 text-sm font-mono leading-relaxed tracking-widest uppercase text-left">
               {lyrics || "歌詞はありません"}
             </p>
           </div>
@@ -139,16 +154,39 @@ const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
   }
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-black/20 backdrop-blur-sm rounded-xl border border-white/5 group">
+    <div className="relative w-full h-full flex flex-col">
+      {/* ── HUD ヘッダー ── */}
+      <div className="shrink-0 px-4 pt-3 pb-2 border-b border-theme-500/10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[8px] text-theme-500 tracking-[0.5em] uppercase animate-pulse">
+            <span className="w-1.5 h-1.5 bg-theme-500 rounded-full shadow-[0_0_6px_rgba(var(--theme-500),0.8)]" />
+            [ LYRICS_SYNC_STREAM ]
+          </div>
+          <div className="flex items-center gap-3 text-[9px] font-mono text-theme-500/40 tracking-wider">
+            <span>LN {formatLineNum(activeIndex >= 0 ? activeIndex : 0, lines.length)}/{String(lines.length).padStart(2, "0")}</span>
+            <span className="text-theme-500/20">|</span>
+            <span>{formatTime(currentTime)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── スキャンラインテクスチャ（静的） ── */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.015] bg-[length:100%_4px] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.5)_50%)] z-10" />
+
+      {/* ── 上下グラデーションフェード ── */}
+      <div className="absolute top-[37px] left-0 right-0 h-12 bg-gradient-to-b from-[#0a0a0f] to-transparent pointer-events-none z-20" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none z-20" />
+
+      {/* ── 歌詞リスト ── */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="h-full overflow-y-auto custom-scrollbar py-1/2 px-4 text-center scroll-smooth"
-        style={{ paddingBlock: "50%" }} // 真ん中に表示されやすくするためのパディング
+        className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth font-mono relative z-10"
+        style={{ paddingBlock: "40%" }}
       >
         {lines.map((line, index) => {
           const isActive = index === activeIndex;
-          // 歌詞が空の場合はスペースを入れて高さを維持
+          const isPast = index < activeIndex;
           const text = line.text === "" ? "\u00A0" : line.text;
 
           return (
@@ -156,27 +194,138 @@ const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
               key={index}
               onClick={() => handleLineClick(line.time)}
               className={`
-                            py-4 px-4 rounded-xl cursor-pointer transition-all duration-500 ease-out transform origin-center
-                            ${
-                              isActive
-                                ? "text-white text-3xl font-bold scale-105 bg-white/10 shadow-[0_0_30px_rgba(255,255,255,0.1)] backdrop-blur-md border border-white/10"
-                                : "text-neutral-500 text-xl font-medium hover:text-neutral-300 hover:bg-white/5 scale-100 blur-[0.5px] hover:blur-0"
-                            }
-                        `}
-              style={{
-                textShadow: isActive
-                  ? "0 0 20px rgba(255,255,255,0.4)"
-                  : "none",
-              }}
+                group relative w-full px-4 py-2.5 cursor-pointer
+                transition-all duration-500 ease-out
+                flex items-start gap-3
+                ${isActive
+                  ? "bg-theme-500/[0.04]"
+                  : "hover:bg-theme-500/[0.02]"
+                }
+              `}
             >
-              {text}
+              {/* 左ガイドライン */}
+              <div
+                className={`
+                  shrink-0 w-px self-stretch transition-all duration-500 ease-out
+                  ${isActive
+                    ? "bg-theme-500/70 shadow-[0_0_8px_rgba(var(--theme-500),0.5)]"
+                    : isPast
+                      ? "bg-theme-500/10 group-hover:bg-theme-500/20"
+                      : "bg-transparent group-hover:bg-theme-500/10"
+                  }
+                `}
+              />
+
+              {/* ライン番号 */}
+              <div
+                className={`
+                  shrink-0 w-7 text-right text-[9px] font-mono
+                  transition-all duration-500 ease-out
+                  ${isActive
+                    ? "text-theme-500/70"
+                    : "text-theme-500/15 group-hover:text-theme-500/30"
+                  }
+                `}
+              >
+                {formatLineNum(index, lines.length)}
+              </div>
+
+              {/* 歌詞テキスト */}
+              <div className="flex-1 min-w-0">
+                <div className={isActive ? "animate-activeLineEnter" : ""}>
+                  <p
+                    className={`
+                      transition-all duration-500 ease-out
+                      ${isActive
+                        ? "text-base md:text-lg font-bold tracking-wider uppercase drop-shadow-[0_0_12px_rgba(var(--theme-500),0.7)]"
+                        : "text-sm tracking-widest uppercase"
+                      }
+                      ${isActive
+                        ? "text-white"
+                        : isPast
+                          ? "text-theme-500/25 group-hover:text-theme-500/40"
+                          : "text-theme-500/10 group-hover:text-theme-500/35"
+                      }
+                    `}
+                    style={
+                      isActive
+                        ? { animation: "textGlowPulse 2s ease-in-out infinite" }
+                        : undefined
+                    }
+                  >
+                    {isActive && (
+                      <span
+                        className="inline-block mr-2 text-theme-500"
+                        style={{ textShadow: "0 0 10px rgba(var(--theme-500),0.9)" }}
+                      >
+                        {">"}
+                      </span>
+                    )}
+                    {isPast && !isActive && (
+                      <span className="text-theme-500/15 mr-2 select-none">
+                        //
+                      </span>
+                    )}
+                    {text}
+                  </p>
+                </div>
+
+                {/* アクティブライン装飾：グローライン */}
+                {isActive && (
+                  <div
+                    className="mt-1 h-px animate-lineGlowExpand"
+                    style={{
+                      background: "linear-gradient(90deg, rgba(var(--theme-500),0.6) 0%, rgba(var(--theme-500),0.2) 50%, transparent 100%)",
+                      boxShadow: "0 0 6px rgba(var(--theme-500),0.3)",
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* ホバー時のタイムスタンプ */}
+              <div
+                className={`
+                  shrink-0 text-[8px] font-mono tracking-widest
+                  transition-all duration-300
+                  ${isActive
+                    ? "text-theme-500/50"
+                    : "text-theme-500/0 group-hover:text-theme-500/30"
+                  }
+                `}
+              >
+                [{formatTime(line.time)}]
+              </div>
             </div>
           );
         })}
       </div>
-      {/* フェードエフェクト */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#121212] to-transparent pointer-events-none z-10" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#121212] to-transparent pointer-events-none z-10" />
+
+      {/* ── フッター：プログレスバー ── */}
+      <div className="shrink-0 px-4 py-2 border-t border-theme-500/10">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-theme-500/10 relative overflow-hidden">
+            <div
+              className="absolute inset-y-0 left-0 transition-all duration-500 ease-out"
+              style={{
+                width: `${progressPercent}%`,
+                background: "linear-gradient(90deg, rgba(var(--theme-500),0.6) 0%, rgba(var(--theme-500),0.2) 100%)",
+                boxShadow: "0 0 6px rgba(var(--theme-500),0.3)",
+              }}
+            />
+          </div>
+          <span className="text-[8px] font-mono text-theme-500/30 uppercase tracking-[0.3em] animate-progressPulse">
+            {progressPercent}%
+          </span>
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-[8px] font-mono text-theme-500/15 uppercase tracking-[0.3em]">
+            --- END_OF_STREAM ---
+          </span>
+          <span className="text-[7px] font-mono text-theme-500/10 tracking-widest">
+            {lines.length} NODES
+          </span>
+        </div>
+      </div>
     </div>
   );
 };
