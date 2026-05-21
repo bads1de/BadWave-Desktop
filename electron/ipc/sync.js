@@ -1,4 +1,8 @@
 "use strict";
+var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -41,254 +45,219 @@ var electron_1 = require("electron");
 var client_1 = require("../db/client");
 var schema_1 = require("../db/schema");
 var utils_1 = require("../utils");
+var drizzle_orm_1 = require("drizzle-orm");
+// SQLiteのバインド変数上限 (SQLITE_MAX_VARIABLE_NUMBER) を考慮したバッチサイズ
+// songs: 17カラム → 999 / 17 ≈ 58曲/batch
+var BATCH_SIZE = 50;
 function setupSyncHandlers() {
     var _this = this;
     var db = (0, client_1.getDb)();
     /**
-     * 楽曲メタデータを内部でupsertする
+     * 楽曲メタデータをバルクupsertする
+     *
+     * 既存レコードを1クエリでプリフェッチし、downloaded fields (songPath, imagePath, videoPath, downloadedAt)
+     * を保持したままバルクINSERTする。SQLite変数制限(999)を超えないようバッチ分割する。
      */
     function internalSyncSongs(songsData) {
-        return __awaiter(this, void 0, void 0, function () {
-            var count, _loop_1, _i, songsData_1, song;
+        if (songsData.length === 0)
+            return 0;
+        var ids = songsData.map(function (song) { return (0, utils_1.normalizeId)(song.id); });
+        // 1. 既存レコードのdownloaded fieldsをバッチでプリフェッチ
+        var existingMap = new Map();
+        for (var i = 0; i < ids.length; i += BATCH_SIZE) {
+            var batchIds = ids.slice(i, i + BATCH_SIZE);
+            var rows = db
+                .select({
+                id: schema_1.songs.id,
+                songPath: schema_1.songs.songPath,
+                imagePath: schema_1.songs.imagePath,
+                videoPath: schema_1.songs.videoPath,
+                downloadedAt: schema_1.songs.downloadedAt,
+            })
+                .from(schema_1.songs)
+                .where((0, drizzle_orm_1.inArray)(schema_1.songs.id, batchIds))
+                .all();
+            for (var _i = 0, rows_1 = rows; _i < rows_1.length; _i++) {
+                var row = rows_1[_i];
+                existingMap.set(row.id, row);
+            }
+        }
+        // 2. 全レコードを構築（downloaded fieldsは既存値を保持）
+        var records = songsData.map(function (song) {
             var _a, _b, _c, _d;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0:
-                        count = 0;
-                        _loop_1 = function (song) {
-                            var songId, existing, record;
-                            return __generator(this, function (_f) {
-                                switch (_f.label) {
-                                    case 0:
-                                        songId = (0, utils_1.normalizeId)(song.id);
-                                        return [4 /*yield*/, db.query.songs.findFirst({
-                                                where: function (songs, _a) {
-                                                    var eq = _a.eq;
-                                                    return eq(songs.id, songId);
-                                                },
-                                                columns: {
-                                                    songPath: true,
-                                                    imagePath: true,
-                                                    videoPath: true,
-                                                    downloadedAt: true,
-                                                },
-                                            })];
-                                    case 1:
-                                        existing = _f.sent();
-                                        record = {
-                                            id: songId,
-                                            userId: String(song.user_id || ""),
-                                            title: String(song.title || "Unknown Title"),
-                                            author: String(song.author || "Unknown Author"),
-                                            songPath: (_a = existing === null || existing === void 0 ? void 0 : existing.songPath) !== null && _a !== void 0 ? _a : null,
-                                            imagePath: (_b = existing === null || existing === void 0 ? void 0 : existing.imagePath) !== null && _b !== void 0 ? _b : null,
-                                            videoPath: (_c = existing === null || existing === void 0 ? void 0 : existing.videoPath) !== null && _c !== void 0 ? _c : null,
-                                            originalSongPath: song.song_path,
-                                            originalImagePath: song.image_path,
-                                            originalVideoPath: song.video_path,
-                                            duration: song.duration ? Number(song.duration) : null,
-                                            genre: song.genre,
-                                            lyrics: song.lyrics,
-                                            playCount: song.count ? Number(song.count) : 0,
-                                            likeCount: song.like_count ? Number(song.like_count) : 0,
-                                            createdAt: song.created_at,
-                                            downloadedAt: (_d = existing === null || existing === void 0 ? void 0 : existing.downloadedAt) !== null && _d !== void 0 ? _d : null,
-                                        };
-                                        return [4 /*yield*/, db
-                                                .insert(schema_1.songs)
-                                                .values(record)
-                                                .onConflictDoUpdate({
-                                                target: schema_1.songs.id,
-                                                set: {
-                                                    title: record.title,
-                                                    author: record.author,
-                                                    originalSongPath: record.originalSongPath,
-                                                    originalImagePath: record.originalImagePath,
-                                                    originalVideoPath: record.originalVideoPath,
-                                                    duration: record.duration,
-                                                    genre: record.genre,
-                                                    lyrics: record.lyrics,
-                                                    playCount: record.playCount,
-                                                    likeCount: record.likeCount,
-                                                    createdAt: record.createdAt,
-                                                },
-                                            })];
-                                    case 2:
-                                        _f.sent();
-                                        count++;
-                                        return [2 /*return*/];
-                                }
-                            });
-                        };
-                        _i = 0, songsData_1 = songsData;
-                        _e.label = 1;
-                    case 1:
-                        if (!(_i < songsData_1.length)) return [3 /*break*/, 4];
-                        song = songsData_1[_i];
-                        return [5 /*yield**/, _loop_1(song)];
-                    case 2:
-                        _e.sent();
-                        _e.label = 3;
-                    case 3:
-                        _i++;
-                        return [3 /*break*/, 1];
-                    case 4: return [2 /*return*/, count];
-                }
-            });
+            var songId = (0, utils_1.normalizeId)(song.id);
+            var existing = existingMap.get(songId);
+            return {
+                id: songId,
+                userId: String(song.user_id || ""),
+                title: String(song.title || "Unknown Title"),
+                author: String(song.author || "Unknown Author"),
+                songPath: (_a = existing === null || existing === void 0 ? void 0 : existing.songPath) !== null && _a !== void 0 ? _a : null,
+                imagePath: (_b = existing === null || existing === void 0 ? void 0 : existing.imagePath) !== null && _b !== void 0 ? _b : null,
+                videoPath: (_c = existing === null || existing === void 0 ? void 0 : existing.videoPath) !== null && _c !== void 0 ? _c : null,
+                originalSongPath: song.song_path,
+                originalImagePath: song.image_path,
+                originalVideoPath: song.video_path,
+                duration: song.duration ? Number(song.duration) : null,
+                genre: song.genre,
+                lyrics: song.lyrics,
+                playCount: song.count ? Number(song.count) : 0,
+                likeCount: song.like_count ? Number(song.like_count) : 0,
+                createdAt: song.created_at,
+                downloadedAt: (_d = existing === null || existing === void 0 ? void 0 : existing.downloadedAt) !== null && _d !== void 0 ? _d : null,
+            };
         });
+        // 3. バルクUPSERT（バッチ分割して変数制限を回避）
+        for (var i = 0; i < records.length; i += BATCH_SIZE) {
+            var batch = records.slice(i, i + BATCH_SIZE);
+            db.insert(schema_1.songs)
+                .values(batch)
+                .onConflictDoUpdate({
+                target: schema_1.songs.id,
+                set: {
+                    title: (0, drizzle_orm_1.sql)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["excluded.title"], ["excluded.title"]))),
+                    author: (0, drizzle_orm_1.sql)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["excluded.author"], ["excluded.author"]))),
+                    originalSongPath: (0, drizzle_orm_1.sql)(templateObject_3 || (templateObject_3 = __makeTemplateObject(["excluded.original_song_path"], ["excluded.original_song_path"]))),
+                    originalImagePath: (0, drizzle_orm_1.sql)(templateObject_4 || (templateObject_4 = __makeTemplateObject(["excluded.original_image_path"], ["excluded.original_image_path"]))),
+                    originalVideoPath: (0, drizzle_orm_1.sql)(templateObject_5 || (templateObject_5 = __makeTemplateObject(["excluded.original_video_path"], ["excluded.original_video_path"]))),
+                    duration: (0, drizzle_orm_1.sql)(templateObject_6 || (templateObject_6 = __makeTemplateObject(["excluded.duration"], ["excluded.duration"]))),
+                    genre: (0, drizzle_orm_1.sql)(templateObject_7 || (templateObject_7 = __makeTemplateObject(["excluded.genre"], ["excluded.genre"]))),
+                    lyrics: (0, drizzle_orm_1.sql)(templateObject_8 || (templateObject_8 = __makeTemplateObject(["excluded.lyrics"], ["excluded.lyrics"]))),
+                    playCount: (0, drizzle_orm_1.sql)(templateObject_9 || (templateObject_9 = __makeTemplateObject(["excluded.play_count"], ["excluded.play_count"]))),
+                    likeCount: (0, drizzle_orm_1.sql)(templateObject_10 || (templateObject_10 = __makeTemplateObject(["excluded.like_count"], ["excluded.like_count"]))),
+                    createdAt: (0, drizzle_orm_1.sql)(templateObject_11 || (templateObject_11 = __makeTemplateObject(["excluded.created_at"], ["excluded.created_at"]))),
+                },
+            })
+                .run();
+        }
+        return songsData.length;
     }
     electron_1.ipcMain.handle("sync-songs-metadata", function (_, data) { return __awaiter(_this, void 0, void 0, function () {
-        var count, error_1;
+        var count;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, internalSyncSongs(data)];
-                case 1:
-                    count = _a.sent();
-                    return [2 /*return*/, { success: true, count: count }];
-                case 2:
-                    error_1 = _a.sent();
-                    return [2 /*return*/, { success: false, error: error_1.message }];
-                case 3: return [2 /*return*/];
+            try {
+                count = internalSyncSongs(data);
+                return [2 /*return*/, { success: true, count: count }];
             }
+            catch (error) {
+                return [2 /*return*/, { success: false, error: error.message }];
+            }
+            return [2 /*return*/];
         });
     }); });
     electron_1.ipcMain.handle("sync-playlists", function (_, data) { return __awaiter(_this, void 0, void 0, function () {
-        var _i, data_1, item, error_2;
+        var records;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    _i = 0, data_1 = data;
-                    _a.label = 1;
-                case 1:
-                    if (!(_i < data_1.length)) return [3 /*break*/, 4];
-                    item = data_1[_i];
-                    return [4 /*yield*/, db
-                            .insert(schema_1.playlists)
-                            .values({
-                            id: (0, utils_1.normalizeId)(item.id),
-                            userId: String(item.user_id),
-                            title: String(item.title),
-                            imagePath: item.image_path,
-                            isPublic: Boolean(item.is_public),
-                            createdAt: item.createdAt || item.created_at,
-                        })
-                            .onConflictDoUpdate({
-                            target: schema_1.playlists.id,
-                            set: {
-                                title: String(item.title),
-                                imagePath: item.image_path,
-                                isPublic: Boolean(item.is_public),
-                            },
-                        })];
-                case 2:
-                    _a.sent();
-                    _a.label = 3;
-                case 3:
-                    _i++;
-                    return [3 /*break*/, 1];
-                case 4: return [2 /*return*/, { success: true, count: data.length }];
-                case 5:
-                    error_2 = _a.sent();
-                    return [2 /*return*/, { success: false, error: error_2.message }];
-                case 6: return [2 /*return*/];
+            try {
+                if (data.length === 0)
+                    return [2 /*return*/, { success: true, count: 0 }];
+                records = data.map(function (item) { return ({
+                    id: (0, utils_1.normalizeId)(item.id),
+                    userId: String(item.user_id),
+                    title: String(item.title),
+                    imagePath: item.image_path,
+                    isPublic: Boolean(item.is_public),
+                    createdAt: item.createdAt || item.created_at,
+                }); });
+                db.insert(schema_1.playlists)
+                    .values(records)
+                    .onConflictDoUpdate({
+                    target: schema_1.playlists.id,
+                    set: {
+                        title: (0, drizzle_orm_1.sql)(templateObject_12 || (templateObject_12 = __makeTemplateObject(["excluded.title"], ["excluded.title"]))),
+                        imagePath: (0, drizzle_orm_1.sql)(templateObject_13 || (templateObject_13 = __makeTemplateObject(["excluded.image_path"], ["excluded.image_path"]))),
+                        isPublic: (0, drizzle_orm_1.sql)(templateObject_14 || (templateObject_14 = __makeTemplateObject(["excluded.is_public"], ["excluded.is_public"]))),
+                    },
+                })
+                    .run();
+                return [2 /*return*/, { success: true, count: data.length }];
             }
+            catch (error) {
+                return [2 /*return*/, { success: false, error: error.message }];
+            }
+            return [2 /*return*/];
         });
     }); });
     electron_1.ipcMain.handle("sync-playlist-songs", function (_1, _a) { return __awaiter(_this, [_1, _a], void 0, function (_, _b) {
-        var _i, fullSongsData_1, songData, songId, psId, error_3;
         var playlistId = _b.playlistId, fullSongsData = _b.songs;
         return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    _c.trys.push([0, 6, , 7]);
-                    return [4 /*yield*/, internalSyncSongs(fullSongsData)];
-                case 1:
-                    _c.sent();
-                    _i = 0, fullSongsData_1 = fullSongsData;
-                    _c.label = 2;
-                case 2:
-                    if (!(_i < fullSongsData_1.length)) return [3 /*break*/, 5];
-                    songData = fullSongsData_1[_i];
-                    songId = (0, utils_1.normalizeId)(songData.id);
-                    psId = "".concat(playlistId, "_").concat(songId);
-                    return [4 /*yield*/, db
-                            .insert(schema_1.playlistSongs)
-                            .values({
-                            id: psId,
-                            playlistId: (0, utils_1.normalizeId)(playlistId),
-                            songId: songId,
-                            addedAt: songData.created_at,
-                        })
-                            .onConflictDoNothing()];
-                case 3:
-                    _c.sent();
-                    _c.label = 4;
-                case 4:
-                    _i++;
-                    return [3 /*break*/, 2];
-                case 5: return [2 /*return*/, { success: true }];
-                case 6:
-                    error_3 = _c.sent();
-                    return [2 /*return*/, { success: false, error: error_3.message }];
-                case 7: return [2 /*return*/];
+            try {
+                db.transaction(function () {
+                    internalSyncSongs(fullSongsData);
+                    var joinRecords = fullSongsData.map(function (songData) { return ({
+                        id: "".concat(playlistId, "_").concat((0, utils_1.normalizeId)(songData.id)),
+                        playlistId: (0, utils_1.normalizeId)(playlistId),
+                        songId: (0, utils_1.normalizeId)(songData.id),
+                        addedAt: songData.created_at,
+                    }); });
+                    db.insert(schema_1.playlistSongs)
+                        .values(joinRecords)
+                        .onConflictDoNothing()
+                        .run();
+                });
+                return [2 /*return*/, { success: true }];
             }
+            catch (error) {
+                return [2 /*return*/, { success: false, error: error.message }];
+            }
+            return [2 /*return*/];
         });
     }); });
     electron_1.ipcMain.handle("sync-liked-songs", function (_1, _a) { return __awaiter(_this, [_1, _a], void 0, function (_, _b) {
-        var _i, fullSongsData_2, songData, error_4;
         var userId = _b.userId, fullSongsData = _b.songs;
         return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    _c.trys.push([0, 6, , 7]);
-                    return [4 /*yield*/, internalSyncSongs(fullSongsData)];
-                case 1:
-                    _c.sent();
-                    _i = 0, fullSongsData_2 = fullSongsData;
-                    _c.label = 2;
-                case 2:
-                    if (!(_i < fullSongsData_2.length)) return [3 /*break*/, 5];
-                    songData = fullSongsData_2[_i];
-                    return [4 /*yield*/, db
-                            .insert(schema_1.likedSongs)
-                            .values({
-                            userId: String(userId),
-                            songId: (0, utils_1.normalizeId)(songData.id),
-                            likedAt: songData.created_at || new Date().toISOString(),
-                        })
-                            .onConflictDoNothing()];
-                case 3:
-                    _c.sent();
-                    _c.label = 4;
-                case 4:
-                    _i++;
-                    return [3 /*break*/, 2];
-                case 5: return [2 /*return*/, { success: true }];
-                case 6:
-                    error_4 = _c.sent();
-                    console.error("[Sync] Liked Songs Error:", error_4);
-                    return [2 /*return*/, { success: false, error: error_4.message }];
-                case 7: return [2 /*return*/];
+            try {
+                db.transaction(function () {
+                    internalSyncSongs(fullSongsData);
+                    var joinRecords = fullSongsData.map(function (songData) { return ({
+                        userId: String(userId),
+                        songId: (0, utils_1.normalizeId)(songData.id),
+                        likedAt: songData.created_at || new Date().toISOString(),
+                    }); });
+                    db.insert(schema_1.likedSongs)
+                        .values(joinRecords)
+                        .onConflictDoNothing()
+                        .run();
+                });
+                return [2 /*return*/, { success: true }];
             }
+            catch (error) {
+                console.error("[Sync] Liked Songs Error:", error);
+                return [2 /*return*/, { success: false, error: error.message }];
+            }
+            return [2 /*return*/];
         });
     }); });
     electron_1.ipcMain.handle("sync-spotlights-metadata", function (_, data) { return __awaiter(_this, void 0, void 0, function () {
-        var count, _i, data_2, item, id, record, error_5;
+        var ids, existingMap_1, i, batchIds, rows, _i, rows_2, row, records, i, batch;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    count = 0;
-                    _i = 0, data_2 = data;
-                    _a.label = 1;
-                case 1:
-                    if (!(_i < data_2.length)) return [3 /*break*/, 4];
-                    item = data_2[_i];
-                    id = (0, utils_1.normalizeId)(item.id);
-                    record = {
+            try {
+                if (data.length === 0)
+                    return [2 /*return*/, { success: true, count: 0 }];
+                ids = data.map(function (item) { return (0, utils_1.normalizeId)(item.id); });
+                existingMap_1 = new Map();
+                for (i = 0; i < ids.length; i += BATCH_SIZE) {
+                    batchIds = ids.slice(i, i + BATCH_SIZE);
+                    rows = db
+                        .select({
+                        id: schema_1.spotlights.id,
+                        videoPath: schema_1.spotlights.videoPath,
+                        thumbnailPath: schema_1.spotlights.thumbnailPath,
+                        downloadedAt: schema_1.spotlights.downloadedAt,
+                    })
+                        .from(schema_1.spotlights)
+                        .where((0, drizzle_orm_1.inArray)(schema_1.spotlights.id, batchIds))
+                        .all();
+                    for (_i = 0, rows_2 = rows; _i < rows_2.length; _i++) {
+                        row = rows_2[_i];
+                        existingMap_1.set(row.id, row);
+                    }
+                }
+                records = data.map(function (item) {
+                    var _a, _b, _c;
+                    var id = (0, utils_1.normalizeId)(item.id);
+                    var existing = existingMap_1.get(id);
+                    return {
                         id: id,
                         title: String(item.title || "Unknown Title"),
                         author: String(item.author || "Unknown Author"),
@@ -297,39 +266,40 @@ function setupSyncHandlers() {
                         originalVideoPath: item.video_path,
                         originalThumbnailPath: item.thumbnail_path,
                         createdAt: item.created_at,
+                        videoPath: (_a = existing === null || existing === void 0 ? void 0 : existing.videoPath) !== null && _a !== void 0 ? _a : null,
+                        thumbnailPath: (_b = existing === null || existing === void 0 ? void 0 : existing.thumbnailPath) !== null && _b !== void 0 ? _b : null,
+                        downloadedAt: (_c = existing === null || existing === void 0 ? void 0 : existing.downloadedAt) !== null && _c !== void 0 ? _c : null,
                     };
-                    return [4 /*yield*/, db
-                            .insert(schema_1.spotlights)
-                            .values(record)
-                            .onConflictDoUpdate({
-                            target: schema_1.spotlights.id,
-                            set: {
-                                title: record.title,
-                                author: record.author,
-                                description: record.description,
-                                genre: record.genre,
-                                originalVideoPath: record.originalVideoPath,
-                                originalThumbnailPath: record.originalThumbnailPath,
-                                createdAt: record.createdAt,
-                            },
-                        })];
-                case 2:
-                    _a.sent();
-                    count++;
-                    _a.label = 3;
-                case 3:
-                    _i++;
-                    return [3 /*break*/, 1];
-                case 4: return [2 /*return*/, { success: true, count: count }];
-                case 5:
-                    error_5 = _a.sent();
-                    return [2 /*return*/, { success: false, error: error_5.message }];
-                case 6: return [2 /*return*/];
+                });
+                // バッチ分割してバルクUPSERT
+                for (i = 0; i < records.length; i += BATCH_SIZE) {
+                    batch = records.slice(i, i + BATCH_SIZE);
+                    db.insert(schema_1.spotlights)
+                        .values(batch)
+                        .onConflictDoUpdate({
+                        target: schema_1.spotlights.id,
+                        set: {
+                            title: (0, drizzle_orm_1.sql)(templateObject_15 || (templateObject_15 = __makeTemplateObject(["excluded.title"], ["excluded.title"]))),
+                            author: (0, drizzle_orm_1.sql)(templateObject_16 || (templateObject_16 = __makeTemplateObject(["excluded.author"], ["excluded.author"]))),
+                            description: (0, drizzle_orm_1.sql)(templateObject_17 || (templateObject_17 = __makeTemplateObject(["excluded.description"], ["excluded.description"]))),
+                            genre: (0, drizzle_orm_1.sql)(templateObject_18 || (templateObject_18 = __makeTemplateObject(["excluded.genre"], ["excluded.genre"]))),
+                            originalVideoPath: (0, drizzle_orm_1.sql)(templateObject_19 || (templateObject_19 = __makeTemplateObject(["excluded.original_video_path"], ["excluded.original_video_path"]))),
+                            originalThumbnailPath: (0, drizzle_orm_1.sql)(templateObject_20 || (templateObject_20 = __makeTemplateObject(["excluded.original_thumbnail_path"], ["excluded.original_thumbnail_path"]))),
+                            createdAt: (0, drizzle_orm_1.sql)(templateObject_21 || (templateObject_21 = __makeTemplateObject(["excluded.created_at"], ["excluded.created_at"]))),
+                        },
+                    })
+                        .run();
+                }
+                return [2 /*return*/, { success: true, count: data.length }];
             }
+            catch (error) {
+                return [2 /*return*/, { success: false, error: error.message }];
+            }
+            return [2 /*return*/];
         });
     }); });
     electron_1.ipcMain.handle("sync-section", function (_1, _a) { return __awaiter(_this, [_1, _a], void 0, function (_, _b) {
-        var itemIds, error_6;
+        var itemIds, error_1;
         var key = _b.key, data = _b.data;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -354,12 +324,13 @@ function setupSyncHandlers() {
                     _c.sent();
                     return [2 /*return*/, { success: true, count: itemIds.length }];
                 case 2:
-                    error_6 = _c.sent();
-                    console.error("[Sync] Section ".concat(key, " Error:"), error_6);
-                    return [2 /*return*/, { success: false, error: error_6.message }];
+                    error_1 = _c.sent();
+                    console.error("[Sync] Section ".concat(key, " Error:"), error_1);
+                    return [2 /*return*/, { success: false, error: error_1.message }];
                 case 3: return [2 /*return*/];
             }
         });
     }); });
 }
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21;
 //# sourceMappingURL=sync.js.map

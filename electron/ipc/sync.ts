@@ -9,29 +9,62 @@ import {
   spotlights,
 } from "../db/schema";
 import { normalizeId } from "../utils";
+import { inArray, sql } from "drizzle-orm";
+
+// SQLiteのバインド変数上限 (SQLITE_MAX_VARIABLE_NUMBER) を考慮したバッチサイズ
+// songs: 17カラム → 999 / 17 ≈ 58曲/batch
+const BATCH_SIZE = 50;
 
 export function setupSyncHandlers() {
   const db = getDb();
 
   /**
-   * 楽曲メタデータを内部でupsertする
+   * 楽曲メタデータをバルクupsertする
+   *
+   * 既存レコードを1クエリでプリフェッチし、downloaded fields (songPath, imagePath, videoPath, downloadedAt)
+   * を保持したままバルクINSERTする。SQLite変数制限(999)を超えないようバッチ分割する。
    */
-  async function internalSyncSongs(songsData: any[]) {
-    let count = 0;
-    for (const song of songsData) {
+  function internalSyncSongs(songsData: any[]) {
+    if (songsData.length === 0) return 0;
+
+    const ids = songsData.map((song) => normalizeId(song.id));
+
+    // 1. 既存レコードのdownloaded fieldsをバッチでプリフェッチ
+    const existingMap = new Map<
+      string,
+      {
+        songPath: string | null;
+        imagePath: string | null;
+        videoPath: string | null;
+        downloadedAt: Date | null;
+      }
+    >();
+
+    for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+      const batchIds = ids.slice(i, i + BATCH_SIZE);
+      const rows = db
+        .select({
+          id: songs.id,
+          songPath: songs.songPath,
+          imagePath: songs.imagePath,
+          videoPath: songs.videoPath,
+          downloadedAt: songs.downloadedAt,
+        })
+        .from(songs)
+        .where(inArray(songs.id, batchIds))
+        .all();
+
+      for (const row of rows) {
+        existingMap.set(row.id, row);
+      }
+    }
+
+    // 2. 全レコードを構築（downloaded fieldsは既存値を保持）
+    const records = songsData.map((song) => {
       const songId = normalizeId(song.id);
+      const existing = existingMap.get(songId);
 
-      const existing = await db.query.songs.findFirst({
-        where: (songs, { eq }) => eq(songs.id, songId),
-        columns: {
-          songPath: true,
-          imagePath: true,
-          videoPath: true,
-          downloadedAt: true,
-        },
-      });
-
-      const record = {
+      return {
         id: songId,
         userId: String(song.user_id || ""),
         title: String(song.title || "Unknown Title"),
@@ -50,34 +83,38 @@ export function setupSyncHandlers() {
         createdAt: song.created_at,
         downloadedAt: existing?.downloadedAt ?? null,
       };
+    });
 
-      await db
-        .insert(songs)
-        .values(record)
+    // 3. バルクUPSERT（バッチ分割して変数制限を回避）
+    for (let i = 0; i < records.length; i += BATCH_SIZE) {
+      const batch = records.slice(i, i + BATCH_SIZE);
+      db.insert(songs)
+        .values(batch)
         .onConflictDoUpdate({
           target: songs.id,
           set: {
-            title: record.title,
-            author: record.author,
-            originalSongPath: record.originalSongPath,
-            originalImagePath: record.originalImagePath,
-            originalVideoPath: record.originalVideoPath,
-            duration: record.duration,
-            genre: record.genre,
-            lyrics: record.lyrics,
-            playCount: record.playCount,
-            likeCount: record.likeCount,
-            createdAt: record.createdAt,
+            title: sql`excluded.title`,
+            author: sql`excluded.author`,
+            originalSongPath: sql`excluded.original_song_path`,
+            originalImagePath: sql`excluded.original_image_path`,
+            originalVideoPath: sql`excluded.original_video_path`,
+            duration: sql`excluded.duration`,
+            genre: sql`excluded.genre`,
+            lyrics: sql`excluded.lyrics`,
+            playCount: sql`excluded.play_count`,
+            likeCount: sql`excluded.like_count`,
+            createdAt: sql`excluded.created_at`,
           },
-        });
-      count++;
+        })
+        .run();
     }
-    return count;
+
+    return songsData.length;
   }
 
   ipcMain.handle("sync-songs-metadata", async (_, data: any[]) => {
     try {
-      const count = await internalSyncSongs(data);
+      const count = internalSyncSongs(data);
       return { success: true, count };
     } catch (error: any) {
       return { success: false, error: error.message };
@@ -86,26 +123,29 @@ export function setupSyncHandlers() {
 
   ipcMain.handle("sync-playlists", async (_, data: any[]) => {
     try {
-      for (const item of data) {
-        await db
-          .insert(playlists)
-          .values({
-            id: normalizeId(item.id),
-            userId: String(item.user_id),
-            title: String(item.title),
-            imagePath: item.image_path,
-            isPublic: Boolean(item.is_public),
-            createdAt: item.createdAt || item.created_at,
-          })
-          .onConflictDoUpdate({
-            target: playlists.id,
-            set: {
-              title: String(item.title),
-              imagePath: item.image_path,
-              isPublic: Boolean(item.is_public),
-            },
-          });
-      }
+      if (data.length === 0) return { success: true, count: 0 };
+
+      const records = data.map((item) => ({
+        id: normalizeId(item.id),
+        userId: String(item.user_id),
+        title: String(item.title),
+        imagePath: item.image_path,
+        isPublic: Boolean(item.is_public),
+        createdAt: item.createdAt || item.created_at,
+      }));
+
+      db.insert(playlists)
+        .values(records)
+        .onConflictDoUpdate({
+          target: playlists.id,
+          set: {
+            title: sql`excluded.title`,
+            imagePath: sql`excluded.image_path`,
+            isPublic: sql`excluded.is_public`,
+          },
+        })
+        .run();
+
       return { success: true, count: data.length };
     } catch (error: any) {
       return { success: false, error: error.message };
@@ -119,20 +159,22 @@ export function setupSyncHandlers() {
       { playlistId, songs: fullSongsData }: { playlistId: string; songs: any[] }
     ) => {
       try {
-        await internalSyncSongs(fullSongsData);
-        for (const songData of fullSongsData) {
-          const songId = normalizeId(songData.id);
-          const psId = `${playlistId}_${songId}`;
-          await db
-            .insert(playlistSongs)
-            .values({
-              id: psId,
-              playlistId: normalizeId(playlistId),
-              songId: songId,
-              addedAt: songData.created_at,
-            })
-            .onConflictDoNothing();
-        }
+        db.transaction(() => {
+          internalSyncSongs(fullSongsData);
+
+          const joinRecords = fullSongsData.map((songData) => ({
+            id: `${playlistId}_${normalizeId(songData.id)}`,
+            playlistId: normalizeId(playlistId),
+            songId: normalizeId(songData.id),
+            addedAt: songData.created_at,
+          }));
+
+          db.insert(playlistSongs)
+            .values(joinRecords)
+            .onConflictDoNothing()
+            .run();
+        });
+
         return { success: true };
       } catch (error: any) {
         return { success: false, error: error.message };
@@ -147,17 +189,21 @@ export function setupSyncHandlers() {
       { userId, songs: fullSongsData }: { userId: string; songs: any[] }
     ) => {
       try {
-        await internalSyncSongs(fullSongsData);
-        for (const songData of fullSongsData) {
-          await db
-            .insert(likedSongs)
-            .values({
-              userId: String(userId),
-              songId: normalizeId(songData.id),
-              likedAt: songData.created_at || new Date().toISOString(),
-            })
-            .onConflictDoNothing();
-        }
+        db.transaction(() => {
+          internalSyncSongs(fullSongsData);
+
+          const joinRecords = fullSongsData.map((songData) => ({
+            userId: String(userId),
+            songId: normalizeId(songData.id),
+            likedAt: songData.created_at || new Date().toISOString(),
+          }));
+
+          db.insert(likedSongs)
+            .values(joinRecords)
+            .onConflictDoNothing()
+            .run();
+        });
+
         return { success: true };
       } catch (error: any) {
         console.error("[Sync] Liked Songs Error:", error);
@@ -168,12 +214,43 @@ export function setupSyncHandlers() {
 
   ipcMain.handle("sync-spotlights-metadata", async (_, data: any[]) => {
     try {
-      let count = 0;
-      for (const item of data) {
-        const id = normalizeId(item.id);
+      if (data.length === 0) return { success: true, count: 0 };
 
-        const record = {
-          id: id,
+      // 既存レコードのdownloaded fieldsをバッチでプリフェッチ
+      const ids = data.map((item) => normalizeId(item.id));
+      const existingMap = new Map<
+        string,
+        {
+          videoPath: string | null;
+          thumbnailPath: string | null;
+          downloadedAt: Date | null;
+        }
+      >();
+
+      for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+        const batchIds = ids.slice(i, i + BATCH_SIZE);
+        const rows = db
+          .select({
+            id: spotlights.id,
+            videoPath: spotlights.videoPath,
+            thumbnailPath: spotlights.thumbnailPath,
+            downloadedAt: spotlights.downloadedAt,
+          })
+          .from(spotlights)
+          .where(inArray(spotlights.id, batchIds))
+          .all();
+
+        for (const row of rows) {
+          existingMap.set(row.id, row);
+        }
+      }
+
+      const records = data.map((item) => {
+        const id = normalizeId(item.id);
+        const existing = existingMap.get(id);
+
+        return {
+          id,
           title: String(item.title || "Unknown Title"),
           author: String(item.author || "Unknown Author"),
           description: item.description,
@@ -181,26 +258,33 @@ export function setupSyncHandlers() {
           originalVideoPath: item.video_path,
           originalThumbnailPath: item.thumbnail_path,
           createdAt: item.created_at,
+          videoPath: existing?.videoPath ?? null,
+          thumbnailPath: existing?.thumbnailPath ?? null,
+          downloadedAt: existing?.downloadedAt ?? null,
         };
+      });
 
-        await db
-          .insert(spotlights)
-          .values(record)
+      // バッチ分割してバルクUPSERT
+      for (let i = 0; i < records.length; i += BATCH_SIZE) {
+        const batch = records.slice(i, i + BATCH_SIZE);
+        db.insert(spotlights)
+          .values(batch)
           .onConflictDoUpdate({
             target: spotlights.id,
             set: {
-              title: record.title,
-              author: record.author,
-              description: record.description,
-              genre: record.genre,
-              originalVideoPath: record.originalVideoPath,
-              originalThumbnailPath: record.originalThumbnailPath,
-              createdAt: record.createdAt,
+              title: sql`excluded.title`,
+              author: sql`excluded.author`,
+              description: sql`excluded.description`,
+              genre: sql`excluded.genre`,
+              originalVideoPath: sql`excluded.original_video_path`,
+              originalThumbnailPath: sql`excluded.original_thumbnail_path`,
+              createdAt: sql`excluded.created_at`,
             },
-          });
-        count++;
+          })
+          .run();
       }
-      return { success: true, count };
+
+      return { success: true, count: data.length };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
