@@ -7,8 +7,12 @@ import PlaybackStateProvider from "@/providers/PlaybackStateProvider";
 import usePlayer from "@/hooks/player/usePlayer";
 import usePlaybackStateStore from "@/hooks/stores/usePlaybackStateStore";
 
-// Mock hooks
-jest.mock("@/hooks/player/usePlayer");
+// Mock hooks — usePlayer needs getState() for zustand store static method
+jest.mock("@/hooks/player/usePlayer", () => {
+  const mockFn = jest.fn();
+  (mockFn as any).getState = jest.fn();
+  return { __esModule: true, default: mockFn };
+});
 jest.mock("@/hooks/stores/usePlaybackStateStore");
 
 // filterStaleLocalSongs をモック（非同期処理を同期的に扱う）
@@ -26,11 +30,14 @@ describe("PlaybackStateProvider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (usePlayer as unknown as jest.Mock).mockReturnValue({
+    const playerState = {
       setIds: mockSetIds,
       setId: mockSetId,
-      localSongs: new Map(),
-    });
+      localSongs: new Map<string, string>(),
+    };
+
+    (usePlayer as unknown as jest.Mock).mockReturnValue(playerState);
+    (usePlayer as any).getState.mockReturnValue(playerState);
 
     (usePlaybackStateStore as unknown as jest.Mock).mockReturnValue({
       songId: "song-1",

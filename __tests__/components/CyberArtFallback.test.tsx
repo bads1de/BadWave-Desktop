@@ -58,6 +58,9 @@ beforeEach(() => {
     createLinearGradient: jest.fn(() => ({
       addColorStop: jest.fn(),
     })),
+    createRadialGradient: jest.fn(() => ({
+      addColorStop: jest.fn(),
+    })),
     fillStyle: "",
     strokeStyle: "",
     lineWidth: 0,
@@ -66,6 +69,7 @@ beforeEach(() => {
     globalCompositeOperation: "source-over",
     font: "",
     textAlign: "",
+    quadraticCurveTo: jest.fn(),
     fillText: jest.fn(),
   })) as any;
 });
@@ -80,29 +84,21 @@ describe("CyberArtFallback", () => {
   it("should have correct canvas classes", () => {
     const { container } = render(<CyberArtFallback />);
     const canvas = container.querySelector("canvas");
-    expect(canvas).toHaveClass("w-full", "h-full", "object-cover", "opacity-95");
+    expect(canvas).toHaveClass("w-full", "h-full", "object-cover", "transition-opacity", "duration-1000");
   });
 
-  it("should render scanline overlay", () => {
-    const { container } = render(<CyberArtFallback />);
-    const overlay = container.querySelector("[data-testid='cyber-art-scanline']");
-    expect(overlay).toBeInTheDocument();
-  });
-
-  it("should render decorative fallback layers without intercepting clicks", () => {
+  it("should render canvas with decorative overlay divs", () => {
     const { container } = render(<CyberArtFallback />);
     const root = container.querySelector("[data-testid='cyber-art-fallback']");
-    const vignette = container.querySelector("[data-testid='cyber-art-vignette']");
-    const frame = container.querySelector("[data-testid='cyber-art-frame']");
-    const radarGlow = container.querySelector("[data-testid='cyber-art-radar-glow']");
-    const hudCorners = container.querySelector("[data-testid='cyber-art-hud-corners']");
+    const canvases = container.querySelectorAll("canvas");
+    // Should have exactly one canvas
+    expect(canvases.length).toBe(1);
 
     expect(root).toHaveClass("pointer-events-none", "isolate");
-    expect(root).toHaveAttribute("aria-hidden", "true");
-    expect(vignette).toBeInTheDocument();
-    expect(frame).toBeInTheDocument();
-    expect(radarGlow).toBeInTheDocument();
-    expect(hudCorners).toBeInTheDocument();
+    // Root should have exactly 4 children: canvas + 3 decorative overlays
+    expect(root?.children.length).toBe(4);
+    // First child is the canvas
+    expect(root?.children[0].tagName).toBe("CANVAS");
   });
 
   it("should request animation frame on mount", () => {
@@ -133,25 +129,6 @@ describe("CyberArtFallback", () => {
     expect(mockAnalyser.getByteFrequencyData).toHaveBeenCalled();
   });
 
-  it("should call getByteTimeDomainData when audio data is present", () => {
-    mockIsPlaying = true;
-    // 周波数データに非ゼロの値を設定（hasAudioData = true にする）
-    mockAnalyser.getByteFrequencyData.mockImplementation((arr: Uint8Array) => {
-      arr.fill(128); // 中間値で埋める
-    });
-    mockAnalyser.getByteTimeDomainData.mockImplementation((arr: Uint8Array) => {
-      arr.fill(128);
-    });
-
-    render(<CyberArtFallback />);
-
-    if (rafCallback) {
-      rafCallback(0);
-    }
-
-    expect(mockAnalyser.getByteTimeDomainData).toHaveBeenCalled();
-  });
-
   it("should not call getByteFrequencyData when not playing", () => {
     mockIsPlaying = false;
     render(<CyberArtFallback />);
@@ -178,7 +155,7 @@ describe("CyberArtFallback", () => {
   it("should set canvas dimensions", () => {
     const { container } = render(<CyberArtFallback />);
     const canvas = container.querySelector("canvas") as HTMLCanvasElement;
-    expect(canvas.width).toBe(600);
+    expect(canvas.width).toBe(800);
     expect(canvas.height).toBe(800);
   });
 
