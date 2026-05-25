@@ -18,8 +18,8 @@ class AudioEngine {
   public reverbGainNode: GainNode | null = null;
   public convolver: ConvolverNode | null = null;
   public spatialFilter: BiquadFilterNode | null = null;
-  private isSpatialActive = false; // Spatial Mode 内部状態
-  private isSlowedReverbActive = false; // Slowed+Reverb 内部状態
+  private isSpatialActive = false;
+  private isSlowedReverbActive = false;
 
   // 8D Audio ノード
   public stereoPanner: StereoPannerNode | null = null;
@@ -281,7 +281,7 @@ class AudioEngine {
       // OFF: 22050Hz (全通)
       this.spatialFilter.frequency.exponentialRampToValueAtTime(
         22050,
-        now + 0.2
+        now + 0.2,
       );
     }
 
@@ -395,7 +395,7 @@ class AudioEngine {
       // LowPass -> 22050Hz
       this.retroLowPass.frequency.exponentialRampToValueAtTime(
         22050,
-        now + 0.3
+        now + 0.3,
       );
       this.retroLowPass.Q.value = 0.5;
 
