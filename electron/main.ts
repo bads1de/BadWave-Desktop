@@ -1,7 +1,4 @@
 import { app, BrowserWindow, globalShortcut, session } from "electron";
-import * as http from "http";
-import * as path from "path";
-import * as fs from "fs";
 import { loadEnvVariables, debugLog } from "./utils";
 import { getDb } from "./db/client";
 
@@ -9,57 +6,10 @@ import { getDb } from "./db/client";
 import { registerProtocolHandlers, registerSchemes } from "./lib/protocol";
 import { createMainWindow } from "./lib/window-manager";
 import { setupTray, destroyTray } from "./lib/tray";
+import { startOAuthServer, stopOAuthServer } from "./lib/oauth-server";
 
 // カスタムプロトコルのスキームを登録（app ready前に必須）
 registerSchemes();
-
-// OAuthコールバック用のHTTPサーバー
-let oauthServer: http.Server | null = null;
-
-function startOAuthServer() {
-  if (oauthServer) return;
-
-  oauthServer = http.createServer((req, res) => {
-    if (req.url?.startsWith("/auth/callback")) {
-      const url = new URL(req.url, `http://localhost:4321`);
-      const code = url.searchParams.get("code");
-      const error = url.searchParams.get("error");
-
-      // 認証ページを返す
-      const htmlPath = path.join(__dirname, "static", "auth-callback.html");
-      const html = fs.readFileSync(htmlPath, "utf-8");
-
-      res.writeHead(200, { "Content-Type": "text/html" });
-      res.end(html);
-
-      // 認証コードをIPC経由でメインウィンドウに送信
-      const mainWindow = BrowserWindow.getAllWindows()[0];
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        if (code) {
-          mainWindow.webContents.send("auth-callback", { code });
-        } else if (error) {
-          mainWindow.webContents.send("auth-callback", { error });
-        }
-      }
-    } else {
-      res.writeHead(404);
-      res.end("Not Found");
-    }
-  });
-
-  oauthServer.listen(4321, () => {
-    debugLog("[OAuth] HTTPサーバーがlocalhost:4321で起動しました");
-  });
-}
-
-function stopOAuthServer() {
-  if (oauthServer) {
-    oauthServer.close(() => {
-      debugLog("[OAuth] HTTPサーバーを停止しました");
-    });
-    oauthServer = null;
-  }
-}
 
 // IPCハンドラーのインポート
 import { setupOfflineDownloadHandlers } from "./ipc/offline";
