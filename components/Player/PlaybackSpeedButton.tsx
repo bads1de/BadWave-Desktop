@@ -12,6 +12,7 @@ import useEffectStore, {
   ROTATION_SPEED_VALUES,
   RotationSpeed,
 } from "@/hooks/stores/useEffectStore";
+import useNightCoreStore from "@/hooks/stores/useNightCoreStore";
 
 const PlaybackSpeedButton: React.FC = () => {
   const playbackRate = usePlaybackRateStore((state) => state.rate);
@@ -33,6 +34,9 @@ const PlaybackSpeedButton: React.FC = () => {
     (state) => state.toggleSlowedReverb
   );
 
+  const isNightCore = useNightCoreStore((state) => state.isEnabled);
+  const toggleNightCore = useNightCoreStore((state) => state.toggle);
+
   const rates = [0.9, 0.95, 1, 1.05, 1.1, 1.25];
   const rotationSpeeds: { value: RotationSpeed; label: string }[] = [
     { value: "slow", label: "Slow" },
@@ -50,13 +54,14 @@ const PlaybackSpeedButton: React.FC = () => {
             isSpatialEnabled ||
             is8DAudioEnabled ||
             isRetroEnabled ||
-            isBassBoostEnabled
+            isBassBoostEnabled ||
+            isNightCore
               ? "text-theme-500 drop-shadow-[0_0_8px_var(--glow-color)]"
               : "text-neutral-400 hover:text-white"
           }`}
         >
           <span className="text-xs font-bold w-6 text-center block">
-            {playbackRate}x
+            {isNightCore ? "1.35x" : `${playbackRate}x`}
           </span>
         </button>
       </PopoverTrigger>
@@ -70,7 +75,7 @@ const PlaybackSpeedButton: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs text-neutral-400 font-medium">Speed</span>
             <span className="text-xs text-theme-500 font-bold">
-              {playbackRate.toFixed(2)}x
+              {isNightCore ? "1.35x" : `${playbackRate.toFixed(2)}x`}
             </span>
           </div>
           <RadixSlider.Root
@@ -82,6 +87,7 @@ const PlaybackSpeedButton: React.FC = () => {
             min={0.5}
             step={0.05}
             aria-label="Playback Speed"
+            disabled={isNightCore}
           >
             <RadixSlider.Track className="relative bg-neutral-600 rounded-full flex-grow h-[3px]">
               <RadixSlider.Range className="absolute bg-theme-500 rounded-full h-full" />
@@ -104,11 +110,12 @@ const PlaybackSpeedButton: React.FC = () => {
             <button
               key={rate}
               onClick={() => setPlaybackRate(rate)}
+              disabled={isNightCore}
               className={`px-2 py-1.5 rounded text-xs transition-colors text-center ${
                 playbackRate === rate
                   ? "bg-theme-500/20 text-theme-500 font-medium ring-1 ring-theme-500/50"
                   : "bg-neutral-800/50 text-neutral-400 hover:bg-neutral-700 hover:text-white"
-              }`}
+              } ${isNightCore ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {rate}x
             </button>
@@ -293,6 +300,38 @@ const PlaybackSpeedButton: React.FC = () => {
               }`}
               style={{
                 left: isBassBoostEnabled ? "calc(100% - 3px - 12px)" : "2px",
+              }}
+            />
+          </button>
+        </div>
+
+        {/* NightCore */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-neutral-400">NightCore</span>
+            <div className="group relative flex items-center justify-center">
+              <HelpCircle
+                size={12}
+                className="text-neutral-500 cursor-help hover:text-neutral-300 transition-colors"
+              />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#252525] border border-[#404040] rounded shadow-xl text-[10px] leading-relaxed text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                再生速度を1.35倍に加速して、ピッチを上げることでアニメや電波ソングのような特徴的なサウンドにします。
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#252525] border-b border-r border-[#404040] rotate-45"></div>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={toggleNightCore}
+            className={`w-8 h-4 rounded-full transition-colors relative ${
+              isNightCore ? "bg-theme-500" : "bg-neutral-600"
+            }`}
+          >
+            <div
+              className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
+                isNightCore ? "left-4.5 translate-x-0" : "left-0.5"
+              }`}
+              style={{
+                left: isNightCore ? "calc(100% - 3px - 12px)" : "2px",
               }}
             />
           </button>

@@ -11,6 +11,7 @@ import usePlaybackRateStore from "@/hooks/stores/usePlaybackRateStore";
 import useEqualizerStore from "@/hooks/stores/useEqualizerStore";
 import useEffectStore from "@/hooks/stores/useEffectStore";
 import useSpatialStore from "@/hooks/stores/useSpatialStore";
+import useNightCoreStore from "@/hooks/stores/useNightCoreStore";
 import SpeedAndEffectsControl from "./SpeedAndEffectsControl";
 import EqualizerControl from "../equalizer/EqualizerControl";
 
@@ -29,6 +30,7 @@ const AudioSettingsButton: React.FC = () => {
     (state) => state.isBassBoostEnabled,
   );
   const isSlowedReverb = useEffectStore((state) => state.isSlowedReverb);
+  const isNightCore = useNightCoreStore((state) => state.isEnabled);
 
   const isAnyEffectActive =
     playbackRate !== 1 ||
@@ -37,7 +39,8 @@ const AudioSettingsButton: React.FC = () => {
     is8DAudioEnabled ||
     isRetroEnabled ||
     isBassBoostEnabled ||
-    isSlowedReverb;
+    isSlowedReverb ||
+    isNightCore;
 
   return (
     <Popover>
