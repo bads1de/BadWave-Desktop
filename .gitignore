@@ -15,9 +15,13 @@
 /build
 /dist
 
-# electron
-/electron/main.js
-/electron/preload.js
+# electron - TypeScript compiled output (do not commit build artifacts)
+/electron/**/*.js
+/electron/**/*.js.map
+
+# types - TypeScript compiled output
+/types/**/*.js
+/types/**/*.js.map
 
 # misc
 .DS_Store
