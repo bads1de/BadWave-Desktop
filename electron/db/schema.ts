@@ -1,14 +1,18 @@
+import { sql } from "drizzle-orm";
 import {
   sqliteTable,
   text,
   real,
   integer,
   primaryKey,
+  index,
 } from "drizzle-orm/sqlite-core";
 
 // 1. Songs: 楽曲のマスターデータ
 // ダウンロード済みの楽曲と、ライブラリ上のメタデータのみの楽曲の両方を含みます。
-export const songs = sqliteTable("songs", {
+export const songs = sqliteTable(
+  "songs",
+  {
   id: text("id").primaryKey(), // SupabaseのUUIDと一致
   userId: text("user_id").notNull(),
   title: text("title").notNull(),
@@ -35,7 +39,14 @@ export const songs = sqliteTable("songs", {
   lastPlayedAt: integer("last_played_at", { mode: "timestamp" }), // 「最近再生した曲」用
   playCount: integer("play_count").default(0),
   likeCount: integer("like_count").default(0),
-});
+},
+(table) => ({
+  // パフォーマンス最適化: よく使われるカラムにインデックス
+  userIdIdx: index("songs_user_id_idx").on(table.userId),
+  genreIdx: index("songs_genre_idx").on(table.genre),
+  playCountIdx: index("songs_play_count_idx").on(table.playCount),
+  likeCountIdx: index("songs_like_count_idx").on(table.likeCount),
+}));
 
 // 2. Playlists: ユーザー作成のプレイリスト
 export const playlists = sqliteTable("playlists", {
@@ -48,16 +59,24 @@ export const playlists = sqliteTable("playlists", {
 });
 
 // 3. Playlist Songs: プレイリストと曲の中間テーブル
-export const playlistSongs = sqliteTable("playlist_songs", {
-  id: text("id").primaryKey(),
-  playlistId: text("playlist_id")
-    .notNull()
-    .references(() => playlists.id, { onDelete: "cascade" }),
-  songId: text("song_id")
-    .notNull()
-    .references(() => songs.id, { onDelete: "cascade" }),
-  addedAt: text("added_at"),
-});
+export const playlistSongs = sqliteTable(
+  "playlist_songs",
+  {
+    id: text("id").primaryKey(),
+    playlistId: text("playlist_id")
+      .notNull()
+      .references(() => playlists.id, { onDelete: "cascade" }),
+    songId: text("song_id")
+      .notNull()
+      .references(() => songs.id, { onDelete: "cascade" }),
+    addedAt: text("added_at"),
+  },
+  (table) => ({
+    // パフォーマンス最適化: JOINクエリ用インデックス
+    playlistIdIdx: index("playlist_songs_playlist_id_idx").on(table.playlistId),
+    songIdIdx: index("playlist_songs_song_id_idx").on(table.songId),
+  })
+);
 
 // 4. Liked Songs: ユーザーの「いいね」
 export const likedSongs = sqliteTable(
@@ -99,5 +118,7 @@ export const spotlights = sqliteTable("spotlights", {
 export const sectionCache = sqliteTable("section_cache", {
   key: text("key").primaryKey(), // 例: "home_trends_all", "home_spotlight"
   itemIds: text("item_ids", { mode: "json" }), // IDの順序付き配列 string[]
-  updatedAt: integer("updated_at", { mode: "timestamp" }).default(new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => new Date()),
 });
