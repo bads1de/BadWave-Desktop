@@ -1,6 +1,14 @@
 import { ipcMain, session } from "electron";
+import { z } from "zod";
 import store from "../lib/store";
 import { debugLog } from "../utils";
+import {
+  validateInput,
+  storeKeySchema,
+  storeValueSchema,
+} from "../lib/ipc-validate";
+
+const booleanSchema = z.boolean();
 
 // オフラインシミュレーション状態を追跡（外部からアクセス可能）
 let isSimulatingOffline = false;
@@ -15,15 +23,22 @@ export function setIsSimulatingOffline(value: boolean) {
 
 export function setupSettingsHandlers() {
   // アプリケーション設定の取得
-  ipcMain.handle("get-store-value", (_, key: string) => {
+  ipcMain.handle("get-store-value", (_, rawKey: string) => {
+    // キーインジェクション対策: 許可された文字種のみ
+    const key = validateInput(storeKeySchema, rawKey, "get-store-value");
     return store.get(key);
   });
 
   // アプリケーション設定の保存
-  ipcMain.handle("set-store-value", (_, key: string, value: any) => {
-    store.set(key, value);
-    return true;
-  });
+  ipcMain.handle(
+    "set-store-value",
+    (_, rawKey: string, rawValue: unknown) => {
+      const key = validateInput(storeKeySchema, rawKey, "set-store-value:key");
+      const value = validateInput(storeValueSchema, rawValue, "set-store-value:value");
+      store.set(key, value);
+      return true;
+    },
+  );
 
   // オフラインモードのシミュレーションを切り替え（開発用）
   ipcMain.handle("toggle-offline-simulation", async () => {
@@ -34,7 +49,7 @@ export function setupSettingsHandlers() {
     });
 
     debugLog(
-      `[Debug] Offline simulation: ${isSimulatingOffline ? "ON" : "OFF"}`
+      `[Debug] Offline simulation: ${isSimulatingOffline ? "ON" : "OFF"}`,
     );
     return { isOffline: isSimulatingOffline };
   });
@@ -45,7 +60,8 @@ export function setupSettingsHandlers() {
   });
 
   // オフラインシミュレーションを設定（明示的に ON/OFF）
-  ipcMain.handle("set-offline-simulation", async (_, offline: boolean) => {
+  ipcMain.handle("set-offline-simulation", async (_, rawOffline: unknown) => {
+    const offline = validateInput(booleanSchema, rawOffline, "set-offline-simulation");
     isSimulatingOffline = offline;
 
     session.defaultSession.enableNetworkEmulation({
@@ -53,7 +69,7 @@ export function setupSettingsHandlers() {
     });
 
     debugLog(
-      `[Debug] Offline simulation set to: ${isSimulatingOffline ? "ON" : "OFF"}`
+      `[Debug] Offline simulation set to: ${isSimulatingOffline ? "ON" : "OFF"}`,
     );
     return { isOffline: isSimulatingOffline };
   });

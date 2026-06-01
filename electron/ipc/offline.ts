@@ -9,12 +9,19 @@ import { getDb } from "../db/client";
 import { songs } from "../db/schema";
 import { eq, isNotNull } from "drizzle-orm";
 import type { SongDownloadPayload } from "../../types";
+import { validateInput, songDownloadPayloadSchema, idSchema } from "../lib/ipc-validate";
 
 export const setupOfflineDownloadHandlers = () => {
   const db = getDb();
 
   // 楽曲のダウンロードリクエストを処理
-  ipcMain.handle("download-song", async (event, song: SongDownloadPayload) => {
+  ipcMain.handle("download-song", async (event, rawSong: unknown) => {
+    // ペイロード全体をZodで検証 (SSRF + ID/長さ制限)
+    const song = validateInput(
+      songDownloadPayloadSchema,
+      rawSong,
+      "download-song",
+    ) as SongDownloadPayload;
     const songId = song.id;
 
     try {
@@ -152,7 +159,8 @@ export const setupOfflineDownloadHandlers = () => {
   });
 
   // オフラインステータスの確認
-  ipcMain.handle("check-offline-status", async (_, songId: string) => {
+  ipcMain.handle("check-offline-status", async (_, rawSongId: string) => {
+    const songId = validateInput(idSchema, rawSongId, "check-offline-status");
     try {
       const result = await db.query.songs.findFirst({
         where: eq(songs.id, songId),
@@ -214,7 +222,8 @@ export const setupOfflineDownloadHandlers = () => {
   });
 
   // オフライン楽曲の削除 (ファイルとDBレコードの両方を削除)
-  ipcMain.handle("delete-offline-song", async (_, songId: string) => {
+  ipcMain.handle("delete-offline-song", async (_, rawSongId: string) => {
+    const songId = validateInput(idSchema, rawSongId, "delete-offline-song");
     try {
       // 1. ファイルパスを取得するためにレコードを確認
       const songRecord = await db.query.songs.findFirst({

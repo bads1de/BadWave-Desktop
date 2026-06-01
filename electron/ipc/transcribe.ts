@@ -4,6 +4,11 @@ import * as path from "path";
 import * as fs from "fs";
 import * as https from "https";
 import * as http from "http";
+import { z } from "zod";
+import { validateInput } from "../lib/ipc-validate";
+
+const audioPathSchema = z.string().min(1).max(2048);
+const lyricsTextSchema = z.string().max(50000);
 
 /**
  * トランスクライブ関連のIPCハンドラーをセットアップする
@@ -16,8 +21,19 @@ export function setupTranscriptionHandlers() {
    */
   ipcMain.handle(
     "transcribe:generate-lrc",
-    async (_event, audioPath: string, lyricsText: string) => {
+    async (_event, rawAudioPath: string, rawLyricsText: string) => {
       return new Promise((resolve) => {
+        // 入力検証: 長さ制限と基本型チェック
+        const audioPath = validateInput(
+          audioPathSchema,
+          rawAudioPath,
+          "transcribe:generate-lrc:audioPath",
+        );
+        const lyricsText = validateInput(
+          lyricsTextSchema,
+          rawLyricsText,
+          "transcribe:generate-lrc:lyricsText",
+        );
         // Python環境のパス解決
         const isDev = !app.isPackaged;
         let pythonPath = "";

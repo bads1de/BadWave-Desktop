@@ -3,6 +3,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as https from "https";
 import { debugLog } from "../utils";
+import {
+  validateInput,
+  externalUrlSchema,
+  filenameSchema,
+  filePathSchema,
+} from "../lib/ipc-validate";
 
 export function setupDownloadHandlers() {
   // 曲のダウンロード
@@ -10,8 +16,17 @@ export function setupDownloadHandlers() {
   // どちらか一方のみを使用してください
   ipcMain.handle(
     "download-song-simple", // チャンネル名を変更して競合を回避
-    async (event, url: string, filename: string) => {
+    async (event, rawUrl: string, rawFilename: string) => {
       try {
+        // SSRF対策: 任意URLを排除 (http/httpsのみ)
+        const url = validateInput(externalUrlSchema, rawUrl, "download-song-simple:url");
+        // パストラバーサル対策
+        const filename = validateInput(
+          filenameSchema,
+          rawFilename,
+          "download-song-simple:filename",
+        );
+
         const userDataPath = app.getPath("userData");
         const downloadsDir = path.join(userDataPath, "downloads");
 
@@ -73,7 +88,8 @@ export function setupDownloadHandlers() {
   );
 
   // ファイル存在確認
-  ipcMain.handle("check-file-exists", async (_, filename: string) => {
+  ipcMain.handle("check-file-exists", async (_, rawFilename: string) => {
+    const filename = validateInput(filenameSchema, rawFilename, "check-file-exists");
     const userDataPath = app.getPath("userData");
     const filePath = path.join(userDataPath, "downloads", filename);
     try {
@@ -85,7 +101,10 @@ export function setupDownloadHandlers() {
   });
 
   // ローカルファイルの存在確認（任意パス）
-  ipcMain.handle("check-local-file-exists", async (_, filePath: string) => {
+  // 注意: 任意の絶対パスを許可するため、Renderer 側の信頼性に依存
+  // TODO: 許可ディレクトリを userData とユーザーが選択した音楽ディレクトリに限定
+  ipcMain.handle("check-local-file-exists", async (_, rawFilePath: string) => {
+    const filePath = validateInput(filePathSchema, rawFilePath, "check-local-file-exists");
     try {
       await fs.promises.access(filePath, fs.constants.F_OK);
       return true;
@@ -95,14 +114,16 @@ export function setupDownloadHandlers() {
   });
 
   // ローカルファイルのパスを取得
-  ipcMain.handle("get-local-file-path", (_, filename: string) => {
+  ipcMain.handle("get-local-file-path", (_, rawFilename: string) => {
+    const filename = validateInput(filenameSchema, rawFilename, "get-local-file-path");
     const userDataPath = app.getPath("userData");
     // appプロトコルで読めるように絶対パスを返す
     return path.join(userDataPath, "downloads", filename);
   });
 
   // ファイル削除
-  ipcMain.handle("delete-song", async (_, filename: string) => {
+  ipcMain.handle("delete-song", async (_, rawFilename: string) => {
+    const filename = validateInput(filenameSchema, rawFilename, "delete-song");
     const userDataPath = app.getPath("userData");
     const filePath = path.join(userDataPath, "downloads", filename);
     try {

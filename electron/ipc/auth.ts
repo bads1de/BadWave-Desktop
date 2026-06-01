@@ -1,5 +1,10 @@
 import { ipcMain, shell, BrowserWindow } from "electron";
 import Store from "electron-store";
+import {
+  validateInput,
+  authUrlSchema,
+  cachedUserSchema,
+} from "../lib/ipc-validate";
 
 interface CachedUser {
   id: string;
@@ -13,8 +18,15 @@ export function setupAuthHandlers() {
   /**
    * 外部ブラウザでGoogle認証を開始
    */
-  ipcMain.handle("auth:start-google-oauth", async (_, authUrl: string) => {
+  ipcMain.handle("auth:start-google-oauth", async (_, rawAuthUrl: string) => {
     try {
+      // URLインジェクション対策: Supabase/Googleの認証URLのみ許可
+      const authUrl = validateInput(
+        authUrlSchema,
+        rawAuthUrl,
+        "auth:start-google-oauth",
+      );
+
       // デフォルトブラウザで認証URLを開く
       await shell.openExternal(authUrl);
       return { success: true };
@@ -27,8 +39,15 @@ export function setupAuthHandlers() {
   /**
    * 認証用BrowserWindowを開く
    */
-  ipcMain.handle("auth:open-oauth-window", async (_, authUrl: string) => {
+  ipcMain.handle("auth:open-oauth-window", async (_, rawAuthUrl: string) => {
     try {
+      // URLインジェクション対策
+      const authUrl = validateInput(
+        authUrlSchema,
+        rawAuthUrl,
+        "auth:open-oauth-window",
+      );
+
       const mainWindow = BrowserWindow.getAllWindows()[0];
       if (!mainWindow) {
         throw new Error("メインウィンドウが見つかりません");
@@ -75,8 +94,9 @@ export function setupAuthHandlers() {
   /**
    * ユーザー情報をローカルに保存
    */
-  ipcMain.handle("save-cached-user", async (_, user: CachedUser) => {
+  ipcMain.handle("save-cached-user", async (_, rawUser: unknown) => {
     try {
+      const user = validateInput(cachedUserSchema, rawUser, "save-cached-user");
       store.set("cachedUser", user);
       return { success: true };
     } catch (error: any) {
@@ -106,6 +126,7 @@ export function setupAuthHandlers() {
       store.delete("cachedUser");
       return { success: true };
     } catch (error: any) {
+      console.error("[Auth] Failed to clear cached user:", error);
       return { success: false, error: error.message };
     }
   });

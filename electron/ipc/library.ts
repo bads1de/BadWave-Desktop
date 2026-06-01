@@ -5,6 +5,7 @@ import * as mm from "music-metadata";
 import store from "../lib/store";
 import { debugLog } from "../utils";
 import { getMainWindow } from "../lib/window-manager";
+import { validateInput, filePathSchema } from "../lib/ipc-validate";
 
 // サポートされている音声ファイルの拡張子
 // 注: electron tsconfig の rootDir 制約により、constants/ からインポートできないため直接定義
@@ -350,8 +351,21 @@ export function setupLibraryHandlers() {
     }, 1000); // 1秒間の遅延でバッチ保存
   };
 
-  ipcMain.handle("handle-get-mp3-metadata", async (_, filePath: string) => {
+  ipcMain.handle("handle-get-mp3-metadata", async (_, rawFilePath: string) => {
+    // パストラバーサル対策: 絶対パスのみ許可、長さ制限
+    const filePath = validateInput(
+      filePathSchema,
+      rawFilePath,
+      "handle-get-mp3-metadata",
+    );
+
+    // 拡張子チェック: サポートされている音声ファイルのみ
+    if (!isSupportedAudioFile(filePath)) {
+      return { error: "Unsupported file extension" };
+    }
+
     try {
+
       // 保存されているライブラリデータを取得
       const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
         | MusicLibrary
