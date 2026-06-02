@@ -67,13 +67,39 @@ const useMutatePlaylistSong = () => {
 
       return { songId, playlistId };
     },
-    onSuccess: () => {
-      // プレイリスト関連のキャッシュを無効化
+    onMutate: async ({ songId, playlistId }) => {
+      await queryClient.cancelQueries({
+        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
+      });
+
+      const previousSongs = queryClient.getQueryData<any[]>([
+        CACHED_QUERIES.playlists,
+        playlistId,
+        "songs",
+      ]);
+
+      queryClient.setQueryData<any[]>(
+        [CACHED_QUERIES.playlists, playlistId, "songs"],
+        (old) => (old || []).filter((s) => s.id !== songId),
+      );
+
+      return { previousSongs, playlistId };
+    },
+    onSuccess: (_data, { playlistId }) => {
+      queryClient.invalidateQueries({
+        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
+      });
       queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
       toast.success("プレイリストから曲が削除されました！");
       router.refresh();
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousSongs !== undefined) {
+        queryClient.setQueryData(
+          [CACHED_QUERIES.playlists, context.playlistId, "songs"],
+          context.previousSongs,
+        );
+      }
       console.error("Error deleting song from playlist:", error);
       toast.error(error.message || "プレイリストから曲の削除に失敗しました");
     },
@@ -144,14 +170,41 @@ const useMutatePlaylistSong = () => {
 
       return { songId, playlistId };
     },
-    onSuccess: () => {
-      // プレイリスト関連のキャッシュを無効化
+    onMutate: async ({ songId, playlistId }) => {
+      await queryClient.cancelQueries({
+        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
+      });
+
+      const previousSongs = queryClient.getQueryData<any[]>([
+        CACHED_QUERIES.playlists,
+        playlistId,
+        "songs",
+      ]);
+
+      queryClient.setQueryData<any[]>(
+        [CACHED_QUERIES.playlists, playlistId, "songs"],
+        (old) => [
+          ...(old || []),
+          { id: songId, playlist_id: playlistId },
+        ],
+      );
+
+      return { previousSongs, playlistId };
+    },
+    onSuccess: (_data, { playlistId }) => {
+      queryClient.invalidateQueries({
+        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
+      });
       queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
-      // プレイリスト曲の状態を無効化
-      queryClient.invalidateQueries({ queryKey: ["playlistSongStatus"] });
       toast.success("プレイリストに曲が追加されました！");
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousSongs !== undefined) {
+        queryClient.setQueryData(
+          [CACHED_QUERIES.playlists, context.playlistId, "songs"],
+          context.previousSongs,
+        );
+      }
       console.error("Error adding song to playlist:", error);
       toast.error(error.message || "プレイリストへの曲の追加に失敗しました");
     },

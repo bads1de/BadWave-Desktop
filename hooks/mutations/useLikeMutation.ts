@@ -100,6 +100,24 @@ const useLikeMutation = (songId: string, userId?: string) => {
 
       return !isCurrentlyLiked;
     },
+    onMutate: async (isCurrentlyLiked: boolean) => {
+      await queryClient.cancelQueries({
+        queryKey: [CACHED_QUERIES.likeStatus, songId, userId],
+      });
+
+      const previousLikeStatus = queryClient.getQueryData<boolean>([
+        CACHED_QUERIES.likeStatus,
+        songId,
+        userId,
+      ]);
+
+      queryClient.setQueryData(
+        [CACHED_QUERIES.likeStatus, songId, userId],
+        !isCurrentlyLiked,
+      );
+
+      return { previousLikeStatus };
+    },
     onSuccess: (newLikeStatus) => {
       // いいね状態のキャッシュを更新
       queryClient.setQueryData(
@@ -122,7 +140,13 @@ const useLikeMutation = (songId: string, userId?: string) => {
         toast.success("いいねしました！");
       }
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      if (context?.previousLikeStatus !== undefined) {
+        queryClient.setQueryData(
+          [CACHED_QUERIES.likeStatus, songId, userId],
+          context.previousLikeStatus
+        );
+      }
       console.error("Like mutation error:", error);
       toast.error("エラーが発生しました。もう一度お試しください。");
     },

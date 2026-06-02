@@ -5,6 +5,7 @@ import React from "react";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import useLikeMutation from "@/hooks/mutations/useLikeMutation";
+import { CACHED_QUERIES } from "@/constants";
 import toast from "react-hot-toast";
 
 // モック
@@ -139,5 +140,66 @@ describe("useLikeMutation", () => {
     });
 
     expect(toast.error).toHaveBeenCalledWith("エラーが発生しました。もう一度お試しください。");
+  });
+
+  describe("楽観的更新", () => {
+    it("mutate呼び出し時に即座にキャッシュが更新される（いいね追加）", async () => {
+      const queryClient = new QueryClient({
+        defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+      });
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      );
+
+      queryClient.setQueryData([CACHED_QUERIES.likeStatus, songId, userId], false);
+
+      const mockInsert = jest.fn().mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({ error: null }), 100)),
+      );
+      mockFrom.mockReturnValue({ insert: mockInsert });
+      mockRpc.mockReturnValue({
+        then: (cb: any) => new Promise((resolve) => setTimeout(() => resolve(cb({ error: null })), 100)),
+      });
+
+      const { result } = renderHook(() => useLikeMutation(songId, userId), {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.mutate(false);
+      });
+
+      await waitFor(() => {
+        expect(queryClient.getQueryData([CACHED_QUERIES.likeStatus, songId, userId])).toBe(true);
+      });
+    });
+
+    it("オフライン時のロールバック", async () => {
+      const queryClient = new QueryClient({
+        defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+      });
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      );
+
+      queryClient.setQueryData([CACHED_QUERIES.likeStatus, songId, userId], false);
+
+      mockIsOnline.mockReturnValue(false);
+
+      const { result } = renderHook(() => useLikeMutation(songId, userId), {
+        wrapper,
+      });
+
+      await act(async () => {
+        try {
+          await result.current.mutateAsync(false);
+        } catch (e) {}
+      });
+
+      // オフラインエラーでロールバックされる
+      await waitFor(() => {
+        expect(queryClient.getQueryData([CACHED_QUERIES.likeStatus, songId, userId])).toBe(false);
+      });
+    });
   });
 });

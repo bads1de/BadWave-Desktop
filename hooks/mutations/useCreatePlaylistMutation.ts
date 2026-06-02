@@ -49,6 +49,28 @@ const useCreatePlaylistMutation = (playlistModal: PlaylistModalHook) => {
 
       return { title };
     },
+    onMutate: async ({ title }) => {
+      await queryClient.cancelQueries({
+        queryKey: [CACHED_QUERIES.playlists],
+      });
+
+      const previousPlaylists = queryClient.getQueryData<any[]>([
+        CACHED_QUERIES.playlists,
+      ]);
+
+      queryClient.setQueryData<any[]>([CACHED_QUERIES.playlists], (old) => [
+        ...(old || []),
+        {
+          id: `temp_${Date.now()}`,
+          title,
+          is_public: false,
+          user_id: user?.id,
+          user_name: user?.full_name,
+        },
+      ]);
+
+      return { previousPlaylists };
+    },
     onSuccess: () => {
       // キャッシュを無効化
       queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
@@ -60,9 +82,13 @@ const useCreatePlaylistMutation = (playlistModal: PlaylistModalHook) => {
       // モーダルを閉じる
       playlistModal.onClose();
     },
-    onError: (error: Error) => {
-      console.error("Create playlist error:", error);
-      // エラーメッセージはmutationFn内で表示しているため、ここでは何もしない
+    onError: (_error, _variables, context) => {
+      if (context?.previousPlaylists) {
+        queryClient.setQueryData(
+          [CACHED_QUERIES.playlists],
+          context.previousPlaylists,
+        );
+      }
     },
   });
 };
