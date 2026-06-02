@@ -31,8 +31,8 @@ export interface UserDetails {
   last_name: string;
   full_name?: string;
   avatar_url?: string;
-  billing_address?: any;
-  payment_method?: any;
+  billing_address?: Record<string, unknown>;
+  payment_method?: Record<string, unknown>;
 }
 
 export interface Playlist {
@@ -105,4 +105,143 @@ export interface SongDownloadPayload {
   lyrics?: string;
   video_path?: string;
   created_at: string;
+}
+
+// ============================================================================
+// 共通型定義
+// ============================================================================
+
+/**
+ * 同期用の曲型（IPC通信で使用）
+ * Song型にオプショナルフィールドを追加
+ */
+export interface SongForSync {
+  id: string;
+  title: string;
+  author: string;
+  song_path: string;
+  image_path: string;
+  genre?: string;
+  count?: number;
+  like_count?: number;
+  created_at: string;
+  user_id?: string;
+  video_path?: string;
+  duration?: number;
+  lyrics?: string;
+}
+
+/**
+ * 同期用のプレイリスト型
+ */
+export interface PlaylistForSync {
+  id: string;
+  title: string;
+  image_path?: string;
+  is_public: boolean;
+  created_at: string;
+  user_name?: string;
+  user_id?: string;
+  createdAt?: string;
+}
+
+/**
+ * 同期用のスポットライト型
+ */
+export interface SpotlightForSync {
+  id: string;
+  video_path: string;
+  title: string;
+  author: string;
+  genre?: string;
+  description?: string;
+  thumbnail_path?: string;
+  created_at?: string;
+}
+
+/**
+ * アイコンコンポーネントの型
+ * lucide-reactなどのアイコンライブラリと互換性のある型
+ */
+export type IconComponent = React.ComponentType<{
+  size?: string | number;
+  color?: string;
+  strokeWidth?: number;
+  className?: string;
+}>;
+
+/**
+ * Electron IPC用のメタデータ型
+ */
+export interface FileMetadata {
+  title?: string;
+  artist?: string;
+  album?: string;
+  genre?: string;
+  year?: number;
+  track?: number;
+  duration?: number;
+  picture?: { format: string; data: Buffer }[];
+}
+
+/**
+ * ライブラリファイル情報の型
+ */
+export interface LibraryFileInfo {
+  metadata?: FileMetadata;
+  lastModified: number;
+  error?: string;
+}
+
+/**
+ * ライブラリ全体の型
+ */
+export interface MusicLibrary {
+  directoryPath: string;
+  files: {
+    [filePath: string]: LibraryFileInfo;
+  };
+}
+
+/**
+ * セクションデータのアイテム型（get-section-data用）
+ */
+export interface SectionItem {
+  id: string;
+  userId?: string | null;
+  title: string;
+  author?: string;
+  description?: string | null;
+  genre?: string | null;
+  video_path?: string | null;
+  thumbnail_path?: string | null;
+  local_video_path?: string | null;
+  local_thumbnail_path?: string | null;
+  image_path?: string | null;
+  is_public?: boolean;
+  created_at?: string | null;
+  [key: string]: unknown;
+}
+
+/**
+ * DBのsongsテーブル行の型（mapDbSongToResponse用）
+ */
+export interface DbSongRow {
+  id: string;
+  userId?: string | null;
+  title: string;
+  author: string;
+  originalSongPath?: string | null;
+  originalImagePath?: string | null;
+  originalVideoPath?: string | null;
+  songPath?: string | null;
+  imagePath?: string | null;
+  videoPath?: string | null;
+  duration?: number | null;
+  genre?: string | null;
+  playCount?: number | null;
+  likeCount?: number | null;
+  lyrics?: string | null;
+  createdAt?: string | null;
+  [key: string]: unknown;
 }

@@ -10,6 +10,7 @@ import {
 } from "../db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
 import { mapDbSongToResponse, createUnknownSongFallback, normalizeId } from "../utils";
+import { SectionItem } from "../../types";
 
 export function setupQueryHandlers() {
   const db = getDb();
@@ -112,8 +113,8 @@ export function setupQueryHandlers() {
         const itemIds = cache.itemIds as unknown as string[];
         if (itemIds.length === 0) return [];
 
-        let results: any[] = [];
-        let idMap = new Map<string, any>();
+        let results: Record<string, unknown>[] = [];
+        let idMap = new Map<string, SectionItem>();
 
         if (type === "spotlights") {
           results = await db
@@ -122,17 +123,17 @@ export function setupQueryHandlers() {
             .where(inArray(spotlights.id, itemIds));
 
           results.forEach((item) =>
-            idMap.set(item.id, {
-              id: item.id,
-              title: item.title,
-              author: item.author,
-              description: item.description,
-              genre: item.genre,
-              video_path: item.originalVideoPath,
-              thumbnail_path: item.originalThumbnailPath,
-              local_video_path: item.videoPath || null,
-              local_thumbnail_path: item.thumbnailPath || null,
-              created_at: item.createdAt,
+            idMap.set(item.id as string, {
+              id: item.id as string,
+              title: item.title as string,
+              author: item.author as string,
+              description: item.description as string | null,
+              genre: item.genre as string | null,
+              video_path: item.originalVideoPath as string | null,
+              thumbnail_path: item.originalThumbnailPath as string | null,
+              local_video_path: item.videoPath as string | null,
+              local_thumbnail_path: item.thumbnailPath as string | null,
+              created_at: item.createdAt as string | null,
             })
           );
         } else if (type === "playlists") {
@@ -142,13 +143,13 @@ export function setupQueryHandlers() {
             .where(inArray(playlists.id, itemIds));
 
           results.forEach((p) =>
-            idMap.set(p.id, {
-              id: p.id,
-              user_id: p.userId,
-              title: p.title,
-              image_path: p.imagePath,
+            idMap.set(p.id as string, {
+              id: p.id as string,
+              user_id: p.userId as string,
+              title: p.title as string,
+              image_path: p.imagePath as string | undefined,
               is_public: !!p.isPublic,
-              created_at: p.createdAt,
+              created_at: p.createdAt as string | null,
             })
           );
         } else {
@@ -157,9 +158,10 @@ export function setupQueryHandlers() {
             .from(songs)
             .where(inArray(songs.id, itemIds));
 
-          results.forEach((s) =>
-            idMap.set(s.id, mapDbSongToResponse(s))
-          );
+          results.forEach((s) => {
+            const song = mapDbSongToResponse(s as unknown as import("../../types").DbSongRow);
+            idMap.set(s.id as string, song as unknown as SectionItem);
+          });
         }
 
         return itemIds
@@ -216,8 +218,9 @@ export function setupQueryHandlers() {
         )
         .limit(10);
       return { liked, allSongs, joined };
-    } catch (error: any) {
-      return { error: error.message };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { error: message };
     }
   });
 
@@ -233,7 +236,7 @@ export function setupQueryHandlers() {
       }
 
       return mapDbSongToResponse(song);
-    } catch (error: any) {
+    } catch (error) {
       console.error(`[IPC] get-song-by-id(${songId}) error:`, error);
       return null;
     }
@@ -258,7 +261,7 @@ export function setupQueryHandlers() {
         is_public: !!playlist.isPublic,
         created_at: playlist.createdAt,
       };
-    } catch (error: any) {
+    } catch (error) {
       console.error(`[IPC] get-playlist-by-id(${playlistId}) error:`, error);
       return null;
     }

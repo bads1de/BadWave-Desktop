@@ -80,7 +80,7 @@ export function setupDownloadHandlers() {
               reject(err);
             });
         });
-      } catch (error: any) {
+      } catch (error) {
         debugLog(`[Download] Error:`, error);
         throw error;
       }

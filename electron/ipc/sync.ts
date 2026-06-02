@@ -24,7 +24,7 @@ export function setupSyncHandlers() {
    * 既存レコードを1クエリでプリフェッチし、downloaded fields (songPath, imagePath, videoPath, downloadedAt)
    * を保持したままバルクINSERTする。SQLite変数制限(999)を超えないようバッチ分割する。
    */
-  function internalSyncSongs(songsData: any[]) {
+  function internalSyncSongs(songsData: { id: string; title: string; author: string; song_path: string; image_path: string; genre?: string; count?: number; like_count?: number; created_at: string; user_id?: string; video_path?: string; duration?: number; lyrics?: string }[]) {
     if (songsData.length === 0) return 0;
 
     const ids = songsData.map((song) => normalizeId(song.id));
@@ -112,16 +112,17 @@ export function setupSyncHandlers() {
     return songsData.length;
   }
 
-  ipcMain.handle("sync-songs-metadata", async (_, data: any[]) => {
+  ipcMain.handle("sync-songs-metadata", async (_, data: { id: string; title: string; author: string; song_path: string; image_path: string; genre?: string; count?: number; like_count?: number; created_at: string; user_id?: string; video_path?: string; duration?: number; lyrics?: string }[]) => {
     try {
       const count = internalSyncSongs(data);
       return { success: true, count };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
-  ipcMain.handle("sync-playlists", async (_, data: any[]) => {
+  ipcMain.handle("sync-playlists", async (_, data: { id: string; title: string; image_path?: string; is_public: boolean; created_at: string; user_name?: string; user_id?: string; createdAt?: string }[]) => {
     try {
       if (data.length === 0) return { success: true, count: 0 };
 
@@ -156,7 +157,7 @@ export function setupSyncHandlers() {
     "sync-playlist-songs",
     async (
       _,
-      { playlistId, songs: fullSongsData }: { playlistId: string; songs: any[] }
+      { playlistId, songs: fullSongsData }: { playlistId: string; songs: { id: string; title: string; author: string; song_path: string; image_path: string; created_at: string }[] }
     ) => {
       try {
         db.transaction(() => {
@@ -186,7 +187,7 @@ export function setupSyncHandlers() {
     "sync-liked-songs",
     async (
       _,
-      { userId, songs: fullSongsData }: { userId: string; songs: any[] }
+      { userId, songs: fullSongsData }: { userId: string; songs: { id: string; title: string; author: string; song_path: string; image_path: string; created_at: string }[] }
     ) => {
       try {
         db.transaction(() => {
@@ -212,7 +213,7 @@ export function setupSyncHandlers() {
     }
   );
 
-  ipcMain.handle("sync-spotlights-metadata", async (_, data: any[]) => {
+  ipcMain.handle("sync-spotlights-metadata", async (_, data: { id: string; video_path: string; title: string; author: string; genre?: string; description?: string; thumbnail_path?: string; created_at?: string }[]) => {
     try {
       if (data.length === 0) return { success: true, count: 0 };
 
@@ -292,7 +293,7 @@ export function setupSyncHandlers() {
 
   ipcMain.handle(
     "sync-section",
-    async (_, { key, data }: { key: string; data: any[] }) => {
+    async (_, { key, data }: { key: string; data: { id: string }[] }) => {
       try {
         const itemIds = data.map((item) => normalizeId(item.id));
 
@@ -300,7 +301,7 @@ export function setupSyncHandlers() {
           .insert(sectionCache)
           .values({
             key,
-            itemIds: itemIds as any,
+            itemIds: itemIds as string[],
             updatedAt: new Date(),
           })
           .onConflictDoUpdate({
@@ -312,9 +313,10 @@ export function setupSyncHandlers() {
           });
 
         return { success: true, count: itemIds.length };
-      } catch (error: any) {
+      } catch (error) {
         console.error(`[Sync] Section ${key} Error:`, error);
-        return { success: false, error: error.message };
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return { success: false, error: message };
       }
     }
   );

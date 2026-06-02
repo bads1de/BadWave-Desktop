@@ -307,8 +307,9 @@ class AudioEngine {
 
     this.audio.preservesPitch = preserve;
     // クロスブラウザ対応
-    (this.audio as any).mozPreservesPitch = preserve;
-    (this.audio as any).webkitPreservesPitch = preserve;
+    const audio = this.audio as HTMLAudioElement & { mozPreservesPitch?: boolean; webkitPreservesPitch?: boolean };
+    audio.mozPreservesPitch = preserve;
+    audio.webkitPreservesPitch = preserve;
   }
 
   // ========================================
@@ -383,7 +384,7 @@ class AudioEngine {
 
       // Distortion: 音割れを防ぐため大幅に低減 (ほぼ隠し味/サチュレーション程度)
       // amount=10 くらいで歪み感を抑える
-      this.distortionNode.curve = this.makeDistortionCurve(10) as any;
+      this.distortionNode.curve = this.makeDistortionCurve(10);
 
       this.isRetroActive = true;
     } else {

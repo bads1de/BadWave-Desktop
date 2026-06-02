@@ -126,7 +126,7 @@ contextBridge.exposeInMainWorld("electron", {
   // 設定ストア操作
   store: {
     get: (key: string) => ipcRenderer.invoke("get-store-value", key),
-    set: (key: string, value: any) =>
+    set: (key: string, value: string | number | boolean | null) =>
       ipcRenderer.invoke("set-store-value", key, value),
   },
 
@@ -134,7 +134,7 @@ contextBridge.exposeInMainWorld("electron", {
   media: {
     // メディア制御イベントのリスナーを登録
     onMediaControl: (callback: (action: string) => void) => {
-      const subscription = (_: any, action: string) => callback(action);
+      const subscription = (_: Electron.IpcRendererEvent, action: string) => callback(action);
       ipcRenderer.on("media-control", subscription);
 
       // リスナーの登録解除関数を返す
@@ -155,7 +155,8 @@ contextBridge.exposeInMainWorld("electron", {
     deleteSong: (songId: string) =>
       ipcRenderer.invoke("delete-offline-song", songId),
     // 曲をダウンロード（メタデータ付き）
-    downloadSong: (song: any) => ipcRenderer.invoke("download-song", song),
+    downloadSong: (song: { id: string; title: string; author: string; song_path: string; image_path: string }) =>
+      ipcRenderer.invoke("download-song", song),
   },
 
   // 開発用ユーティリティ
@@ -174,21 +175,22 @@ contextBridge.exposeInMainWorld("electron", {
   // キャッシュ機能（オフラインライブラリ表示用）
   cache: {
     // 曲のメタデータをキャッシュ
-    syncSongsMetadata: (songs: any[]) =>
+    syncSongsMetadata: (songs: { id: string; title: string; author: string; song_path: string; image_path: string; genre?: string; count?: number; like_count?: number; created_at: string; user_id?: string; video_path?: string; duration?: number; lyrics?: string }[]) =>
       ipcRenderer.invoke("sync-songs-metadata", songs),
     // プレイリストをキャッシュ
-    syncPlaylists: (playlists: any[]) =>
+    syncPlaylists: (playlists: { id: string; title: string; image_path?: string; is_public: boolean; created_at: string; user_name?: string; user_id?: string; createdAt?: string }[]) =>
       ipcRenderer.invoke("sync-playlists", playlists),
     // プレイリスト内の曲をキャッシュ
-    syncPlaylistSongs: (data: any) =>
+    syncPlaylistSongs: (data: { playlistId: string; songs: { id: string; title: string; author: string; song_path: string; image_path: string }[] }) =>
       ipcRenderer.invoke("sync-playlist-songs", data),
     // いいねをキャッシュ
-    syncLikedSongs: (data: any) => ipcRenderer.invoke("sync-liked-songs", data),
+    syncLikedSongs: (data: { userId: string; songs: { id: string; title: string; author: string; song_path: string; image_path: string }[] }) =>
+      ipcRenderer.invoke("sync-liked-songs", data),
     // スポットライトをキャッシュ
-    syncSpotlightsMetadata: (data: any[]) =>
+    syncSpotlightsMetadata: (data: { id: string; video_path: string; title: string; author: string; genre?: string; description?: string; thumbnail_path?: string; created_at?: string }[]) =>
       ipcRenderer.invoke("sync-spotlights-metadata", data),
     // セクションをキャッシュ
-    syncSection: (data: { key: string; data: any[] }) =>
+    syncSection: (data: { key: string; data: Record<string, unknown>[] }) =>
       ipcRenderer.invoke("sync-section", data),
     // キャッシュからセクションデータを取得
     getSectionData: (key: string, type: string) =>
@@ -249,7 +251,7 @@ contextBridge.exposeInMainWorld("electron", {
   },
 
   discord: {
-    setActivity: (activity: any) =>
+    setActivity: (activity: { details?: string; state?: string; startTimestamp?: number; endTimestamp?: number; largeImageKey?: string; largeImageText?: string; smallImageKey?: string; smallImageText?: string }) =>
       ipcRenderer.invoke("discord:set-activity", activity),
     clearActivity: () => ipcRenderer.invoke("discord:clear-activity"),
   },
@@ -295,7 +297,15 @@ contextBridge.exposeInMainWorld("electron", {
         isPlaying: boolean;
       }) => void,
     ) => {
-      const subscription = (_: any, state: any) => callback(state);
+      const subscription = (_: Electron.IpcRendererEvent, state: {
+        song: {
+          id: string;
+          title: string;
+          author: string;
+          image_path: string | null;
+        } | null;
+        isPlaying: boolean;
+      }) => callback(state);
       ipcRenderer.on("mini-player:state-changed", subscription);
       return () => {
         ipcRenderer.removeListener("mini-player:state-changed", subscription);
@@ -314,16 +324,16 @@ contextBridge.exposeInMainWorld("electron", {
   // IPC通信
   ipc: {
     // メインプロセスにメッセージを送信し、応答を待つ
-    invoke: (channel: string, ...args: any[]) => {
+    invoke: (channel: string, ...args: unknown[]) => {
       if (validateChannel(channel, ALLOWED_INVOKE_CHANNELS)) {
         return ipcRenderer.invoke(channel, ...args);
       }
     },
 
     // メインプロセスからのメッセージを受信
-    on: (channel: string, callback: (...args: any[]) => void) => {
+    on: (channel: string, callback: (...args: unknown[]) => void) => {
       if (validateChannel(channel, ALLOWED_ON_CHANNELS)) {
-        const subscription = (_: any, ...args: any[]) => callback(...args);
+        const subscription = (_: Electron.IpcRendererEvent, ...args: unknown[]) => callback(...args);
         ipcRenderer.on(channel, subscription);
 
         // リスナーの登録解除関数を返す
@@ -334,7 +344,7 @@ contextBridge.exposeInMainWorld("electron", {
     },
 
     // メインプロセスにメッセージを送信（応答を待たない）
-    send: (channel: string, ...args: any[]) => {
+    send: (channel: string, ...args: unknown[]) => {
       if (validateChannel(channel, ALLOWED_SEND_CHANNELS)) {
         ipcRenderer.send(channel, ...args);
       }

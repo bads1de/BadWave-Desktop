@@ -28,9 +28,10 @@ export function setupMutationHandlers() {
         })
         .onConflictDoNothing();
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[IPC] add-liked-song error:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
@@ -49,9 +50,10 @@ export function setupMutationHandlers() {
           } = ${normalizeId(songId)}`,
         );
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[IPC] remove-liked-song error:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
@@ -68,9 +70,10 @@ export function setupMutationHandlers() {
         } = ${normalizeId(songId)}`,
       });
       return { isLiked: !!result };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[IPC] get-like-status error:", error);
-      return { isLiked: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { isLiked: false, error: message };
     }
   });
 
@@ -92,9 +95,10 @@ export function setupMutationHandlers() {
         })
         .onConflictDoNothing();
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[IPC] add-playlist-song error:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
@@ -113,9 +117,10 @@ export function setupMutationHandlers() {
           } = ${normalizeId(songId)}`,
         );
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[IPC] remove-playlist-song error:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 }

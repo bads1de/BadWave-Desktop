@@ -153,8 +153,9 @@ export const setupOfflineDownloadHandlers = () => {
       });
 
       return { success: true, localPath: songRecord.songPath };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
@@ -215,7 +216,7 @@ export const setupOfflineDownloadHandlers = () => {
         downloaded_at: song.downloadedAt,
         is_downloaded: true,
       }));
-    } catch (error: any) {
+    } catch (error) {
       console.error("[IPC] Failed to get offline songs:", error);
       return [];
     }
@@ -254,8 +255,8 @@ export const setupOfflineDownloadHandlers = () => {
           if (fs.existsSync(filePath)) {
             await fs.promises.unlink(filePath);
           }
-        } catch (err: any) {
-          if (err.code !== "ENOENT") {
+        } catch (err) {
+          if (err instanceof Error && (err as NodeJS.ErrnoException).code !== "ENOENT") {
             // ignore
           }
         }
@@ -265,9 +266,10 @@ export const setupOfflineDownloadHandlers = () => {
       await db.delete(songs).where(eq(songs.id, songId));
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error(`[IPC] Failed to delete offline song ${songId}:`, error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 };

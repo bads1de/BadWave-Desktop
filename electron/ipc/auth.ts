@@ -30,9 +30,10 @@ export function setupAuthHandlers() {
       // デフォルトブラウザで認証URLを開く
       await shell.openExternal(authUrl);
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[Auth] Failed to open auth URL:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
@@ -85,9 +86,10 @@ export function setupAuthHandlers() {
       });
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[Auth] Failed to open auth window:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
@@ -99,9 +101,10 @@ export function setupAuthHandlers() {
       const user = validateInput(cachedUserSchema, rawUser, "save-cached-user");
       store.set("cachedUser", user);
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[Auth] Failed to save user:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 
@@ -125,9 +128,10 @@ export function setupAuthHandlers() {
     try {
       store.delete("cachedUser");
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error("[Auth] Failed to clear cached user:", error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message };
     }
   });
 }

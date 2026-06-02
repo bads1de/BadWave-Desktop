@@ -3,6 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
 import { fileURLToPath } from "url";
+import { DbSongRow } from "../../types";
 
 /**
  * file:// または badwave:// URLをローカルパスに変換するヘルパー
@@ -60,7 +61,7 @@ export function loadEnvVariables(): boolean {
  * @param id - 正規化するID
  * @returns 正規化された文字列ID
  */
-export function normalizeId(id: any): string {
+export function normalizeId(id: string | number | null | undefined): string {
   if (id === null || id === undefined) return "";
   const s = String(id);
   return s.includes(".") ? s.split(".")[0] : s;
@@ -131,24 +132,7 @@ export function createUnknownSongFallback(
 }
 
 export function mapDbSongToResponse(
-  song: {
-    id: string;
-    userId: string | null;
-    title: string;
-    author: string;
-    originalSongPath?: string | null;
-    originalImagePath?: string | null;
-    originalVideoPath?: string | null;
-    songPath?: string | null;
-    imagePath?: string | null;
-    videoPath?: string | null;
-    duration?: number | null;
-    genre?: string | null;
-    playCount?: number | null;
-    likeCount?: number | null;
-    lyrics?: string | null;
-    createdAt?: string | null;
-  },
+  song: DbSongRow,
   overrides?: {
     created_at?: string | null;
     user_id?: string;
