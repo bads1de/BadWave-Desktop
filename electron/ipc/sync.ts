@@ -10,6 +10,7 @@ import {
 } from "../db/schema";
 import { normalizeId } from "../utils";
 import { inArray, sql } from "drizzle-orm";
+import { getErrorMessage } from "../lib/error";
 
 // SQLiteのバインド変数上限 (SQLITE_MAX_VARIABLE_NUMBER) を考慮したバッチサイズ
 // songs: 17カラム → 999 / 17 ≈ 58曲/batch
@@ -116,9 +117,8 @@ export function setupSyncHandlers() {
     try {
       const count = internalSyncSongs(data);
       return { success: true, count };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { success: false, error: message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -148,8 +148,8 @@ export function setupSyncHandlers() {
         .run();
 
       return { success: true, count: data.length };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -177,8 +177,8 @@ export function setupSyncHandlers() {
         });
 
         return { success: true };
-      } catch (error: any) {
-        return { success: false, error: error.message };
+      } catch (error: unknown) {
+        return { success: false, error: getErrorMessage(error) };
       }
     }
   );
@@ -206,9 +206,9 @@ export function setupSyncHandlers() {
         });
 
         return { success: true };
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("[Sync] Liked Songs Error:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: getErrorMessage(error) };
       }
     }
   );
@@ -286,8 +286,8 @@ export function setupSyncHandlers() {
       }
 
       return { success: true, count: data.length };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -313,10 +313,9 @@ export function setupSyncHandlers() {
           });
 
         return { success: true, count: itemIds.length };
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(`[Sync] Section ${key} Error:`, error);
-        const message = error instanceof Error ? error.message : "Unknown error";
-        return { success: false, error: message };
+        return { success: false, error: getErrorMessage(error) };
       }
     }
   );

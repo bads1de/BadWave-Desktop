@@ -4,6 +4,7 @@ import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { sanitizeTitle } from "@/libs/utils";
 import s3Client from "@/libs/s3";
 import { requireAdmin } from "@/libs/admin";
+import { getErrorMessage } from "../electron/lib/error";
 
 // ============================================================================
 // Types
@@ -123,11 +124,11 @@ export async function uploadFileToR2(
       success: true,
       url,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("R2 upload error:", error);
     return {
       success: false,
-      error: error.message || "ファイルのアップロードに失敗しました",
+      error: getErrorMessage(error, "ファイルのアップロードに失敗しました"),
     };
   }
 }
@@ -169,11 +170,11 @@ export async function deleteFileFromR2(
     return {
       success: true,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("R2 delete error:", error);
     return {
       success: false,
-      error: error.message || "ファイルの削除に失敗しました",
+      error: getErrorMessage(error, "ファイルの削除に失敗しました"),
     };
   }
 }

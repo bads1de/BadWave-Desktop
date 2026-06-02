@@ -7,6 +7,7 @@ import { debugLog } from "../utils";
 import { getMainWindow } from "../lib/window-manager";
 import { validateInput, filePathSchema } from "../lib/ipc-validate";
 import { MusicLibrary } from "../../types";
+import { getErrorMessage } from "../lib/error";
 
 // サポートされている音声ファイルの拡張子
 // 注: electron tsconfig の rootDir 制約により、constants/ からインポートできないため直接定義
@@ -217,13 +218,12 @@ export function setupLibraryHandlers() {
             isFullScan: !shouldPerformDiffScan,
           },
         };
-      } catch (error) {
+      } catch (error: unknown) {
         debugLog(
           `[Error] MP3ファイルのスキャンに失敗: ${directoryPath}`,
           error
         );
-        const message = error instanceof Error ? error.message : "Unknown error";
-        return { error: message };
+        return { error: getErrorMessage(error) };
       }
     }
   );
@@ -259,9 +259,9 @@ export function setupLibraryHandlers() {
         lastScan,
         directoryExists,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       debugLog(`[Error] 保存された音楽ライブラリの取得に失敗:`, error);
-      return { error: error.message };
+      return { error: getErrorMessage(error) };
     }
   });
 
@@ -295,10 +295,9 @@ export function setupLibraryHandlers() {
         files: filesWithMetadata,
         lastScan,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       debugLog(`[Error] キャッシュ済みファイルの取得に失敗:`, error);
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { error: message, exists: false, files: [] };
+      return { error: getErrorMessage(error), exists: false, files: [] };
     }
   });
 
@@ -389,9 +388,9 @@ export function setupLibraryHandlers() {
       debouncedSaveLibrary();
 
       return { metadata, fromCache: false };
-    } catch (error) {
+    } catch (error: unknown) {
       debugLog(`[Error] メタデータの取得に失敗: ${filePath}`, error);
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = getErrorMessage(error);
 
       // エラー情報をライブラリデータに保存
       const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as

@@ -5,6 +5,7 @@ import {
   authUrlSchema,
   cachedUserSchema,
 } from "../lib/ipc-validate";
+import { getErrorMessage } from "../lib/error";
 
 interface CachedUser {
   id: string;
@@ -30,10 +31,9 @@ export function setupAuthHandlers() {
       // デフォルトブラウザで認証URLを開く
       await shell.openExternal(authUrl);
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("[Auth] Failed to open auth URL:", error);
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { success: false, error: message };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -81,15 +81,14 @@ export function setupAuthHandlers() {
       });
 
       authWindow.on("closed", () => {
-        // セッションをリフレッシュして認証完了を検知
+        // セッションをリフレッシュして認ッシュして認証完了を検知
         mainWindow.webContents.send("auth-window-closed");
       });
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("[Auth] Failed to open auth window:", error);
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { success: false, error: message };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -101,10 +100,9 @@ export function setupAuthHandlers() {
       const user = validateInput(cachedUserSchema, rawUser, "save-cached-user");
       store.set("cachedUser", user);
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("[Auth] Failed to save user:", error);
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { success: false, error: message };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 

@@ -11,6 +11,7 @@ import {
 import { eq, sql, inArray } from "drizzle-orm";
 import { mapDbSongToResponse, createUnknownSongFallback, normalizeId } from "../utils";
 import { SectionItem } from "../../types";
+import { getErrorMessage } from "../lib/error";
 
 export function setupQueryHandlers() {
   const db = getDb();
@@ -218,9 +219,8 @@ export function setupQueryHandlers() {
         )
         .limit(10);
       return { liked, allSongs, joined };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { error: message };
+    } catch (error: unknown) {
+      return { error: getErrorMessage(error) };
     }
   });
 
