@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { getErrorMessage } from "@/electron/lib/error";
 import { useEffect, useState, useRef } from "react";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 
@@ -159,7 +160,7 @@ const useGetSongById = (id?: string | number) => {
 
     if (error && !isPaused && errorShownRef.current !== error.message) {
       errorShownRef.current = error.message;
-      toast.error(error.message);
+      toast.error(getErrorMessage(error));
     }
     // エラーがクリアされたらrefもリセット
     if (!error) {

@@ -14,6 +14,7 @@ import Button from "../common/Button";
 import useEditSongMutation from "@/hooks/mutations/useEditSongMutation";
 import { toast } from "react-hot-toast";
 import { Sparkles } from "lucide-react";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface EditFormValues extends Partial<Song> {
   video?: FileList;
@@ -54,12 +55,12 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
   const handleTranscribeSync = async () => {
     const lyrics = getValues("lyrics");
     if (!lyrics) {
-      toast.error("歌詞を入力してください");
+      toast.error(ERROR_MESSAGES.LYRICS_REQUIRED);
       return;
     }
 
     if (!song.song_path) {
-      toast.error("音声ファイルが見つかりません");
+      toast.error(ERROR_MESSAGES.SONG_FILE_NOT_FOUND);
       return;
     }
 
@@ -67,7 +68,7 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
     const toastId = toast.loading("自動同期中... (初回は数分かかります)");
 
     try {
-      const electron = (window as any).electron;
+      const electron = window.electron;
 
       // transcribe.ts は URL とローカルパスの両方を処理できる
       // URL の場合は内部でダウンロードしてくれる
@@ -80,11 +81,11 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
         setValue("lyrics", result.lrc);
         toast.success("自動同期が完了しました", { id: toastId });
       } else {
-        toast.error(result.message || "同期に失敗しました", { id: toastId });
+        toast.error(result.message || ERROR_MESSAGES.SYNC_FAILED, { id: toastId });
       }
     } catch (error) {
       console.error("Transcribe Sync Error:", error);
-      toast.error("エラーが発生しました", { id: toastId });
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR, { id: toastId });
     } finally {
       setIsGenerating(false);
     }

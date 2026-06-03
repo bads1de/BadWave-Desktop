@@ -13,7 +13,7 @@ export const auth = {
     avatarUrl?: string;
   }): Promise<{ success: boolean }> => {
     if (isElectron()) {
-      return (window as any).electron.auth.saveCachedUser(user);
+      return window.electron.auth.saveCachedUser(user);
     }
     return { success: false };
   },
@@ -27,7 +27,7 @@ export const auth = {
     avatarUrl?: string;
   } | null> => {
     if (isElectron()) {
-      return (window as any).electron.auth.getCachedUser();
+      return window.electron.auth.getCachedUser();
     }
     return null;
   },
@@ -37,7 +37,7 @@ export const auth = {
    */
   clearCachedUser: async (): Promise<{ success: boolean }> => {
     if (isElectron()) {
-      return (window as any).electron.auth.clearCachedUser();
+      return window.electron.auth.clearCachedUser();
     }
     return { success: false };
   },

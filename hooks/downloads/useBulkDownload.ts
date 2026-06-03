@@ -38,7 +38,7 @@ const useBulkDownload = (songs: Song[] = []) => {
   const checkDownloadStatus = useCallback(async (songId: string) => {
     if (!electronAPI.isElectron()) return { isDownloaded: false };
     try {
-      return await (window as any).electron.offline.checkStatus(songId);
+      return await window.electron.offline.checkStatus(songId);
     } catch {
       return { isDownloaded: false };
     }
@@ -83,7 +83,7 @@ const useBulkDownload = (songs: Song[] = []) => {
   const downloadSingle = useCallback(async (song: Song) => {
     if (!electronAPI.isElectron()) return false;
     try {
-      const result = await (window as any).electron.offline.downloadSong({
+      const result = await window.electron.offline.downloadSong({
         id: String(song.id),
         userId: song.user_id,
         song_path: song.song_path,
@@ -108,7 +108,7 @@ const useBulkDownload = (songs: Song[] = []) => {
   const deleteSingle = useCallback(async (songId: string) => {
     if (!electronAPI.isElectron()) return false;
     try {
-      const result = await (window as any).electron.offline.deleteSong(songId);
+      const result = await window.electron.offline.deleteSong(songId);
       return result.success;
     } catch (e) {
       console.error(`Failed to delete song ${songId}:`, e);

@@ -6,7 +6,7 @@ import { isElectron } from "./common";
 export const windowControls = {
   minimize: (): Promise<void> => {
     if (isElectron()) {
-      return (window as any).electron.window.minimize();
+      return window.electron.window.minimize();
     }
 
     return Promise.resolve();
@@ -14,7 +14,7 @@ export const windowControls = {
 
   maximize: (): Promise<void> => {
     if (isElectron()) {
-      return (window as any).electron.window.maximize();
+      return window.electron.window.maximize();
     }
 
     return Promise.resolve();
@@ -22,7 +22,7 @@ export const windowControls = {
 
   close: (): Promise<void> => {
     if (isElectron()) {
-      return (window as any).electron.window.close();
+      return window.electron.window.close();
     }
 
     return Promise.resolve();

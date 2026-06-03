@@ -10,11 +10,19 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import ja from "@/constants/ja.json";
 
+interface Session {
+  user: {
+    id: string;
+    email?: string;
+  };
+  access_token?: string;
+}
+
 const AuthModal = () => {
   const supabaseClient = createClient();
   const router = useRouter();
   const { onClose, isOpen } = useAuthModal();
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,8 +57,8 @@ const AuthModal = () => {
 
   // auth-callbackイベントを監視（Electron環境のみ）
   useEffect(() => {
-    if (typeof window !== "undefined" && (window as any).electron?.ipc) {
-      const unsubscribe = (window as any).electron.ipc.on(
+    if (typeof window !== "undefined" && window.electron?.ipc) {
+      const unsubscribe = window.electron.ipc.on(
         "auth-callback",
         async (data: { code?: string; error?: string }) => {
           if (data.error) {
@@ -88,8 +96,8 @@ const AuthModal = () => {
               } else {
                 throw new Error("セッション情報が見つかりません");
               }
-            } catch (err: any) {
-              setError(err.message || "認証に失敗しました");
+            } catch (err: unknown) {
+              setError(err instanceof Error ? err.message : "認証に失敗しました");
               setIsLoading(false);
             }
           }
@@ -116,7 +124,7 @@ const AuthModal = () => {
       setIsLoading(true);
       setError(null);
 
-      const isElectron = typeof window !== "undefined" && (window as any).electron?.auth;
+      const isElectron = typeof window !== "undefined" && window.electron?.auth;
 
       if (isElectron) {
         // Electron環境では外部ブラウザで認証
@@ -131,7 +139,7 @@ const AuthModal = () => {
 
         if (error) throw error;
 
-        await (window as any).electron.auth.startGoogleOAuth(data.url);
+        await window.electron!.auth.startGoogleOAuth(data.url);
       } else {
         // 非Electron環境では標準的なOAuthフロー
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -144,14 +152,14 @@ const AuthModal = () => {
 
         if (error) throw error;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[Auth] Google login error:", err);
-      setError(err.message || "認証に失敗しました");
+      setError(err instanceof Error ? err.message : "認証に失敗しました");
       setIsLoading(false);
     }
   };
 
-  const isElectron = typeof window !== "undefined" && (window as any).electron?.auth;
+  const isElectron = typeof window !== "undefined" && !!(window as { electron?: { auth?: unknown } }).electron?.auth;
 
   return (
     <Modal

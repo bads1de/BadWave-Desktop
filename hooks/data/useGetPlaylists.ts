@@ -4,6 +4,7 @@ import { Playlist } from "@/types";
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { useUser } from "@/hooks/auth/useUser";
 import { electronAPI } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * ユーザーのプレイリスト一覧を取得するカスタムフック (ローカルファースト)
@@ -46,7 +47,7 @@ const useGetPlaylists = () => {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching playlists:", error.message);
+        console.error("Error fetching playlists:", getErrorMessage(error));
         throw error;
       }
 

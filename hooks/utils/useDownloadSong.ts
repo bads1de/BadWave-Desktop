@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { getErrorMessage } from "@/electron/lib/error";
 import { Song } from "@/types";
 import toast from "react-hot-toast";
 
 import { electronAPI } from "@/libs/electron/index";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface UseDownloadSongResult {
   download: () => Promise<void>;
@@ -72,9 +74,7 @@ const useDownloadSong = (song: Song | null): UseDownloadSongResult => {
 
     try {
       if (!electronAPI.isElectron()) {
-        throw new Error(
-          "ダウンロード機能が利用できません（Electron APIが見つかりません）"
-        );
+        throw new Error(ERROR_MESSAGES.NO_DOWNLOAD_ENVIRONMENT);
       }
 
       // SongDownloadPayload形式に変換
@@ -97,13 +97,10 @@ const useDownloadSong = (song: Song | null): UseDownloadSongResult => {
         setIsDownloaded(true);
         toast.success("ダウンロードが完了しました");
       } else {
-        throw new Error(result.error || "ダウンロードに失敗しました");
+        throw new Error(result.error || ERROR_MESSAGES.DOWNLOAD_FAILED);
       }
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "ダウンロード中にエラーが発生しました";
+      const message = getErrorMessage(err, "ダウンロード中にエラーが発生しました");
       setError(message);
       toast.error(message);
       console.error(err);
@@ -131,11 +128,10 @@ const useDownloadSong = (song: Song | null): UseDownloadSongResult => {
         setIsDownloaded(false);
         toast.success("オフラインデータを削除しました");
       } else {
-        throw new Error(result.error || "削除に失敗しました");
+        throw new Error(result.error || ERROR_MESSAGES.DOWNLOAD_DELETE_FAILED);
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "削除中にエラーが発生しました";
+      const message = getErrorMessage(err, "削除中にエラーが発生しました");
       toast.error(message);
       console.error(err);
     }

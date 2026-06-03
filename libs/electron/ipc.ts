@@ -4,29 +4,29 @@ import { isElectron } from "./common";
  * IPC通信
  */
 export const ipc = {
-  invoke: async <T = any>(channel: string, ...args: any[]): Promise<T> => {
+  invoke: async <T = unknown>(channel: string, ...args: unknown[]): Promise<T> => {
     if (isElectron()) {
-      return (window as any).electron.ipc.invoke(channel, ...args);
+      return window.electron.ipc.invoke(channel, ...args);
     }
 
     console.warn(`IPC invoke called in non-Electron environment: ${channel}`);
     return Promise.reject(new Error("Not in Electron environment"));
   },
 
-  on: <T = any>(
+  on: <T = unknown>(
     channel: string,
     callback: (...args: T[]) => void
   ): (() => void) => {
     if (isElectron()) {
-      return (window as any).electron.ipc.on(channel, callback);
+      return window.electron.ipc.on(channel, callback);
     }
 
     return () => {};
   },
 
-  send: (channel: string, ...args: any[]): void => {
+  send: (channel: string, ...args: unknown[]): void => {
     if (isElectron()) {
-      (window as any).electron.ipc.send(channel, ...args);
+      window.electron.ipc.send(channel, ...args);
     } else {
       console.warn(`IPC send called in non-Electron environment: ${channel}`);
     }

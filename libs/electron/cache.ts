@@ -1,4 +1,5 @@
 import { isElectron } from "./common";
+import type { SongForSync, PlaylistForSync, SpotlightForSync, SectionItem } from "@/types";
 
 /**
  * キャッシュ機能（オフラインライブラリ表示用）
@@ -9,10 +10,10 @@ export const cache = {
    * ダウンロード状態は上書きしない
    */
   syncSongsMetadata: async (
-    songs: any[]
+    songs: SongForSync[]
   ): Promise<{ success: boolean; count: number; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.syncSongsMetadata(songs);
+      return window.electron.cache.syncSongsMetadata(songs);
     }
 
     return { success: false, count: 0, error: "Not in Electron environment" };
@@ -22,10 +23,10 @@ export const cache = {
    * プレイリストをローカルDBにキャッシュ
    */
   syncPlaylists: async (
-    playlists: any[]
+    playlists: PlaylistForSync[]
   ): Promise<{ success: boolean; count: number; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.syncPlaylists(playlists);
+      return window.electron.cache.syncPlaylists(playlists);
     }
 
     return { success: false, count: 0, error: "Not in Electron environment" };
@@ -36,10 +37,10 @@ export const cache = {
    */
   syncPlaylistSongs: async (data: {
     playlistId: string;
-    songs: any[];
+    songs: SongForSync[];
   }): Promise<{ success: boolean; count: number; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.syncPlaylistSongs(data);
+      return window.electron.cache.syncPlaylistSongs(data);
     }
 
     return { success: false, count: 0, error: "Not in Electron environment" };
@@ -50,10 +51,10 @@ export const cache = {
    */
   syncLikedSongs: async (data: {
     userId: string;
-    songs: any[];
+    songs: SongForSync[];
   }): Promise<{ success: boolean; count: number; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.syncLikedSongs(data);
+      return window.electron.cache.syncLikedSongs(data);
     }
 
     return { success: false, count: 0, error: "Not in Electron environment" };
@@ -62,9 +63,9 @@ export const cache = {
   /**
    * キャッシュからプレイリストを取得
    */
-  getCachedPlaylists: async (userId: string): Promise<any[]> => {
+  getCachedPlaylists: async (userId: string): Promise<PlaylistForSync[]> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getCachedPlaylists(userId);
+      return window.electron.cache.getCachedPlaylists(userId);
     }
 
     return [];
@@ -73,9 +74,9 @@ export const cache = {
   /**
    * キャッシュからいいね曲を取得（ダウンロード状態付き）
    */
-  getCachedLikedSongs: async (userId: string): Promise<any[]> => {
+  getCachedLikedSongs: async (userId: string): Promise<SongForSync[]> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getCachedLikedSongs(userId);
+      return window.electron.cache.getCachedLikedSongs(userId);
     }
 
     return [];
@@ -85,10 +86,10 @@ export const cache = {
    * スポットライトのメタデータをローカルDBにキャッシュ
    */
   syncSpotlightsMetadata: async (
-    spotlights: any[]
+    spotlights: SpotlightForSync[]
   ): Promise<{ success: boolean; count: number; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.syncSpotlightsMetadata(spotlights);
+      return window.electron.cache.syncSpotlightsMetadata(spotlights);
     }
 
     return { success: false, count: 0, error: "Not in Electron environment" };
@@ -99,10 +100,10 @@ export const cache = {
    */
   syncSection: async (data: {
     key: string;
-    data: any[];
+    data: SectionItem[];
   }): Promise<{ success: boolean; count: number; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.syncSection(data);
+      return window.electron.cache.syncSection(data);
     }
     return { success: false, count: 0, error: "Not in Electron environment" };
   },
@@ -110,9 +111,9 @@ export const cache = {
   /**
    * キャッシュからプレイリスト内の曲を取得（ダウンロード状態付き）
    */
-  getCachedPlaylistSongs: async (playlistId: string): Promise<any[]> => {
+  getCachedPlaylistSongs: async (playlistId: string): Promise<SongForSync[]> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getCachedPlaylistSongs(playlistId);
+      return window.electron.cache.getCachedPlaylistSongs(playlistId);
     }
 
     return [];
@@ -124,9 +125,9 @@ export const cache = {
   getSectionData: async (
     key: string,
     type: "songs" | "spotlights" | "playlists"
-  ): Promise<any[]> => {
+  ): Promise<SectionItem[]> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getSectionData(key, type);
+      return window.electron.cache.getSectionData(key, type);
     }
 
     return [];
@@ -142,7 +143,7 @@ export const cache = {
     songId: string;
   }): Promise<{ success: boolean; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.addLikedSong(data);
+      return window.electron.cache.addLikedSong(data);
     }
 
     return { success: false, error: "Not in Electron environment" };
@@ -156,7 +157,7 @@ export const cache = {
     songId: string;
   }): Promise<{ success: boolean; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.removeLikedSong(data);
+      return window.electron.cache.removeLikedSong(data);
     }
 
     return { success: false, error: "Not in Electron environment" };
@@ -170,7 +171,7 @@ export const cache = {
     songId: string;
   }): Promise<{ isLiked: boolean; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getLikeStatus(data);
+      return window.electron.cache.getLikeStatus(data);
     }
     return { isLiked: false, error: "Not in Electron environment" };
   },
@@ -183,7 +184,7 @@ export const cache = {
     songId: string;
   }): Promise<{ success: boolean; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.addPlaylistSong(data);
+      return window.electron.cache.addPlaylistSong(data);
     }
 
     return { success: false, error: "Not in Electron environment" };
@@ -197,7 +198,7 @@ export const cache = {
     songId: string;
   }): Promise<{ success: boolean; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.cache.removePlaylistSong(data);
+      return window.electron.cache.removePlaylistSong(data);
     }
 
     return { success: false, error: "Not in Electron environment" };
@@ -206,9 +207,9 @@ export const cache = {
   /**
    * 単一の曲情報を取得（ローカルDB）
    */
-  getSongById: async (songId: string): Promise<any | null> => {
+  getSongById: async (songId: string): Promise<SongForSync | null> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getSongById(songId);
+      return window.electron.cache.getSongById(songId);
     }
 
     return null;
@@ -217,9 +218,9 @@ export const cache = {
   /**
    * 単一のプレイリスト情報を取得（ローカルDB）
    */
-  getPlaylistById: async (playlistId: string): Promise<any | null> => {
+  getPlaylistById: async (playlistId: string): Promise<PlaylistForSync | null> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getPlaylistById(playlistId);
+      return window.electron.cache.getPlaylistById(playlistId);
     }
     return null;
   },
@@ -227,9 +228,9 @@ export const cache = {
   /**
    * ページネーション対応の曲取得（ローカルDB）
    */
-  getSongsPaginated: async (offset: number, limit: number): Promise<any[]> => {
+  getSongsPaginated: async (offset: number, limit: number): Promise<SongForSync[]> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getSongsPaginated(offset, limit);
+      return window.electron.cache.getSongsPaginated(offset, limit);
     }
 
     return [];
@@ -240,7 +241,7 @@ export const cache = {
    */
   getSongsTotalCount: async (): Promise<number> => {
     if (isElectron()) {
-      return (window as any).electron.cache.getSongsTotalCount();
+      return window.electron.cache.getSongsTotalCount();
     }
 
     return 0;

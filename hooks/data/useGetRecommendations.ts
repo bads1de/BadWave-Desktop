@@ -43,7 +43,7 @@ const useGetRecommendations = (initialData?: Song[], limit: number = 10) => {
           "songs"
         );
         // ローカルDBのSong型をUIのSong型（ローカルパス付き）として返す
-        return (cachedSongs as Song[]) || [];
+        return (cachedSongs as unknown as Song[]) || [];
       }
 
       // オフライン時はフェッチをスキップ

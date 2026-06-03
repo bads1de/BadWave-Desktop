@@ -6,7 +6,7 @@ import { isElectron } from "./common";
 export const mediaControls = {
   onMediaControl: (callback: (action: string) => void): (() => void) => {
     if (isElectron()) {
-      return (window as any).electron.media.onMediaControl(callback);
+      return window.electron.media.onMediaControl(callback);
     }
 
     return () => {};

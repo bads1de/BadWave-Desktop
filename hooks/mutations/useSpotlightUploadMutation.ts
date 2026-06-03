@@ -5,9 +5,11 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/auth/useUser";
 import { createClient } from "@/libs/supabase/client";
+import { getErrorMessage } from "@/electron/lib/error";
 import { uploadFileToR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import { CACHED_QUERIES } from "@/constants";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface SpotlightUploadParams {
   title: string;
@@ -47,13 +49,13 @@ const useSpotlightUploadMutation = (
       const { isAdmin } = await checkIsAdmin();
 
       if (!isAdmin) {
-        toast.error("管理者権限が必要です");
-        throw new Error("管理者権限が必要です");
+        toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
+        throw new Error(ERROR_MESSAGES.ADMIN_REQUIRED);
       }
 
       if (!videoFile || !user) {
-        toast.error("動画ファイルを選択してください");
-        throw new Error("動画ファイルを選択してください");
+        toast.error(ERROR_MESSAGES.VIDEO_FILE_REQUIRED);
+        throw new Error(ERROR_MESSAGES.VIDEO_FILE_REQUIRED);
       }
 
       // 動画をR2にアップロード
@@ -65,8 +67,8 @@ const useSpotlightUploadMutation = (
       const result = await uploadFileToR2(formData);
 
       if (!result.success || !result.url) {
-        toast.error(result.error || "動画のアップロードに失敗しました");
-        throw new Error(result.error || "動画のアップロードに失敗しました");
+        toast.error(result.error || ERROR_MESSAGES.VIDEO_UPLOAD_FAILED);
+        throw new Error(result.error || ERROR_MESSAGES.VIDEO_UPLOAD_FAILED);
       }
 
       const videoUrl = result.url;
@@ -82,8 +84,8 @@ const useSpotlightUploadMutation = (
       });
 
       if (error) {
-        toast.error(error.message);
-        throw new Error(error.message);
+        toast.error(getErrorMessage(error));
+        throw new Error(getErrorMessage(error));
       }
 
       return { title, author };
@@ -101,7 +103,7 @@ const useSpotlightUploadMutation = (
     },
     onError: (error: Error) => {
       console.error("Spotlight upload error:", error);
-      toast.error(error.message || "投稿に失敗しました");
+      toast.error(getErrorMessage(error, ERROR_MESSAGES.POST_FAILED));
     },
   });
 };

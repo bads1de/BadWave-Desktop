@@ -3,11 +3,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/electron/lib/error";
 import { createClient } from "@/libs/supabase/client";
 import { deleteFileFromR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import { useUser } from "@/hooks/auth/useUser";
 import { CACHED_QUERIES } from "@/constants";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface DeleteSongParams {
   songId: string;
@@ -33,8 +35,8 @@ const useDeleteSongMutation = () => {
       // 管理者権限チェック
       const { isAdmin } = await checkIsAdmin();
       if (!isAdmin) {
-        toast.error("管理者権限が必要です");
-        throw new Error("管理者権限が必要です");
+        toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
+        throw new Error(ERROR_MESSAGES.ADMIN_REQUIRED);
       }
 
       // データベースから削除（削除されたレコードを取得）
@@ -107,8 +109,8 @@ const useDeleteSongMutation = () => {
     },
     onError: (error: Error) => {
       console.error("Delete song error:", error);
-      if (error.message !== "管理者権限が必要です") {
-        toast.error(error.message || "削除に失敗しました");
+      if (error.message !== ERROR_MESSAGES.ADMIN_REQUIRED) {
+        toast.error(getErrorMessage(error, ERROR_MESSAGES.DELETE_FAILED));
       }
     },
   });

@@ -307,7 +307,7 @@ export function setupSyncHandlers() {
           .onConflictDoUpdate({
             target: sectionCache.key,
             set: {
-              itemIds: itemIds as any,
+              itemIds: itemIds as string[],
               updatedAt: new Date(),
             },
           });

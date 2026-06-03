@@ -183,10 +183,10 @@ const usePlayer = create<PlayerStore>()(
       }),
       // 復元時に配列をMapに変換
       merge: (persistedState, currentState) => {
-        const persisted = persistedState as any;
+        const persisted = persistedState as Partial<PlayerStore> & { localSongs?: LocalSongEntry[] };
         return {
           ...currentState,
-          ...persisted,
+          ...(persisted as unknown as Partial<PlayerStore>),
           localSongs: persisted?.localSongs
             ? new Map<string, Song>(persisted.localSongs as LocalSongEntry[])
             : currentState.localSongs,

@@ -9,7 +9,7 @@ export type { OfflineSong, SongDownloadPayload };
 export const offline = {
   getSongs: async (): Promise<OfflineSong[]> => {
     if (isElectron()) {
-      return (window as any).electron.offline.getSongs();
+      return window.electron.offline.getSongs();
     }
     return [];
   },
@@ -21,7 +21,7 @@ export const offline = {
     localImagePath?: string;
   }> => {
     if (isElectron()) {
-      return (window as any).electron.offline.checkStatus(songId);
+      return window.electron.offline.checkStatus(songId);
     }
     return { isDownloaded: false };
   },
@@ -29,7 +29,7 @@ export const offline = {
     songId: string
   ): Promise<{ success: boolean; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.offline.deleteSong(songId);
+      return window.electron.offline.deleteSong(songId);
     }
     return { success: false, error: "Not in Electron environment" };
   },
@@ -37,7 +37,7 @@ export const offline = {
     song: SongDownloadPayload
   ): Promise<{ success: boolean; localPath?: string; error?: string }> => {
     if (isElectron()) {
-      return (window as any).electron.offline.downloadSong(song);
+      return window.electron.offline.downloadSong(song);
     }
     return { success: false, error: "Not in Electron environment" };
   },

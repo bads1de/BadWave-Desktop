@@ -1,3 +1,5 @@
+type ElectronAPI = Window["electron"];
+
 /**
  * 現在の実行環境がElectronかどうかを判定
  *
@@ -11,8 +13,8 @@ export const isElectron = (): boolean => {
   }
 
   // クライアントサイドでのみElectronの存在を確認
-  if (typeof (window as any).electron !== "undefined") {
-    return (window as any).electron.appInfo.isElectron;
+  if (typeof (window as { electron?: ElectronAPI }).electron !== "undefined") {
+    return (window as { electron: ElectronAPI }).electron.appInfo.isElectron;
   }
 
   return false;
@@ -31,8 +33,8 @@ export const getAppVersion = (): string => {
   }
 
   // クライアントサイドでElectronが利用可能な場合はバージョン情報を取得
-  if (typeof (window as any).electron !== "undefined") {
-    return (window as any).electron.appInfo.getVersion();
+  if (typeof (window as { electron?: ElectronAPI }).electron !== "undefined") {
+    return (window as { electron: ElectronAPI }).electron.appInfo.getVersion();
   }
 
   return process.env.NEXT_PUBLIC_APP_VERSION || "0.0.0";
@@ -51,8 +53,8 @@ export const getPlatform = (): string => {
   }
 
   // クライアントサイドでElectronが利用可能な場合はプラットフォーム情報を取得
-  if (typeof (window as any).electron !== "undefined") {
-    return (window as any).electron.appInfo.platform;
+  if (typeof (window as { electron?: ElectronAPI }).electron !== "undefined") {
+    return (window as { electron: ElectronAPI }).electron.appInfo.platform;
   }
 
   return "web";
@@ -63,10 +65,10 @@ export const getPlatform = (): string => {
  * @param error エラーオブジェクト
  * @returns ネットワークエラーかどうか
  */
-export const isNetworkError = (error: any): boolean => {
+export const isNetworkError = (error: unknown): boolean => {
   if (!error) return false;
 
-  const errorMessage = error.message || error.toString();
+  const errorMessage = error instanceof Error ? error.message : String(error);
   const networkErrorPatterns = [
     "Failed to fetch",
     "NetworkError",

@@ -1,9 +1,9 @@
 /// <reference types="electron" />
 
-import type { OfflineSong, SongDownloadPayload } from "../types";
+import type { OfflineSong, SongDownloadPayload, SongForSync, PlaylistForSync, SpotlightForSync, SectionItem, Playlist } from "../types";
 
 // Electronのウィンドウオブジェクトに公開されるAPIの型定義
-interface ElectronAPI {
+export interface ElectronAPI {
   // アプリケーション情報
   appInfo: {
     // アプリケーションのバージョンを取得
@@ -69,28 +69,28 @@ interface ElectronAPI {
   cache: {
     // 曲のメタデータをキャッシュ
     syncSongsMetadata: (
-      songs: any[],
+      songs: SongForSync[],
     ) => Promise<{ success: boolean; count: number; error?: string }>;
     // プレイリストをキャッシュ
     syncPlaylists: (
-      playlists: any[],
+      playlists: PlaylistForSync[],
     ) => Promise<{ success: boolean; count: number; error?: string }>;
     // プレイリスト内の曲をキャッシュ
     syncPlaylistSongs: (data: {
       playlistId: string;
-      songs: any[];
+      songs: SongForSync[];
     }) => Promise<{ success: boolean; count: number; error?: string }>;
     // いいねをキャッシュ
     syncLikedSongs: (data: {
       userId: string;
-      songs: any[];
+      songs: SongForSync[];
     }) => Promise<{ success: boolean; count: number; error?: string }>;
     // キャッシュからプレイリストを取得
-    getCachedPlaylists: (userId: string) => Promise<any[]>;
+    getCachedPlaylists: (userId: string) => Promise<PlaylistForSync[]>;
     // キャッシュからいいね曲を取得
-    getCachedLikedSongs: (userId: string) => Promise<any[]>;
+    getCachedLikedSongs: (userId: string) => Promise<SongForSync[]>;
     // キャッシュからプレイリスト内の曲を取得
-    getCachedPlaylistSongs: (playlistId: string) => Promise<any[]>;
+    getCachedPlaylistSongs: (playlistId: string) => Promise<SongForSync[]>;
     // Local-first mutation methods
     addLikedSong: (data: {
       userId: string;
@@ -114,17 +114,17 @@ interface ElectronAPI {
     }) => Promise<{ success: boolean; error?: string }>;
     // Spotlight and Section caching
     syncSpotlightsMetadata: (
-      spotlights: any[],
+      spotlights: SpotlightForSync[],
     ) => Promise<{ success: boolean; count: number; error?: string }>;
     syncSection: (data: {
       key: string;
-      data: any[];
+      data: SectionItem[];
     }) => Promise<{ success: boolean; count: number; error?: string }>;
-    getSectionData: (key: string, table: string) => Promise<any[]>;
+    getSectionData: (key: string, table: string) => Promise<SectionItem[]>;
     // Specialized queries
-    getSongById: (id: string) => Promise<any>;
-    getPlaylistById: (id: string) => Promise<any>;
-    getSongsPaginated: (limit: number, offset: number) => Promise<any[]>;
+    getSongById: (id: string) => Promise<SongForSync | null>;
+    getPlaylistById: (id: string) => Promise<PlaylistForSync | null>;
+    getSongsPaginated: (limit: number, offset: number) => Promise<SongForSync[]>;
     getSongsTotalCount: () => Promise<number>;
   };
 
@@ -135,16 +135,24 @@ interface ElectronAPI {
       id: string;
       email?: string;
       avatarUrl?: string;
-    }) => Promise<any>;
+    }) => Promise<{ success: boolean }>;
     // ユーザー情報を取得
-    getCachedUser: () => Promise<any>;
+    getCachedUser: () => Promise<{
+      id: string;
+      email?: string;
+      avatarUrl?: string;
+    } | null>;
     // ユーザー情報をクリア
-    clearCachedUser: () => Promise<any>;
+    clearCachedUser: () => Promise<{ success: boolean }>;
+    // Google OAuth開始
+    startGoogleOAuth: (authUrl: string) => Promise<{ success: boolean; error?: string }>;
+    // OAuthウィンドウを開く
+    openOAuthWindow: (authUrl: string) => Promise<{ success: boolean; error?: string }>;
   };
 
   // Discord RPC
   discord: {
-    setActivity: (activity: any) => Promise<any>;
+    setActivity: (activity: { details?: string; state?: string; largeImageKey?: string; largeImageText?: string; smallImageKey?: string; smallImageText?: string; startTimestamp?: number; endTimestamp?: number; instance?: boolean; }) => Promise<void>;
     clearActivity: () => Promise<void>;
   };
 
@@ -191,14 +199,20 @@ interface ElectronAPI {
   // IPC通信
   ipc: {
     // メインプロセスにメッセージを送信し、応答を待つ
-    invoke: <T = any>(channel: string, ...args: any[]) => Promise<T>;
+    invoke: <T = unknown>(channel: string, ...args: unknown[]) => Promise<T>;
     // メインプロセスからのメッセージを受信
-    on: <T = any>(
+    on: <T = unknown>(
       channel: string,
       callback: (...args: T[]) => void,
     ) => () => void;
     // メインプロセスにメッセージを送信（応答を待たない）
-    send: (channel: string, ...args: any[]) => void;
+    send: (channel: string, ...args: unknown[]) => void;
+  };
+
+  // 文字起こし
+  transcribe: {
+    // LRCファイルを生成
+    generateLrc: (audioPath: string, lyricsText: string) => Promise<{ status: string; lrc?: string; message?: string }>;
   };
 }
 

@@ -128,8 +128,7 @@ export function setupAuthHandlers() {
       return { success: true };
     } catch (error) {
       console.error("[Auth] Failed to clear cached user:", error);
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { success: false, error: message };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 }

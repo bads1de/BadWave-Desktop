@@ -77,9 +77,9 @@ export const isDev = !app.isPackaged;
  * 開発モードの場合のみログを出力
  *
  * @param {string} message - ログメッセージ
- * @param {any[]} args - 追加の引数
+ * @param {unknown[]} args - 追加の引数
  */
-export function debugLog(message: string, ...args: any[]): void {
+export function debugLog(message: string, ...args: unknown[]): void {
   if (isDev) {
     console.log(message, ...args);
   }

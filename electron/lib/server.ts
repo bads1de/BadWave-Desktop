@@ -71,7 +71,8 @@ async function findAvailablePort(startPort: number): Promise<number> {
   return new Promise((resolve) => {
     const server = http.createServer();
     server.listen(startPort, () => {
-      const port = (server.address() as any).port;
+      const address = server.address();
+      const port = typeof address === "object" && address ? address.port : startPort;
       server.close(() => resolve(port));
     });
     server.on("error", () => {

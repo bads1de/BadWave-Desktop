@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import { createClient } from "@/libs/supabase/client";
 import { useUser } from "@/hooks/auth/useUser";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Palette, Database, Activity, BarChart2 } from "lucide-react";
@@ -30,7 +31,7 @@ const AccountPage = () => {
       router.push("/");
       toast.success("ログアウトしました");
     } catch (error) {
-      toast.error("ログアウトに失敗しました");
+      toast.error(ERROR_MESSAGES.LOGOUT_FAILED);
     } finally {
       setIsLoading(false);
     }

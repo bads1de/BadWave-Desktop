@@ -1,6 +1,8 @@
+import { FileMetadata } from "./index";
+
 export interface LocalFile {
   path: string;
-  metadata?: any;
+  metadata?: FileMetadata;
   error?: string;
   lastModified?: number;
 }

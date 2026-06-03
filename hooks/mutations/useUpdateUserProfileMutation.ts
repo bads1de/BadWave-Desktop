@@ -3,10 +3,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/electron/lib/error";
 import { createClient } from "@/libs/supabase/client";
 import { uploadFileToR2, deleteFileFromR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import { CACHED_QUERIES } from "@/constants";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface UpdateProfileParams {
   userId: string;
@@ -44,8 +46,8 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
   const updateProfile = useMutation({
     mutationFn: async ({ userId, fullName }: UpdateProfileParams) => {
       if (!userId) {
-        toast.error("ユーザーIDが必要です");
-        throw new Error("ユーザーIDが必要です");
+        toast.error(ERROR_MESSAGES.USER_ID_REQUIRED);
+        throw new Error(ERROR_MESSAGES.USER_ID_REQUIRED);
       }
 
       // プロフィール名を更新
@@ -55,7 +57,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
         .eq("id", userId);
 
       if (error) {
-        toast.error(error.message);
+        toast.error(getErrorMessage(error));
         throw error;
       }
 
@@ -74,7 +76,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
     },
     onError: (error: Error) => {
       console.error("Update profile error:", error);
-      toast.error("プロフィールの更新に失敗しました");
+      toast.error(ERROR_MESSAGES.UPDATE_PROFILE_FAILED);
     },
   });
 
@@ -91,13 +93,13 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
       const { isAdmin } = await checkIsAdmin();
 
       if (!isAdmin) {
-        toast.error("管理者権限が必要です");
-        throw new Error("管理者権限が必要です");
+        toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
+        throw new Error(ERROR_MESSAGES.ADMIN_REQUIRED);
       }
 
       if (!userId || !avatarFile) {
-        toast.error("ユーザーIDと画像が必要です");
-        throw new Error("ユーザーIDと画像が必要です");
+        toast.error(ERROR_MESSAGES.USER_ID_AND_IMAGE_REQUIRED);
+        throw new Error(ERROR_MESSAGES.USER_ID_AND_IMAGE_REQUIRED);
       }
 
       // 既存のアバター画像がある場合は削除する
@@ -126,8 +128,8 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
       const result = await uploadFileToR2(formData);
 
       if (!result.success || !result.url) {
-        toast.error(result.error || "アップロードに失敗しました");
-        throw new Error(result.error || "アップロードに失敗しました");
+        toast.error(result.error || ERROR_MESSAGES.UPLOAD_FAILED);
+        throw new Error(result.error || ERROR_MESSAGES.UPLOAD_FAILED);
       }
 
       const avatarUrl = result.url;
@@ -139,7 +141,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
         .eq("id", userId);
 
       if (error) {
-        toast.error(error.message);
+        toast.error(getErrorMessage(error));
         throw error;
       }
 
@@ -155,7 +157,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
     },
     onError: (error: Error) => {
       console.error("Update avatar error:", error);
-      toast.error(error.message || "アバターの更新に失敗しました");
+      toast.error(getErrorMessage(error, ERROR_MESSAGES.UPDATE_AVATAR_FAILED));
     },
   });
 
@@ -165,8 +167,8 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
   const updatePassword = useMutation({
     mutationFn: async ({ newPassword }: UpdatePasswordParams) => {
       if (!newPassword || newPassword.length < 8) {
-        toast.error("パスワードは8文字以上で入力してください");
-        throw new Error("パスワードは8文字以上で入力してください");
+        toast.error(ERROR_MESSAGES.PASSWORD_MIN_LENGTH);
+        throw new Error(ERROR_MESSAGES.PASSWORD_MIN_LENGTH);
       }
 
       // Supabaseの認証APIでパスワードを更新
@@ -175,7 +177,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
       });
 
       if (error) {
-        toast.error(error.message);
+        toast.error(getErrorMessage(error));
         throw error;
       }
 
@@ -190,7 +192,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
     },
     onError: (error: Error) => {
       console.error("Update password error:", error);
-      toast.error("パスワードの更新に失敗しました");
+      toast.error(ERROR_MESSAGES.UPDATE_PASSWORD_FAILED);
     },
   });
 

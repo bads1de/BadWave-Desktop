@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CACHED_QUERIES } from "@/constants";
 import { LocalFile } from "@/types/local";
+import { FileMetadata } from "@/types";
 
 /**
  * スキャン情報の型
@@ -31,7 +32,7 @@ export interface ScanProgress {
  */
 interface FileWithMetadataInfo {
   path: string;
-  metadata: any | null;
+  metadata: FileMetadata | null;
   lastModified?: number | null;
   needsMetadata: boolean;
 }
@@ -52,7 +53,7 @@ interface ScanResult {
 interface CachedFilesResult {
   exists: boolean;
   directoryPath?: string;
-  files: { path: string; metadata: any | null; lastModified?: number | null }[];
+  files: { path: string; metadata: FileMetadata | null; lastModified?: number | null }[];
   lastScan?: string;
   error?: string;
 }
@@ -61,7 +62,7 @@ interface CachedFilesResult {
  * メタデータ取得結果の型
  */
 interface MetadataResult {
-  metadata?: any;
+  metadata?: FileMetadata;
   fromCache?: boolean;
   error?: string;
 }
@@ -82,7 +83,7 @@ interface LocalFilesData {
 const BATCH_SIZE = 10;
 
 interface MetadataWithArt {
-  metadata: any;
+  metadata: FileMetadata;
   error?: string;
 }
 
@@ -107,13 +108,15 @@ async function fetchMissingMetadataInBatches(
             metadata: result.metadata,
             error: result.error,
           };
-        } catch (err: any) {
-          return { path: filePath, metadata: null, error: err.message };
+        } catch (err: unknown) {
+          return { path: filePath, metadata: null, error: err instanceof Error ? err.message : "Unknown error" };
         }
       })
     );
     batchResults.forEach(({ path, metadata }) => {
-      metadataMap.set(path, { metadata });
+      if (metadata) {
+        metadataMap.set(path, { metadata });
+      }
     });
   }
 
@@ -234,7 +237,7 @@ const useGetLocalFiles = (directoryPath: string | null) => {
             const filesWithMetadata: LocalFile[] = cachedResult.files.map(
               (f) => ({
                 path: f.path,
-                metadata: f.metadata,
+                metadata: f.metadata || undefined,
                 lastModified: f.lastModified || undefined,
               })
             );

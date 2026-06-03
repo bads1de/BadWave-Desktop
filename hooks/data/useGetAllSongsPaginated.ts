@@ -5,6 +5,7 @@ import { useQuery, onlineManager } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * ページネーション対応の曲取得結果
@@ -83,7 +84,7 @@ const useGetAllSongsPaginated = (page: number = 0, pageSize: number = 24) => {
             currentPage: page,
           };
         }
-        console.error("Error fetching songs:", songsResult.error.message);
+        console.error("Error fetching songs:", getErrorMessage(songsResult.error));
         throw songsResult.error;
       }
 

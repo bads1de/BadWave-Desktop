@@ -31,7 +31,7 @@ const useGetSavedLibraryInfo = () => {
   } = useQuery({
     queryKey,
     queryFn: async () => {
-      const result = await window.electron.ipc.invoke(
+      const result = await window.electron.ipc.invoke<{ error?: string; exists?: boolean; directoryPath?: string; fileCount?: number; lastScan?: string; directoryExists?: boolean }>(
         "handle-get-saved-music-library"
       );
 

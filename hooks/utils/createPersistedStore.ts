@@ -34,7 +34,7 @@ export function createPersistedStore<S extends object>(
       (set, get) => ({
         ...initializer(set, get as () => S & PersistHydrated),
         hasHydrated: false,
-        setHasHydrated: (state: boolean) => set({ hasHydrated: state } as any),
+        setHasHydrated: (state: boolean) => set({ hasHydrated: state } as unknown as Partial<S & PersistHydrated>),
       }),
       {
         name,

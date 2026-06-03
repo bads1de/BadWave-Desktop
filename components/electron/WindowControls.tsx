@@ -4,6 +4,10 @@ import React, { useState, useEffect } from "react";
 import { Minus, Square, X } from "lucide-react";
 import { windowControls, isElectron, getPlatform } from "@/libs/electron";
 
+interface ElectronCSSProperties extends React.CSSProperties {
+  WebkitAppRegion?: "drag" | "no-drag";
+}
+
 interface WindowControlsProps {
   className?: string;
 }
@@ -38,14 +42,14 @@ const WindowControls: React.FC<WindowControlsProps> = ({ className = "" }) => {
   return (
     <div
       className={`fixed top-0 left-0 right-0 h-8 bg-black/80 backdrop-blur-sm z-50 ${className}`}
-      style={{ WebkitAppRegion: "drag" } as any}
+      style={{ WebkitAppRegion: "drag" } as ElectronCSSProperties}
     >
       <div className="fixed top-0 right-0 flex items-center">
         {/* 最小化ボタン */}
         <button
           onClick={() => windowControls.minimize()}
           className="flex items-center justify-center w-10 h-8 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
-          style={{ WebkitAppRegion: "no-drag" } as any}
+          style={{ WebkitAppRegion: "no-drag" } as ElectronCSSProperties}
           aria-label="最小化"
         >
           <Minus size={16} />
@@ -55,7 +59,7 @@ const WindowControls: React.FC<WindowControlsProps> = ({ className = "" }) => {
         <button
           onClick={() => windowControls.maximize()}
           className="flex items-center justify-center w-10 h-8 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
-          style={{ WebkitAppRegion: "no-drag" } as any}
+          style={{ WebkitAppRegion: "no-drag" } as ElectronCSSProperties}
           aria-label="最大化"
         >
           <Square size={14} />
@@ -65,7 +69,7 @@ const WindowControls: React.FC<WindowControlsProps> = ({ className = "" }) => {
         <button
           onClick={() => windowControls.close()}
           className="flex items-center justify-center w-10 h-8 text-gray-400 transition-colors hover:bg-red-600 hover:text-white"
-          style={{ WebkitAppRegion: "no-drag" } as any}
+          style={{ WebkitAppRegion: "no-drag" } as ElectronCSSProperties}
           aria-label="閉じる"
         >
           <X size={18} />

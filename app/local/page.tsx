@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import Header from "@/components/header/Header";
 import { Button } from "@/components/ui/button";
 import { mapFileToSong } from "@/libs/localFileMappers";
+import { getErrorMessage } from "@/electron/lib/error";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import {
@@ -58,7 +59,7 @@ const LocalPage = () => {
     setSelectError(null);
 
     try {
-      const result = await window.electron.ipc.invoke(
+      const result = await window.electron.ipc.invoke<{ canceled?: boolean; error?: string; filePath?: string }>(
         "handle-select-directory"
       );
 
@@ -75,10 +76,10 @@ const LocalPage = () => {
         return;
       }
 
-      setSelectedDirectory(result.filePath);
-    } catch (err: any) {
+      setSelectedDirectory(result.filePath ?? null);
+    } catch (err: unknown) {
       console.error("フォルダ選択中にエラーが発生しました:", err);
-      setSelectError(`フォルダ選択中にエラーが発生しました: ${err.message}`);
+      setSelectError(`フォルダ選択中にエラーが発生しました: ${getErrorMessage(err)}`);
     } finally {
       setIsSelectingDirectory(false);
     }
@@ -117,7 +118,7 @@ const LocalPage = () => {
   // エラーメッセージ（選択エラーまたはスキャンエラー）
   const errorMessage =
     selectError ||
-    (error instanceof Error ? error.message : error ? String(error) : null);
+    (error ? getErrorMessage(error) : null);
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto pb-[80px] custom-scrollbar relative font-mono">

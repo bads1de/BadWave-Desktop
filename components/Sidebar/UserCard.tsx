@@ -7,10 +7,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/libs/supabase/client";
 import { toast } from "react-hot-toast";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import useAuthModal from "@/hooks/auth/useAuthModal";
+import { UserDetails } from "@/types";
 
 interface UserCardProps {
-  userDetails: any;
+  userDetails: UserDetails | null;
   isCollapsed: boolean;
 }
 
@@ -29,7 +31,7 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
       router.push("/");
       toast.success("ログアウトしました");
     } catch (error) {
-      toast.error("エラーが発生しました");
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR);
     } finally {
       setIsLoading(false);
     }

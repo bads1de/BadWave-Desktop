@@ -30,10 +30,9 @@ export default function PulsePage() {
     if (!audioRef.current) return;
 
     if (!audioContextRef.current) {
-      const AudioContext =
-        (window as any).AudioContext || (window as any).webkitAudioContext;
-      if (AudioContext) {
-        const ctx = new AudioContext();
+      const AudioContextConstructor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextConstructor) {
+        const ctx = new AudioContextConstructor();
         const analyserNode = ctx.createAnalyser();
         analyserNode.fftSize = 2048;
 
@@ -135,7 +134,7 @@ export default function PulsePage() {
     onSeek,
     handleNextPulse,
     handlePrevPulse,
-  } as any;
+  };
 
   if (isLoading) {
     return (

@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/libs/supabase/client";
 import { uploadFileToR2, deleteFileFromR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
+import { getErrorMessage } from "@/electron/lib/error";
 import { sanitizeTitle } from "@/libs/utils";
 import { CACHED_QUERIES } from "@/constants";
 import { Song } from "@/types";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface EditSongParams {
   id: string;
@@ -114,13 +116,13 @@ const useEditSongMutation = (editModal: EditModalHook) => {
       const { isAdmin } = await checkIsAdmin();
 
       if (!isAdmin) {
-        toast.error("管理者権限が必要です");
-        throw new Error("管理者権限が必要です");
+        toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
+        throw new Error(ERROR_MESSAGES.ADMIN_REQUIRED);
       }
 
       if (!id) {
-        toast.error("曲のIDが必要です");
-        throw new Error("曲のIDが必要です");
+        toast.error(ERROR_MESSAGES.SONG_ID_REQUIRED);
+        throw new Error(ERROR_MESSAGES.SONG_ID_REQUIRED);
       }
 
       let updatedVideoPath = currentSong.video_path;
@@ -194,6 +196,7 @@ const useEditSongMutation = (editModal: EditModalHook) => {
               video_path: updatedVideoPath,
               song_path: updatedSongPath,
               image_path: updatedImagePath,
+              created_at: new Date().toISOString(),
               // 既存の他のフィールドは更新されないように、syncSongsMetadataの実装に依存するが、
               // 基本的にメタデータのUpsertなので、必要なフィールドがあれば更新される
             },
@@ -224,7 +227,7 @@ const useEditSongMutation = (editModal: EditModalHook) => {
     },
     onError: (error: Error) => {
       console.error("Edit song error:", error);
-      toast.error(error.message || "編集に失敗しました");
+      toast.error(getErrorMessage(error, ERROR_MESSAGES.EDIT_FAILED));
     },
   });
 };

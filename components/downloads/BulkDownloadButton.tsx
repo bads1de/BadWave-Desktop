@@ -5,6 +5,7 @@ import { HiDownload, HiTrash } from "react-icons/hi";
 import useBulkDownload from "@/hooks/downloads/useBulkDownload";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { Song } from "@/types";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { electronAPI } from "@/libs/electron";
 import { toast } from "react-hot-toast";
 
@@ -62,7 +63,7 @@ const BulkDownloadButton: React.FC<BulkDownloadButtonProps> = ({
     }
 
     if (songs.length === 0) {
-      toast.error("曲がありません");
+      toast.error(ERROR_MESSAGES.NO_SONGS);
       return;
     }
 

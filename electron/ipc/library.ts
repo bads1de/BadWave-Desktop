@@ -6,7 +6,7 @@ import store from "../lib/store";
 import { debugLog } from "../utils";
 import { getMainWindow } from "../lib/window-manager";
 import { validateInput, filePathSchema } from "../lib/ipc-validate";
-import { MusicLibrary } from "../../types";
+import { MusicLibrary, FileMetadata } from "../../types";
 import { getErrorMessage } from "../lib/error";
 
 // サポートされている音声ファイルの拡張子
@@ -306,7 +306,7 @@ export function setupLibraryHandlers() {
   // ストアへの書き込みは遅延させてバッチ処理する
   let pendingMetadataUpdates: Map<
     string,
-    { metadata: any; lastModified: number }
+    { metadata: FileMetadata; lastModified: number }
   > = new Map();
   let saveTimeout: NodeJS.Timeout | null = null;
 
@@ -382,12 +382,12 @@ export function setupLibraryHandlers() {
       const metadata = await mm.parseFile(filePath);
 
       // ペンディングキューに追加（即座に保存しない）
-      pendingMetadataUpdates.set(filePath, { metadata, lastModified });
+      pendingMetadataUpdates.set(filePath, { metadata: metadata as unknown as FileMetadata, lastModified });
 
       // 遅延保存をスケジュール
       debouncedSaveLibrary();
 
-      return { metadata, fromCache: false };
+      return { metadata: metadata as unknown as FileMetadata, fromCache: false };
     } catch (error: unknown) {
       debugLog(`[Error] メタデータの取得に失敗: ${filePath}`, error);
       const message = getErrorMessage(error);

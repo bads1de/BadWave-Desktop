@@ -4,9 +4,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useUser } from "@/hooks/auth/useUser";
 import { createClient } from "@/libs/supabase/client";
+import { getErrorMessage } from "@/electron/lib/error";
 import { uploadFileToR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import { CACHED_QUERIES } from "@/constants";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface PulseUploadParams {
   title: string;
@@ -46,36 +48,36 @@ const usePulseUploadMutation = (pulseUploadModal: PulseUploadModalHook) => {
     mutationFn: async ({ title, genre, musicFile }: PulseUploadParams) => {
       const { isAdmin } = await checkIsAdmin();
       if (!isAdmin) {
-        toast.error("管理者権限が必要です");
-        throw new Error("管理者権限が必要です");
+        toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
+        throw new Error(ERROR_MESSAGES.ADMIN_REQUIRED);
       }
 
       if (!musicFile || !user) {
-        toast.error("音声ファイルを選択してください");
-        throw new Error("音声ファイルを選択してください");
+        toast.error(ERROR_MESSAGES.AUDIO_FILE_REQUIRED);
+        throw new Error(ERROR_MESSAGES.AUDIO_FILE_REQUIRED);
       }
 
       if (!title.trim()) {
-        toast.error("タイトルを入力してください");
-        throw new Error("タイトルを入力してください");
+        toast.error(ERROR_MESSAGES.TITLE_REQUIRED);
+        throw new Error(ERROR_MESSAGES.TITLE_REQUIRED);
       }
 
       if (!genre.trim()) {
-        toast.error("ジャンルを入力してください");
-        throw new Error("ジャンルを入力してください");
+        toast.error(ERROR_MESSAGES.GENRE_REQUIRED);
+        throw new Error(ERROR_MESSAGES.GENRE_REQUIRED);
       }
 
       let musicUrl: string | null;
       try {
         musicUrl = await uploadFile(musicFile, "pulse", "pulse");
       } catch (error) {
-        toast.error("音声のアップロードに失敗しました");
-        throw new Error("音声のアップロードに失敗しました");
+        toast.error(ERROR_MESSAGES.AUDIO_UPLOAD_FAILED);
+        throw new Error(ERROR_MESSAGES.AUDIO_UPLOAD_FAILED);
       }
 
       if (!musicUrl) {
-        toast.error("音声のアップロードに失敗しました");
-        throw new Error("音声のアップロードに失敗しました");
+        toast.error(ERROR_MESSAGES.AUDIO_UPLOAD_FAILED);
+        throw new Error(ERROR_MESSAGES.AUDIO_UPLOAD_FAILED);
       }
 
       const { error } = await supabaseClient.from("pulses").insert({
@@ -85,8 +87,8 @@ const usePulseUploadMutation = (pulseUploadModal: PulseUploadModalHook) => {
       });
 
       if (error) {
-        toast.error(error.message);
-        throw new Error(error.message);
+        toast.error(getErrorMessage(error));
+        throw new Error(getErrorMessage(error));
       }
 
       return { title, genre };

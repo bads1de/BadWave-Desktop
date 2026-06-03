@@ -10,6 +10,7 @@ import { songs } from "../db/schema";
 import { eq, isNotNull } from "drizzle-orm";
 import type { SongDownloadPayload } from "../../types";
 import { validateInput, songDownloadPayloadSchema, idSchema } from "../lib/ipc-validate";
+import { getErrorMessage } from "../lib/error";
 
 export const setupOfflineDownloadHandlers = () => {
   const db = getDb();
@@ -154,8 +155,7 @@ export const setupOfflineDownloadHandlers = () => {
 
       return { success: true, localPath: songRecord.songPath };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { success: false, error: message };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -268,8 +268,7 @@ export const setupOfflineDownloadHandlers = () => {
       return { success: true };
     } catch (error) {
       console.error(`[IPC] Failed to delete offline song ${songId}:`, error);
-      const message = error instanceof Error ? error.message : "Unknown error";
-      return { success: false, error: message };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 };

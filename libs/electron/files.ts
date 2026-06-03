@@ -7,7 +7,7 @@ import { Song } from "@/types";
  */
 export async function checkLocalFileExists(filePath: string): Promise<boolean> {
   try {
-    return await (window as any).electron.ipc.invoke(
+    return await window.electron.ipc.invoke(
       "check-local-file-exists",
       filePath
     );

@@ -10,6 +10,7 @@ import Image from "next/image";
 import { User } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { createClient } from "@/libs/supabase/client";
 
 interface HeaderProps {
@@ -40,7 +41,7 @@ const HomeHeader: React.FC<HeaderProps> = memo(({ className }) => {
       toast.success("ログアウトしました");
       router.refresh();
     } catch (error) {
-      toast.error("エラーが発生しました");
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR);
     }
   };
 

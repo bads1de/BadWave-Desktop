@@ -3,6 +3,7 @@ import { createClient } from "@/libs/supabase/client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { isNetworkError } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * 指定されたジャンルに一致する曲を取得するカスタムフック
@@ -58,7 +59,7 @@ const useGetSongsByGenres = (genres: string[], excludeId?: string) => {
           return [];
         }
         throw new Error(
-          `ジャンルによる曲の取得に失敗しました: ${error.message}`
+          `ジャンルによる曲の取得に失敗しました: ${getErrorMessage(error)}`
         );
       }
 

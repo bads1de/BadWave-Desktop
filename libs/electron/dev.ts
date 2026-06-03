@@ -8,7 +8,7 @@ export const dev = {
    */
   toggleOfflineSimulation: async (): Promise<{ isOffline: boolean }> => {
     if (isElectron()) {
-      return (window as any).electron.dev.toggleOfflineSimulation();
+      return window.electron.dev.toggleOfflineSimulation();
     }
     console.warn("Offline simulation is only available in Electron");
     return { isOffline: false };
@@ -19,7 +19,7 @@ export const dev = {
    */
   getOfflineSimulationStatus: async (): Promise<{ isOffline: boolean }> => {
     if (isElectron()) {
-      return (window as any).electron.dev.getOfflineSimulationStatus();
+      return window.electron.dev.getOfflineSimulationStatus();
     }
     return { isOffline: false };
   },
@@ -32,7 +32,7 @@ export const dev = {
     offline: boolean
   ): Promise<{ isOffline: boolean }> => {
     if (isElectron()) {
-      return (window as any).electron.dev.setOfflineSimulation(offline);
+      return window.electron.dev.setOfflineSimulation(offline);
     }
     console.warn("Offline simulation is only available in Electron");
     return { isOffline: false };

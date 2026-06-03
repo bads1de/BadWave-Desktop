@@ -35,7 +35,7 @@ const useGetTrendSongs = (
           "songs"
         );
         // キャッシュがあればそれを返す。なければ空配列（同期は裏で行われる）
-        return (cachedSongs as Song[]) || [];
+        return (cachedSongs as unknown as Song[]) || [];
       }
 
       // Web環境 / フォールバック

@@ -83,7 +83,7 @@ export const useBackgroundSync = () => {
             }
 
             if (playlistSongsData && playlistSongsData.length > 0) {
-              const songs = playlistSongsData.map((item: any) => ({
+              const songs = playlistSongsData.map((item: { songs: Song }) => ({
                 ...item.songs,
                 songType: "regular",
               })) as Song[];
@@ -123,7 +123,7 @@ export const useBackgroundSync = () => {
         }
 
         if (likedData) {
-          const songs = likedData.map((item: any) => ({
+          const songs = likedData.map((item: { songs: Song }) => ({
             ...item.songs,
             songType: "regular",
           })) as Song[];

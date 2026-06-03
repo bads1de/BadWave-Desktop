@@ -34,7 +34,7 @@ const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
           cacheKey,
           "playlists"
         );
-        return (cachedPlaylists as Playlist[]) || [];
+        return (cachedPlaylists as unknown as Playlist[]) || [];
       }
 
       // オフライン時はフェッチをスキップ

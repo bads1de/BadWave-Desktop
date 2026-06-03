@@ -45,7 +45,7 @@ export function setupOnlineManager(): void {
       });
 
       // IPC イベントをリッスン
-      unsubscribeIpc = (window as any).electron?.ipc?.on(
+      unsubscribeIpc = window.electron?.ipc?.on(
         "offline-simulation-changed",
         (isSimulatingOffline: boolean) => {
           if (isSimulatingOffline) {

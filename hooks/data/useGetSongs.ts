@@ -3,6 +3,7 @@ import { useQuery, onlineManager } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * 最新曲を取得するカスタムフック (クライアントサイド)
@@ -35,7 +36,7 @@ const useGetSongs = (initialData?: Song[], limit: number = 12) => {
           cacheKey,
           "songs"
         );
-        return (cachedSongs as Song[]) || [];
+        return (cachedSongs as unknown as Song[]) || [];
       }
 
       // オフライン時はフェッチをスキップしてundefinedを返す（キャッシュがあればそれを使用）
@@ -55,7 +56,7 @@ const useGetSongs = (initialData?: Song[], limit: number = 12) => {
           console.log("[useGetSongs] Fetch skipped: offline/network error");
           return undefined;
         }
-        console.error("Error fetching songs:", error.message);
+        console.error("Error fetching songs:", getErrorMessage(error));
         throw error;
       }
 

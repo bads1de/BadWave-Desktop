@@ -7,6 +7,7 @@ import { isElectron } from "@/libs/electron";
 import { useSyncLikedSongs } from "@/hooks/sync/useSyncLikedSongs";
 import { useSyncPlaylists } from "@/hooks/sync/useSyncPlaylists";
 import { useSyncHomeAll } from "@/hooks/sync/useSyncHomeAll";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { twMerge } from "tailwind-merge";
 import { useCallback } from "react";
 
@@ -23,7 +24,7 @@ export const SyncSection = () => {
     if (result.success) {
       toast.success("お気に入り曲を同期しました");
     } else {
-      toast.error("同期に失敗しました");
+      toast.error(ERROR_MESSAGES.SYNC_FAILED);
     }
   }, [syncLiked]);
 
@@ -32,7 +33,7 @@ export const SyncSection = () => {
     if (result.success) {
       toast.success("プレイリストを同期しました");
     } else {
-      toast.error("同期に失敗しました");
+      toast.error(ERROR_MESSAGES.SYNC_FAILED);
     }
   }, [syncPlaylists]);
 
@@ -41,7 +42,7 @@ export const SyncSection = () => {
     if (result.success) {
       toast.success("ホーム画面のデータを更新しました");
     } else {
-      toast.error("ホーム同期に失敗しました");
+      toast.error(ERROR_MESSAGES.HOME_SYNC_FAILED);
     }
   }, [syncHome]);
 

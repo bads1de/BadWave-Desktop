@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Camera, User, Lock } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { createClient } from "@/libs/supabase/client";
 import useUpdateUserProfileMutation from "@/hooks/mutations/useUpdateUserProfileMutation";
 import Modal from "@/components/modals/Modal";
@@ -74,7 +75,7 @@ export const AccountModal = ({ isOpen, onClose, user }: AccountModalProps) => {
   const handlePasswordUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      toast.error("パスワードが一致しません");
+      toast.error(ERROR_MESSAGES.PASSWORD_MISMATCH);
       return;
     }
     updatePassword.mutate(

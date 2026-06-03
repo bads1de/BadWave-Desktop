@@ -8,6 +8,7 @@ import {
 import { Playlist, Song } from "@/types";
 import { RiPlayListAddFill, RiPlayListFill } from "react-icons/ri";
 import toast from "react-hot-toast";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { useUser } from "@/hooks/auth/useUser";
 import useAuthModal from "@/hooks/auth/useAuthModal";
 import useGetSongById from "@/hooks/data/useGetSongById";
@@ -66,7 +67,7 @@ const AddPlaylist: React.FC<PlaylistMenuProps> = ({
     }
 
     if (isInPlaylist[playlistId]) {
-      toast.error("既にプレイリストに追加されています。");
+      toast.error(ERROR_MESSAGES.PLAYLIST_ALREADY_ADDED);
       return;
     }
 

@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/popover";
 import { useUser } from "@/hooks/auth/useUser";
 import { CACHED_QUERIES } from "@/constants";
+import { Playlist } from "@/types";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface PlaylistOptionsPopoverProps {
   playlistId: string;
@@ -57,11 +59,11 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
         queryKey: [CACHED_QUERIES.playlists],
       });
 
-      const previousPlaylists = queryClient.getQueryData<any[]>([
+      const previousPlaylists = queryClient.getQueryData<Playlist[]>([
         CACHED_QUERIES.playlists,
       ]);
 
-      queryClient.setQueryData<any[]>([CACHED_QUERIES.playlists], (old) =>
+      queryClient.setQueryData<Playlist[]>([CACHED_QUERIES.playlists], (old) =>
         (old || []).map((p) =>
           p.id === playlistId ? { ...p, title: newTitle } : p,
         ),
@@ -84,7 +86,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
           context.previousPlaylists,
         );
       }
-      toast.error("プレイリスト名の更新に失敗しました");
+      toast.error(ERROR_MESSAGES.PLAYLIST_UPDATE_FAILED);
     },
   });
 
@@ -110,11 +112,11 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
         queryKey: [CACHED_QUERIES.playlists],
       });
 
-      const previousPlaylists = queryClient.getQueryData<any[]>([
+      const previousPlaylists = queryClient.getQueryData<Playlist[]>([
         CACHED_QUERIES.playlists,
       ]);
 
-      queryClient.setQueryData<any[]>([CACHED_QUERIES.playlists], (old) =>
+      queryClient.setQueryData<Playlist[]>([CACHED_QUERIES.playlists], (old) =>
         (old || []).map((p) =>
           p.id === playlistId ? { ...p, is_public: !isPublic } : p,
         ),
@@ -138,7 +140,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
           context.previousPlaylists,
         );
       }
-      toast.error("プレイリストの公開設定の更新に失敗しました");
+      toast.error(ERROR_MESSAGES.PLAYLIST_VISIBILITY_UPDATE_FAILED);
     },
   });
 
@@ -165,11 +167,11 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
         queryKey: [CACHED_QUERIES.playlists],
       });
 
-      const previousPlaylists = queryClient.getQueryData<any[]>([
+      const previousPlaylists = queryClient.getQueryData<Playlist[]>([
         CACHED_QUERIES.playlists,
       ]);
 
-      queryClient.setQueryData<any[]>([CACHED_QUERIES.playlists], (old) =>
+      queryClient.setQueryData<Playlist[]>([CACHED_QUERIES.playlists], (old) =>
         (old || []).filter((p) => p.id !== playlistId),
       );
 
@@ -188,7 +190,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
           context.previousPlaylists,
         );
       }
-      toast.error("プレイリストの削除に失敗しました");
+      toast.error(ERROR_MESSAGES.PLAYLIST_DELETE_FAILED);
     },
   });
 

@@ -122,13 +122,16 @@ export interface SongForSync {
   song_path: string;
   image_path: string;
   genre?: string;
-  count?: number;
-  like_count?: number;
+  count?: string;
+  like_count?: string;
   created_at: string;
   user_id?: string;
   video_path?: string;
   duration?: number;
   lyrics?: string;
+  is_downloaded?: boolean;
+  local_song_path?: string;
+  local_image_path?: string;
 }
 
 /**
@@ -182,6 +185,19 @@ export interface FileMetadata {
   track?: number;
   duration?: number;
   picture?: { format: string; data: Buffer }[];
+  common?: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    genre?: string[];
+    year?: number;
+    track?: number;
+  };
+  format?: {
+    duration?: number;
+    bitrate?: number;
+    sampleRate?: number;
+  };
 }
 
 /**

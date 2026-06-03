@@ -13,6 +13,7 @@ import usePulseUploadModal from "@/hooks/modal/usePulseUploadModal";
 import Hover from "../common/Hover";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import toast from "react-hot-toast";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { twMerge } from "tailwind-merge";
@@ -50,19 +51,19 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
     switch (value) {
       case "music":
         if (!isAdmin) {
-          return toast.error("管理者権限が必要です");
+          return toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
         }
         return uploadModal.onOpen();
       case "playlist":
         return playlistModal.onOpen();
       case "spotlight":
         if (!isAdmin) {
-          return toast.error("管理者権限が必要です");
+          return toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
         }
         return spotlightUploadModal.onOpen();
       case "pulse":
         if (!isAdmin) {
-          return toast.error("管理者権限が必要です");
+          return toast.error(ERROR_MESSAGES.ADMIN_REQUIRED);
         }
         return pulseUploadModal.onOpen();
     }

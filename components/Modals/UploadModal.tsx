@@ -23,6 +23,7 @@ import { Textarea } from "../ui/textarea";
 import GenreSelect from "../genre/GenreSelect";
 import Button from "../common/Button";
 import { RiUploadCloud2Line, RiMusic2Line } from "react-icons/ri";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 const UploadModal: React.FC = memo(() => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -82,7 +83,7 @@ const UploadModal: React.FC = memo(() => {
           setValue("image", [file]);
           setImagePreview(URL.createObjectURL(file));
         } else {
-          toast.error("サポートされていないファイル形式です");
+          toast.error(ERROR_MESSAGES.UNSUPPORTED_FILE_FORMAT);
         }
       }
     },
@@ -139,7 +140,7 @@ const UploadModal: React.FC = memo(() => {
         const songFile = values.song?.[0];
 
         if (!imageFile || !songFile || !user) {
-          toast.error("必須フィールドが未入力です");
+          toast.error(ERROR_MESSAGES.REQUIRED_FIELDS);
           return;
         }
 

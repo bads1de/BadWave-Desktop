@@ -6,7 +6,7 @@ import { isElectron } from "./common";
 export const store = {
   get: async <T>(key: string, defaultValue?: T): Promise<T> => {
     if (isElectron()) {
-      const value = await (window as any).electron.store.get(key);
+      const value = await window.electron.store.get<T>(key);
       return value !== undefined ? value : (defaultValue as T);
     }
 
@@ -28,7 +28,7 @@ export const store = {
 
   set: async <T>(key: string, value: T): Promise<boolean> => {
     if (isElectron()) {
-      return (window as any).electron.store.set(key, value);
+      return window.electron.store.set(key, value);
     }
 
     // Electronでない場合はローカルストレージを使用

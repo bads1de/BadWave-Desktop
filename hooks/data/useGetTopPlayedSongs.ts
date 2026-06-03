@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { isNetworkError } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 interface TopPlayedSong extends Song {
   play_count: number;
@@ -54,7 +55,7 @@ const useGetTopPlayedSongs = (userId?: string, period: Period = "day") => {
           );
           return [];
         }
-        throw new Error(`再生履歴の取得に失敗しました: ${error.message}`);
+        throw new Error(`再生履歴の取得に失敗しました: ${getErrorMessage(error)}`);
       }
 
       return (data || []) as TopPlayedSong[];
