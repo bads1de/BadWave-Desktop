@@ -8,6 +8,7 @@ import { uploadFileToR2, deleteFileFromR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import { getErrorMessage } from "@/electron/lib/error";
 import { sanitizeTitle } from "@/libs/utils";
+import { serializeGenres } from "@/libs/songUtils";
 import { CACHED_QUERIES } from "@/constants";
 import { Song } from "@/types";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
@@ -172,7 +173,7 @@ const useEditSongMutation = (editModal: EditModalHook) => {
           title,
           author,
           lyrics,
-          genre: genre.join(", "),
+          genre: serializeGenres(genre),
           video_path: updatedVideoPath,
           song_path: updatedSongPath,
           image_path: updatedImagePath,
@@ -192,7 +193,7 @@ const useEditSongMutation = (editModal: EditModalHook) => {
               title,
               author,
               lyrics,
-              genre: genre.join(", "),
+              genre: serializeGenres(genre),
               video_path: updatedVideoPath,
               song_path: updatedSongPath,
               image_path: updatedImagePath,

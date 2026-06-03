@@ -25,6 +25,10 @@ export interface SongWithRecommendation extends Song {
   recommendation_score: string;
 }
 
+export interface TopPlayedSong extends Song {
+  play_count: number;
+}
+
 export interface UserDetails {
   id: string;
   first_name: string;

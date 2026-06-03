@@ -1,5 +1,8 @@
 // 聴取統計関連の型定義
 
+export type Period = "day" | "week" | "month" | "all";
+
+/** @deprecated Period を使用してください */
 export type StatsPeriod = "week" | "month" | "all";
 
 export interface HourlyActivity {

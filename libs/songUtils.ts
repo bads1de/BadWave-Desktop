@@ -257,3 +257,13 @@ export function extractSongsFromJoin(data: Record<string, unknown>[]): Song[] {
     songType: "regular" as const,
   })) as Song[];
 }
+
+/**
+ * ジャンル配列を文字列にシリアライズする
+ *
+ * @param genres - ジャンルの配列
+ * @returns カンマ区切りのジャンル文字列
+ */
+export function serializeGenres(genres: string[]): string {
+  return genres.join(", ");
+}

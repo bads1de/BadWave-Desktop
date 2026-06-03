@@ -8,6 +8,7 @@ import { createClient } from "@/libs/supabase/client";
 import { uploadFileToR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import { sanitizeTitle } from "@/libs/utils";
+import { serializeGenres } from "@/libs/songUtils";
 import { getErrorMessage } from "@/electron/lib/error";
 import uniqid from "uniqid";
 import { CACHED_QUERIES } from "@/constants";
@@ -110,7 +111,7 @@ const useUploadSongMutation = (uploadModal: UploadModalHook) => {
           lyrics,
           image_path: imageUrl,
           song_path: songUrl,
-          genre: genre.join(", "),
+          genre: serializeGenres(genre),
           count: 0,
         });
 

@@ -1,4 +1,5 @@
-import { Song } from "@/types";
+import { Song, TopPlayedSong } from "@/types";
+import { Period } from "@/types/stats";
 import { createClient } from "@/libs/supabase/client";
 import {
   keepPreviousData,
@@ -8,12 +9,6 @@ import {
 import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
 import { isNetworkError } from "@/libs/electron/index";
 import { getErrorMessage } from "@/electron/lib/error";
-
-interface TopPlayedSong extends Song {
-  play_count: number;
-}
-
-type Period = "day" | "week" | "month" | "all";
 
 /**
  * ユーザーの再生数が多い曲を取得するカスタムフック

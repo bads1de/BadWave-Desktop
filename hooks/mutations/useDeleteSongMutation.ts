@@ -44,7 +44,7 @@ const useDeleteSongMutation = () => {
         .from("songs")
         .delete()
         .eq("user_id", user.id)
-        .eq("id", parseInt(songId, 10))
+        .eq("id", songId)
         .select("*");
 
       if (dbDeleteError) {
