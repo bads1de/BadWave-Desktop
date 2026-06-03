@@ -51,7 +51,11 @@ const useGetPlaylist = (playlistId?: string) => {
         .from("playlists")
         .select("*")
         .eq("id", playlistId)
-        .single();
+        .maybeSingle();
+
+      if (!data) {
+        return null;
+      }
 
       if (error) {
         if (!onlineManager.isOnline() || isNetworkError(error)) {

@@ -122,7 +122,7 @@ export const MyUserContextProvider = (props: Props) => {
     queryFn: async () => {
       if (!user) return null;
 
-      const { data, error } = await supabase.from("users").select("*").single();
+      const { data, error } = await supabase.from("users").select("*").maybeSingle();
 
       if (error) {
         // オフラインなどで取得できない場合は null を返す（エラーを投げるとリトライが走る）

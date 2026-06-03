@@ -35,8 +35,8 @@ export function startOAuthServer() {
     }
   });
 
-  oauthServer.listen(4321, () => {
-    debugLog("[OAuth] HTTPサーバーがlocalhost:4321で起動しました");
+  oauthServer.listen(4321, "127.0.0.1", () => {
+    debugLog("[OAuth] HTTPサーバーが127.0.0.1:4321で起動しました");
   });
 }
 

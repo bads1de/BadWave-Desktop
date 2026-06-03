@@ -19,7 +19,7 @@ const SeekBar: React.FC<SeekBarProps> = ({
     onSeek(newTime);
   };
 
-  const normalizedValue = (currentTime / duration) * 100;
+  const normalizedValue = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div className={`relative flex items-center h-6 group w-full ${className}`}>
