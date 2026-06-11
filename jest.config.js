@@ -24,7 +24,8 @@ const commonConfig = {
     ],
   },
   setupFilesAfterEnv: ["<rootDir>/__tests__/setup.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/.next/"],
+  testPathIgnorePatterns: ["/node_modules/", "/.next/", "/dist/"],
+  modulePathIgnorePatterns: ["<rootDir>/dist/", "<rootDir>/.next/"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   collectCoverageFrom: [
     "hooks/**/*.{ts,tsx}",
