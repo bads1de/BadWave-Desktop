@@ -82,4 +82,36 @@ describe("serveLocalFile", () => {
     // Wait a bit to let remaining fs.ReadStream events fire
     await new Promise((resolve) => setTimeout(resolve, 100));
   });
+
+  it("should deny path traversal attempts", () => {
+    // さまざまなトラバーサルパスのパターン (path.join を使わず生の文字列結合で .. を残す)
+    const baseDir = path.dirname(testFilePath).replace(/\\/g, "/");
+    const traversalPaths = [
+      baseDir + "/../test-media-file.mp3",
+      baseDir + "/subdir/../../test-media-file.mp3",
+      baseDir + "/..\\test-media-file.mp3",
+    ];
+
+    for (const p of traversalPaths) {
+      const url = new URL(`badwave://file/${encodeURIComponent(p)}`);
+      const request = new Request(url.toString());
+      const response = serveLocalFile(request, url);
+      expect(response.status).toBe(403);
+    }
+  });
+
+  it("should deny access if normalized path resolves outside intended boundaries or contains traversal patterns after normalization", () => {
+    const maliciousPaths = [
+      "C:\\Windows\\System32\\cmd.exe",
+      "C:/Windows/System32/cmd.exe",
+      "/etc/passwd",
+    ];
+
+    for (const p of maliciousPaths) {
+      const url = new URL(`badwave://file/${encodeURIComponent(p)}`);
+      const request = new Request(url.toString());
+      const response = serveLocalFile(request, url);
+      expect(response.status).toBe(403);
+    }
+  });
 });

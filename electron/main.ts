@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, session } from "electron";
+import { app, BrowserWindow, globalShortcut, session, shell } from "electron";
 import { loadEnvVariables, debugLog } from "./utils";
 import { getDb } from "./db/client";
 
@@ -76,6 +76,38 @@ function setupIPC() {
   setupThumbBarHandlers();
 }
 
+// すべてのWebContentsに対するグローバルセキュリティ制約
+app.on("web-contents-created", (event, contents) => {
+  // 予期しないページ遷移（ナビゲーション）を制限する
+  contents.on("will-navigate", (navigateEvent, navigationUrl) => {
+    const allowed =
+      navigationUrl.startsWith("http://localhost:") ||
+      navigationUrl.startsWith("badwave://");
+
+    if (!allowed) {
+      debugLog(`Blocked navigation attempt to: ${navigationUrl}`);
+      navigateEvent.preventDefault();
+    }
+  });
+
+  // 安全な外部リンクのみをデフォルトブラウザで開くようにする
+  contents.setWindowOpenHandler(({ url: openUrl }) => {
+    try {
+      const parsed = new URL(openUrl);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+        shell.openExternal(openUrl).catch((err) => {
+          console.error(`Failed to open external URL: ${openUrl}`, err);
+        });
+      } else {
+        debugLog(`Blocked opening external URL with insecure scheme: ${openUrl}`);
+      }
+    } catch (err) {
+      console.error(`Invalid URL in setWindowOpenHandler: ${openUrl}`, err);
+    }
+    return { action: "deny" };
+  });
+});
+
 // アプリケーションの準備完了時の処理
 app.on("ready", async () => {
   await runMigrations();
@@ -92,7 +124,13 @@ app.on("ready", async () => {
     const headers = { ...details.responseHeaders };
 
     // セキュリティ向上のため、Supabase/R2ストレージのドメインに対してのみCORSを許可する
-    const isR2Resource = details.url.includes(".r2.dev");
+    let isR2Resource = false;
+    try {
+      const parsedUrl = new URL(details.url);
+      isR2Resource = parsedUrl.hostname.endsWith(".r2.dev") || parsedUrl.hostname === "r2.dev";
+    } catch (e) {
+      isR2Resource = false;
+    }
 
     if (isR2Resource) {
       // 既存のヘッダーがあっても強制的に書き換える（キャッシュによるポート不一致などを防ぐため）

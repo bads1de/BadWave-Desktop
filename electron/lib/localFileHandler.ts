@@ -35,8 +35,14 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
     const encodedPath = urlObj.pathname.slice(1); // 先頭の '/' を削除
     const filePath = decodeURIComponent(encodedPath);
 
-    // ディレクトリトラバーサル対策
-    if (filePath.includes("..")) {
+    // ディレクトリトラバーサル対策 (正規化パスと元パスの両方でチェック)
+    const normalizedPath = path.normalize(filePath);
+    if (
+      filePath.includes("..") ||
+      normalizedPath.includes("..") ||
+      /(\/|\\)\.\.(\/|\\|$)/.test(filePath) ||
+      /(\/|\\)\.\.(\/|\\|$)/.test(normalizedPath)
+    ) {
       return new Response("Forbidden", { status: 403 });
     }
 

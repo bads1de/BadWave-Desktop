@@ -21,21 +21,7 @@ export function registerSchemes() {
 
 // プロトコルハンドラーの登録
 export function registerProtocolHandlers() {
-  registerAppProtocol();
   registerBadwaveProtocol();
-}
-
-// appプロトコルのハンドラーを登録
-function registerAppProtocol() {
-  protocol.registerFileProtocol(
-    "app",
-    (request, callback) => {
-      const filePath = url.fileURLToPath(
-        "file://" + request.url.slice("app://".length)
-      );
-      callback(filePath);
-    }
-  );
 }
 
 // badwaveプロトコルのハンドラーを登録

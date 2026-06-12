@@ -124,12 +124,6 @@ export async function createMainWindow() {
     icon: path.join(__dirname, "../../public/logo.png"),
   });
 
-  // 外部リンクをデフォルトブラウザで開く
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
-    return { action: "deny" };
-  });
-
   // 開発モードの場合
   if (isDev) {
     debugLog(
