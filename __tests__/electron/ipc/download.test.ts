@@ -14,24 +14,32 @@ jest.mock("electron", () => ({
   },
 }));
 
-jest.mock("fs", () => ({
-  existsSync: jest.fn(),
-  createWriteStream: jest.fn(),
-  unlink: jest.fn((path, cb: any) => cb()),
-  promises: {
-    mkdir: jest.fn(),
-    access: jest.fn(),
-    unlink: jest.fn(),
-  },
-}));
+jest.mock("fs", () => {
+  const actualFs = jest.requireActual("fs");
+  return {
+    existsSync: jest.fn(),
+    createWriteStream: jest.fn(),
+    unlink: jest.fn((path, cb: any) => cb()),
+    constants: actualFs.constants,
+    promises: {
+      mkdir: jest.fn(),
+      access: jest.fn(),
+      unlink: jest.fn(),
+    },
+  };
+});
 
 jest.mock("https", () => ({
   get: jest.fn(),
 }));
 
-jest.mock("path", () => ({
-  join: (...args: string[]) => args.join("/"),
-}));
+jest.mock("path", () => {
+  const actual = jest.requireActual("path");
+  return {
+    ...actual,
+    join: (...args: string[]) => args.join("/"),
+  };
+});
 
 jest.mock("@/electron/utils", () => ({
   debugLog: jest.fn(),
@@ -151,6 +159,26 @@ describe("IPC: Download", () => {
       (fs.promises.unlink as jest.Mock).mockRejectedValue(new Error("Error"));
       const result = await invoke("delete-song", "song.mp3");
       expect(result).toBe(false);
+    });
+  });
+
+  describe("check-local-file-exists", () => {
+    it("returns true if valid media file exists", async () => {
+      (fs.promises.access as jest.Mock).mockResolvedValue(undefined);
+      const result = await invoke("check-local-file-exists", "C:/Users/test/music/song.mp3");
+      expect(result).toBe(true);
+    });
+
+    it("throws error or returns false if file contains path traversal", async () => {
+      await expect(
+        invoke("check-local-file-exists", "C:/Users/test/music/../../windows/system32/cmd.exe")
+      ).rejects.toThrow();
+    });
+
+    it("throws error or returns false if file extension is not allowed", async () => {
+      await expect(
+        invoke("check-local-file-exists", "C:/Users/test/music/malicious.exe")
+      ).rejects.toThrow();
     });
   });
 });

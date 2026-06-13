@@ -102,9 +102,27 @@ export function setupDownloadHandlers() {
 
   // ローカルファイルの存在確認（任意パス）
   // 注意: 任意の絶対パスを許可するため、Renderer 側の信頼性に依存
-  // TODO: 許可ディレクトリを userData とユーザーが選択した音楽ディレクトリに限定
   ipcMain.handle("check-local-file-exists", async (_, rawFilePath: string) => {
     const filePath = validateInput(filePathSchema, rawFilePath, "check-local-file-exists");
+
+    // 安全なパスと拡張子のチェック
+    const ALLOWED_EXTENSIONS = new Set([
+      ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus", ".m4a", ".wma",
+      ".alac", ".aiff", ".webm", ".mp4", ".m4v", ".avi", ".mkv",
+      ".jpg", ".jpeg", ".png", ".webp",
+    ]);
+    const normalized = path.normalize(filePath);
+    const ext = path.extname(normalized).toLowerCase();
+
+    if (
+      filePath.includes("..") ||
+      normalized.includes("..") ||
+      /(\/|\\)\.\.(\/|\\|$)/.test(filePath) ||
+      !ALLOWED_EXTENSIONS.has(ext)
+    ) {
+      throw new Error("Invalid path or unsupported file extension");
+    }
+
     try {
       await fs.promises.access(filePath, fs.constants.F_OK);
       return true;

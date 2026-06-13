@@ -20,9 +20,13 @@ jest.mock("fs", () => ({
   existsSync: jest.fn(),
 }));
 
-jest.mock("path", () => ({
-  join: (...args: string[]) => args.join("/"),
-}));
+jest.mock("path", () => {
+  const actual = jest.requireActual("path");
+  return {
+    ...actual,
+    join: (...args: string[]) => args.join("/"),
+  };
+});
 
 describe("IPC: Transcribe", () => {
   let handlers: Record<string, Function> = {};
@@ -139,6 +143,18 @@ describe("IPC: Transcribe", () => {
       expect(result.message).toContain(
         "トランスクライブエンジンの実行に失敗しました",
       );
+    });
+
+    it("throws error if audioPath contains path traversal", async () => {
+      await expect(
+        invoke("transcribe:generate-lrc", "C:/Users/test/music/../../windows/system32/cmd.exe", "test lyrics")
+      ).rejects.toThrow();
+    });
+
+    it("throws error if audioPath has unsupported extension", async () => {
+      await expect(
+        invoke("transcribe:generate-lrc", "C:/Users/test/music/malicious.exe", "test lyrics")
+      ).rejects.toThrow();
     });
   });
 });

@@ -152,6 +152,24 @@ export function setupTranscriptionHandlers() {
           });
         } else {
           console.log(`[Transcribe] Local path detected.`);
+
+          // 安全なパスと拡張子のチェック
+          const ALLOWED_EXTENSIONS = new Set([
+            ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus", ".m4a", ".wma",
+            ".alac", ".aiff", ".webm", ".mp4", ".m4v", ".avi", ".mkv",
+          ]);
+          const normalized = path.normalize(audioPath);
+          const ext = path.extname(normalized).toLowerCase();
+
+          if (
+            audioPath.includes("..") ||
+            normalized.includes("..") ||
+            /(\/|\\)\.\.(\/|\\|$)/.test(audioPath) ||
+            !ALLOWED_EXTENSIONS.has(ext)
+          ) {
+            throw new Error("Invalid path or unsupported file extension");
+          }
+
           runPython(audioPath, false);
         }
       });
