@@ -12,6 +12,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { createClient } from "@/libs/supabase/client";
+import { ROUTES } from "@/constants";
 
 interface HeaderProps {
   className?: string;
@@ -93,7 +94,7 @@ const HomeHeader: React.FC<HeaderProps> = memo(({ className }) => {
                 {/* User profile */}
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-theme-500/10 to-theme-900/10 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500" />
-                  <Link href="/account">
+                  <Link href={ROUTES.ACCOUNT}>
                     <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 flex-shrink-0 shadow-inner group transition-transform duration-300 hover:scale-105">
                       {userDetails?.avatar_url ? (
                         <Image

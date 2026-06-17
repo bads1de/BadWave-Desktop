@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { useSyncBase } from "./useSyncBase";
 
 /**
@@ -25,7 +25,7 @@ export const useSyncAllSongs = (options?: { autoSync?: boolean }) => {
     // ページ分割で全曲を取得・同期
     while (hasMore) {
       const { data, error } = await supabase
-        .from("songs")
+        .from(TABLES.SONGS)
         .select("*")
         .order("created_at", { ascending: false })
         .range(offset, offset + pageSize - 1);

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import useAudioWaveStore from "@/hooks/audio/useAudioWave";
+import { DURATIONS } from "@/constants";
 
 /**
  * オーディオ波形コンポーネントのプロパティ型定義
@@ -273,7 +274,7 @@ const AudioWaveform = ({
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: DURATIONS.NORMAL }}
             className="relative h-full w-full"
           >
             <Image
@@ -291,7 +292,7 @@ const AudioWaveform = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: DURATIONS.NORMAL }}
             className="relative h-full"
           >
             {/* 波形描画用キャンバス */}

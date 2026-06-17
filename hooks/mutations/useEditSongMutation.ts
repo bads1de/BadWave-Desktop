@@ -9,7 +9,7 @@ import { checkIsAdmin } from "@/actions/checkAdmin";
 import { getErrorMessage } from "@/electron/lib/error";
 import { sanitizeTitle } from "@/libs/utils";
 import { serializeGenres } from "@/libs/songUtils";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { Song } from "@/types";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
@@ -168,7 +168,7 @@ const useEditSongMutation = (editModal: EditModalHook) => {
 
       // データベースを更新
       const { error } = await supabaseClient
-        .from("songs")
+        .from(TABLES.SONGS)
         .update({
           title,
           author,

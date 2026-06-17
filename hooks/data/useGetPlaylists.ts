@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/libs/supabase/client";
 import { Playlist } from "@/types";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { useUser } from "@/hooks/auth/useUser";
 import { electronAPI } from "@/libs/electron/index";
 import { getErrorMessage } from "@/electron/lib/error";
@@ -41,7 +41,7 @@ const useGetPlaylists = () => {
 
       // Web版: Supabaseから直接取得
       const { data, error } = await supabase
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });

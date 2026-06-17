@@ -8,7 +8,7 @@ import { createClient } from "@/libs/supabase/client";
 import { deleteFileFromR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
 import { useUser } from "@/hooks/auth/useUser";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface DeleteSongParams {
@@ -41,7 +41,7 @@ const useDeleteSongMutation = () => {
 
       // データベースから削除（削除されたレコードを取得）
       const { data, error: dbDeleteError } = await supabaseClient
-        .from("songs")
+        .from(TABLES.SONGS)
         .delete()
         .eq("user_id", user.id)
         .eq("id", songId)

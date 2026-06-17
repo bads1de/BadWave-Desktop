@@ -8,6 +8,7 @@ import { memo, useCallback } from "react";
 import useGetPlaylists from "@/hooks/data/useGetPlaylists";
 import { useSyncPlaylists } from "@/hooks/sync/useSyncPlaylists";
 import { twMerge } from "tailwind-merge";
+import { ROUTES } from "@/constants";
 
 
 
@@ -22,7 +23,7 @@ const PlaylistContent: React.FC = memo(() => {
 
   const handlePlaylistClick = useCallback(
     (id: string) => {
-      router.push(`/playlists/${id}`);
+      router.push(ROUTES.PLAYLISTS_DETAIL(id));
     },
     [router]
   );

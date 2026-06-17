@@ -9,6 +9,7 @@ import { createClient } from "@/libs/supabase/client";
 import { toast } from "react-hot-toast";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import useAuthModal from "@/hooks/auth/useAuthModal";
+import { ROUTES } from "@/constants";
 import { UserDetails } from "@/types";
 
 interface UserCardProps {
@@ -87,7 +88,7 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
     return (
       <div className="px-2">
         <button
-          onClick={() => router.push("/account")}
+          onClick={() => router.push(ROUTES.ACCOUNT)}
           className="w-full aspect-square rounded-none bg-[#0a0a0f] border border-theme-500/30 hover:border-theme-500 hover:shadow-[0_0_20px_rgba(var(--theme-500),0.4)] transition-all duration-500 relative group overflow-hidden cyber-glitch"
         >
           <div className="absolute inset-0 bg-theme-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
@@ -150,7 +151,7 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
 
             <div className="flex flex-col gap-1">
               <button
-                onClick={() => router.push("/account")}
+                onClick={() => router.push(ROUTES.ACCOUNT)}
                 className="p-1.5 bg-theme-500/10 hover:bg-theme-500/30 border border-theme-500/30 text-theme-400 hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(var(--theme-500),0.1)]"
               >
                 <Settings size={14} />

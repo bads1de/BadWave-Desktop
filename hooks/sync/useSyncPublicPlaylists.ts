@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { useSyncBase } from "./useSyncBase";
 
 /**
@@ -18,7 +18,7 @@ export const useSyncPublicPlaylists = (
   const syncFn = useCallback(async () => {
     const supabase = createClient();
     const { data, error } = await supabase
-      .from("playlists")
+      .from(TABLES.PLAYLISTS)
       .select("*")
       .eq("is_public", true)
       .order("created_at", { ascending: false })

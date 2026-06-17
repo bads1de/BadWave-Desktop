@@ -1,7 +1,7 @@
 import { createClient } from "@/libs/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import type { Song } from "@/types";
 import { useUser } from "@/hooks/auth/useUser";
 import { getErrorMessage } from "@/electron/lib/error";
@@ -55,7 +55,7 @@ const useMutatePlaylistSong = () => {
       // --- Step 2: Supabaseから削除（バックグラウンド）---
       try {
         const { error } = await supabaseClient
-          .from("playlist_songs")
+          .from(TABLES.PLAYLIST_SONGS)
           .delete()
           .eq("playlist_id", playlistId)
           .eq("user_id", user.id)
@@ -144,7 +144,7 @@ const useMutatePlaylistSong = () => {
 
       // --- Step 2: Supabaseに追加（バックグラウンド）---
       try {
-        const { error } = await supabaseClient.from("playlist_songs").insert({
+        const { error } = await supabaseClient.from(TABLES.PLAYLIST_SONGS).insert({
           playlist_id: playlistId,
           user_id: user.id,
           song_id: songId,
@@ -158,7 +158,7 @@ const useMutatePlaylistSong = () => {
         // プレイリストの画像を更新する必要がある場合
         if (updateImagePath && !error) {
           const { error: updateError } = await supabaseClient
-            .from("playlists")
+            .from(TABLES.PLAYLISTS)
             .update({ image_path: updateImagePath })
             .eq("id", playlistId)
             .eq("user_id", user.id);

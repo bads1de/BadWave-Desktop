@@ -1,7 +1,7 @@
 import { useQuery, onlineManager } from "@tanstack/react-query";
 import { createClient } from "@/libs/supabase/client";
 import { Playlist } from "@/types";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { isNetworkError } from "@/libs/electron/index";
 
 /**
@@ -37,7 +37,7 @@ const useGetPlaylistsByTitle = (title: string) => {
       }
 
       const { data, error } = await supabase
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("is_public", true)
         .ilike("title", `%${title}%`)

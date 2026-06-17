@@ -1,7 +1,7 @@
 import { Song } from "@/types";
 import { createClient } from "@/libs/supabase/client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { isNetworkError } from "@/libs/electron/index";
 import { getErrorMessage } from "@/electron/lib/error";
 
@@ -37,7 +37,7 @@ const useGetSongsByGenres = (genres: string[], excludeId?: string) => {
         return [];
       }
 
-      let query = supabaseClient.from("songs").select("*");
+      let query = supabaseClient.from(TABLES.SONGS).select("*");
 
       // ジャンルのOR条件を構築
       const genreConditions = genres.map((genre) => `genre.ilike.%${genre}%`);

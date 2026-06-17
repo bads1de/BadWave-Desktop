@@ -9,7 +9,7 @@ import { UserDetails } from "@/types";
 import { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/libs/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { electronAPI } from "@/libs/electron/index";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 
@@ -122,7 +122,7 @@ export const MyUserContextProvider = (props: Props) => {
     queryFn: async () => {
       if (!user) return null;
 
-      const { data, error } = await supabase.from("users").select("*").maybeSingle();
+      const { data, error } = await supabase.from(TABLES.USERS).select("*").maybeSingle();
 
       if (error) {
         // オフラインなどで取得できない場合は null を返す（エラーを投げるとリトライが走る）

@@ -1,6 +1,6 @@
 import { createClient } from "@/libs/supabase/client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG } from "@/constants";
+import { CACHE_CONFIG, TABLES } from "@/constants";
 import { useUser } from "@/hooks/auth/useUser";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { isNetworkError } from "@/libs/electron/index";
@@ -30,7 +30,7 @@ const usePlaylistSongStatus = (songId: string, playlists: { id: string }[]) => {
       }
 
       const { data, error } = await supabaseClient
-        .from("playlist_songs")
+        .from(TABLES.PLAYLIST_SONGS)
         .select("playlist_id")
         .eq("user_id", user.id)
         .eq("song_id", songId)

@@ -7,7 +7,7 @@ import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/electron/lib/error";
 import { uploadFileToR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface PulseUploadParams {
@@ -80,7 +80,7 @@ const usePulseUploadMutation = (pulseUploadModal: PulseUploadModalHook) => {
         throw new Error(ERROR_MESSAGES.AUDIO_UPLOAD_FAILED);
       }
 
-      const { error } = await supabaseClient.from("pulses").insert({
+      const { error } = await supabaseClient.from(TABLES.PULSES).insert({
         music_path: musicUrl,
         title,
         genre,

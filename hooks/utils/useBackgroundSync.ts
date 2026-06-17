@@ -5,7 +5,7 @@ import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
 import { Song, Playlist } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 
 /**
  * ログイン後にバックグラウンドでライブラリ情報を SQLite に同期するフック
@@ -47,7 +47,7 @@ export const useBackgroundSync = () => {
       if (!isOnlineRef.current) throw new Error("Offline detected");
 
       const { data: playlistsData, error: pError } = await supabase
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("user_id", user.id);
 
@@ -67,7 +67,7 @@ export const useBackgroundSync = () => {
 
           try {
             const { data: playlistSongsData, error: psError } = await supabase
-              .from("playlist_songs")
+              .from(TABLES.PLAYLIST_SONGS)
               .select("*, songs(*)")
               .eq("playlist_id", playlist.id)
               .order("created_at", { ascending: false });
@@ -112,7 +112,7 @@ export const useBackgroundSync = () => {
       // --- 3. いいねした曲を同期 ---
       if (isOnlineRef.current) {
         const { data: likedData, error: lError } = await supabase
-          .from("liked_songs_regular")
+          .from(TABLES.LIKED_SONGS_REGULAR)
           .select("*, songs(*)")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });

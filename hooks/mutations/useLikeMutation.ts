@@ -1,7 +1,7 @@
 import { createClient } from "@/libs/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { isElectron, cache as electronCache } from "@/libs/electron";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
@@ -48,7 +48,7 @@ const useLikeMutation = (songId: string, userId?: string) => {
         if (isCurrentlyLiked) {
           // いいねを削除
           const { error } = await supabaseClient
-            .from("liked_songs_regular")
+            .from(TABLES.LIKED_SONGS_REGULAR)
             .delete()
             .eq("user_id", userId)
             .eq("song_id", songId);
@@ -70,7 +70,7 @@ const useLikeMutation = (songId: string, userId?: string) => {
         } else {
           // いいねを追加
           const { error } = await supabaseClient
-            .from("liked_songs_regular")
+            .from(TABLES.LIKED_SONGS_REGULAR)
             .insert({
               song_id: songId,
               user_id: userId,

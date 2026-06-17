@@ -8,6 +8,7 @@ import { splitTags } from "@/libs/utils";
 import ScrollingText from "../common/ScrollingText";
 import DownloadIndicator from "../common/DownloadIndicator";
 import CyberArtFallback from "../common/CyberArtFallback";
+import { ROUTES } from "@/constants";
 
 interface CurrentSongDisplayProps {
   song: Song;
@@ -64,7 +65,7 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
               LIVE_STREAM_DATA ]
             </div>
             <h1 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-[0_0_10px_rgba(var(--theme-500),0.8)] cyber-glitch">
-              <Link href={`/songs/${song.id}`}>
+              <Link href={ROUTES.SONGS_DETAIL(song.id)}>
                 <ScrollingText text={song.title} />
               </Link>
             </h1>
@@ -78,7 +79,7 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
               {visibleGenres.map((genre, index) => (
                 <Link
                   key={index}
-                  href={`/genre/${genre}`}
+                  href={ROUTES.GENRE(genre)}
                   className="bg-theme-500/5 border border-theme-500/20 px-3 py-1 text-[10px] text-theme-400 font-bold uppercase tracking-widest hover:bg-theme-500/20 hover:border-theme-500/40 transition-all shadow-[inset_0_0_5px_rgba(var(--theme-500),0.1)]"
                 >
                   # {genre}

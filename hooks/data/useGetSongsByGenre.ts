@@ -1,6 +1,6 @@
 import { Song } from "@/types";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError } from "@/libs/electron/index";
 
@@ -41,7 +41,7 @@ const useGetSongsByGenre = (genre: string | string[]) => {
 
       // データベースから曲を検索
       const { data, error } = await supabase
-        .from("songs")
+        .from(TABLES.SONGS)
         .select("*")
         .or(genreArray.map((g) => `genre.ilike.%${g}%`).join(","))
         .order("created_at", { ascending: false });

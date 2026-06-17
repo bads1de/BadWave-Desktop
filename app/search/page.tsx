@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { useCallback, memo, use } from "react";
 import useGetSongsByTitle from "@/hooks/data/useGetSongsByTitle";
 import useGetPlaylistsByTitle from "@/hooks/data/useGetPlaylistsByTitle";
+import { ROUTES } from "@/constants";
 
 // 曲リストセクションコンポーネント（メモ化）
 const SongListSection = memo(
@@ -123,7 +124,7 @@ const PlaylistSection = memo(
             className="group relative cursor-pointer cyber-glitch"
             onClick={() =>
               router.push(
-                `/playlists/${playlist.id}?title=${encodeURIComponent(
+                `${ROUTES.PLAYLISTS_DETAIL(playlist.id)}?title=${encodeURIComponent(
                   playlist.title,
                 )}`,
               )

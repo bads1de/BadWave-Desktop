@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { subMonths, subWeeks, subDays } from "date-fns";
 import { useSyncBase } from "./useSyncBase";
 
@@ -18,7 +18,7 @@ export const useSyncTrends = (
 
   const syncFn = useCallback(async () => {
     const supabase = createClient();
-    let query = supabase.from("songs").select("*");
+    let query = supabase.from(TABLES.SONGS).select("*");
 
     switch (period) {
       case "month":

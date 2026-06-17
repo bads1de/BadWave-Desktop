@@ -1,6 +1,6 @@
 import { Playlist } from "@/types";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
 
@@ -42,7 +42,7 @@ const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
                   return [];
                 }
       const { data, error } = await supabase
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("is_public", true)
         .order("created_at", { ascending: false })

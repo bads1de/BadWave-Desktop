@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
 import { useState } from "react";
+import { ROUTES, DURATIONS } from "@/constants";
 
 interface PublicPlaylistBoardProps {
   playlists: Playlist[];
@@ -30,11 +31,11 @@ const PublicPlaylistBoard: React.FC<PublicPlaylistBoardProps> = ({
               key={playlist.id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: i * 0.1 }}
+              transition={{ duration: DURATIONS.FAST, delay: i * 0.1 }}
               className="group relative cursor-pointer min-w-[200px] max-w-[200px]"
               onClick={() =>
                 router.push(
-                  `/playlists/${playlist.id}?title=${encodeURIComponent(
+                  `${ROUTES.PLAYLISTS_DETAIL(playlist.id)}?title=${encodeURIComponent(
                     playlist.title
                   )}`
                 )

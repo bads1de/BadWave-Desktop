@@ -1,6 +1,6 @@
 import { Song } from "@/types";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError } from "@/libs/electron/index";
 
@@ -31,7 +31,7 @@ const useGetSongsByTitle = (title: string) => {
                     return [];      }
 
       const query = supabase
-        .from("songs")
+        .from(TABLES.SONGS)
         .select("*")
         .order("created_at", { ascending: false });
 

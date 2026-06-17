@@ -8,7 +8,7 @@ import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/electron/lib/error";
 import { uploadFileToR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface SpotlightUploadParams {
@@ -74,7 +74,7 @@ const useSpotlightUploadMutation = (
       const videoUrl = result.url;
 
       // データベースにレコードを作成
-      const { error } = await supabaseClient.from("spotlights").insert({
+      const { error } = await supabaseClient.from(TABLES.SPOTLIGHTS).insert({
         video_path: videoUrl,
         title,
         author,

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { DURATIONS } from "@/constants";
 
 const Loading = () => {
   return (
@@ -25,18 +26,18 @@ const Loading = () => {
           <div className="relative w-24 h-24">
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: DURATIONS.ROTATE_SLOW, repeat: Infinity, ease: "linear" }}
               className="absolute inset-0 border-t-2 border-r-2 border-theme-500/40 rounded-full"
             />
             <motion.div
               animate={{ rotate: -360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: DURATIONS.ROTATE_FAST, repeat: Infinity, ease: "linear" }}
               className="absolute inset-2 border-b-2 border-l-2 border-theme-500/20 rounded-full"
             />
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{
-                duration: 1.5,
+                duration: DURATIONS.LOADING_PULSE,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
@@ -47,7 +48,7 @@ const Loading = () => {
           <div className="flex flex-col items-center gap-2">
             <motion.p
               animate={{ opacity: [0.4, 1, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              transition={{ duration: DURATIONS.ROTATE_SLOW, repeat: Infinity }}
               className="text-xs text-theme-500 font-black tracking-[0.5em] uppercase"
             >
               // INITIALIZING_SYSTEM_LINK...
@@ -57,7 +58,7 @@ const Loading = () => {
                 <motion.div
                   key={i}
                   animate={{ height: [4, 12, 4] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                  transition={{ duration: DURATIONS.SLOW, repeat: Infinity, delay: i * 0.2 }}
                   className="w-1 bg-theme-500/40"
                 />
               ))}

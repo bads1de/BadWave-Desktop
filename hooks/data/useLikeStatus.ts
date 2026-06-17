@@ -1,6 +1,6 @@
 import { createClient } from "@/libs/supabase/client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import {
   isElectron,
@@ -38,7 +38,7 @@ const useLikeStatus = (songId: string, userId?: string) => {
 
       // --- Web: Supabaseから取得（フォールバック）---
       const { data, error } = await supabaseClient
-        .from("liked_songs_regular")
+        .from(TABLES.LIKED_SONGS_REGULAR)
         .select("*")
         .eq("user_id", userId)
         .eq("song_id", songId)

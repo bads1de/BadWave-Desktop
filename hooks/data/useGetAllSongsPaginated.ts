@@ -2,7 +2,7 @@
 
 import { Song } from "@/types";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
 import { getErrorMessage } from "@/electron/lib/error";
@@ -65,11 +65,11 @@ const useGetAllSongsPaginated = (page: number = 0, pageSize: number = 24) => {
       // Web環境: Supabase から直接取得
       const [songsResult, countResult] = await Promise.all([
         supabase
-          .from("songs")
+          .from(TABLES.SONGS)
           .select("*")
           .order("created_at", { ascending: false })
           .range(offset, offset + pageSize - 1),
-        supabase.from("songs").select("*", { count: "exact", head: true }),
+        supabase.from(TABLES.SONGS).select("*", { count: "exact", head: true }),
       ]);
 
       if (songsResult.error) {

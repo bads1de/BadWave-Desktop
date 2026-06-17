@@ -12,6 +12,7 @@ import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import useDownloadSong from "@/hooks/utils/useDownloadSong";
 import { IoCloudDone, IoCloudOffline } from "react-icons/io5";
 import { getPlayableImagePath } from "@/libs/songUtils";
+import { ROUTES } from "@/constants";
 
 interface SongListProps {
   data: Song;
@@ -121,7 +122,7 @@ const SongList: React.FC<SongListProps> = memo(
 
         <div className="flex flex-col py-1 truncate flex-grow min-w-0 gap-y-0.5">
           <Link
-            href={`/songs/${data.id}`}
+            href={ROUTES.SONGS_DETAIL(data.id)}
             className={!isPlayable ? "pointer-events-none" : ""}
           >
             <div
@@ -136,7 +137,7 @@ const SongList: React.FC<SongListProps> = memo(
           </Link>
           <div className="flex items-center gap-x-2">
             <Link
-              href={`/genre/${data.genre}`}
+              href={ROUTES.GENRE(data.genre)}
               className={!isPlayable ? "pointer-events-none" : ""}
             >
               <p

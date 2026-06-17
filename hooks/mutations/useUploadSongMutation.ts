@@ -11,7 +11,7 @@ import { sanitizeTitle } from "@/libs/utils";
 import { serializeGenres } from "@/libs/songUtils";
 import { getErrorMessage } from "@/electron/lib/error";
 import uniqid from "uniqid";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface UploadSongParams {
@@ -103,7 +103,7 @@ const useUploadSongMutation = (uploadModal: UploadModalHook) => {
 
       // Create record
       const { error: supabaseError } = await supabaseClient
-        .from("songs")
+        .from(TABLES.SONGS)
         .insert({
           user_id: user.id,
           title,

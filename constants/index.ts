@@ -84,3 +84,41 @@ export const CACHE_CONFIG = {
  * 認証が必要なルートのリスト
  */
 export const PROTECTED_ROUTES = ["/account", "/liked"] as const;
+
+export const TABLES = {
+  SONGS: "songs",
+  PLAYLISTS: "playlists",
+  PLAYLIST_SONGS: "playlist_songs",
+  LIKED_SONGS_REGULAR: "liked_songs_regular",
+  USERS: "users",
+  SPOTLIGHTS: "spotlights",
+  PULSES: "pulses",
+  PLAY_HISTORY: "play_history",
+} as const;
+
+export const DURATIONS = {
+  FAST: 0.3,
+  NORMAL: 0.5,
+  SLOW: 1,
+  LOADING_PULSE: 1.5,
+  ROTATE_SLOW: 2,
+  ROTATE_FAST: 3,
+  BACKGROUND: 5,
+} as const;
+
+export const SPRING_SIDEBAR = { stiffness: 300, damping: 30 } as const;
+
+export const ROUTES = {
+  HOME: "/",
+  ACCOUNT: "/account",
+  LIKED: "/liked",
+  SEARCH: "/search",
+  LOCAL: "/local",
+  OFFLINE: "/offline",
+  PULSE: "/pulse",
+  SONGS_ALL: "/songs/all",
+  SONGS_DETAIL: (id: string) => `/songs/${id}`,
+  GENRE: (genre: string) => `/genre/${encodeURIComponent(genre)}`,
+  PLAYLISTS: "/playlists",
+  PLAYLISTS_DETAIL: (id: string) => `/playlists/${id}`,
+} as const;

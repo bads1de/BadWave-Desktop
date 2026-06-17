@@ -12,6 +12,7 @@ import { IoCloudOffline } from "react-icons/io5";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { getPlayableImagePath } from "@/libs/songUtils";
 import DownloadIndicator from "../common/DownloadIndicator";
+import { ROUTES } from "@/constants";
 
 interface SongItemProps {
   onClick: (id: string) => void;
@@ -94,7 +95,7 @@ const SongItem: React.FC<SongItemProps> = memo(({ onClick, data }) => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-20">
           <Link
-            href={`/songs/${data.id}`}
+            href={ROUTES.SONGS_DETAIL(data.id)}
             className={twMerge(
               "w-full block mb-1",
               !isPlayable && "pointer-events-none",

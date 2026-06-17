@@ -7,7 +7,7 @@ import { getErrorMessage } from "@/electron/lib/error";
 import { createClient } from "@/libs/supabase/client";
 import { uploadFileToR2, deleteFileFromR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface UpdateProfileParams {
@@ -52,7 +52,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
 
       // プロフィール名を更新
       const { error } = await supabaseClient
-        .from("users")
+        .from(TABLES.USERS)
         .update({ full_name: fullName })
         .eq("id", userId);
 
@@ -136,7 +136,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
 
       // データベースのユーザー情報を更新する
       const { error } = await supabaseClient
-        .from("users")
+        .from(TABLES.USERS)
         .update({ avatar_url: avatarUrl })
         .eq("id", userId);
 

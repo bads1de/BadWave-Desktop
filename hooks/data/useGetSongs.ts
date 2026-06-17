@@ -1,6 +1,6 @@
 import { Song } from "@/types";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
 import { getErrorMessage } from "@/electron/lib/error";
@@ -45,7 +45,7 @@ const useGetSongs = (initialData?: Song[], limit: number = 12) => {
       }
 
       const { data, error } = await supabase
-        .from("songs")
+        .from(TABLES.SONGS)
         .select("*")
         .order("created_at", { ascending: false })
         .limit(limit);

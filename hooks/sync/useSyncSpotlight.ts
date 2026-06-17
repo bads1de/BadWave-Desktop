@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { useSyncBase } from "./useSyncBase";
 
 /**
@@ -15,7 +15,7 @@ export const useSyncSpotlight = (options?: { autoSync?: boolean }) => {
   const syncFn = useCallback(async () => {
     const supabase = createClient();
     const { data, error } = await supabase
-      .from("spotlights")
+      .from(TABLES.SPOTLIGHTS)
       .select("*")
       .order("created_at", { ascending: false });
 

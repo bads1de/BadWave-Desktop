@@ -1,7 +1,7 @@
 import { Pulse } from "@/types";
 import { createClient } from "@/libs/supabase/client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { isNetworkError } from "@/libs/electron/index";
 
 /**
@@ -32,7 +32,7 @@ const useGetPulses = (initialData?: Pulse[]) => {
       }
 
       const { data, error } = await supabaseClient
-        .from("pulses")
+        .from(TABLES.PULSES)
         .select("*")
         .order("created_at", { ascending: false });
 

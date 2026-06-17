@@ -1,7 +1,7 @@
 import { Song } from "@/types";
 import { createClient } from "@/libs/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { electronAPI } from "@/libs/electron/index";
 import { extractSongsFromJoin } from "@/libs/songUtils";
 
@@ -39,7 +39,7 @@ const useGetLikedSongs = (userId?: string) => {
 
       // Web版: Supabaseから直接取得
       const { data, error } = await supabaseClient
-        .from("liked_songs_regular")
+        .from(TABLES.LIKED_SONGS_REGULAR)
         .select("*, songs(*)")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });

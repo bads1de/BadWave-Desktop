@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useUser } from "@/hooks/auth/useUser";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, ROUTES, TABLES } from "@/constants";
 import { Playlist } from "@/types";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
@@ -43,7 +43,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
       }
 
       const { error } = await supabase
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .update({ title: newTitle })
         .eq("id", playlistId)
         .eq("user_id", user.id);
@@ -75,7 +75,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
       queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
       toast.success("プレイリスト名を更新しました");
       router.push(
-        `/playlists/${playlistId}?title=${encodeURIComponent(newTitle)}`
+        `${ROUTES.PLAYLISTS_DETAIL(playlistId)}?title=${encodeURIComponent(newTitle)}`
       );
       setIsEditing(false);
     },
@@ -97,7 +97,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
       }
 
       const { error } = await supabase
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .update({ is_public: !isPublic })
         .eq("id", playlistId)
         .eq("user_id", user.id);
@@ -151,13 +151,13 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
       }
 
       await supabase
-        .from("playlist_songs")
+        .from(TABLES.PLAYLIST_SONGS)
         .delete()
         .eq("playlist_id", playlistId)
         .eq("user_id", user.id);
 
       await supabase
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .delete()
         .eq("id", playlistId)
         .eq("user_id", user.id);
@@ -180,7 +180,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
       toast.success("プレイリストを削除しました");
-      router.push("/playlists");
+      router.push(ROUTES.PLAYLISTS);
       router.refresh();
     },
     onError: (_error, _variables, context) => {

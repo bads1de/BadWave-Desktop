@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { DURATIONS } from "@/constants";
 
 interface GenreHeaderProps {
   genre: string;
@@ -83,7 +84,7 @@ const GenreHeader: React.FC<GenreHeaderProps> = ({ genre }) => {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: DURATIONS.NORMAL }}
             className="flex flex-col md:flex-row md:items-end justify-between gap-6"
           >
             <div className="space-y-4">

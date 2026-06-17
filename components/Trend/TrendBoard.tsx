@@ -10,6 +10,7 @@ import ScrollableContainer from "@/components/common/ScrollableContainer";
 import { Song } from "@/types";
 
 import ScrollingText from "@/components/common/ScrollingText";
+import { ROUTES, DURATIONS } from "@/constants";
 
 interface TrendBoardProps {
   className?: string;
@@ -39,7 +40,7 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
 
     const itemVariants = {
       hidden: { opacity: 0, y: 50 },
-      visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+      visible: { opacity: 1, y: 0, transition: { duration: DURATIONS.NORMAL } },
     };
 
     return (
@@ -112,7 +113,7 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
                 <div className="p-4 font-mono uppercase">
                   <h3 className="text-theme-300 text-lg font-bold mb-1 flex items-center gap-x-2 overflow-hidden group-hover:text-white transition-colors">
                     <div className="flex-1 min-w-0">
-                      <Link href={`/songs/${song.id}`}>
+                      <Link href={ROUTES.SONGS_DETAIL(song.id)}>
                         <ScrollingText text={song.title} limitCharacters={18} />
                       </Link>
                     </div>

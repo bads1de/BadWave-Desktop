@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/electron/lib/error";
 import { useUser } from "@/hooks/auth/useUser";
 import { createClient } from "@/libs/supabase/client";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface CreatePlaylistParams {
@@ -38,7 +38,7 @@ const useCreatePlaylistMutation = (playlistModal: PlaylistModalHook) => {
       }
 
       // プレイリストを作成
-      const { error } = await supabaseClient.from("playlists").insert({
+      const { error } = await supabaseClient.from(TABLES.PLAYLISTS).insert({
         user_id: user.id,
         user_name: user.full_name,
         title,

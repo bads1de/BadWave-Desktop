@@ -11,7 +11,7 @@ import { motion, useSpring } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import { BsGripVertical, BsChevronLeft } from "react-icons/bs";
 import { store } from "@/libs/electron/index";
-import { ELECTRON_STORE_KEYS } from "@/constants";
+import { ELECTRON_STORE_KEYS, SPRING_SIDEBAR } from "@/constants";
 
 interface RightSidebarProps {
   children: React.ReactNode;
@@ -107,10 +107,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
   }, [isClosed]);
 
   // framer-motion の useSpring でアニメーション用の幅を管理
-  const width = useSpring(isClosed ? 0 : sidebarWidth, {
-    stiffness: 300,
-    damping: 30,
-  });
+  const width = useSpring(isClosed ? 0 : sidebarWidth, SPRING_SIDEBAR);
 
   // 状態が変化したときに幅を更新
   useEffect(() => {

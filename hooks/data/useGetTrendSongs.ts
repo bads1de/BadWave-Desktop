@@ -1,6 +1,6 @@
 import { Song } from "@/types";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { subMonths, subWeeks, subDays } from "date-fns";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
@@ -44,7 +44,7 @@ const useGetTrendSongs = (
         return undefined;
       }
 
-      let query = supabase.from("songs").select("*");
+      let query = supabase.from(TABLES.SONGS).select("*");
 
       switch (period) {
         case "month":

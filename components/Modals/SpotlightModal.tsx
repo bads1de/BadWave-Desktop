@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import useSpotlightModal from "@/hooks/modal/useSpotlightModal";
 import useVolumeStore from "@/hooks/stores/useVolumeStore";
 import { cn } from "@/libs/utils";
+import { DURATIONS } from "@/constants";
 
 const SpotlightModal = () => {
   const { isOpen, onClose } = useSpotlightModal();
@@ -86,7 +87,7 @@ const SpotlightModal = () => {
               initial={{ scale: 0.9, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 30 }}
-              transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+              transition={{ duration: DURATIONS.NORMAL, ease: [0.19, 1, 0.22, 1] }}
               className="relative w-full max-w-7xl mx-auto flex flex-col md:flex-row bg-[#0a0a0f] border border-theme-500/20 shadow-[0_0_60px_rgba(0,0,0,0.8),0_0_20px_rgba(var(--theme-500),0.05)] h-[90vh] md:h-[80vh] overflow-hidden group rounded-none"
             >
               {/* HUD Corners */}

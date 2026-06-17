@@ -5,6 +5,7 @@ import SongItem from "@/components/song/SongItem";
 import { Song } from "@/types";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
 import { motion } from "framer-motion";
+import { DURATIONS } from "@/constants";
 
 interface SongScrollBoardProps {
   songs: Song[];
@@ -20,7 +21,7 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  visible: { opacity: 1, y: 0, transition: { duration: DURATIONS.NORMAL } },
 };
 
 const DEFAULT_EMPTY_STATE = (

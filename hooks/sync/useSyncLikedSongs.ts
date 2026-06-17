@@ -3,7 +3,7 @@ import { useUser } from "@/hooks/auth/useUser";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
-import { CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { extractSongsFromJoin } from "@/libs/songUtils";
 import { useSyncBase } from "./useSyncBase";
 
@@ -26,7 +26,7 @@ export const useSyncLikedSongs = (options?: { autoSync?: boolean }) => {
   const syncFn = useCallback(async () => {
     const supabase = createClient();
     const { data, error } = await supabase
-      .from("liked_songs_regular")
+      .from(TABLES.LIKED_SONGS_REGULAR)
       .select("*, songs(*)")
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false });

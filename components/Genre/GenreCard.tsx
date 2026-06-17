@@ -2,6 +2,7 @@ import Link from "next/link";
 import React, { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { ROUTES } from "@/constants";
 
 interface GenreCardProps {
   genre: string;
@@ -82,7 +83,7 @@ const GenreCard: React.FC<GenreCardProps> = memo(({ genre }) => {
   }, [genre]);
 
   return (
-    <Link href={`/genre/${genre}`}>
+    <Link href={ROUTES.GENRE(genre)}>
       <motion.div
         whileHover={{
           scale: 1.02,

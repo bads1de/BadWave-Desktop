@@ -1,7 +1,7 @@
 import { Playlist } from "@/types";
 import { createClient } from "@/libs/supabase/client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
 
 /**
@@ -48,7 +48,7 @@ const useGetPlaylist = (playlistId?: string) => {
       }
 
       const { data, error } = await supabaseClient
-        .from("playlists")
+        .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("id", playlistId)
         .maybeSingle();

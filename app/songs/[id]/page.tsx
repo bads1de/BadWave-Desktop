@@ -41,6 +41,7 @@ import useAudioWaveStore from "@/hooks/audio/useAudioWave";
 import useDownloadSong from "@/hooks/utils/useDownloadSong";
 import { electronAPI } from "@/libs/electron";
 import { isLocalSong, getPlayableImagePath } from "@/libs/songUtils";
+import { ROUTES } from "@/constants";
 
 interface SongPageProps {
   params: Promise<{
@@ -359,7 +360,7 @@ const SongPage = (props: SongPageProps) => {
           {/* Genre Tags */}
           <div className="flex flex-wrap gap-3 mb-16">
             {genres.map((genre) => (
-              <Link href={`/genre/${encodeURIComponent(genre)}`} key={genre}>
+              <Link href={ROUTES.GENRE(genre)} key={genre}>
                 <span className="px-5 py-2 border border-theme-500/20 bg-theme-500/5 text-[10px] text-theme-400 font-bold uppercase tracking-[0.2em] hover:bg-theme-500/20 hover:border-theme-500/40 transition-all cursor-pointer">
                   # {genre}
                 </span>
@@ -451,7 +452,7 @@ const SongPage = (props: SongPageProps) => {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {songGenres.map((similarSong) => (
-                  <Link href={`/songs/${similarSong.id}`} key={similarSong.id}>
+                  <Link href={ROUTES.SONGS_DETAIL(similarSong.id)} key={similarSong.id}>
                     <Card className="group relative overflow-hidden bg-[#0a0a0f] border border-theme-500/20 rounded-none p-4 hover:border-theme-500/60 transition-all duration-500 cyber-glitch">
                       <div className="relative aspect-video border border-theme-500/10 overflow-hidden">
                         <Image

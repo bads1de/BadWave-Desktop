@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Song } from "@/types";
 import LatestBoard from "@/components/latest/LatestBoard";
 import { ChevronRight } from "lucide-react";
+import { ROUTES } from "@/constants";
 
 interface LatestSectionProps {
   songs: Song[];
@@ -29,7 +30,7 @@ const LatestSection: React.FC<LatestSectionProps> = ({ songs }) => {
           </div>
         </div>
         <Link
-          href="/songs/all"
+          href={ROUTES.SONGS_ALL}
           className="flex items-center self-start md:self-auto gap-2 text-xs font-mono uppercase tracking-[0.2em] text-theme-500 hover:text-white transition-all duration-300 group border border-theme-500/20 px-4 py-2 bg-theme-500/5 hover:bg-theme-500/20 hover:border-theme-500/50 hover:shadow-[0_0_10px_rgba(var(--theme-500),0.3)] cyber-glitch"
         >
           [ VIEW_ALL ]

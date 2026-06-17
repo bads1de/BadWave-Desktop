@@ -1,6 +1,7 @@
 import { createClient } from "@/libs/supabase/client";
 import { useCallback } from "react";
 import { useUser } from "../auth/useUser";
+import { TABLES } from "@/constants";
 
 /**
  * 再生履歴を管理するカスタムフック
@@ -19,7 +20,7 @@ const usePlayHistory = () => {
       if (!userDetails?.id || !songId) return;
 
       const { error } = await supabase
-        .from("play_history")
+        .from(TABLES.PLAY_HISTORY)
         .insert({ user_id: userDetails.id, song_id: songId });
 
       if (error) {
