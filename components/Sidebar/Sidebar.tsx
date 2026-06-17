@@ -20,7 +20,6 @@ import Hover from "../common/Hover";
 import Image from "next/image";
 import { GoSidebarCollapse } from "react-icons/go";
 import UserCard from "./UserCard";
-import { ROUTES } from "@/constants";
 
 interface SidebarProps {
   children: React.ReactNode;

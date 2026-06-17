@@ -137,7 +137,7 @@ const SongList: React.FC<SongListProps> = memo(
           </Link>
           <div className="flex items-center gap-x-2">
             <Link
-              href={ROUTES.GENRE(data.genre)}
+              href={ROUTES.GENRE(data.genre ?? "")}
               className={!isPlayable ? "pointer-events-none" : ""}
             >
               <p
