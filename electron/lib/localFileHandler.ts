@@ -65,8 +65,28 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
     const rangeHeader = request.headers.get("Range");
     if (rangeHeader) {
       const parts = rangeHeader.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      let start: number;
+      let end: number;
+
+      if (parts[0] === "") {
+        // サフィックス範囲 (例: bytes=-200) → 末尾から 200 バイト
+        const suffixLength = parseInt(parts[1], 10);
+        end = fileSize - 1;
+        start = fileSize - suffixLength;
+      } else {
+        start = parseInt(parts[0], 10);
+        end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      }
+
+      // NaN / 範囲外をクランプ (サフィックス長がファイルサイズを超える等)
+      start = Number.isNaN(start)
+        ? 0
+        : Math.max(0, Math.min(start, fileSize - 1));
+      end = Number.isNaN(end)
+        ? fileSize - 1
+        : Math.max(start, Math.min(end, fileSize - 1));
+
       const chunkSize = end - start + 1;
 
       const stream = fs.createReadStream(filePath, { start, end });

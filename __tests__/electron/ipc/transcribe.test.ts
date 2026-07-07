@@ -145,6 +145,14 @@ describe("IPC: Transcribe", () => {
       );
     });
 
+    it("returns an error object (not a rejection) on invalid input", async () => {
+      // 空文字列は audioPathSchema (min(1)) を満たさないためバリデーションエラーになる。
+      // 修正後は Promise が { status: "error", message } で resolve されること。
+      const result = await invoke("transcribe:generate-lrc", "", "test lyrics");
+      expect(result.status).toBe("error");
+      expect(typeof result.message).toBe("string");
+    });
+
     it("throws error if audioPath contains path traversal", async () => {
       await expect(
         invoke("transcribe:generate-lrc", "C:/Users/test/music/../../windows/system32/cmd.exe", "test lyrics")

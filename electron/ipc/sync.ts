@@ -128,24 +128,28 @@ export function setupSyncHandlers() {
 
       const records = data.map((item) => ({
         id: normalizeId(item.id),
-        userId: String(item.user_id),
+        userId: String(item.user_id || ""),
         title: String(item.title),
         imagePath: item.image_path,
         isPublic: Boolean(item.is_public),
         createdAt: item.createdAt || item.created_at,
       }));
 
-      db.insert(playlists)
-        .values(records)
-        .onConflictDoUpdate({
-          target: playlists.id,
-          set: {
-            title: sql`excluded.title`,
-            imagePath: sql`excluded.image_path`,
-            isPublic: sql`excluded.is_public`,
-          },
-        })
-        .run();
+      // SQLiteのバインド変数上限(999)を超えないようバッチ分割してUPSERT
+      for (let i = 0; i < records.length; i += BATCH_SIZE) {
+        const batch = records.slice(i, i + BATCH_SIZE);
+        db.insert(playlists)
+          .values(batch)
+          .onConflictDoUpdate({
+            target: playlists.id,
+            set: {
+              title: sql`excluded.title`,
+              imagePath: sql`excluded.image_path`,
+              isPublic: sql`excluded.is_public`,
+            },
+          })
+          .run();
+      }
 
       return { success: true, count: data.length };
     } catch (error: unknown) {

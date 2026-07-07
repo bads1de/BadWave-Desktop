@@ -62,6 +62,33 @@ describe("serveLocalFile", () => {
     expect(receivedLength).toBe(1000);
   });
 
+  it("should handle suffix Range requests (bytes=-N)", async () => {
+    const url = new URL(`badwave://file/${encodeURIComponent(testFilePath)}`);
+    const request = new Request(url.toString(), {
+      headers: {
+        Range: "bytes=-200",
+      },
+    });
+    const response = serveLocalFile(request, url);
+
+    expect(response.status).toBe(206);
+    expect(response.headers.get("Content-Length")).toBe("200");
+    expect(response.headers.get("Content-Range")).toBe(
+      `bytes ${testData.length - 200}-${testData.length - 1}/${testData.length}`,
+    );
+
+    const reader = response.body?.getReader();
+    expect(reader).toBeDefined();
+
+    let receivedLength = 0;
+    while (true) {
+      const { done, value } = await reader!.read();
+      if (done) break;
+      receivedLength += value.length;
+    }
+    expect(receivedLength).toBe(200);
+  });
+
   it("should handle client cancel without throwing Uncaught Exception", async () => {
     const url = new URL(`badwave://file/${encodeURIComponent(testFilePath)}`);
     const request = new Request(url.toString());

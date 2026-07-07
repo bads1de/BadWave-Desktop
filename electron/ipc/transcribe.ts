@@ -24,16 +24,31 @@ export function setupTranscriptionHandlers() {
     async (_event, rawAudioPath: string, rawLyricsText: string) => {
       return new Promise((resolve) => {
         // 入力検証: 長さ制限と基本型チェック
-        const audioPath = validateInput(
-          audioPathSchema,
-          rawAudioPath,
-          "transcribe:generate-lrc:audioPath",
-        );
-        const lyricsText = validateInput(
-          lyricsTextSchema,
-          rawLyricsText,
-          "transcribe:generate-lrc:lyricsText",
-        );
+        let audioPath: string;
+        let lyricsText: string;
+        try {
+          audioPath = validateInput(
+            audioPathSchema,
+            rawAudioPath,
+            "transcribe:generate-lrc:audioPath",
+          );
+          lyricsText = validateInput(
+            lyricsTextSchema,
+            rawLyricsText,
+            "transcribe:generate-lrc:lyricsText",
+          );
+        } catch (validationError) {
+          // バリデーション失敗は例外ではなく、クライアントが期待する
+          // { status: "error", message } 形式で返す
+          resolve({
+            status: "error",
+            message:
+              validationError instanceof Error
+                ? validationError.message
+                : "Invalid input",
+          });
+          return;
+        }
         // Python環境のパス解決
         const isDev = !app.isPackaged;
         let pythonPath = "";

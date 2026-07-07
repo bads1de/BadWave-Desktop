@@ -128,7 +128,12 @@ export const songDownloadPayloadSchema = z.object({
   title: z.string().min(1).max(500),
   author: z.string().min(1).max(500),
   song_path: z.string().url().max(MAX_URL_LENGTH),
-  image_path: z.string().url().max(MAX_URL_LENGTH),
+  image_path: z
+    .string()
+    .url()
+    .max(MAX_URL_LENGTH)
+    .optional()
+    .or(z.literal("")),
   duration: z.number().int().nonnegative().optional(),
   genre: z.string().max(100).optional(),
   lyrics: z.string().max(MAX_LYRICS_LENGTH).optional(),

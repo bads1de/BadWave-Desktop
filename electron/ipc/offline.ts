@@ -72,8 +72,11 @@ export const setupOfflineDownloadHandlers = () => {
             if (response.statusCode === 301 || response.statusCode === 302) {
               const redirectUrl = response.headers.location;
               if (redirectUrl) {
-                file.close();
-                downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+                // ハンドルを完全に閉じてから再帰的にダウンロードし直す
+                // (Windows で同一パスを同時に開こうとすると EBUSY になるのを防ぐ)
+                file.close(() => {
+                  downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+                });
                 return;
               }
             }

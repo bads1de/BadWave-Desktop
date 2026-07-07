@@ -184,6 +184,34 @@ describe("electron/lib/ipc-validate", () => {
         songDownloadPayloadSchema.parse({ id: "123" }),
       ).toThrow();
     });
+
+    it("should accept a valid payload without image_path (image is optional)", () => {
+      const payload = {
+        id: "song-123",
+        userId: "user-456",
+        title: "Test Song",
+        author: "Test Artist",
+        song_path: "https://example.com/song.mp3",
+        created_at: "2024-01-01T00:00:00Z",
+      };
+      const result = songDownloadPayloadSchema.parse(payload);
+      expect(result.id).toBe("song-123");
+      expect(result.image_path).toBeUndefined();
+    });
+
+    it("should treat an empty image_path as valid", () => {
+      const payload = {
+        id: "song-123",
+        userId: "user-456",
+        title: "Test Song",
+        author: "Test Artist",
+        song_path: "https://example.com/song.mp3",
+        image_path: "",
+        created_at: "2024-01-01T00:00:00Z",
+      };
+      const result = songDownloadPayloadSchema.parse(payload);
+      expect(result.image_path).toBe("");
+    });
   });
 
   describe("cachedUserSchema", () => {

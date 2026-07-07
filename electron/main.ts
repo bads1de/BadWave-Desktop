@@ -4,6 +4,7 @@ import { getDb } from "./db/client";
 
 // モジュールのインポート
 import { registerProtocolHandlers, registerSchemes } from "./lib/protocol";
+import { isNavigationAllowed } from "./lib/navigation";
 import { createMainWindow } from "./lib/window-manager";
 import { setupTray, destroyTray } from "./lib/tray";
 import { startOAuthServer, stopOAuthServer } from "./lib/oauth-server";
@@ -79,16 +80,12 @@ function setupIPC() {
 // すべてのWebContentsに対するグローバルセキュリティ制約
 app.on("web-contents-created", (event, contents) => {
   // 予期しないページ遷移（ナビゲーション）を制限する
-  contents.on("will-navigate", (navigateEvent, navigationUrl) => {
-    const allowed =
-      navigationUrl.startsWith("http://localhost:") ||
-      navigationUrl.startsWith("badwave://");
-
-    if (!allowed) {
-      debugLog(`Blocked navigation attempt to: ${navigationUrl}`);
-      navigateEvent.preventDefault();
-    }
-  });
+    contents.on("will-navigate", (navigateEvent, navigationUrl) => {
+      if (!isNavigationAllowed(navigationUrl)) {
+        debugLog(`Blocked navigation attempt to: ${navigationUrl}`);
+        navigateEvent.preventDefault();
+      }
+    });
 
   // 安全な外部リンクのみをデフォルトブラウザで開くようにする
   contents.setWindowOpenHandler(({ url: openUrl }) => {
