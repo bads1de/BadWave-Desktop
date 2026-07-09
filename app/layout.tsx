@@ -9,6 +9,7 @@ import OfflineIndicator from "@/components/common/OfflineIndicator";
 import OfflineRedirector from "@/components/common/OfflineRedirector";
 
 import ModalProvider from "@/providers/ModalProvider";
+import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import ThemeProvider from "@/providers/ThemeProvider";
 import PlaybackStateProvider from "@/providers/PlaybackStateProvider";
 
@@ -61,6 +62,7 @@ export default function RootLayout({
                       <RightSidebar>{children}</RightSidebar>
                     </Sidebar>
                     <Player />
+                    <KeyboardShortcuts />
                   </div>
                   <OfflineIndicator />
                   <OfflineRedirector />
