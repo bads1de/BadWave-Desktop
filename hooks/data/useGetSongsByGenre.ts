@@ -3,6 +3,7 @@ import { useQuery, onlineManager } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * 指定したジャンルの曲一覧を取得するカスタムフック (オフライン対応)
@@ -54,7 +55,7 @@ const useGetSongsByGenre = (genre: string | string[]) => {
           return undefined;
         }
         console.error("Error fetching songs by genre:", error.message);
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return (data as Song[]) || [];

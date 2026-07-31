@@ -4,6 +4,7 @@ import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { useSyncBase } from "./useSyncBase";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * スポットライト情報をバックグラウンドで同期する Syncer フック
@@ -19,7 +20,7 @@ export const useSyncSpotlight = (options?: { autoSync?: boolean }) => {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) throw new Error(getErrorMessage(error));
     if (!data) return { success: true as const, count: 0 };
 
     // 1. メタデータを保存 (Videos)

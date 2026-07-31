@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { extractSongsFromJoin } from "@/libs/songUtils";
 import { useSyncBase } from "./useSyncBase";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * Liked Songs をバックグラウンドで同期する Syncer フック
@@ -31,7 +32,7 @@ export const useSyncLikedSongs = (options?: { autoSync?: boolean }) => {
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) throw new Error(getErrorMessage(error));
 
     if (!data) return { success: true as const, count: 0 };
 

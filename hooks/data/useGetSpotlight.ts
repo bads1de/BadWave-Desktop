@@ -3,6 +3,7 @@ import { useQuery, onlineManager } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * スポットライトデータを取得するカスタムフック (クライアントサイド)
@@ -49,7 +50,7 @@ const useGetSpotlight = (initialData?: Spotlight[]) => {
           return [];
         }
         console.error("Error fetching spotlights:", error.message);
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return (data as Spotlight[]) || [];

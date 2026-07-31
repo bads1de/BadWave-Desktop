@@ -4,6 +4,7 @@ import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { useSyncBase } from "./useSyncBase";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * 全曲をバックグラウンドで同期する Syncer フック
@@ -30,7 +31,7 @@ export const useSyncAllSongs = (options?: { autoSync?: boolean }) => {
         .order("created_at", { ascending: false })
         .range(offset, offset + pageSize - 1);
 
-      if (error) throw error;
+      if (error) throw new Error(getErrorMessage(error));
 
       if (data && data.length > 0) {
         await electronAPI.cache.syncSongsMetadata(data);

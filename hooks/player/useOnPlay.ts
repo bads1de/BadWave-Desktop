@@ -5,6 +5,7 @@ import { createClient } from "@/libs/supabase/client";
 import usePlayHistory from "./usePlayHistory";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { useDebouncedCallback } from "use-debounce";
+import { getErrorMessage } from "@/electron/lib/error";
 
 const DEFAULT_COOLDOWN = 1000;
 
@@ -57,7 +58,7 @@ const useOnPlay = (songs: Song[]) => {
 
           if (rpcError) {
             console.error("RPC Error:", rpcError);
-            throw rpcError;
+            throw new Error(getErrorMessage(rpcError));
           }
 
           // 再生履歴を記録（Supabaseに保存するためオンライン時のみ）

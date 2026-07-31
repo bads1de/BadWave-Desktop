@@ -3,6 +3,7 @@ import { useQuery, onlineManager } from "@tanstack/react-query";
 import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { isNetworkError } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * タイトルで曲を検索するカスタムフック (オフライン対応)
@@ -49,7 +50,7 @@ const useGetSongsByTitle = (title: string) => {
           );
                       return [];        }
         console.error("Error fetching songs by title:", error.message);
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return (data as Song[]) || [];

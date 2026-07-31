@@ -9,8 +9,20 @@ import {
   spotlights,
 } from "../db/schema";
 import { normalizeId } from "../utils";
+import {
+  mapSyncPlaylistToRow,
+  mapSyncSongToRow,
+  mapSyncSpotlightToRow,
+  SongDownloadedFields,
+  SpotlightDownloadedFields,
+} from "../utils/syncMapper";
 import { inArray, sql } from "drizzle-orm";
 import { getErrorMessage } from "../lib/error";
+import type {
+  PlaylistForSync,
+  SongForSync,
+  SpotlightForSync,
+} from "../../types";
 
 // SQLiteのバインド変数上限 (SQLITE_MAX_VARIABLE_NUMBER) を考慮したバッチサイズ
 // songs: 17カラム → 999 / 17 ≈ 58曲/batch
@@ -25,21 +37,13 @@ export function setupSyncHandlers() {
    * 既存レコードを1クエリでプリフェッチし、downloaded fields (songPath, imagePath, videoPath, downloadedAt)
    * を保持したままバルクINSERTする。SQLite変数制限(999)を超えないようバッチ分割する。
    */
-  function internalSyncSongs(songsData: { id: string; title: string; author: string; song_path: string; image_path: string; genre?: string; count?: number; like_count?: number; created_at: string; user_id?: string; video_path?: string; duration?: number; lyrics?: string }[]) {
+  function internalSyncSongs(songsData: SongForSync[]) {
     if (songsData.length === 0) return 0;
 
     const ids = songsData.map((song) => normalizeId(song.id));
 
     // 1. 既存レコードのdownloaded fieldsをバッチでプリフェッチ
-    const existingMap = new Map<
-      string,
-      {
-        songPath: string | null;
-        imagePath: string | null;
-        videoPath: string | null;
-        downloadedAt: Date | null;
-      }
-    >();
+    const existingMap = new Map<string, SongDownloadedFields>();
 
     for (let i = 0; i < ids.length; i += BATCH_SIZE) {
       const batchIds = ids.slice(i, i + BATCH_SIZE);
@@ -61,30 +65,9 @@ export function setupSyncHandlers() {
     }
 
     // 2. 全レコードを構築（downloaded fieldsは既存値を保持）
-    const records = songsData.map((song) => {
-      const songId = normalizeId(song.id);
-      const existing = existingMap.get(songId);
-
-      return {
-        id: songId,
-        userId: String(song.user_id || ""),
-        title: String(song.title || "Unknown Title"),
-        author: String(song.author || "Unknown Author"),
-        songPath: existing?.songPath ?? null,
-        imagePath: existing?.imagePath ?? null,
-        videoPath: existing?.videoPath ?? null,
-        originalSongPath: song.song_path,
-        originalImagePath: song.image_path,
-        originalVideoPath: song.video_path,
-        duration: song.duration ? Number(song.duration) : null,
-        genre: song.genre,
-        lyrics: song.lyrics,
-        playCount: song.count ? Number(song.count) : 0,
-        likeCount: song.like_count ? Number(song.like_count) : 0,
-        createdAt: song.created_at,
-        downloadedAt: existing?.downloadedAt ?? null,
-      };
-    });
+    const records = songsData.map((song) =>
+      mapSyncSongToRow(song, existingMap.get(normalizeId(song.id)))
+    );
 
     // 3. バルクUPSERT（バッチ分割して変数制限を回避）
     for (let i = 0; i < records.length; i += BATCH_SIZE) {
@@ -113,7 +96,7 @@ export function setupSyncHandlers() {
     return songsData.length;
   }
 
-  ipcMain.handle("sync-songs-metadata", async (_, data: { id: string; title: string; author: string; song_path: string; image_path: string; genre?: string; count?: number; like_count?: number; created_at: string; user_id?: string; video_path?: string; duration?: number; lyrics?: string }[]) => {
+  ipcMain.handle("sync-songs-metadata", async (_, data: SongForSync[]) => {
     try {
       const count = internalSyncSongs(data);
       return { success: true, count };
@@ -122,18 +105,11 @@ export function setupSyncHandlers() {
     }
   });
 
-  ipcMain.handle("sync-playlists", async (_, data: { id: string; title: string; image_path?: string; is_public: boolean; created_at: string; user_name?: string; user_id?: string; createdAt?: string }[]) => {
+  ipcMain.handle("sync-playlists", async (_, data: PlaylistForSync[]) => {
     try {
       if (data.length === 0) return { success: true, count: 0 };
 
-      const records = data.map((item) => ({
-        id: normalizeId(item.id),
-        userId: String(item.user_id || ""),
-        title: String(item.title),
-        imagePath: item.image_path,
-        isPublic: Boolean(item.is_public),
-        createdAt: item.createdAt || item.created_at,
-      }));
+      const records = data.map(mapSyncPlaylistToRow);
 
       // SQLiteのバインド変数上限(999)を超えないようバッチ分割してUPSERT
       for (let i = 0; i < records.length; i += BATCH_SIZE) {
@@ -161,7 +137,7 @@ export function setupSyncHandlers() {
     "sync-playlist-songs",
     async (
       _,
-      { playlistId, songs: fullSongsData }: { playlistId: string; songs: { id: string; title: string; author: string; song_path: string; image_path: string; created_at: string }[] }
+      { playlistId, songs: fullSongsData }: { playlistId: string; songs: SongForSync[] }
     ) => {
       try {
         db.transaction(() => {
@@ -191,7 +167,7 @@ export function setupSyncHandlers() {
     "sync-liked-songs",
     async (
       _,
-      { userId, songs: fullSongsData }: { userId: string; songs: { id: string; title: string; author: string; song_path: string; image_path: string; created_at: string }[] }
+      { userId, songs: fullSongsData }: { userId: string; songs: SongForSync[] }
     ) => {
       try {
         db.transaction(() => {
@@ -217,20 +193,13 @@ export function setupSyncHandlers() {
     }
   );
 
-  ipcMain.handle("sync-spotlights-metadata", async (_, data: { id: string; video_path: string; title: string; author: string; genre?: string; description?: string; thumbnail_path?: string; created_at?: string }[]) => {
+  ipcMain.handle("sync-spotlights-metadata", async (_, data: SpotlightForSync[]) => {
     try {
       if (data.length === 0) return { success: true, count: 0 };
 
       // 既存レコードのdownloaded fieldsをバッチでプリフェッチ
       const ids = data.map((item) => normalizeId(item.id));
-      const existingMap = new Map<
-        string,
-        {
-          videoPath: string | null;
-          thumbnailPath: string | null;
-          downloadedAt: Date | null;
-        }
-      >();
+      const existingMap = new Map<string, SpotlightDownloadedFields>();
 
       for (let i = 0; i < ids.length; i += BATCH_SIZE) {
         const batchIds = ids.slice(i, i + BATCH_SIZE);
@@ -250,24 +219,9 @@ export function setupSyncHandlers() {
         }
       }
 
-      const records = data.map((item) => {
-        const id = normalizeId(item.id);
-        const existing = existingMap.get(id);
-
-        return {
-          id,
-          title: String(item.title || "Unknown Title"),
-          author: String(item.author || "Unknown Author"),
-          description: item.description,
-          genre: item.genre,
-          originalVideoPath: item.video_path,
-          originalThumbnailPath: item.thumbnail_path,
-          createdAt: item.created_at,
-          videoPath: existing?.videoPath ?? null,
-          thumbnailPath: existing?.thumbnailPath ?? null,
-          downloadedAt: existing?.downloadedAt ?? null,
-        };
-      });
+      const records = data.map((item) =>
+        mapSyncSpotlightToRow(item, existingMap.get(normalizeId(item.id)))
+      );
 
       // バッチ分割してバルクUPSERT
       for (let i = 0; i < records.length; i += BATCH_SIZE) {

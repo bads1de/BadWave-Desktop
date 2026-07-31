@@ -181,7 +181,7 @@ const useEditSongMutation = (editModal: EditModalHook) => {
         .eq("id", id);
 
       if (error) {
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       // Electron環境: ローカルDB (キャッシュ) を即座に更新

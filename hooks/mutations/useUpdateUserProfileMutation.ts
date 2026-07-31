@@ -58,7 +58,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
 
       if (error) {
         toast.error(getErrorMessage(error));
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return { userId, fullName };
@@ -142,7 +142,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
 
       if (error) {
         toast.error(getErrorMessage(error));
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return { userId, avatarUrl };
@@ -178,7 +178,7 @@ const useUpdateUserProfileMutation = (accountModal: AccountModalHook) => {
 
       if (error) {
         toast.error(getErrorMessage(error));
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return { success: true };

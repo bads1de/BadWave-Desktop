@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { extractSongsFromJoin } from "@/libs/songUtils";
 import { useSyncBase } from "./useSyncBase";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * 特定のプレイリスト内の曲をバックグラウンドで同期する Syncer フック
@@ -33,7 +34,7 @@ export const useSyncPlaylistSongs = (
       .eq("playlist_id", playlistId!)
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) throw new Error(getErrorMessage(error));
 
     if (!data) return { success: true as const, count: 0 };
 

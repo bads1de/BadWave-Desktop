@@ -57,7 +57,7 @@ const useGetSongs = (initialData?: Song[], limit: number = 12) => {
           return undefined;
         }
         console.error("Error fetching songs:", getErrorMessage(error));
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return (data as Song[]) || [];

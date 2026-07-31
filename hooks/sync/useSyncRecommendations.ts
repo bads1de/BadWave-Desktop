@@ -7,6 +7,7 @@ import { CACHED_QUERIES } from "@/constants";
 import { Song, SongWithRecommendation } from "@/types";
 import { mapRecommendationToSong } from "@/libs/songUtils";
 import { useSyncBase } from "./useSyncBase";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * おすすめ曲（Recommendations）をバックグラウンドで同期する Syncer フック
@@ -26,7 +27,7 @@ export const useSyncRecommendations = (
       p_limit: limit,
     });
 
-    if (error) throw error;
+    if (error) throw new Error(getErrorMessage(error));
     if (!data) return { success: true as const, count: 0 };
 
     const songs: Song[] = data.map((item: SongWithRecommendation) =>

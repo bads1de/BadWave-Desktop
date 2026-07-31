@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { subMonths, subWeeks, subDays } from "date-fns";
 import { useSyncBase } from "./useSyncBase";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * トレンド情報をバックグラウンドで同期する Syncer フック
@@ -36,7 +37,7 @@ export const useSyncTrends = (
       .order("count", { ascending: false })
       .limit(10);
 
-    if (error) throw error;
+    if (error) throw new Error(getErrorMessage(error));
     if (!data) return { success: true as const, count: 0 };
 
     // 1. メタデータを保存

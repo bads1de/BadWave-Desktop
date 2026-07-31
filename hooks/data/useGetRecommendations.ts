@@ -5,6 +5,7 @@ import { createClient } from "@/libs/supabase/client";
 import { useUser } from "@/hooks/auth/useUser";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
 import { mapRecommendationToSong } from "@/libs/songUtils";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * おすすめ曲を取得するカスタムフック (クライアントサイド)
@@ -65,7 +66,7 @@ const useGetRecommendations = (initialData?: Song[], limit: number = 10) => {
             return undefined;
           }
           console.error("Error fetching recommendations:", error);
-          throw error;
+          throw new Error(getErrorMessage(error));
         }
 
         if (!data) return [];

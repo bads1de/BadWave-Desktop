@@ -122,3 +122,19 @@ export const sectionCache = sqliteTable("section_cache", {
     .default(sql`(unixepoch())`)
     .$onUpdate(() => new Date()),
 });
+
+// ============================================================================
+// 推定型: テーブル定義を起点に生成する (types/index.ts との二重管理を避ける)
+// ============================================================================
+
+export type SongRow = typeof songs.$inferSelect;
+export type SongInsertRow = typeof songs.$inferInsert;
+
+export type PlaylistRow = typeof playlists.$inferSelect;
+export type PlaylistInsertRow = typeof playlists.$inferInsert;
+
+export type PlaylistSongRow = typeof playlistSongs.$inferSelect;
+export type LikedSongRow = typeof likedSongs.$inferSelect;
+export type SpotlightRow = typeof spotlights.$inferSelect;
+export type SpotlightInsertRow = typeof spotlights.$inferInsert;
+export type SectionCacheRow = typeof sectionCache.$inferSelect;

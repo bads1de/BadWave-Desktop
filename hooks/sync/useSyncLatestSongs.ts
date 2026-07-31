@@ -4,6 +4,7 @@ import { electronAPI } from "@/libs/electron/index";
 import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { useSyncBase } from "./useSyncBase";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * 最新曲（Latest Songs）をバックグラウンドで同期する Syncer フック
@@ -23,7 +24,7 @@ export const useSyncLatestSongs = (
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
+    if (error) throw new Error(getErrorMessage(error));
     if (!data) return { success: true as const, count: 0 };
 
     // 1. メタデータを保存

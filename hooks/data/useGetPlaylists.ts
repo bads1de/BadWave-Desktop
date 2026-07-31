@@ -48,7 +48,7 @@ const useGetPlaylists = () => {
 
       if (error) {
         console.error("Error fetching playlists:", getErrorMessage(error));
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return (data as Playlist[]) || [];

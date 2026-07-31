@@ -3,6 +3,7 @@ import { createClient } from "@/libs/supabase/client";
 import { Playlist } from "@/types";
 import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { isNetworkError } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * タイトルでパブリックプレイリストを検索するカスタムフック (オフライン対応)
@@ -52,7 +53,7 @@ const useGetPlaylistsByTitle = (title: string) => {
           return [];
         }
         console.error("Error fetching playlists by title:", error.message);
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return (data as Playlist[]) || [];

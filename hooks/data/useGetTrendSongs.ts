@@ -4,6 +4,7 @@ import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { subMonths, subWeeks, subDays } from "date-fns";
 import { isNetworkError, electronAPI } from "@/libs/electron/index";
+import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * トレンド曲を取得するカスタムフック
@@ -70,7 +71,7 @@ const useGetTrendSongs = (
           return undefined;
         }
         console.error("Error fetching trend songs:", error.message);
-        throw error;
+        throw new Error(getErrorMessage(error));
       }
 
       return (data as Song[]) || [];
