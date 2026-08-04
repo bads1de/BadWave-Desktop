@@ -26,7 +26,7 @@ const mockSupabase = {
   from: jest.fn().mockReturnThis(),
   select: jest.fn().mockReturnThis(),
   eq: jest.fn().mockReturnThis(),
-  single: jest
+  maybeSingle: jest
     .fn()
     .mockImplementation(() => Promise.resolve({ data: null, error: null })),
 };
@@ -64,7 +64,7 @@ describe("useGetPlaylist (Offline Support)", () => {
   });
 
   it("オンライン時はAPIからプレイリスト情報を取得する", async () => {
-    mockSupabase.single.mockResolvedValue({
+    mockSupabase.maybeSingle.mockResolvedValue({
       data: mockPlaylist,
       error: null,
     });

@@ -23,7 +23,7 @@ jest.mock("@/libs/electron/index", () => ({
 }));
 
 const mockSingle = jest.fn();
-const mockEq = jest.fn(() => ({ single: mockSingle }));
+const mockEq = jest.fn(() => ({ maybeSingle: mockSingle }));
 const mockSelect = jest.fn(() => ({ eq: mockEq }));
 const mockFrom = jest.fn(() => ({ select: mockSelect }));
 
@@ -130,7 +130,10 @@ describe("useGetPlaylist", () => {
 
     it("should handle Supabase error", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-      mockSingle.mockResolvedValue({ data: null, error: { message: "Error" } });
+      mockSingle.mockResolvedValue({
+        data: { id: "p1", title: "Remote Playlist" },
+        error: { message: "Error" },
+      });
 
       const { result } = renderHook(() => useGetPlaylist("p1"), {
         wrapper: createWrapper(),

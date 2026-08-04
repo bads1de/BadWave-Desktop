@@ -5,6 +5,11 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import EditModal from "@/components/modals/EditModal";
 
+jest.mock("@/actions/r2", () => ({
+  uploadFileToR2: jest.fn(),
+  deleteFileFromR2: jest.fn(),
+}));
+
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
   useMutation: () => ({ mutateAsync: jest.fn(), isPending: false }),

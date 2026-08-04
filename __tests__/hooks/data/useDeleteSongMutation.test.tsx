@@ -76,7 +76,7 @@ describe("useDeleteSongMutation", () => {
   it("正常に曲を削除できる", async () => {
     // Mock delete chain
     const mockDeletedSong = {
-      id: 123,
+      id: "123",
       song_path: "https://example.com/songs/song-file.mp3",
       image_path: "https://example.com/images/image-file.jpg",
     };
@@ -103,7 +103,7 @@ describe("useDeleteSongMutation", () => {
     // DB削除が呼ばれたことを確認
     expect(mockDelete).toHaveBeenCalled();
     expect(mockEqUserId).toHaveBeenCalledWith("user_id", "test-user-id");
-    expect(mockEqId).toHaveBeenCalledWith("id", 123);
+    expect(mockEqId).toHaveBeenCalledWith("id", "123");
 
     // R2からファイルが削除されたことを確認
     expect(mockDeleteFileFromR2).toHaveBeenCalledWith("song", "song-file.mp3");
@@ -180,7 +180,7 @@ describe("useDeleteSongMutation", () => {
 
   it("isPending状態が正しく管理される", async () => {
     const mockDeletedSong = {
-      id: 123,
+      id: "123",
       song_path: "https://example.com/songs/song.mp3",
       image_path: "https://example.com/images/image.jpg",
     };

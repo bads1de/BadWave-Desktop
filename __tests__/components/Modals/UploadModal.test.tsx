@@ -8,6 +8,11 @@ import { useUploadModal } from "@/hooks/modal/useUploadModal";
 
 jest.mock("@/hooks/modal/useUploadModal");
 
+jest.mock("@/actions/r2", () => ({
+  uploadFileToR2: jest.fn(),
+  deleteFileFromR2: jest.fn(),
+}));
+
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
   useMutation: () => ({ mutateAsync: jest.fn(), isPending: false }),

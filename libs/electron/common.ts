@@ -68,7 +68,15 @@ export const getPlatform = (): string => {
 export const isNetworkError = (error: unknown): boolean => {
   if (!error) return false;
 
-  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string"
+      ? (error as { message: string }).message
+      : String(error);
   const networkErrorPatterns = [
     "Failed to fetch",
     "NetworkError",
