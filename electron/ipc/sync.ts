@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain } from "electron";
 import { getDb } from "../db/client";
 import {
@@ -96,7 +97,7 @@ export function setupSyncHandlers() {
     return songsData.length;
   }
 
-  ipcMain.handle("sync-songs-metadata", async (_, data: SongForSync[]) => {
+  ipcMain.handle(CHANNELS.SYNC_SONGS_METADATA, async (_, data: SongForSync[]) => {
     try {
       const count = internalSyncSongs(data);
       return { success: true, count };
@@ -105,7 +106,7 @@ export function setupSyncHandlers() {
     }
   });
 
-  ipcMain.handle("sync-playlists", async (_, data: PlaylistForSync[]) => {
+  ipcMain.handle(CHANNELS.SYNC_PLAYLISTS, async (_, data: PlaylistForSync[]) => {
     try {
       if (data.length === 0) return { success: true, count: 0 };
 
@@ -134,7 +135,7 @@ export function setupSyncHandlers() {
   });
 
   ipcMain.handle(
-    "sync-playlist-songs",
+    CHANNELS.SYNC_PLAYLIST_SONGS,
     async (
       _,
       { playlistId, songs: fullSongsData }: { playlistId: string; songs: SongForSync[] }
@@ -164,7 +165,7 @@ export function setupSyncHandlers() {
   );
 
   ipcMain.handle(
-    "sync-liked-songs",
+    CHANNELS.SYNC_LIKED_SONGS,
     async (
       _,
       { userId, songs: fullSongsData }: { userId: string; songs: SongForSync[] }
@@ -193,7 +194,7 @@ export function setupSyncHandlers() {
     }
   );
 
-  ipcMain.handle("sync-spotlights-metadata", async (_, data: SpotlightForSync[]) => {
+  ipcMain.handle(CHANNELS.SYNC_SPOTLIGHTS_METADATA, async (_, data: SpotlightForSync[]) => {
     try {
       if (data.length === 0) return { success: true, count: 0 };
 
@@ -250,7 +251,7 @@ export function setupSyncHandlers() {
   });
 
   ipcMain.handle(
-    "sync-section",
+    CHANNELS.SYNC_SECTION,
     async (_, { key, data }: { key: string; data: { id: string }[] }) => {
       try {
         const itemIds = data.map((item) => normalizeId(item.id));

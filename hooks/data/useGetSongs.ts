@@ -1,75 +1,46 @@
 import { Song } from "@/types";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
-import { isNetworkError, electronAPI } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * 最新曲を取得するカスタムフック (クライアントサイド)
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
+ * Electron環境ではローカルキャッシュから、Web環境では Supabase から取得。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  *
  * @param {Song[]} initialData - サーバーから取得した初期データ（Optional）
  * @param {number} limit - 取得する曲数の上限
- * @returns {Object} 曲の取得状態と結果
  */
 const useGetSongs = (initialData?: Song[], limit: number = 12) => {
-  const supabase = createClient();
-
-  const queryKey = [CACHED_QUERIES.songs, limit];
-
   const {
     data: songs = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
-      // Electron環境: ローカルキャッシュから取得
-      // Latest Songs (id: home_latest_songs) として取得
-      if (electronAPI.isElectron()) {
-        const cacheKey = "home_latest_songs";
-        const cachedSongs = await electronAPI.cache.getSectionData(
-          cacheKey,
-          "songs"
-        );
-        return (cachedSongs as unknown as Song[]) || [];
-      }
-
-      // オフライン時はフェッチをスキップしてundefinedを返す（キャッシュがあればそれを使用）
-      if (!onlineManager.isOnline()) {
-        return undefined;
-      }
-
-      const { data, error } = await supabase
+    isPaused,
+  } = useSectionQuery<Song[]>({
+    queryKey: [CACHED_QUERIES.songs, limit],
+    electron: { sectionKey: "home_latest_songs", sectionType: "songs" },
+    emptySectionFallback: [],
+    offlineFallback: [],
+    initialData,
+    networkMode: "always",
+    webFn: async () => {
+      const { data, error } = await createClient()
         .from(TABLES.SONGS)
         .select("*")
         .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error) {
-        // オフラインまたはネットワークエラーの場合はログのみ
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log("[useGetSongs] Fetch skipped: offline/network error");
-          return undefined;
-        }
-        console.error("Error fetching songs:", getErrorMessage(error));
         throw new Error(getErrorMessage(error));
       }
 
       return (data as Song[]) || [];
     },
-    initialData: initialData,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
-    networkMode: "always",
   });
-
-  const isPaused = fetchStatus === "paused";
 
   return { songs, isLoading, error, isPaused };
 };

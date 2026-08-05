@@ -5,7 +5,7 @@ import { createClient } from "@/libs/supabase/client";
 import usePlayHistory from "./usePlayHistory";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { useDebouncedCallback } from "use-debounce";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 
 const DEFAULT_COOLDOWN = 1000;
 

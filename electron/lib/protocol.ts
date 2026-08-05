@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { protocol } from "electron";
 import * as url from "url";
 import { serveLocalFile } from "./localFileHandler";
@@ -53,7 +54,7 @@ function handleAuthCallback(urlObj: URL): Response {
 
   if (error) {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("auth-callback", { error });
+      mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { error });
     }
     return new Response(
       HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"),
@@ -63,7 +64,7 @@ function handleAuthCallback(urlObj: URL): Response {
 
   if (code) {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("auth-callback", { code });
+      mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { code });
     }
     return new Response(
       HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"),

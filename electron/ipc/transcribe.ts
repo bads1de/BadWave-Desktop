@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain, app } from "electron";
 import { spawn } from "child_process";
 import * as path from "path";
@@ -20,7 +21,7 @@ export function setupTranscriptionHandlers() {
    * @param lyricsText 歌詞テキスト
    */
   ipcMain.handle(
-    "transcribe:generate-lrc",
+    CHANNELS.GENERATE_LRC,
     async (_event, rawAudioPath: string, rawLyricsText: string) => {
       return new Promise((resolve) => {
         // 入力検証: 長さ制限と基本型チェック

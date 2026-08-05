@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { globalShortcut, session, BrowserWindow } from "electron";
 import { getMainWindow } from "../lib/window-manager";
 import { debugLog } from "../utils";
@@ -44,7 +45,7 @@ export function setupDevShortcuts() {
       }
 
       // レンダラーに通知を送信
-      mainWindow.webContents.send("offline-simulation-changed", newState);
+      mainWindow.webContents.send(CHANNELS.OFFLINE_SIMULATION_CHANGED, newState);
     }
 
     debugLog(

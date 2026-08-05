@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain, session } from "electron";
 import { z } from "zod";
 import store from "../lib/store";
@@ -23,15 +24,15 @@ export function setIsSimulatingOffline(value: boolean) {
 
 export function setupSettingsHandlers() {
   // アプリケーション設定の取得
-  ipcMain.handle("get-store-value", (_, rawKey: string) => {
+  ipcMain.handle(CHANNELS.GET_STORE_VALUE, (_, rawKey: string) => {
     // キーインジェクション対策: 許可された文字種のみ
-    const key = validateInput(storeKeySchema, rawKey, "get-store-value");
+    const key = validateInput(storeKeySchema, rawKey, CHANNELS.GET_STORE_VALUE);
     return store.get(key);
   });
 
   // アプリケーション設定の保存
   ipcMain.handle(
-    "set-store-value",
+    CHANNELS.SET_STORE_VALUE,
     (_, rawKey: string, rawValue: unknown) => {
       const key = validateInput(storeKeySchema, rawKey, "set-store-value:key");
       const value = validateInput(storeValueSchema, rawValue, "set-store-value:value");
@@ -41,7 +42,7 @@ export function setupSettingsHandlers() {
   );
 
   // オフラインモードのシミュレーションを切り替え（開発用）
-  ipcMain.handle("toggle-offline-simulation", async () => {
+  ipcMain.handle(CHANNELS.TOGGLE_OFFLINE_SIMULATION, async () => {
     isSimulatingOffline = !isSimulatingOffline;
 
     session.defaultSession.enableNetworkEmulation({
@@ -55,13 +56,13 @@ export function setupSettingsHandlers() {
   });
 
   // 現在のオフラインシミュレーション状態を取得
-  ipcMain.handle("get-offline-simulation-status", () => {
+  ipcMain.handle(CHANNELS.GET_OFFLINE_SIMULATION_STATUS, () => {
     return { isOffline: isSimulatingOffline };
   });
 
   // オフラインシミュレーションを設定（明示的に ON/OFF）
-  ipcMain.handle("set-offline-simulation", async (_, rawOffline: unknown) => {
-    const offline = validateInput(booleanSchema, rawOffline, "set-offline-simulation");
+  ipcMain.handle(CHANNELS.SET_OFFLINE_SIMULATION, async (_, rawOffline: unknown) => {
+    const offline = validateInput(booleanSchema, rawOffline, CHANNELS.SET_OFFLINE_SIMULATION);
     isSimulatingOffline = offline;
 
     session.defaultSession.enableNetworkEmulation({

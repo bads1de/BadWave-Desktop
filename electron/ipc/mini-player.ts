@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain, BrowserWindow } from "electron";
 import {
   getMiniPlayerWindow,
@@ -11,14 +12,14 @@ import {
  */
 export function setupMiniPlayerHandlers() {
   // ミニプレイヤーを開く
-  ipcMain.handle("mini-player:open", async () => {
+  ipcMain.handle(CHANNELS.MINI_PLAYER_OPEN, async () => {
     try {
       await createMiniPlayer();
 
       // メインウィンドウに状態再送信をリクエスト（ウィンドウが新規作成されたかどうかにかかわらず実行）
       const mainWindow = getMainWindow();
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("mini-player:request-state");
+        mainWindow.webContents.send(CHANNELS.MINI_PLAYER_REQUEST_STATE);
       }
 
       return { success: true };
@@ -29,7 +30,7 @@ export function setupMiniPlayerHandlers() {
   });
 
   // ミニプレイヤーを閉じる
-  ipcMain.handle("mini-player:close", (event) => {
+  ipcMain.handle(CHANNELS.MINI_PLAYER_CLOSE, (event) => {
     try {
       // event.senderからウィンドウを取得して閉じる（ミニプレイヤー自身から呼ばれた場合）
       const callerWindow = BrowserWindow.fromWebContents(event.sender);
@@ -49,7 +50,7 @@ export function setupMiniPlayerHandlers() {
 
   // ミニプレイヤーの状態を更新（メインウィンドウからミニプレイヤーに曲情報を送る）
   ipcMain.handle(
-    "mini-player:update-state",
+    CHANNELS.MINI_PLAYER_UPDATE_STATE,
     (
       _event,
       state: {
@@ -65,7 +66,7 @@ export function setupMiniPlayerHandlers() {
       try {
         const miniPlayer = getMiniPlayerWindow();
         if (miniPlayer && !miniPlayer.isDestroyed()) {
-          miniPlayer.webContents.send("mini-player:state-changed", state);
+          miniPlayer.webContents.send(CHANNELS.MINI_PLAYER_STATE_CHANGED, state);
         }
         return { success: true };
       } catch (error) {
@@ -77,12 +78,12 @@ export function setupMiniPlayerHandlers() {
 
   // ミニプレイヤーからの操作をメインウィンドウに転送
   ipcMain.handle(
-    "mini-player:control",
+    CHANNELS.MINI_PLAYER_CONTROL,
     (_event, action: "play-pause" | "next" | "previous") => {
       try {
         const mainWindow = getMainWindow();
         if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("media-control", action);
+          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, action);
           return { success: true };
         } else {
           return { success: false, error: "Main window not available" };
@@ -95,17 +96,17 @@ export function setupMiniPlayerHandlers() {
   );
 
   // ミニプレイヤーが開いているか確認
-  ipcMain.handle("mini-player:is-open", () => {
+  ipcMain.handle(CHANNELS.MINI_PLAYER_IS_OPEN, () => {
     const miniPlayer = getMiniPlayerWindow();
     return miniPlayer !== null && !miniPlayer.isDestroyed();
   });
 
   // ミニプレイヤーの準備完了通知
-  ipcMain.handle("mini-player:ready", () => {
+  ipcMain.handle(CHANNELS.MINI_PLAYER_READY, () => {
     try {
       const mainWindow = getMainWindow();
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("mini-player:request-state");
+        mainWindow.webContents.send(CHANNELS.MINI_PLAYER_REQUEST_STATE);
       }
       return { success: true };
     } catch (error) {

@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import type { Song } from "@/types";
 import { useUser } from "@/hooks/auth/useUser";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 import { useRouter } from "next/navigation";
 import { isElectron, cache as electronCache } from "@/libs/electron";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";

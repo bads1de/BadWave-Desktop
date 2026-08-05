@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain } from "electron";
 import { getDb } from "../db/client";
 import { songs, playlists, playlistSongs, likedSongs } from "../db/schema";
@@ -13,12 +14,12 @@ import { getErrorMessage } from "../lib/error";
 export function setupMutationHandlers() {
   const db = getDb();
 
-  ipcMain.handle("add-liked-song", async (_, rawInput: unknown) => {
+  ipcMain.handle(CHANNELS.ADD_LIKED_SONG, async (_, rawInput: unknown) => {
     try {
       const { userId, songId } = validateInput(
         likedSongInputSchema,
         rawInput,
-        "add-liked-song",
+        CHANNELS.ADD_LIKED_SONG,
       );
       await db
         .insert(likedSongs)
@@ -35,12 +36,12 @@ export function setupMutationHandlers() {
     }
   });
 
-  ipcMain.handle("remove-liked-song", async (_, rawInput: unknown) => {
+  ipcMain.handle(CHANNELS.REMOVE_LIKED_SONG, async (_, rawInput: unknown) => {
     try {
       const { userId, songId } = validateInput(
         likedSongInputSchema,
         rawInput,
-        "remove-liked-song",
+        CHANNELS.REMOVE_LIKED_SONG,
       );
       await db
         .delete(likedSongs)
@@ -56,12 +57,12 @@ export function setupMutationHandlers() {
     }
   });
 
-  ipcMain.handle("get-like-status", async (_, rawInput: unknown) => {
+  ipcMain.handle(CHANNELS.GET_LIKE_STATUS, async (_, rawInput: unknown) => {
     try {
       const { userId, songId } = validateInput(
         likedSongInputSchema,
         rawInput,
-        "get-like-status",
+        CHANNELS.GET_LIKE_STATUS,
       );
       const result = await db.query.likedSongs.findFirst({
         where: sql`${likedSongs.userId} = ${String(userId)} AND ${
@@ -75,12 +76,12 @@ export function setupMutationHandlers() {
     }
   });
 
-  ipcMain.handle("add-playlist-song", async (_, rawInput: unknown) => {
+  ipcMain.handle(CHANNELS.ADD_PLAYLIST_SONG, async (_, rawInput: unknown) => {
     try {
       const { playlistId, songId } = validateInput(
         playlistSongInputSchema,
         rawInput,
-        "add-playlist-song",
+        CHANNELS.ADD_PLAYLIST_SONG,
       );
       const psId = `${normalizeId(playlistId)}_${normalizeId(songId)}`;
       await db
@@ -99,12 +100,12 @@ export function setupMutationHandlers() {
     }
   });
 
-  ipcMain.handle("remove-playlist-song", async (_, rawInput: unknown) => {
+  ipcMain.handle(CHANNELS.REMOVE_PLAYLIST_SONG, async (_, rawInput: unknown) => {
     try {
       const { playlistId, songId } = validateInput(
         playlistSongInputSchema,
         rawInput,
-        "remove-playlist-song",
+        CHANNELS.REMOVE_PLAYLIST_SONG,
       );
       await db
         .delete(playlistSongs)

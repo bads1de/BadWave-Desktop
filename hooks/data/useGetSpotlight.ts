@@ -1,68 +1,42 @@
 import { Spotlight } from "@/types";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
-import { isNetworkError, electronAPI } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * スポットライトデータを取得するカスタムフック (クライアントサイド)
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
+ * Electron環境ではローカルキャッシュから、Web環境では Supabase から取得。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  */
 const useGetSpotlight = (initialData?: Spotlight[]) => {
-  const supabase = createClient();
-
-  const queryKey = [CACHED_QUERIES.spotlight];
-
   const {
     data: spotlightData = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
-      // Electron環境: ローカルキャッシュから取得
-      if (electronAPI.isElectron()) {
-        const cacheKey = "home_spotlight";
-        const cachedSpots = await electronAPI.cache.getSectionData(
-          cacheKey,
-          "spotlights"
-        );
-        return (cachedSpots as Spotlight[]) || [];
-      }
-
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-        return [];
-      }
-
-      const { data, error } = await supabase
+    isPaused,
+  } = useSectionQuery<Spotlight[]>({
+    queryKey: [CACHED_QUERIES.spotlight],
+    electron: { sectionKey: "home_spotlight", sectionType: "spotlights" },
+    emptySectionFallback: [],
+    offlineFallback: [],
+    initialData,
+    networkMode: "always",
+    webFn: async () => {
+      const { data, error } = await createClient()
         .from(TABLES.SPOTLIGHTS)
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log("[useGetSpotlight] Fetch skipped: offline/network error");
-          return [];
-        }
-        console.error("Error fetching spotlights:", error.message);
         throw new Error(getErrorMessage(error));
       }
 
       return (data as Spotlight[]) || [];
     },
-    initialData: initialData,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
-    networkMode: "always",
   });
-
-  const isPaused = fetchStatus === "paused";
 
   return { spotlightData, isLoading, error, isPaused };
 };

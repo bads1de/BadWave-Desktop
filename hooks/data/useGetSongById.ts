@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 import { useEffect, useState, useRef } from "react";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 

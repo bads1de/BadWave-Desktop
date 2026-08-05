@@ -1,6 +1,7 @@
 "use client";
 
 import { onlineManager, focusManager } from "@tanstack/react-query";
+import { CHANNELS } from "@/electron/channels";
 import { electronAPI } from "@/libs/electron/index";
 
 /**
@@ -46,7 +47,7 @@ export function setupOnlineManager(): void {
 
       // IPC イベントをリッスン
       unsubscribeIpc = window.electron?.ipc?.on(
-        "offline-simulation-changed",
+        CHANNELS.OFFLINE_SIMULATION_CHANGED,
         (isSimulatingOffline: boolean) => {
           if (isSimulatingOffline) {
             setOnline(false);

@@ -1,53 +1,43 @@
 import { Playlist } from "@/types";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
-import { isNetworkError, electronAPI } from "@/libs/electron/index";
+import { electronAPI } from "@/libs/electron";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
 
 /**
  * プレイリスト情報を取得するカスタムフック
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
+ * Electron環境ではローカルDB (キャッシュ) を優先し、見つからない場合のみ
+ * Supabase から取得します。オフライン時はクエリが pause され、
+ * PersistQueryClient によりキャッシュから即座に表示されます。
  */
 const useGetPlaylist = (playlistId?: string) => {
-  const supabaseClient = createClient();
-
-  const queryKey = [CACHED_QUERIES.playlists, playlistId];
-
   const {
     data: playlist,
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
+    isPaused,
+  } = useSectionQuery<Playlist>({
+    queryKey: [CACHED_QUERIES.playlists, playlistId],
+    enabled: !!playlistId,
+    electron: {
+      getLocal: async () => {
+        try {
+          return (await electronAPI.cache.getPlaylistById(
+            playlistId ?? ""
+          )) as Playlist | null;
+        } catch (e) {
+          console.error("[useGetPlaylist] Local fetch failed:", e);
+          return undefined;
+        }
+      },
+    },
+    webFn: async () => {
       if (!playlistId) {
         return null;
       }
 
-      // Electron環境: ローカルDB (キャッシュ) から優先的に取得
-      if (electronAPI.isElectron()) {
-        try {
-          const localPlaylist = await electronAPI.cache.getPlaylistById(
-            playlistId
-          );
-          if (localPlaylist) {
-            return localPlaylist as Playlist;
-          }
-        } catch (e) {
-          console.error("[useGetPlaylist] Local fetch failed:", e);
-        }
-        // ローカルにない場合は続行してSupabaseから取得を試みる
-      }
-
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-        return undefined;
-      }
-
-      const { data, error } = await supabaseClient
+      const { data, error } = await createClient()
         .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("id", playlistId)
@@ -58,30 +48,14 @@ const useGetPlaylist = (playlistId?: string) => {
       }
 
       if (error) {
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log("[useGetPlaylist] Fetch skipped: offline/network error");
-          return undefined;
-        }
-        console.error("Error fetching playlist:", error);
         throw new Error("プレイリストの取得に失敗しました");
       }
 
       return data as Playlist;
     },
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    enabled: !!playlistId,
-    retry: false,
   });
 
-  const isPaused = fetchStatus === "paused";
-
-  return {
-    playlist,
-    isLoading,
-    error,
-    isPaused,
-  };
+  return { playlist, isLoading, error, isPaused };
 };
 
 export default useGetPlaylist;

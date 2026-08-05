@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { BrowserWindow, ipcMain, nativeImage, NativeImage } from "electron";
 import * as zlib from "zlib";
 import { getMainWindow } from "./window-manager";
@@ -184,7 +185,7 @@ function buildThumbBarButtons(): Electron.ThumbarButton[] {
       click: () => {
         const mainWindow = getMainWindow();
         if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("media-control", "previous");
+          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "previous");
         }
       },
     },
@@ -194,7 +195,7 @@ function buildThumbBarButtons(): Electron.ThumbarButton[] {
       click: () => {
         const mainWindow = getMainWindow();
         if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("media-control", "play-pause");
+          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "play-pause");
         }
       },
     },
@@ -204,7 +205,7 @@ function buildThumbBarButtons(): Electron.ThumbarButton[] {
       click: () => {
         const mainWindow = getMainWindow();
         if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("media-control", "next");
+          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "next");
         }
       },
     },
@@ -242,7 +243,7 @@ export function updateThumbBarState(playing: boolean) {
 
 // IPCハンドラーをセットアップ（rendererからの状態受信）
 export function setupThumbBarHandlers() {
-  ipcMain.on("player-state-change", (_event, state: { isPlaying: boolean }) => {
+  ipcMain.on(CHANNELS.PLAYER_STATE_CHANGE, (_event, state: { isPlaying: boolean }) => {
     updateThumbBarState(state.isPlaying);
   });
 }

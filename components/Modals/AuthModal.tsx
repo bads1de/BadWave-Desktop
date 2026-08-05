@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CHANNELS } from "@/electron/channels";
 import useAuthModal from "@/hooks/auth/useAuthModal";
 import Modal from "./Modal";
 import { createClient } from "@/libs/supabase/client";
@@ -59,7 +60,7 @@ const AuthModal = () => {
   useEffect(() => {
     if (typeof window !== "undefined" && window.electron?.ipc) {
       const unsubscribe = window.electron.ipc.on(
-        "auth-callback",
+        CHANNELS.AUTH_CALLBACK,
         async (data: { code?: string; error?: string }) => {
           if (data.error) {
             setError(data.error);

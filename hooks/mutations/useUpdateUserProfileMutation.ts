@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 import { createClient } from "@/libs/supabase/client";
 import { uploadFileToR2, deleteFileFromR2 } from "@/actions/r2";
 import { checkIsAdmin } from "@/actions/checkAdmin";

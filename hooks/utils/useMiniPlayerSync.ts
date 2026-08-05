@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { Song } from "@/types";
+import { CHANNELS } from "@/electron/channels";
 import { miniPlayer, isElectron } from "@/libs/electron";
 import { isLocalFilePath } from "@/libs/songUtils";
 
@@ -48,7 +49,7 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
   useEffect(() => {
     if (!isElectron()) return;
 
-    window.electron.ipc.send("player-state-change", { isPlaying });
+    window.electron.ipc.send(CHANNELS.PLAYER_STATE_CHANGE, { isPlaying });
   }, [isPlaying]);
 
   // 状態再送信リクエストのリスナーを登録

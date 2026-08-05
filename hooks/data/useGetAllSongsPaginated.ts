@@ -1,11 +1,11 @@
 "use client";
 
 import { Song } from "@/types";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
-import { isNetworkError, electronAPI } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
+import { electronAPI } from "@/libs/electron";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * ページネーション対応の曲取得結果
@@ -27,90 +27,74 @@ interface PaginatedSongsResult {
  * @param pageSize - 1ページあたりの曲数
  */
 const useGetAllSongsPaginated = (page: number = 0, pageSize: number = 24) => {
-  const supabase = createClient();
   const offset = page * pageSize;
 
-  const queryKey = [CACHED_QUERIES.songs, "paginated", page, pageSize];
-
-  const { data, isLoading, error, fetchStatus } = useQuery({
-    queryKey,
-    queryFn: async (): Promise<PaginatedSongsResult> => {
-      // Electron環境: ローカルDBから取得
-      if (electronAPI.isElectron()) {
+  const {
+    data = {
+      songs: [],
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: page,
+    },
+    isLoading,
+    error,
+    isPaused,
+  } = useSectionQuery<PaginatedSongsResult>({
+    queryKey: [CACHED_QUERIES.songs, "paginated", page, pageSize],
+    networkMode: "always",
+    electron: {
+      getLocal: async () => {
         const [songs, totalCount] = await Promise.all([
           electronAPI.cache.getSongsPaginated(offset, pageSize),
           electronAPI.cache.getSongsTotalCount(),
         ]);
 
-        const totalPages = Math.ceil(totalCount / pageSize);
-
         return {
           songs: (songs as Song[]) || [],
           totalCount,
-          totalPages,
+          totalPages: Math.ceil(totalCount / pageSize),
           currentPage: page,
         };
-      }
-
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-        return {
-          songs: [],
-          totalCount: 0,
-          totalPages: 0,
-          currentPage: page,
-        };
-      }
-
-      // Web環境: Supabase から直接取得
+      },
+    },
+    webFn: async () => {
       const [songsResult, countResult] = await Promise.all([
-        supabase
+        createClient()
           .from(TABLES.SONGS)
           .select("*")
           .order("created_at", { ascending: false })
           .range(offset, offset + pageSize - 1),
-        supabase.from(TABLES.SONGS).select("*", { count: "exact", head: true }),
+        createClient()
+          .from(TABLES.SONGS)
+          .select("*", { count: "exact", head: true }),
       ]);
 
       if (songsResult.error) {
-        if (!onlineManager.isOnline() || isNetworkError(songsResult.error)) {
-          console.log(
-            "[useGetAllSongsPaginated] Fetch skipped: offline/network error"
-          );
-          return {
-            songs: [],
-            totalCount: 0,
-            totalPages: 0,
-            currentPage: page,
-          };
-        }
-        console.error("Error fetching songs:", getErrorMessage(songsResult.error));
         throw songsResult.error;
       }
 
       const totalCount = countResult.count || 0;
-      const totalPages = Math.ceil(totalCount / pageSize);
 
       return {
         songs: (songsResult.data as Song[]) || [],
         totalCount,
-        totalPages,
+        totalPages: Math.ceil(totalCount / pageSize),
         currentPage: page,
       };
     },
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
-    networkMode: "always",
+    offlineFallback: {
+      songs: [],
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: page,
+    },
   });
 
-  const isPaused = fetchStatus === "paused";
-
   return {
-    songs: data?.songs || [],
-    totalCount: data?.totalCount || 0,
-    totalPages: data?.totalPages || 0,
-    currentPage: data?.currentPage || 0,
+    songs: data.songs,
+    totalCount: data.totalCount,
+    totalPages: data.totalPages,
+    currentPage: data.currentPage,
     isLoading,
     error,
     isPaused,

@@ -1,95 +1,67 @@
 import { Song, SongWithRecommendation } from "@/types";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
+import { CACHED_QUERIES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useUser } from "@/hooks/auth/useUser";
-import { isNetworkError, electronAPI } from "@/libs/electron/index";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { mapRecommendationToSong } from "@/libs/songUtils";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * おすすめ曲を取得するカスタムフック (クライアントサイド)
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
- *
- * @param {Song[]} initialData - サーバーから取得した初期データ（Optional）
- * @param {number} limit - 取得する曲数の上限
- * @returns {Object} おすすめ曲の取得状態と結果
+ * Electron環境ではローカルキャッシュから、Web環境では Supabase から取得。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  */
 const useGetRecommendations = (initialData?: Song[], limit: number = 10) => {
-  const supabase = createClient();
   const { user } = useUser();
-
-  const queryKey = [CACHED_QUERIES.recommendations, user?.id, limit];
 
   const {
     data: recommendations = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
+    isPaused,
+  } = useSectionQuery<Song[]>({
+    queryKey: [CACHED_QUERIES.recommendations, user?.id, limit],
+    electron: {
+      sectionKey: `home_recommendations_${user?.id ?? ""}`,
+      sectionType: "songs",
+    },
+    emptySectionFallback: [],
+    offlineFallback: [],
+    initialData,
+    enabled: !!user?.id,
+    networkMode: "always",
+    webFn: async () => {
       // ユーザーがログインしていない場合は空配列を返す
       if (!user?.id) {
         return [];
       }
 
-      // Electron環境: ローカルキャッシュから取得
-      if (electronAPI.isElectron()) {
-        const cacheKey = `home_recommendations_${user.id}`;
-        const cachedSongs = await electronAPI.cache.getSectionData(
-          cacheKey,
-          "songs"
-        );
-        // ローカルDBのSong型をUIのSong型（ローカルパス付き）として返す
-        return (cachedSongs as unknown as Song[]) || [];
-      }
-
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-        return undefined;
-      }
-
       try {
-        const { data, error } = await supabase.rpc("get_recommendations", {
-          p_user_id: user.id,
-          p_limit: limit,
-        });
+        const { data, error } = await createClient().rpc(
+          "get_recommendations",
+          {
+            p_user_id: user.id,
+            p_limit: limit,
+          }
+        );
 
         if (error) {
-          if (!onlineManager.isOnline() || isNetworkError(error)) {
-            console.log(
-              "[useGetRecommendations] Fetch skipped: offline/network error"
-            );
-            return undefined;
-          }
-          console.error("Error fetching recommendations:", error);
           throw new Error(getErrorMessage(error));
         }
 
         if (!data) return [];
 
-        const result: Song[] = data.map((item: SongWithRecommendation) =>
-          mapRecommendationToSong(item, user.id),
+        return data.map((item: SongWithRecommendation) =>
+          mapRecommendationToSong(item, user.id)
         );
-
-        return result;
       } catch (e) {
         console.error("Exception in getRecommendations:", e);
         return [];
       }
     },
-    initialData: initialData,
-    enabled: !!user?.id,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
-    networkMode: "always",
   });
-
-  const isPaused = fetchStatus === "paused";
 
   return { recommendations, isLoading, error, isPaused };
 };

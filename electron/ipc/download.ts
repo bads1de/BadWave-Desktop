@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain, app } from "electron";
 import * as fs from "fs";
 import * as path from "path";
@@ -62,7 +63,7 @@ export function setupDownloadHandlers() {
                     (downloadedSize / totalSize) * 100,
                   );
                   // 進捗を送信
-                  event.sender.send("download-progress", progress);
+                  event.sender.send(CHANNELS.DOWNLOAD_PROGRESS, progress);
                 }
               });
 
@@ -88,8 +89,8 @@ export function setupDownloadHandlers() {
   );
 
   // ファイル存在確認
-  ipcMain.handle("check-file-exists", async (_, rawFilename: string) => {
-    const filename = validateInput(filenameSchema, rawFilename, "check-file-exists");
+  ipcMain.handle(CHANNELS.CHECK_FILE_EXISTS, async (_, rawFilename: string) => {
+    const filename = validateInput(filenameSchema, rawFilename, CHANNELS.CHECK_FILE_EXISTS);
     const userDataPath = app.getPath("userData");
     const filePath = path.join(userDataPath, "downloads", filename);
     try {
@@ -102,8 +103,8 @@ export function setupDownloadHandlers() {
 
   // ローカルファイルの存在確認（任意パス）
   // 注意: 任意の絶対パスを許可するため、Renderer 側の信頼性に依存
-  ipcMain.handle("check-local-file-exists", async (_, rawFilePath: string) => {
-    const filePath = validateInput(filePathSchema, rawFilePath, "check-local-file-exists");
+  ipcMain.handle(CHANNELS.CHECK_LOCAL_FILE_EXISTS, async (_, rawFilePath: string) => {
+    const filePath = validateInput(filePathSchema, rawFilePath, CHANNELS.CHECK_LOCAL_FILE_EXISTS);
 
     // 安全なパスと拡張子のチェック
     const ALLOWED_EXTENSIONS = new Set([
@@ -132,16 +133,16 @@ export function setupDownloadHandlers() {
   });
 
   // ローカルファイルのパスを取得
-  ipcMain.handle("get-local-file-path", (_, rawFilename: string) => {
-    const filename = validateInput(filenameSchema, rawFilename, "get-local-file-path");
+  ipcMain.handle(CHANNELS.GET_LOCAL_FILE_PATH, (_, rawFilename: string) => {
+    const filename = validateInput(filenameSchema, rawFilename, CHANNELS.GET_LOCAL_FILE_PATH);
     const userDataPath = app.getPath("userData");
     // appプロトコルで読めるように絶対パスを返す
     return path.join(userDataPath, "downloads", filename);
   });
 
   // ファイル削除
-  ipcMain.handle("delete-song", async (_, rawFilename: string) => {
-    const filename = validateInput(filenameSchema, rawFilename, "delete-song");
+  ipcMain.handle(CHANNELS.DELETE_SONG, async (_, rawFilename: string) => {
+    const filename = validateInput(filenameSchema, rawFilename, CHANNELS.DELETE_SONG);
     const userDataPath = app.getPath("userData");
     const filePath = path.join(userDataPath, "downloads", filename);
     try {

@@ -1,75 +1,48 @@
-import { Song, TopPlayedSong } from "@/types";
+import { TopPlayedSong } from "@/types";
 import { Period } from "@/types/stats";
+import { CACHED_QUERIES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
-import {
-  keepPreviousData,
-  useQuery,
-  onlineManager,
-} from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES } from "@/constants";
-import { isNetworkError } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * ユーザーの再生数が多い曲を取得するカスタムフック
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  */
 const useGetTopPlayedSongs = (userId?: string, period: Period = "day") => {
-  const supabase = createClient();
-
-  const queryKey = [CACHED_QUERIES.getTopSongs, userId, period];
-
   const {
-    data: topSongs,
+    data: topSongs = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
+    isPaused,
+  } = useSectionQuery<TopPlayedSong[]>({
+    queryKey: [CACHED_QUERIES.getTopSongs, userId, period],
+    enabled: !!userId,
+    keepPreviousData: true,
+    offlineFallback: [],
+    webFn: async () => {
       if (!userId) {
         return [];
       }
 
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-        return [];
-      }
-
-      const { data, error } = await supabase.rpc("get_top_songs", {
+      const { data, error } = await createClient().rpc("get_top_songs", {
         p_user_id: userId,
         p_period: period,
       });
 
       if (error) {
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log(
-            "[useGetTopPlayedSongs] Fetch skipped: offline/network error"
-          );
-          return [];
-        }
-        throw new Error(`再生履歴の取得に失敗しました: ${getErrorMessage(error)}`);
+        throw new Error(
+          `再生履歴の取得に失敗しました: ${getErrorMessage(error)}`
+        );
       }
 
       return (data || []) as TopPlayedSong[];
     },
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    enabled: !!userId,
-    placeholderData: keepPreviousData,
-    retry: false,
   });
 
-  const isPaused = fetchStatus === "paused";
-
-  return {
-    topSongs: topSongs ?? [],
-    isLoading,
-    error,
-    isPaused,
-  };
+  return { topSongs, isLoading, error, isPaused };
 };
 
 export default useGetTopPlayedSongs;

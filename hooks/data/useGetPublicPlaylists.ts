@@ -1,48 +1,34 @@
 import { Playlist } from "@/types";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
-import { isNetworkError, electronAPI } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * パブリックプレイリストを取得するカスタムフック (クライアントサイド)
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
- *
- * @param {Playlist[]} initialData - サーバーから取得した初期データ（Optional）
- * @param {number} limit - 取得するプレイリスト数の上限
- * @returns {Object} パブリックプレイリストの取得状態と結果
+ * Electron環境ではローカルキャッシュから、Web環境では Supabase から取得。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  */
 const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
-  const supabase = createClient();
-
-  const queryKey = [CACHED_QUERIES.publicPlaylists, limit];
-
   const {
     data: playlists = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
-      // Electron環境: ローカルキャッシュから取得
-      if (electronAPI.isElectron()) {
-        const cacheKey = "home_public_playlists";
-        const cachedPlaylists = await electronAPI.cache.getSectionData(
-          cacheKey,
-          "playlists"
-        );
-        return (cachedPlaylists as unknown as Playlist[]) || [];
-      }
-
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-        return [];
-      }
-      const { data, error } = await supabase
+    isPaused,
+  } = useSectionQuery<Playlist[]>({
+    queryKey: [CACHED_QUERIES.publicPlaylists, limit],
+    electron: {
+      sectionKey: "home_public_playlists",
+      sectionType: "playlists",
+    },
+    emptySectionFallback: [],
+    offlineFallback: [],
+    initialData,
+    networkMode: "always",
+    webFn: async () => {
+      const { data, error } = await createClient()
         .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("is_public", true)
@@ -50,26 +36,12 @@ const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
         .limit(limit);
 
       if (error) {
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log(
-            "[useGetPublicPlaylists] Fetch skipped: offline/network error"
-          );
-          return [];
-        }
-        console.error("Error fetching public playlists:", error.message);
         throw new Error(getErrorMessage(error));
       }
 
       return (data as Playlist[]) || [];
     },
-    initialData: initialData,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
-    networkMode: "always",
   });
-
-  const isPaused = fetchStatus === "paused";
 
   return { playlists, isLoading, error, isPaused };
 };

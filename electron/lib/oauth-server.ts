@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { BrowserWindow } from "electron";
 import * as http from "http";
 import * as path from "path";
@@ -24,9 +25,9 @@ export function startOAuthServer() {
       const mainWindow = BrowserWindow.getAllWindows()[0];
       if (mainWindow && !mainWindow.isDestroyed()) {
         if (code) {
-          mainWindow.webContents.send("auth-callback", { code });
+          mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { code });
         } else if (error) {
-          mainWindow.webContents.send("auth-callback", { error });
+          mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { error });
         }
       }
     } else {

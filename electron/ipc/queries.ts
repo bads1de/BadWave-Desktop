@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain } from "electron";
 import { getDb } from "../db/client";
 import {
@@ -16,7 +17,7 @@ import { getErrorMessage } from "../lib/error";
 export function setupQueryHandlers() {
   const db = getDb();
 
-  ipcMain.handle("get-cached-liked-songs", async (_, userId: string) => {
+  ipcMain.handle(CHANNELS.GET_CACHED_LIKED_SONGS, async (_, userId: string) => {
     try {
       const results = await db
         .select()
@@ -48,7 +49,7 @@ export function setupQueryHandlers() {
     }
   });
 
-  ipcMain.handle("get-cached-playlists", async (_, userId: string) => {
+  ipcMain.handle(CHANNELS.GET_CACHED_PLAYLISTS, async (_, userId: string) => {
     try {
       const data = await db.query.playlists.findMany({
         where: eq(playlists.userId, String(userId)),
@@ -66,7 +67,7 @@ export function setupQueryHandlers() {
     }
   });
 
-  ipcMain.handle("get-cached-playlist-songs", async (_, playlistId: string) => {
+  ipcMain.handle(CHANNELS.GET_CACHED_PLAYLIST_SONGS, async (_, playlistId: string) => {
     try {
       const results = await db
         .select()
@@ -97,7 +98,7 @@ export function setupQueryHandlers() {
   });
 
   ipcMain.handle(
-    "get-section-data",
+    CHANNELS.GET_SECTION_DATA,
     async (
       _,
       { key, type }: { key: string; type: "songs" | "spotlights" | "playlists" }
@@ -176,7 +177,7 @@ export function setupQueryHandlers() {
   );
 
   ipcMain.handle(
-    "get-songs-paginated",
+    CHANNELS.GET_SONGS_PAGINATED,
     async (_, { offset, limit }: { offset: number; limit: number }) => {
       try {
         const results = await db
@@ -194,7 +195,7 @@ export function setupQueryHandlers() {
     }
   );
 
-  ipcMain.handle("get-songs-total-count", async () => {
+  ipcMain.handle(CHANNELS.GET_SONGS_TOTAL_COUNT, async () => {
     try {
       const result = await db
         .select({ count: sql<number>`count(*)` })
@@ -206,7 +207,7 @@ export function setupQueryHandlers() {
     }
   });
 
-  ipcMain.handle("debug-dump-db", async () => {
+  ipcMain.handle(CHANNELS.DEBUG_DUMP_DB, async () => {
     try {
       const liked = await db.select().from(likedSongs).limit(10);
       const allSongs = await db.select().from(songs).limit(10);
@@ -224,7 +225,7 @@ export function setupQueryHandlers() {
     }
   });
 
-  ipcMain.handle("get-song-by-id", async (_, songId: string) => {
+  ipcMain.handle(CHANNELS.GET_SONG_BY_ID, async (_, songId: string) => {
     try {
       const normalizedId = normalizeId(songId);
       const song = await db.query.songs.findFirst({
@@ -242,7 +243,7 @@ export function setupQueryHandlers() {
     }
   });
 
-  ipcMain.handle("get-playlist-by-id", async (_, playlistId: string) => {
+  ipcMain.handle(CHANNELS.GET_PLAYLIST_BY_ID, async (_, playlistId: string) => {
     try {
       const normalizedId = normalizeId(playlistId);
       const playlist = await db.query.playlists.findFirst({

@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { subMonths, subWeeks, subDays } from "date-fns";
 import { useSyncBase } from "./useSyncBase";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * トレンド情報をバックグラウンドで同期する Syncer フック

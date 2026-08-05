@@ -1,43 +1,34 @@
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { createClient } from "@/libs/supabase/client";
 import { Playlist } from "@/types";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
-import { isNetworkError } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
+import { CACHED_QUERIES, TABLES } from "@/constants";
+import { createClient } from "@/libs/supabase/client";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * タイトルでパブリックプレイリストを検索するカスタムフック (オフライン対応)
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  *
  * @param title 検索するタイトル
- * @returns プレイリストの配列とローディング状態
  */
 const useGetPlaylistsByTitle = (title: string) => {
-  const supabase = createClient();
-
-  const queryKey = [CACHED_QUERIES.playlists, "search", title];
-
   const {
     data: playlists = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
+    isPaused,
+  } = useSectionQuery<Playlist[]>({
+    queryKey: [CACHED_QUERIES.playlists, "search", title],
+    enabled: !!title,
+    offlineFallback: [],
+    webFn: async () => {
       // タイトルが空の場合は空の配列を返す
       if (!title) {
         return [];
       }
 
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-        return [];
-      }
-
-      const { data, error } = await supabase
+      const { data, error } = await createClient()
         .from(TABLES.PLAYLISTS)
         .select("*")
         .eq("is_public", true)
@@ -45,26 +36,12 @@ const useGetPlaylistsByTitle = (title: string) => {
         .order("created_at", { ascending: false });
 
       if (error) {
-        // ネットワークエラーまたはオフラインの場合はエラーをスローしない
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log(
-            "[useGetPlaylistsByTitle] Network error, returning cached data"
-          );
-          return [];
-        }
-        console.error("Error fetching playlists by title:", error.message);
         throw new Error(getErrorMessage(error));
       }
 
       return (data as Playlist[]) || [];
     },
-    enabled: !!title,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
   });
-
-  const isPaused = fetchStatus === "paused";
 
   return { playlists, isLoading, error, isPaused };
 };

@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import Header from "@/components/header/Header";
 import { Button } from "@/components/ui/button";
 import { mapFileToSong } from "@/libs/localFileMappers";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import {

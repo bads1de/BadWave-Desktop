@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain, app } from "electron";
 import fs from "fs";
 import path from "path";
@@ -16,12 +17,12 @@ export const setupOfflineDownloadHandlers = () => {
   const db = getDb();
 
   // 楽曲のダウンロードリクエストを処理
-  ipcMain.handle("download-song", async (event, rawSong: unknown) => {
+  ipcMain.handle(CHANNELS.DOWNLOAD_SONG, async (event, rawSong: unknown) => {
     // ペイロード全体をZodで検証 (SSRF + ID/長さ制限)
     const song = validateInput(
       songDownloadPayloadSchema,
       rawSong,
-      "download-song",
+      CHANNELS.DOWNLOAD_SONG,
     ) as SongDownloadPayload;
     const songId = song.id;
 
@@ -163,8 +164,8 @@ export const setupOfflineDownloadHandlers = () => {
   });
 
   // オフラインステータスの確認
-  ipcMain.handle("check-offline-status", async (_, rawSongId: string) => {
-    const songId = validateInput(idSchema, rawSongId, "check-offline-status");
+  ipcMain.handle(CHANNELS.CHECK_OFFLINE_STATUS, async (_, rawSongId: string) => {
+    const songId = validateInput(idSchema, rawSongId, CHANNELS.CHECK_OFFLINE_STATUS);
     try {
       const result = await db.query.songs.findFirst({
         where: eq(songs.id, songId),
@@ -190,7 +191,7 @@ export const setupOfflineDownloadHandlers = () => {
   });
 
   // すべてのオフライン楽曲（ダウンロード済み）を取得
-  ipcMain.handle("get-offline-songs", async () => {
+  ipcMain.handle(CHANNELS.GET_OFFLINE_SONGS, async () => {
     try {
       // 実際にファイルがダウンロードされている楽曲のみを抽出
       const offlineSongs = await db.query.songs.findMany({
@@ -226,8 +227,8 @@ export const setupOfflineDownloadHandlers = () => {
   });
 
   // オフライン楽曲の削除 (ファイルとDBレコードの両方を削除)
-  ipcMain.handle("delete-offline-song", async (_, rawSongId: string) => {
-    const songId = validateInput(idSchema, rawSongId, "delete-offline-song");
+  ipcMain.handle(CHANNELS.DELETE_OFFLINE_SONG, async (_, rawSongId: string) => {
+    const songId = validateInput(idSchema, rawSongId, CHANNELS.DELETE_OFFLINE_SONG);
     try {
       // 1. ファイルパスを取得するためにレコードを確認
       const songRecord = await db.query.songs.findFirst({

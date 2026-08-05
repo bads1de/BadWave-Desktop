@@ -1,37 +1,28 @@
 import { Song } from "@/types";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
-import { isNetworkError } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * タイトルで曲を検索するカスタムフック (オフライン対応)
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  *
  * @param title 検索するタイトル
- * @returns 曲の配列とローディング状態
  */
 const useGetSongsByTitle = (title: string) => {
-  const supabase = createClient();
-
-  const queryKey = [CACHED_QUERIES.songs, "search", title];
-
   const {
     data: songs = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
-      // オフライン時はフェッチをスキップ
-      if (!onlineManager.isOnline()) {
-                    return [];      }
-
-      const query = supabase
+    isPaused,
+  } = useSectionQuery<Song[]>({
+    queryKey: [CACHED_QUERIES.songs, "search", title],
+    offlineFallback: [],
+    webFn: async () => {
+      const query = createClient()
         .from(TABLES.SONGS)
         .select("*")
         .order("created_at", { ascending: false });
@@ -44,23 +35,12 @@ const useGetSongsByTitle = (title: string) => {
       const { data, error } = await query.limit(20);
 
       if (error) {
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log(
-            "[useGetSongsByTitle] Fetch skipped: offline/network error"
-          );
-                      return [];        }
-        console.error("Error fetching songs by title:", error.message);
         throw new Error(getErrorMessage(error));
       }
 
       return (data as Song[]) || [];
     },
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
   });
-
-  const isPaused = fetchStatus === "paused";
 
   return { songs, isLoading, error, isPaused };
 };

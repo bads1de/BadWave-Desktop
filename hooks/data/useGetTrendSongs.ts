@@ -1,51 +1,35 @@
 import { Song } from "@/types";
-import { useQuery, onlineManager } from "@tanstack/react-query";
-import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
+import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
+import { useSectionQuery } from "@/libs/query/useSectionQuery";
+import { getErrorMessage } from "@/libs/utils/error";
 import { subMonths, subWeeks, subDays } from "date-fns";
-import { isNetworkError, electronAPI } from "@/libs/electron/index";
-import { getErrorMessage } from "@/electron/lib/error";
 
 /**
  * トレンド曲を取得するカスタムフック
  *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
+ * Electron環境ではローカルキャッシュから、Web環境では Supabase から取得。
+ * オフライン時はクエリが pause され、PersistQueryClient により
+ * キャッシュから即座に表示されます。
  */
 const useGetTrendSongs = (
   period: "all" | "month" | "week" | "day" = "all",
   initialData?: Song[]
 ) => {
-  const supabase = createClient();
-
-  const queryKey = [CACHED_QUERIES.trendSongs, period];
-
   const {
     data: trends = [],
     isLoading,
     error,
-    fetchStatus,
-  } = useQuery({
-    queryKey,
-    queryFn: async () => {
-      // Electron環境: ローカルキャッシュから取得
-      if (electronAPI.isElectron()) {
-        const cacheKey = `trend_${period}`;
-        const cachedSongs = await electronAPI.cache.getSectionData(
-          cacheKey,
-          "songs"
-        );
-        // キャッシュがあればそれを返す。なければ空配列（同期は裏で行われる）
-        return (cachedSongs as unknown as Song[]) || [];
-      }
-
-      // Web環境 / フォールバック
-      // オフライン時はフェッチをスキップ (Web)
-      if (!onlineManager.isOnline()) {
-        return undefined;
-      }
-
-      let query = supabase.from(TABLES.SONGS).select("*");
+    isPaused,
+  } = useSectionQuery<Song[]>({
+    queryKey: [CACHED_QUERIES.trendSongs, period],
+    electron: { sectionKey: `trend_${period}`, sectionType: "songs" },
+    emptySectionFallback: [],
+    offlineFallback: [],
+    initialData,
+    networkMode: "always",
+    webFn: async () => {
+      let query = createClient().from(TABLES.SONGS).select("*");
 
       switch (period) {
         case "month":
@@ -64,27 +48,12 @@ const useGetTrendSongs = (
         .limit(10);
 
       if (error) {
-        if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log(
-            "[useGetTrendSongs] Fetch skipped: offline/network error"
-          );
-          return undefined;
-        }
-        console.error("Error fetching trend songs:", error.message);
         throw new Error(getErrorMessage(error));
       }
 
       return (data as Song[]) || [];
     },
-    initialData: initialData,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
-    retry: false,
-    networkMode: "always",
   });
-
-  // fetchStatus: 'paused' はオフライン状態を示す
-  const isPaused = fetchStatus === "paused";
 
   return { trends, isLoading, error, isPaused };
 };

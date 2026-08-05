@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain, shell, BrowserWindow } from "electron";
 import Store from "electron-store";
 import {
@@ -19,13 +20,13 @@ export function setupAuthHandlers() {
   /**
    * 外部ブラウザでGoogle認証を開始
    */
-  ipcMain.handle("auth:start-google-oauth", async (_, rawAuthUrl: string) => {
+  ipcMain.handle(CHANNELS.START_GOOGLE_OAUTH, async (_, rawAuthUrl: string) => {
     try {
       // URLインジェクション対策: Supabase/Googleの認証URLのみ許可
       const authUrl = validateInput(
         authUrlSchema,
         rawAuthUrl,
-        "auth:start-google-oauth",
+        CHANNELS.START_GOOGLE_OAUTH,
       );
 
       // デフォルトブラウザで認証URLを開く
@@ -40,13 +41,13 @@ export function setupAuthHandlers() {
   /**
    * 認証用BrowserWindowを開く
    */
-  ipcMain.handle("auth:open-oauth-window", async (_, rawAuthUrl: string) => {
+  ipcMain.handle(CHANNELS.OPEN_OAUTH_WINDOW, async (_, rawAuthUrl: string) => {
     try {
       // URLインジェクション対策
       const authUrl = validateInput(
         authUrlSchema,
         rawAuthUrl,
-        "auth:open-oauth-window",
+        CHANNELS.OPEN_OAUTH_WINDOW,
       );
 
       const mainWindow = BrowserWindow.getAllWindows()[0];
@@ -82,7 +83,7 @@ export function setupAuthHandlers() {
 
       authWindow.on("closed", () => {
         // セッションをリフレッシュして認ッシュして認証完了を検知
-        mainWindow.webContents.send("auth-window-closed");
+        mainWindow.webContents.send(CHANNELS.AUTH_WINDOW_CLOSED);
       });
 
       return { success: true };
@@ -95,9 +96,9 @@ export function setupAuthHandlers() {
   /**
    * ユーザー情報をローカルに保存
    */
-  ipcMain.handle("save-cached-user", async (_, rawUser: unknown) => {
+  ipcMain.handle(CHANNELS.SAVE_CACHED_USER, async (_, rawUser: unknown) => {
     try {
-      const user = validateInput(cachedUserSchema, rawUser, "save-cached-user");
+      const user = validateInput(cachedUserSchema, rawUser, CHANNELS.SAVE_CACHED_USER);
       store.set("cachedUser", user);
       return { success: true };
     } catch (error: unknown) {
@@ -109,7 +110,7 @@ export function setupAuthHandlers() {
   /**
    * ローカルに保存されたユーザー情報を取得
    */
-  ipcMain.handle("get-cached-user", async () => {
+  ipcMain.handle(CHANNELS.GET_CACHED_USER, async () => {
     try {
       const user = store.get("cachedUser", null);
       return user;
@@ -122,7 +123,7 @@ export function setupAuthHandlers() {
   /**
    * ローカルのユーザー情報をクリア（ログアウト時）
    */
-  ipcMain.handle("clear-cached-user", async () => {
+  ipcMain.handle(CHANNELS.CLEAR_CACHED_USER, async () => {
     try {
       store.delete("cachedUser");
       return { success: true };

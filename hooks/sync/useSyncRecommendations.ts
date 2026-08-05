@@ -7,7 +7,7 @@ import { CACHED_QUERIES } from "@/constants";
 import { Song, SongWithRecommendation } from "@/types";
 import { mapRecommendationToSong } from "@/libs/songUtils";
 import { useSyncBase } from "./useSyncBase";
-import { getErrorMessage } from "@/electron/lib/error";
+import { getErrorMessage } from "@/libs/utils/error";
 
 /**
  * おすすめ曲（Recommendations）をバックグラウンドで同期する Syncer フック

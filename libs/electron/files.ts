@@ -1,4 +1,5 @@
 import { Song } from "@/types";
+import { CHANNELS } from "@/electron/channels";
 
 /**
  * ローカルファイルの存在確認
@@ -8,7 +9,7 @@ import { Song } from "@/types";
 export async function checkLocalFileExists(filePath: string): Promise<boolean> {
   try {
     return await window.electron.ipc.invoke(
-      "check-local-file-exists",
+      CHANNELS.CHECK_LOCAL_FILE_EXISTS,
       filePath
     );
   } catch {

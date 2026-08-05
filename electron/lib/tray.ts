@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { app, Tray, Menu, nativeImage } from "electron";
 import * as path from "path";
 import * as fs from "fs";
@@ -121,7 +122,7 @@ export function setupTray() {
           click: () => {
             const mainWindow = getMainWindow();
             if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send("media-control", "play-pause");
+              mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "play-pause");
             }
           },
         },
@@ -130,7 +131,7 @@ export function setupTray() {
           click: () => {
             const mainWindow = getMainWindow();
             if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send("media-control", "next");
+              mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "next");
             }
           },
         },
@@ -139,7 +140,7 @@ export function setupTray() {
           click: () => {
             const mainWindow = getMainWindow();
             if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send("media-control", "previous");
+              mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "previous");
             }
           },
         },

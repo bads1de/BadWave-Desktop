@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain, app } from "electron";
 import * as fs from "fs";
 import * as path from "path";
@@ -42,14 +43,14 @@ export interface ScanProgress {
 function sendScanProgress(progress: ScanProgress) {
   const mainWindow = getMainWindow();
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send("scan-progress", progress);
+    mainWindow.webContents.send(CHANNELS.SCAN_PROGRESS, progress);
   }
 }
 
 export function setupLibraryHandlers() {
   // 指定されたフォルダ内のMP3ファイルをスキャン（永続化対応版）
   ipcMain.handle(
-    "handle-scan-mp3-files",
+    CHANNELS.SCAN_MP3_FILES,
     async (_, directoryPath: string, forceFullScan: boolean = false) => {
       try {
         // 前回のスキャン結果を取得
@@ -229,7 +230,7 @@ export function setupLibraryHandlers() {
   );
 
   // 保存されている音楽ライブラリデータを取得
-  ipcMain.handle("handle-get-saved-music-library", async () => {
+  ipcMain.handle(CHANNELS.GET_SAVED_MUSIC_LIBRARY, async () => {
     try {
       const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
         | MusicLibrary
@@ -267,7 +268,7 @@ export function setupLibraryHandlers() {
 
   // キャッシュ済みのファイルリスト+メタデータを取得（スキャンなし）
   // ページ遷移時の高速ロード用
-  ipcMain.handle("handle-get-cached-files-with-metadata", async () => {
+  ipcMain.handle(CHANNELS.GET_CACHED_FILES_WITH_METADATA, async () => {
     try {
       const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
         | MusicLibrary
@@ -341,12 +342,12 @@ export function setupLibraryHandlers() {
     }, 1000); // 1秒間の遅延でバッチ保存
   };
 
-  ipcMain.handle("handle-get-mp3-metadata", async (_, rawFilePath: string) => {
+  ipcMain.handle(CHANNELS.GET_MP3_METADATA, async (_, rawFilePath: string) => {
     // パストラバーサル対策: 絶対パスのみ許可、長さ制限
     const filePath = validateInput(
       filePathSchema,
       rawFilePath,
-      "handle-get-mp3-metadata",
+      CHANNELS.GET_MP3_METADATA,
     );
 
     // 拡張子チェック: サポートされている音声ファイルのみ

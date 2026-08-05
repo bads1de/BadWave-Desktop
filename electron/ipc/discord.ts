@@ -1,3 +1,4 @@
+import { CHANNELS } from "../channels";
 import { ipcMain } from "electron";
 import * as DiscordRPC from "discord-rpc";
 
@@ -34,7 +35,7 @@ export const setupDiscordHandlers = () => {
 
   // アクティビティの更新
   ipcMain.handle(
-    "discord:set-activity",
+    CHANNELS.DISCORD_SET_ACTIVITY,
     async (_, activity: DiscordRPC.Presence) => {
       try {
         await initRpc();
@@ -57,7 +58,7 @@ export const setupDiscordHandlers = () => {
   );
 
   // クリア
-  ipcMain.handle("discord:clear-activity", async () => {
+  ipcMain.handle(CHANNELS.DISCORD_CLEAR_ACTIVITY, async () => {
     if (rpc) {
       await rpc.clearActivity();
     }

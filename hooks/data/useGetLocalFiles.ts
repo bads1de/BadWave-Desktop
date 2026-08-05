@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CHANNELS } from "@/electron/channels";
 import { CACHED_QUERIES } from "@/constants";
 import { LocalFile } from "@/types/local";
 import { FileMetadata } from "@/types";
@@ -102,7 +103,7 @@ async function fetchMissingMetadataInBatches(
       batch.map(async (filePath: string) => {
         try {
           const result: MetadataResult =
-            await window.electron.ipc.invoke("handle-get-mp3-metadata", filePath);
+            await window.electron.ipc.invoke(CHANNELS.GET_MP3_METADATA, filePath);
           return {
             path: filePath,
             metadata: result.metadata,
@@ -161,7 +162,7 @@ const useGetLocalFiles = (directoryPath: string | null) => {
     }
 
     const unsubscribe = window.electron.ipc.on(
-      "scan-progress",
+      CHANNELS.SCAN_PROGRESS,
       (progress: ScanProgress) => {
         setScanProgress(progress);
 
@@ -225,7 +226,7 @@ const useGetLocalFiles = (directoryPath: string | null) => {
         try {
           const cachedResult: CachedFilesResult =
             await window.electron.ipc.invoke(
-              "handle-get-cached-files-with-metadata"
+              CHANNELS.GET_CACHED_FILES_WITH_METADATA
             );
 
           // キャッシュが存在し、同じディレクトリの場合はキャッシュを使用
@@ -256,7 +257,7 @@ const useGetLocalFiles = (directoryPath: string | null) => {
 
       // キャッシュがない、または再スキャンが要求された場合はスキャン実行
       const scanResult: ScanResult = await window.electron.ipc.invoke(
-        "handle-scan-mp3-files",
+        CHANNELS.SCAN_MP3_FILES,
         directoryPath,
         shouldForceScan
       );
