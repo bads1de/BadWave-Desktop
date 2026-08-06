@@ -1,7 +1,7 @@
 import { CHANNELS } from "../channels";
 import { protocol } from "electron";
 import * as url from "url";
-import { serveLocalFile } from "./localFileHandler";
+import { serveLocalFile } from "./local-file-handler";
 
 // カスタムプロトコルのスキームを登録（app ready前に呼び出す必要あり）
 export function registerSchemes() {

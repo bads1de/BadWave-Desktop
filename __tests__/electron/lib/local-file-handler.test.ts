@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { serveLocalFile } from "../../../electron/lib/localFileHandler";
+import { serveLocalFile } from "../../../electron/lib/local-file-handler";
 
 describe("serveLocalFile", () => {
   const testFilePath = path.join(__dirname, "test-media-file.mp3");
