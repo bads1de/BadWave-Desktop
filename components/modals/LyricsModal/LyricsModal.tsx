@@ -43,7 +43,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <Dialog.Portal>
-        {/* 繧ｪ繝ｼ繝舌・繝ｬ繧､ */}
+        {/* オーバーレイ */}
         <Dialog.Overlay
           className="
             fixed inset-0 z-[100]
@@ -56,7 +56,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
           "
         />
 
-        {/* 繝｡繧､繝ｳ繧ｳ繝ｳ繝・Φ繝・*/}
+        {/* メインコンテンツ*/}
         <Dialog.Content
           className="
             fixed inset-0 z-[101]
@@ -73,10 +73,10 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
             overflow-hidden
           "
         >
-          {/* 繧｢繧ｯ繧ｻ繧ｷ繝薙Μ繝・ぅ逕ｨ縺ｮ髱櫁｡ｨ遉ｺ繧ｿ繧､繝医Ν */}
+          {/* アクセシビリティ用の非表示タイトル */}
           <Dialog.Title className="sr-only">Lyrics</Dialog.Title>
 
-          {/* 繝倥ャ繝繝ｼ・亥承荳翫・繝懊ち繝ｳ・・*/}
+          {/* ヘッダー（右上：閉じるボタン）*/}
           <div className="absolute top-0 right-0 z-10 p-4 flex items-center gap-2">
             {/* キューボタン */}
             <button
@@ -111,7 +111,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
             </Dialog.Close>
           </div>
 
-          {/* 繝｡繧､繝ｳ繧ｨ繝ｪ繧｢・亥ｷｦ・壹い繝ｼ繝医Ρ繝ｼ繧ｯ縲∝承・壽ｭ瑚ｩ橸ｼ・*/}
+          {/* メインエリア（左：アートワーク、右：歌詞）*/}
           <div className="flex flex-1 overflow-hidden">
             {/* 左側：アートワーク */}
             <div className="w-1/2 h-full">
@@ -127,14 +127,14 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ song }) => {
                 </span>
               </div>
 
-              {/* 豁瑚ｩ槭せ繧ｯ繝ｭ繝ｼ繝ｫ繧ｨ繝ｪ繧｢ */}
+              {/* 歌詞スクロールエリア */}
               <div className="flex-1 overflow-y-auto custom-scrollbar px-8 pb-8">
                 <SyncedLyrics lyrics={lyrics} />
               </div>
             </div>
           </div>
 
-          {/* 荳矩Κ・壹さ繝ｳ繝医Ο繝ｼ繝ｫ繝代ロ繝ｫ */}
+          {/* 下部：コントロールパネル */}
           <LyricsModalControls
             isPlaying={isPlaying}
             currentTime={currentTime}

@@ -7,7 +7,7 @@ import useGetSongById from "@/hooks/data/useGetSongById";
 import { store } from "@/libs/electron/index";
 import { ELECTRON_STORE_KEYS } from "@/constants";
 
-// 繝｢繝・け縺ｮ險ｭ螳・
+// モックの設定
 jest.mock("@/hooks/player/usePlayer");
 jest.mock("@/hooks/data/useGetSongById");
 jest.mock("@/libs/electron", () => ({
@@ -28,7 +28,7 @@ jest.mock("@/libs/electron", () => ({
   },
 }));
 
-// use-gesture縺ｮ繝｢繝・け
+// use-gestureのモック
 jest.mock("@use-gesture/react", () => ({
   useDrag: jest.fn(() => () => ({})),
 }));

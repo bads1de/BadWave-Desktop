@@ -97,7 +97,7 @@ export default function AllSongsPage() {
             <div className="absolute top-0 right-0 w-24 h-px bg-gradient-to-l from-theme-500/40 to-transparent" />
           </div>
 
-          {/* 譖ｲ荳隕ｧ */}
+          {/* 楽曲一覧 */}
           {isLoading && songs.length === 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => (

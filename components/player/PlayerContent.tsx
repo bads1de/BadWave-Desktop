@@ -36,14 +36,14 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     // ローカル曲かどうかを判定
     const isLocalFile = isLocalSong(song);
 
-    // 繝繧ｦ繝ｳ繝ｭ繝ｼ繝画ｸ医∩縺ｮ蝣ｴ蜷医・繝ｭ繝ｼ繧ｫ繝ｫ繝代せ繧貞━蜈・
+    // ダウンロード済みの場合はローカルパスを優先
     const playablePath = getPlayablePath(song);
 
     // カラースキームを取得
     const { getColorScheme, hasHydrated } = useColorSchemeStore();
     const colorScheme = getColorScheme();
 
-    // 繧ｫ繝ｩ繝ｼ繧ｹ繧ｭ繝ｼ繝槭°繧峨・濶ｲ蜿門ｾ暦ｼ医ワ繧､繝峨Ξ繝ｼ繧ｷ繝ｧ繝ｳ蜑阪・繝・ヵ繧ｩ繝ｫ繝亥､繧剃ｽｿ逕ｨ・・
+    // カラースキーマから色取得（ハイドレーション前のデフォルト値を使用）
     const accentFrom = hasHydrated ? colorScheme.colors.accentFrom : "#7c3aed";
     const primary = hasHydrated ? colorScheme.colors.primary : "#4c1d95";
     const glowColor = hasHydrated
@@ -87,7 +87,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
     const { toggleLyrics } = useLyricsStore();
     const { openModal } = useLyricsModalStore();
 
-    // 繝｡繝・ぅ繧｢繧ｳ繝ｳ繝医Ο繝ｼ繝ｫ・医Α繝九・繝ｬ繧､繝､繝ｼ蜷ｫ繧・峨・繧､繝吶Φ繝医ｒ蜿励￠蜿悶ｋ
+    // メタデータコントロール（ミニプレイヤー含む）のイベントを受け取る
     useMediaControl({
       onPlayPause: handlePlay,
       onNext: onPlayNext,
@@ -96,7 +96,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
 
     return (
       <>
-        {/* audio隕∫ｴ縺ｯAudioEngine繧ｷ繝ｳ繧ｰ繝ｫ繝医Φ縺ｧ邂｡逅・＆繧後ｋ縺溘ａ縲√％縺薙↓縺ｯ荳崎ｦ・*/}
+        {/* audio要素はAudioEngineシングルトンで管理されるため、ここには不要*/}
         <div className="grid grid-cols-3 h-full bg-transparent">
           <div className="flex w-full justify-start px-4">
             <div className="flex items-center gap-x-4">
@@ -132,7 +132,7 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
                 onClick={handlePlay}
                 className="relative flex items-center justify-center h-12 w-12 cursor-pointer group/play transition-all duration-500"
               >
-                {/* 閭梧勹陬・｣ｾ */}
+                {/* 背景装飾 */}
                 <div className="absolute inset-0 border border-theme-500/20 group-hover/play:border-theme-500/40" />
                 <div className="absolute inset-1 border border-theme-500/40 group-hover/play:border-theme-500/80 transition-colors" />
 

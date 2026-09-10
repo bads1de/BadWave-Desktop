@@ -131,7 +131,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
                 </button>
               </div>
 
-              {/* 繧ｪ繝輔Λ繧､繝ｳ讖溯・ (Phase 2霑ｽ蜉 - 繝ｭ繝ｼ繧ｫ繝ｫ譖ｲ莉･螟悶・縺ｿ) */}
+              {/* オフライン機能 (Phase 2追加 - ローカル曲以外のみ) */}
               {!isLocal && (
                 <div className="px-4 py-3 border-t border-theme-500/10">
                   {isDownloaded ? (
