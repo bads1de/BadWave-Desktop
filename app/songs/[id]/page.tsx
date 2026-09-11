@@ -4,7 +4,6 @@ import React, {
   useState,
   useEffect,
   useMemo,
-  memo,
   useCallback,
   use,
 } from "react";
@@ -12,7 +11,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
   Heart,
-  Share2,
   Download,
   Edit2,
   Clock,
@@ -95,8 +93,6 @@ const SongPage = (props: SongPageProps) => {
     }
 
     try {
-      console.log("再生を開始します", { songId, currentSongId });
-
       if (currentSongId !== songId) {
         await initializeAudio(song.song_path, songId);
         await play();
@@ -150,7 +146,7 @@ const SongPage = (props: SongPageProps) => {
     try {
       navigator.clipboard.writeText(song?.lyrics || "");
       toast.success("Lyrics copied to clipboard!");
-    } catch (error) {
+    } catch {
       toast.error(ERROR_MESSAGES.COPY_LYRICS_FAILED);
     }
   }, [song?.lyrics]);
@@ -164,7 +160,7 @@ const SongPage = (props: SongPageProps) => {
           <div className="absolute inset-8 border-2 border-theme-500 animate-pulse" />
         </div>
         <span className="text-theme-500 text-[10px] tracking-[0.4em] uppercase animate-pulse">
-          // FETCHING_SONG_BUFFER...
+          {"// FETCHING_SONG_BUFFER..."}
         </span>
       </div>
     );
@@ -263,7 +259,7 @@ const SongPage = (props: SongPageProps) => {
                   
                   <div className="flex items-center justify-center md:justify-start gap-4 mb-8">
                     <p className="text-xl md:text-3xl text-theme-400 font-mono tracking-widest uppercase border-l-4 border-theme-500 pl-4">
-                      // AUTH: {song.author}
+                      {`// AUTH: ${song.author}`}
                     </p>
                   </div>
 

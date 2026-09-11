@@ -26,9 +26,7 @@ interface CityPopThemeProps {
 }
 
 const CityPopTheme: React.FC<CityPopThemeProps> = ({
-  pulses,
   currentPulse,
-  currentPulseIndex,
   isPlaying,
   hasStarted,
   togglePlay,

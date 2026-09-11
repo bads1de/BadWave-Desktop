@@ -3,6 +3,7 @@ import {
   getAppVersion,
   getPlatform,
   isNetworkError,
+  invokeOr,
 } from "./common";
 import { windowControls } from "./window";
 import { store } from "./store";
@@ -40,6 +41,7 @@ export {
   getAppVersion,
   getPlatform,
   isNetworkError,
+  invokeOr,
   windowControls,
   store,
   mediaControls,

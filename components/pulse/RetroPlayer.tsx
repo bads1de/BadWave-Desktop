@@ -22,11 +22,8 @@ interface RetroPlayerProps {
 }
 
 const RetroPlayer: React.FC<RetroPlayerProps> = ({
-  audioRef,
   isPlaying,
   togglePlay,
-  volume,
-  handleVolumeChange,
   currentTime,
   duration,
   onSeek,

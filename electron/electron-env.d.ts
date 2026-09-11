@@ -45,7 +45,7 @@ export interface ElectronAPI {
     getSongs: () => Promise<OfflineSong[]>;
     checkStatus: (
       songId: string,
-    ) => Promise<{ isDownloaded: boolean; localPath?: string }>;
+    ) => Promise<{ isDownloaded: boolean; localPath?: string; localImagePath?: string }>;
     // オフライン曲を削除（ファイル + DB）
     deleteSong: (
       songId: string,
@@ -125,7 +125,7 @@ export interface ElectronAPI {
     // Specialized queries
     getSongById: (id: string) => Promise<SongForSync | null>;
     getPlaylistById: (id: string) => Promise<PlaylistForSync | null>;
-    getSongsPaginated: (limit: number, offset: number) => Promise<SongForSync[]>;
+    getSongsPaginated: (offset: number, limit: number) => Promise<SongForSync[]>;
     getSongsTotalCount: () => Promise<number>;
   };
 

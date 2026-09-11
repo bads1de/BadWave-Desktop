@@ -48,7 +48,7 @@ const MediaItem: React.FC<MediaItemProps> = memo(
       if ("author" in data && data.id) {
         return player.setId(data.id);
       }
-    }, [onClick, data.id, player, isPlayable]);
+    }, [onClick, data, player, isPlayable]);
 
     return (
       <div
@@ -132,7 +132,7 @@ const MediaItem: React.FC<MediaItemProps> = memo(
               )}
             </div>
             <p className="text-[10px] text-theme-500/60 truncate uppercase tracking-widest">
-              // AUTH: {data.author}
+              {`// AUTH: ${data.author}`}
             </p>
           </div>
         )}

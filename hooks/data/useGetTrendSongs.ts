@@ -1,19 +1,14 @@
 import { Song } from "@/types";
+import type { Period } from "@/types/stats";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
 import { subMonths, subWeeks, subDays } from "date-fns";
 
-/**
- * トレンド曲を取得するカスタムフック
- *
- * Electron環境ではローカルキャッシュから、Web環境では Supabase から取得。
- * オフライン時はクエリが pause され、PersistQueryClient により
- * キャッシュから即座に表示されます。
- */
+/** トレンド曲を取得する (Electronはキャッシュ、WebはSupabase) */
 const useGetTrendSongs = (
-  period: "all" | "month" | "week" | "day" = "all",
+  period: Period = "all",
   initialData?: Song[]
 ) => {
   const {

@@ -13,15 +13,7 @@ import { getErrorMessage } from "@/libs/utils/error";
 import { useEffect, useState, useRef } from "react";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 
-/**
- * 指定されたIDに基づいて曲を取得するカスタムフック
- *
- * onlineManager により、オフライン時はクエリが自動的に pause されます。
- * PersistQueryClient により、オフライン時や起動時は即座にキャッシュから表示されます。
- *
- * @param {string|number|undefined} id - 取得する曲のID
- * @returns {Object} 曲の取得状態と結果
- */
+/** 指定IDの曲を取得する (ローカルキャッシュ優先、オフライン時はpause) */
 const useGetSongById = (id?: string | number) => {
   const supabaseClient = createClient();
   const { isOnline } = useNetworkStatus();
@@ -84,7 +76,6 @@ const useGetSongById = (id?: string | number) => {
 
       if (error) {
         if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log("[useGetSongById] Fetch skipped: offline/network error");
           return undefined;
         }
         throw new Error(`Failed to load song: ${error.message}`);

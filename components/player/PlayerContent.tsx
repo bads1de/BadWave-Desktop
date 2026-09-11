@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { twMerge } from "tailwind-merge";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill, BsRepeat1 } from "react-icons/bs";
@@ -15,8 +15,6 @@ import useLyricsStore from "@/hooks/stores/useLyricsStore";
 import useLyricsModalStore from "@/hooks/stores/useLyricsModalStore";
 import usePlaybackRate from "@/hooks/audio/usePlaybackRate";
 import useAudioEffects from "@/hooks/audio/useAudioEffects";
-import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
-import { mediaControls } from "@/libs/electron";
 import { isLocalSong, getPlayablePath } from "@/libs/songUtils";
 import DisabledOverlay from "../common/DisabledOverlay";
 import VolumeControl from "./VolumeControl";
@@ -38,17 +36,6 @@ const PlayerContent: React.FC<PlayerContentProps> = React.memo(
 
     // ダウンロード済みの場合はローカルパスを優先
     const playablePath = getPlayablePath(song);
-
-    // カラースキームを取得
-    const { getColorScheme, hasHydrated } = useColorSchemeStore();
-    const colorScheme = getColorScheme();
-
-    // カラースキーマから色取得（ハイドレーション前のデフォルト値を使用）
-    const accentFrom = hasHydrated ? colorScheme.colors.accentFrom : "#7c3aed";
-    const primary = hasHydrated ? colorScheme.colors.primary : "#4c1d95";
-    const glowColor = hasHydrated
-      ? `rgba(${colorScheme.colors.glow}, 0.8)`
-      : "rgba(139, 92, 246, 0.8)";
 
     const {
       formattedCurrentTime,

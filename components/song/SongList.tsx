@@ -47,7 +47,7 @@ const SongList: React.FC<SongListProps> = memo(
       if ("author" in data && data.id) {
         return player.setId(data.id);
       }
-    }, [onClick, data.id, player, isPlayable]);
+    }, [onClick, data, player, isPlayable]);
 
     return (
       <motion.div
@@ -147,7 +147,7 @@ const SongList: React.FC<SongListProps> = memo(
                     : "text-theme-500/10"
                 }`}
               >
-                // {data?.genre}
+                {`// ${data?.genre}`}
               </p>
             </Link>
             <span className="text-theme-500/20 text-[8px]">•</span>

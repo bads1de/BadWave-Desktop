@@ -72,9 +72,9 @@ const OfflinePage = () => {
                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(239,68,68,0.5)]" />
                   NETWORK: LOST
                 </span>
-                <span>// SECTOR: CACHE_BLOCK_A</span>
+                <span>{"// SECTOR: CACHE_BLOCK_A"}</span>
                 <span className="hidden sm:inline">
-                  // DECRYPTION: LOCAL_ONLY
+                  {"// DECRYPTION: LOCAL_ONLY"}
                 </span>
               </div>
             </div>
@@ -101,7 +101,7 @@ const OfflinePage = () => {
                 <div className="absolute inset-8 border-2 border-theme-500 animate-pulse" />
               </div>
               <span className="text-theme-500 text-[10px] tracking-[0.4em] uppercase animate-pulse">
-                // SCANNING_LOCAL_BUFFERS...
+                {"// SCANNING_LOCAL_BUFFERS..."}
               </span>
             </div>
           ) : offlineSongs.length === 0 ? (
@@ -110,8 +110,7 @@ const OfflinePage = () => {
                 [ CACHE_MISS ]
               </h2>
               <p className="text-[10px] uppercase tracking-widest text-center mt-2 max-w-sm px-6 text-theme-500/20">
-                // NO_DOWNLOADED_STREAMS_DETECTED.
-                DOWNLOAD_FAVORITES_TO_ACCESS_DURING_OUTAGE.
+                {"// NO_DOWNLOADED_STREAMS_DETECTED. DOWNLOAD_FAVORITES_TO_ACCESS_DURING_OUTAGE."}
               </p>
             </div>
           ) : (

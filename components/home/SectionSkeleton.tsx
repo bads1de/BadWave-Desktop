@@ -40,7 +40,7 @@ const SectionSkeleton: React.FC<SectionSkeletonProps> = ({
         </h2>
         <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase flex items-center gap-2">
           <span className="w-1 h-1 bg-theme-500 rounded-full animate-ping" />
-          // {description}
+          {`// ${description}`}
         </p>
         {/* スキャンライン装飾 */}
         <div className="absolute -bottom-1 left-0 w-full h-[1px] bg-gradient-to-r from-theme-500/40 via-transparent to-transparent" />

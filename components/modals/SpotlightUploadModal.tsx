@@ -4,8 +4,6 @@ import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
 import { RiVideoLine, RiUploadCloud2Line } from "react-icons/ri";
 
-import { useUser } from "@/hooks/auth/useUser";
-
 import Modal from "./Modal";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
@@ -18,7 +16,6 @@ const SpotlightUploadModal: React.FC = memo(() => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const spotlightUploadModal = useSpotLightUploadModal();
-  const { user } = useUser();
 
   // TanStack Queryを使用したミューテーション
   const { mutateAsync, isPending: isLoading } =

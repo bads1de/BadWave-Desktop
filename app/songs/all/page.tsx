@@ -90,7 +90,7 @@ export default function AllSongsPage() {
               LATEST_SIGNAL_RELEASE
             </h1>
             <p className="text-theme-500/60 mt-2 text-xs uppercase tracking-widest italic">
-              // DECRYPTING_ALL_RECENT_BINARY_STREAMS_IN_THIS_SECTOR
+              {"// DECRYPTING_ALL_RECENT_BINARY_STREAMS_IN_THIS_SECTOR"}
             </p>
 
             {/* 装飾用HUDパーツ */}
@@ -134,7 +134,7 @@ export default function AllSongsPage() {
             <div className="mt-20 pt-10 border-t border-theme-500/10">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-[8px] text-theme-500/20 uppercase tracking-widest font-bold">
-                  sector_index: {page + 1} // total_blocks: {totalPages}
+                  {`sector_index: ${page + 1} // total_blocks: ${totalPages}`}
                 </span>
                 <div className="h-px flex-1 mx-8 bg-gradient-to-r from-theme-500/20 via-transparent to-transparent" />
               </div>

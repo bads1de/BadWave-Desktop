@@ -25,7 +25,7 @@ const LatestSection: React.FC<LatestSectionProps> = ({ songs }) => {
               LATEST_RELEASES
             </h2>
             <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase">
-              // FRESH_DATA_STREAM_v4.2
+              {"// FRESH_DATA_STREAM_v4.2"}
             </p>
           </div>
         </div>

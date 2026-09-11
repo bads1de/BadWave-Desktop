@@ -5,15 +5,7 @@ import { electronAPI } from "@/libs/electron";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { extractSongsFromJoin } from "@/libs/songUtils";
 
-/**
- * ユーザーがいいねした曲を取得するカスタムフック (ローカルファースト)
- *
- * Electron環境では常にローカルDBから読み込みます。
- * 同期は useSyncLikedSongs フックが担当します。
- *
- * networkMode: "always" により、オフライン時でも queryFn が実行され、
- * SQLite キャッシュからの取得が可能になります。
- */
+/** いいね曲を取得する (ElectronはローカルDB優先、同期はuseSyncLikedSongs) */
 const useGetLikedSongs = (userId?: string) => {
   const {
     data: likedSongs = [],

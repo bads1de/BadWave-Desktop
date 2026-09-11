@@ -14,7 +14,7 @@ const GenreSection: React.FC = () => {
             GENRE_EXPLORER
           </h2>
           <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase">
-            // DATABASE_INDEX_READY
+            {"// DATABASE_INDEX_READY"}
           </p>
         </div>
       </div>

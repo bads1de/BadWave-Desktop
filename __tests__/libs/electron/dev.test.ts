@@ -4,7 +4,10 @@
 import { dev } from "@/libs/electron/dev";
 import { isElectron } from "@/libs/electron/common";
 
-jest.mock("@/libs/electron/common");
+jest.mock("@/libs/electron/common", () => ({
+  ...jest.requireActual("@/libs/electron/common"),
+  isElectron: jest.fn(),
+}));
 
 describe("electron/dev", () => {
   beforeEach(() => {

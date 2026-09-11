@@ -1,17 +1,17 @@
 "use server";
 
 import { createClient } from "@/libs/supabase/server";
-import type { StatsPeriod, UserStats } from "@/types/stats";
+import type { Period, UserStats } from "@/types/stats";
 
-export type { StatsPeriod, UserStats } from "@/types/stats";
+export type { Period, UserStats } from "@/types/stats";
 
 /**
  * ユーザーの聴取統計を取得する
- * @param period - 集計期間 ("week" | "month" | "all")
+ * @param period - 集計期間 ("day" | "week" | "month" | "all")
  * @returns 統計データ
  */
 export async function getListeningStats(
-  period: StatsPeriod = "week"
+  period: Period = "week"
 ): Promise<UserStats | null> {
   const supabase = await createClient();
 
@@ -30,6 +30,9 @@ export async function getListeningStats(
   let periodStart: Date;
 
   switch (period) {
+    case "day":
+      periodStart = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+      break;
     case "week":
       periodStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       break;

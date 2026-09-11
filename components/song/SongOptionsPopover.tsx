@@ -33,7 +33,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
     const { isOnline } = useNetworkStatus();
     const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
     const { fileUrl: audioUrl } = useDownload(song.song_path);
-    const [isLoading, setIsLoading] = useState(false);
+    const [, setIsLoading] = useState(false);
 
     // ダウンロードフック
     const { download, remove, isDownloaded, isDownloading } =
@@ -127,7 +127,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
                     size={16}
                     className="mr-3 group-hover:text-theme-500"
                   />
-                  // EXTRACT_ASSET
+                  {"// EXTRACT_ASSET"}
                 </button>
               </div>
 
@@ -144,7 +144,7 @@ const SongOptionsPopover: React.FC<SongOptionsPopoverProps> = memo(
                         size={16}
                         className="mr-3 group-hover:text-red-500"
                       />
-                      // PURGE_CACHE
+                      {"// PURGE_CACHE"}
                     </button>
                   ) : (
                     <button

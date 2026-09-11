@@ -1,16 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
-
-// アイコン変換に必要なパッケージはdevDependenciesに含まれていると仮定
-// console.log('アイコン変換に必要なパッケージをインストールしています...');
-// try {
-//   execSync('npm install --save-dev sharp png2icons');
-//   console.log('パッケージのインストールが完了しました。');
-// } catch (error) {
-//   console.error('パッケージのインストールに失敗しました:', error);
-//   process.exit(1);
-// }
 
 // モジュールを読み込み
 const sharp = require("sharp");

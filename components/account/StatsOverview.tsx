@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import useStats from "@/hooks/data/useStats";
 import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
-import { type StatsPeriod } from "@/types/stats";
+import { type Period } from "@/types/stats";
 import { Flame, Clock, Music, TrendingUp, Calendar, Database } from "lucide-react";
 import ContributionHeatmap from "./ContributionHeatmap";
 import { twMerge } from "tailwind-merge";
@@ -38,8 +38,10 @@ const GENRE_COLORS = [
   "#a855f7",
 ];
 
+const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
 const StatsOverview: React.FC = memo(() => {
-  const [period, setPeriod] = useState<StatsPeriod>("week");
+  const [period, setPeriod] = useState<Period>("week");
   const { stats, isLoading } = useStats(period);
   const { getColorScheme, hasHydrated } = useColorSchemeStore();
   const colorScheme = getColorScheme();
@@ -77,7 +79,6 @@ const StatsOverview: React.FC = memo(() => {
     }));
   }, [stats?.genre_stats]);
 
-  const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const weeklyData = React.useMemo(() => {
     const fullData = DAY_NAMES.map((name) => ({ day: name, count: 0 }));
     if (!stats?.weekly_activity) return fullData;

@@ -22,7 +22,7 @@ export const ColorSchemeSelector = () => {
           </div>
           <h2 className="text-2xl font-black text-white uppercase tracking-widest">カラースキーム設定</h2>
           <p className="text-[9px] text-theme-500/40 uppercase tracking-widest mt-1">
-            // OVERRIDE_SYSTEM_VISUAL_REPRESENTATION_MODULE
+            {"// OVERRIDE_SYSTEM_VISUAL_REPRESENTATION_MODULE"}
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export const ColorSchemeSelector = () => {
                       {scheme.name}
                     </h4>
                     <p className="text-[8px] text-theme-500/40 mt-1 uppercase tracking-tighter truncate">
-                      // {scheme.description}
+                      {`// ${scheme.description}`}
                     </p>
                   </div>
                   {isSelected && (

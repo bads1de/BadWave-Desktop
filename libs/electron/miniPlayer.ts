@@ -1,22 +1,11 @@
 import { isElectron } from "./common";
+import type { ElectronAPI } from "@/electron/electron-env";
 
-/**
- * ミニプレイヤーの曲情報
- */
-export interface MiniPlayerSong {
-  id: string;
-  title: string;
-  author: string;
-  image_path: string | null;
-}
-
-/**
- * ミニプレイヤーの状態
- */
-export interface MiniPlayerState {
-  song: MiniPlayerSong | null;
-  isPlaying: boolean;
-}
+/** ミニプレイヤーの状態（正は electron-env.d.ts の ElectronAPI.miniPlayer） */
+export type MiniPlayerState = Parameters<
+  ElectronAPI["miniPlayer"]["updateState"]
+>[0];
+export type MiniPlayerSong = MiniPlayerState["song"];
 
 /**
  * ミニプレイヤー関連の操作

@@ -5,13 +5,7 @@ import { useUser } from "@/hooks/auth/useUser";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { isNetworkError } from "@/libs/electron/index";
 
-/**
- * 曲がプレイリストに含まれているかどうかを確認するカスタムフック
- *
- * @param songId 曲のID
- * @param playlists プレイリストの配列
- * @returns 各プレイリストに曲が含まれているかどうかの状態
- */
+/** 曲がプレイリストに含まれるかを確認する */
 const usePlaylistSongStatus = (songId: string, playlists: { id: string }[]) => {
   const supabaseClient = createClient();
   const { user } = useUser();
@@ -39,9 +33,6 @@ const usePlaylistSongStatus = (songId: string, playlists: { id: string }[]) => {
       if (error) {
         // オフラインまたはネットワークエラーの場合は空オブジェクトを返す
         if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log(
-            "[usePlaylistSongStatus] Fetch skipped: offline/network error"
-          );
           return {}; // キャッシュがあればそれを使用
         }
         console.error("Error fetching playlist song status:", error);

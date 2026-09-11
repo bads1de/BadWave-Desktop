@@ -1,250 +1,148 @@
-import { isElectron } from "./common";
+import { invokeOr } from "./common";
 import type { SongForSync, PlaylistForSync, SpotlightForSync } from "@/types";
 import type { SectionItem } from "@/types/local";
 
-/**
- * キャッシュ機能（オフラインライブラリ表示用）
- */
+const NOT_IN_ELECTRON = "Not in Electron environment";
+
+/** キャッシュ機能（オフラインライブラリ表示用） */
 export const cache = {
-  /**
-   * 曲のメタデータをローカルDBにキャッシュ
-   * ダウンロード状態は上書きしない
-   */
-  syncSongsMetadata: async (
+  /** 曲のメタデータをローカルDBにキャッシュ（ダウンロード状態は上書きしない） */
+  syncSongsMetadata: (
     songs: SongForSync[]
-  ): Promise<{ success: boolean; count: number; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.syncSongsMetadata(songs);
-    }
+  ): Promise<{ success: boolean; count: number; error?: string }> =>
+    invokeOr({ success: false, count: 0, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.syncSongsMetadata(songs)
+    ),
 
-    return { success: false, count: 0, error: "Not in Electron environment" };
-  },
-
-  /**
-   * プレイリストをローカルDBにキャッシュ
-   */
-  syncPlaylists: async (
+  /** プレイリストをローカルDBにキャッシュ */
+  syncPlaylists: (
     playlists: PlaylistForSync[]
-  ): Promise<{ success: boolean; count: number; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.syncPlaylists(playlists);
-    }
+  ): Promise<{ success: boolean; count: number; error?: string }> =>
+    invokeOr({ success: false, count: 0, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.syncPlaylists(playlists)
+    ),
 
-    return { success: false, count: 0, error: "Not in Electron environment" };
-  },
-
-  /**
-   * プレイリスト内の曲をローカルDBにキャッシュ（メタデータも同期）
-   */
-  syncPlaylistSongs: async (data: {
+  /** プレイリスト内の曲をローカルDBにキャッシュ（メタデータも同期） */
+  syncPlaylistSongs: (data: {
     playlistId: string;
     songs: SongForSync[];
-  }): Promise<{ success: boolean; count: number; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.syncPlaylistSongs(data);
-    }
+  }): Promise<{ success: boolean; count: number; error?: string }> =>
+    invokeOr({ success: false, count: 0, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.syncPlaylistSongs(data)
+    ),
 
-    return { success: false, count: 0, error: "Not in Electron environment" };
-  },
-
-  /**
-   * いいねした曲をローカルDBにキャッシュ（メタデータも同期）
-   */
-  syncLikedSongs: async (data: {
+  /** いいねした曲をローカルDBにキャッシュ（メタデータも同期） */
+  syncLikedSongs: (data: {
     userId: string;
     songs: SongForSync[];
-  }): Promise<{ success: boolean; count: number; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.syncLikedSongs(data);
-    }
+  }): Promise<{ success: boolean; count: number; error?: string }> =>
+    invokeOr({ success: false, count: 0, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.syncLikedSongs(data)
+    ),
 
-    return { success: false, count: 0, error: "Not in Electron environment" };
-  },
+  /** キャッシュからプレイリストを取得 */
+  getCachedPlaylists: (userId: string): Promise<PlaylistForSync[]> =>
+    invokeOr([], () => window.electron.cache.getCachedPlaylists(userId)),
 
-  /**
-   * キャッシュからプレイリストを取得
-   */
-  getCachedPlaylists: async (userId: string): Promise<PlaylistForSync[]> => {
-    if (isElectron()) {
-      return window.electron.cache.getCachedPlaylists(userId);
-    }
+  /** キャッシュからいいね曲を取得（ダウンロード状態付き） */
+  getCachedLikedSongs: (userId: string): Promise<SongForSync[]> =>
+    invokeOr([], () => window.electron.cache.getCachedLikedSongs(userId)),
 
-    return [];
-  },
-
-  /**
-   * キャッシュからいいね曲を取得（ダウンロード状態付き）
-   */
-  getCachedLikedSongs: async (userId: string): Promise<SongForSync[]> => {
-    if (isElectron()) {
-      return window.electron.cache.getCachedLikedSongs(userId);
-    }
-
-    return [];
-  },
-
-  /**
-   * スポットライトのメタデータをローカルDBにキャッシュ
-   */
-  syncSpotlightsMetadata: async (
+  /** スポットライトのメタデータをローカルDBにキャッシュ */
+  syncSpotlightsMetadata: (
     spotlights: SpotlightForSync[]
-  ): Promise<{ success: boolean; count: number; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.syncSpotlightsMetadata(spotlights);
-    }
+  ): Promise<{ success: boolean; count: number; error?: string }> =>
+    invokeOr({ success: false, count: 0, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.syncSpotlightsMetadata(spotlights)
+    ),
 
-    return { success: false, count: 0, error: "Not in Electron environment" };
-  },
-
-  /**
-   * セクション情報をローカルDBにキャッシュ (itemIdsの保存)
-   */
-  syncSection: async (data: {
+  /** セクション情報をローカルDBにキャッシュ (itemIdsの保存) */
+  syncSection: (data: {
     key: string;
     data: SectionItem[];
-  }): Promise<{ success: boolean; count: number; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.syncSection(data);
-    }
-    return { success: false, count: 0, error: "Not in Electron environment" };
-  },
+  }): Promise<{ success: boolean; count: number; error?: string }> =>
+    invokeOr({ success: false, count: 0, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.syncSection(data)
+    ),
 
-  /**
-   * キャッシュからプレイリスト内の曲を取得（ダウンロード状態付き）
-   */
-  getCachedPlaylistSongs: async (playlistId: string): Promise<SongForSync[]> => {
-    if (isElectron()) {
-      return window.electron.cache.getCachedPlaylistSongs(playlistId);
-    }
+  /** キャッシュからプレイリスト内の曲を取得（ダウンロード状態付き） */
+  getCachedPlaylistSongs: (playlistId: string): Promise<SongForSync[]> =>
+    invokeOr([], () =>
+      window.electron.cache.getCachedPlaylistSongs(playlistId)
+    ),
 
-    return [];
-  },
-
-  /**
-   * キャッシュからセクションデータを取得
-   */
-  getSectionData: async (
+  /** キャッシュからセクションデータを取得 */
+  getSectionData: (
     key: string,
     type: "songs" | "spotlights" | "playlists"
-  ): Promise<SectionItem[]> => {
-    if (isElectron()) {
-      return window.electron.cache.getSectionData(key, type);
-    }
-
-    return [];
-  },
+  ): Promise<SectionItem[]> =>
+    invokeOr([], () => window.electron.cache.getSectionData(key, type)),
 
   // --- Local-first Mutation Methods ---
 
-  /**
-   * いいねを追加（ローカルDB）
-   */
-  addLikedSong: async (data: {
+  /** いいねを追加（ローカルDB） */
+  addLikedSong: (data: {
     userId: string;
     songId: string;
-  }): Promise<{ success: boolean; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.addLikedSong(data);
-    }
+  }): Promise<{ success: boolean; error?: string }> =>
+    invokeOr({ success: false, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.addLikedSong(data)
+    ),
 
-    return { success: false, error: "Not in Electron environment" };
-  },
-
-  /**
-   * いいねを削除（ローカルDB）
-   */
-  removeLikedSong: async (data: {
+  /** いいねを削除（ローカルDB） */
+  removeLikedSong: (data: {
     userId: string;
     songId: string;
-  }): Promise<{ success: boolean; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.removeLikedSong(data);
-    }
+  }): Promise<{ success: boolean; error?: string }> =>
+    invokeOr({ success: false, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.removeLikedSong(data)
+    ),
 
-    return { success: false, error: "Not in Electron environment" };
-  },
-
-  /**
-   * いいね状態を取得（ローカルDB）
-   */
-  getLikeStatus: async (data: {
+  /** いいね状態を取得（ローカルDB） */
+  getLikeStatus: (data: {
     userId: string;
     songId: string;
-  }): Promise<{ isLiked: boolean; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.getLikeStatus(data);
-    }
-    return { isLiked: false, error: "Not in Electron environment" };
-  },
+  }): Promise<{ isLiked: boolean; error?: string }> =>
+    invokeOr({ isLiked: false, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.getLikeStatus(data)
+    ),
 
-  /**
-   * プレイリストに曲を追加（ローカルDB）
-   */
-  addPlaylistSong: async (data: {
+  /** プレイリストに曲を追加（ローカルDB） */
+  addPlaylistSong: (data: {
     playlistId: string;
     songId: string;
-  }): Promise<{ success: boolean; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.addPlaylistSong(data);
-    }
+  }): Promise<{ success: boolean; error?: string }> =>
+    invokeOr({ success: false, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.addPlaylistSong(data)
+    ),
 
-    return { success: false, error: "Not in Electron environment" };
-  },
-
-  /**
-   * プレイリストから曲を削除（ローカルDB）
-   */
-  removePlaylistSong: async (data: {
+  /** プレイリストから曲を削除（ローカルDB） */
+  removePlaylistSong: (data: {
     playlistId: string;
     songId: string;
-  }): Promise<{ success: boolean; error?: string }> => {
-    if (isElectron()) {
-      return window.electron.cache.removePlaylistSong(data);
-    }
+  }): Promise<{ success: boolean; error?: string }> =>
+    invokeOr({ success: false, error: NOT_IN_ELECTRON }, () =>
+      window.electron.cache.removePlaylistSong(data)
+    ),
 
-    return { success: false, error: "Not in Electron environment" };
-  },
+  /** 単一の曲情報を取得（ローカルDB） */
+  getSongById: (songId: string): Promise<SongForSync | null> =>
+    invokeOr(null, () => window.electron.cache.getSongById(songId)),
 
-  /**
-   * 単一の曲情報を取得（ローカルDB）
-   */
-  getSongById: async (songId: string): Promise<SongForSync | null> => {
-    if (isElectron()) {
-      return window.electron.cache.getSongById(songId);
-    }
+  /** 単一のプレイリスト情報を取得（ローカルDB） */
+  getPlaylistById: (playlistId: string): Promise<PlaylistForSync | null> =>
+    invokeOr(null, () => window.electron.cache.getPlaylistById(playlistId)),
 
-    return null;
-  },
+  /** ページネーション対応の曲取得（ローカルDB） */
+  getSongsPaginated: (
+    offset: number,
+    limit: number
+  ): Promise<SongForSync[]> =>
+    invokeOr([], () =>
+      window.electron.cache.getSongsPaginated(offset, limit)
+    ),
 
-  /**
-   * 単一のプレイリスト情報を取得（ローカルDB）
-   */
-  getPlaylistById: async (playlistId: string): Promise<PlaylistForSync | null> => {
-    if (isElectron()) {
-      return window.electron.cache.getPlaylistById(playlistId);
-    }
-    return null;
-  },
-
-  /**
-   * ページネーション対応の曲取得（ローカルDB）
-   */
-  getSongsPaginated: async (offset: number, limit: number): Promise<SongForSync[]> => {
-    if (isElectron()) {
-      return window.electron.cache.getSongsPaginated(offset, limit);
-    }
-
-    return [];
-  },
-
-  /**
-   * 曲の総件数を取得（ローカルDB）
-   */
-  getSongsTotalCount: async (): Promise<number> => {
-    if (isElectron()) {
-      return window.electron.cache.getSongsTotalCount();
-    }
-
-    return 0;
-  },
+  /** 曲の総件数を取得（ローカルDB） */
+  getSongsTotalCount: (): Promise<number> =>
+    invokeOr(0, () => window.electron.cache.getSongsTotalCount()),
 };

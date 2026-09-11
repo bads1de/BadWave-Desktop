@@ -15,7 +15,6 @@ interface DisabledOverlayProps {
 const DisabledOverlay: React.FC<DisabledOverlayProps> = ({
   children,
   disabled = false,
-  size = 24,
   className = "",
 }) => {
   if (!disabled) {

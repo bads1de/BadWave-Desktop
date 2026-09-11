@@ -41,7 +41,7 @@ const ErrorPage = ({
               CRITICAL_SYSTEM_FAILURE
             </h2>
             <p className="text-[10px] text-red-500/60 uppercase tracking-widest mt-1">
-              // ERROR_CODE: 0x{Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase()}
+              {`// ERROR_CODE: 0x${Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase()}`}
             </p>
           </div>
         </div>
@@ -61,13 +61,13 @@ const ErrorPage = ({
             onClick={() => reset()}
             className="px-8 py-3 bg-red-500/20 border border-red-500 text-white font-bold uppercase tracking-widest hover:bg-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all duration-300"
           >
-            // INITIATE_RECOVERY
+            {"// INITIATE_RECOVERY"}
           </button>
           <button 
             onClick={() => router.push("/")}
             className="px-8 py-3 border border-theme-500/40 text-theme-500 font-bold uppercase tracking-widest hover:bg-theme-500/10 transition-all duration-300"
           >
-            // RETURN_TO_BASE
+            {"// RETURN_TO_BASE"}
           </button>
         </div>
       </div>

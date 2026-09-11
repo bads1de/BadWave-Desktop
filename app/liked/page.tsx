@@ -37,9 +37,9 @@ const Liked = () => {
                   </span>
                   NODE_STATUS: ONLINE
                 </span>
-                <span>// ENCRYPTION: 0x256_AES</span>
+                <span>{"// ENCRYPTION: 0x256_AES"}</span>
                 <span className="hidden sm:inline">
-                  // VOLUME: 0xLIKED_VAULT
+                  {"// VOLUME: 0xLIKED_VAULT"}
                 </span>
               </div>
             </div>

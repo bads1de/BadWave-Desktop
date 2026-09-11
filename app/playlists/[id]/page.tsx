@@ -192,7 +192,7 @@ const PlaylistPage = (props: {
           <div className="absolute inset-4 border-4 border-theme-500 animate-pulse" />
         </div>
         <p className="mt-8 text-theme-500/60 text-[10px] font-black tracking-[0.4em] uppercase animate-pulse">
-          // RECOVERING_ARCHIVE_DATA...
+          {"// RECOVERING_ARCHIVE_DATA..."}
         </p>
       </div>
     );
@@ -224,7 +224,7 @@ const PlaylistPage = (props: {
           <div className="flex flex-col items-center justify-center py-40 border border-dashed border-theme-500/10">
             <h2 className="text-xl font-black text-theme-500/40 uppercase tracking-[0.4em] mb-3">[ NULL_CONTENT ]</h2>
             <p className="text-[9px] font-bold text-theme-500/20 uppercase tracking-widest">
-              // NO_SIGNAL_DETECTED_IN_THIS_COLLECTION.
+              {"// NO_SIGNAL_DETECTED_IN_THIS_COLLECTION."}
             </p>
           </div>
         )}

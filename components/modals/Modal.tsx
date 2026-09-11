@@ -102,7 +102,7 @@ const Modal: React.FC<ModalProps> = ({
               py-2
             "
             >
-              // {description}
+              {`// ${description}`}
             </Dialog.Description>
           </div>
           <div className="relative z-10">{children}</div>

@@ -66,8 +66,6 @@ export function setupOnlineManager(): void {
       unsubscribeIpc?.();
     };
   });
-
-  console.log("[TanStack Query] onlineManager configured");
 }
 
 /**
@@ -93,8 +91,6 @@ export function setupFocusManager(): void {
         document.removeEventListener("visibilitychange", onVisibilityChange);
       };
     });
-
-    console.log("[TanStack Query] focusManager configured for Electron");
   }
 }
 

@@ -68,7 +68,7 @@ const PublicPlaylistBoard: React.FC<PublicPlaylistBoardProps> = ({
                     </h3>
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] text-theme-500/60 truncate tracking-widest">
-                        // AUTH: {playlist.user_name || "SYSTEM"}
+                        {`// AUTH: ${playlist.user_name || "SYSTEM"}`}
                       </p>
                       <div className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(var(--theme-500),0.8)] opacity-0 group-hover:opacity-100" />
                     </div>

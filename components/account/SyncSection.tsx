@@ -62,7 +62,7 @@ export const SyncSection = () => {
           </div>
           <h2 className="text-2xl font-black text-white uppercase tracking-widest">ライブラリ同期</h2>
           <p className="text-[9px] text-theme-500/40 uppercase tracking-widest mt-1">
-            // SYNC_LOCAL_BUFFERS_WITH_MAIN_NET_REGISTRY
+            {"// SYNC_LOCAL_BUFFERS_WITH_MAIN_NET_REGISTRY"}
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export const SyncSection = () => {
                   {item.label}
                 </h4>
                 <p className="text-[8px] text-theme-500/30 uppercase tracking-tighter">
-                  // {item.desc}
+                  {`// ${item.desc}`}
                 </p>
               </div>
 

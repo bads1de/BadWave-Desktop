@@ -263,7 +263,7 @@ const SyncedLyrics = ({ lyrics }: SyncedLyricsProps) => {
                     )}
                     {isPast && !isActive && (
                       <span className="text-theme-500/15 mr-2 select-none">
-                        //
+                        {"//"}
                       </span>
                     )}
                     {text}

@@ -1,5 +1,5 @@
 import { Song, SongWithRecommendation } from "@/types";
-import { SUPPORTED_AUDIO_EXTENSIONS } from "@/constants";
+import { ALLOWED_MEDIA_EXTENSIONS } from "@/constants";
 
 /**
  * 曲がローカルファイルかどうかを判定する
@@ -50,13 +50,8 @@ export function isLocalFilePath(songPath: string | null | undefined): boolean {
   return isWindowsPath || isUnixPath;
 }
 
-// 許可されるメディアファイルの拡張子（音声 + 動画 + 画像）
-const ALLOWED_MEDIA_EXTENSIONS = new Set(
-  SUPPORTED_AUDIO_EXTENSIONS.concat([
-    ".mp4", ".m4v", ".avi", ".mkv",
-    ".jpg", ".jpeg", ".png", ".webp",
-  ]),
-);
+// 許可されるメディアファイルの拡張子（音声 + 動画 + 画像）。一覧は constants が正
+const ALLOWED_MEDIA_EXTENSIONS_SET = new Set(ALLOWED_MEDIA_EXTENSIONS);
 
 /**
  * ローカルファイルパスが安全かどうかを検証する
@@ -76,7 +71,7 @@ export function isValidLocalFilePath(filePath: string): boolean {
     return false;
   }
   const ext = extMatch[0].toLowerCase();
-  if (!ALLOWED_MEDIA_EXTENSIONS.has(ext)) {
+  if (!ALLOWED_MEDIA_EXTENSIONS_SET.has(ext)) {
     return false;
   }
 

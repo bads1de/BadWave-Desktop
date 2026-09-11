@@ -55,22 +55,6 @@ const UploadModal: React.FC = memo(() => {
   const song = watch("song");
   const image = watch("image");
 
-  const handleFileDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    handleFiles(files);
-  }, []);
-
-  const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files) handleFiles(files);
-    },
-    []
-  );
-
   const handleFiles = useCallback(
     (files: FileList) => {
       for (let i = 0; i < files.length; i++) {
@@ -88,6 +72,22 @@ const UploadModal: React.FC = memo(() => {
       }
     },
     [setValue]
+  );
+
+  const handleFileDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    handleFiles(files);
+  }, [handleFiles]);
+
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files) handleFiles(files);
+    },
+    [handleFiles]
   );
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { twMerge } from "tailwind-merge";
 import useGetTopPlayedSongs from "@/hooks/data/useGetTopPlayedSongs";
 import useOnPlay from "@/hooks/player/useOnPlay";
-import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
 import { getPlayableImagePath } from "@/libs/songUtils";
 
 interface TopPlayedSongsProps {
@@ -28,7 +27,6 @@ const TopPlayedSongs: React.FC<TopPlayedSongsProps> = memo(({ user }) => {
     useState<(typeof PERIODS)[number]["value"]>("day");
   const { topSongs, isLoading } = useGetTopPlayedSongs(user?.id, period);
   const onPlay = useOnPlay(topSongs || []);
-  const { hasHydrated } = useColorSchemeStore();
 
   const handlePlay = useCallback(
     (id: string) => {
@@ -122,7 +120,7 @@ const TopPlayedSongs: React.FC<TopPlayedSongsProps> = memo(({ user }) => {
                   {song.title}
                 </h4>
                 <p className="text-[9px] text-theme-500/40 uppercase tracking-widest truncate mt-1">
-                  // SRC: {song.author}
+                  {`// SRC: ${song.author}`}
                 </p>
               </div>
 

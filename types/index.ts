@@ -145,14 +145,3 @@ export interface SpotlightForSync {
   created_at?: string;
 }
 
-/**
- * アイコンコンポーネントの型
- * lucide-reactなどのアイコンライブラリと互換性のある型
- */
-export type IconComponent = React.ComponentType<{
-  size?: string | number;
-  color?: string;
-  strokeWidth?: number;
-  className?: string;
-}>;
-

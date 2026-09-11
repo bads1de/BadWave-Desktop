@@ -20,9 +20,9 @@ interface UserCardProps {
 const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
   const router = useRouter();
   const supabaseClient = createClient();
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const authModal = useAuthModal();
-  const [isHovered, setIsHovered] = useState(false);
+  const [, setIsHovered] = useState(false);
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -31,7 +31,7 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
       await supabaseClient.auth.signOut();
       router.push("/");
       toast.success("ログアウトしました");
-    } catch (error) {
+    } catch {
       toast.error(ERROR_MESSAGES.GENERIC_ERROR);
     } finally {
       setIsLoading(false);
@@ -72,7 +72,7 @@ const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
             </div>
             <div className="flex-1 text-left">
               <p className="text-[10px] font-mono text-theme-500/60 uppercase tracking-widest mb-1">
-                // SYSTEM_LOGIN
+                {"// SYSTEM_LOGIN"}
               </p>
               <p className="text-sm font-bold font-mono text-white tracking-widest uppercase group-hover/card:text-theme-300 transition-colors">
                 [ CONNECT_ID ]

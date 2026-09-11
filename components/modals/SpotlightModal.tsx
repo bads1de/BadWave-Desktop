@@ -133,7 +133,13 @@ const SpotlightModal = () => {
                       controls={false}
                       onClick={() => {
                         const v = videoRef.current;
-                        if (v) v.paused ? v.play() : v.pause();
+                        if (v) {
+                          if (v.paused) {
+                            v.play();
+                          } else {
+                            v.pause();
+                          }
+                        }
                       }}
                       onLoadedData={() => setIsLoading(false)}
                       className={cn(
@@ -195,9 +201,9 @@ const SpotlightModal = () => {
                   {/* Title & Description */}
                   <div className="space-y-8">
                     <div className="space-y-3">
-                       <p className="text-[9px] text-theme-500/30 uppercase tracking-[0.3em] font-black">
-                          // DATA_STREAM_METADATA
-                       </p>
+                        <p className="text-[9px] text-theme-500/30 uppercase tracking-[0.3em] font-black">
+                           {"// DATA_STREAM_METADATA"}
+                        </p>
                        <h2 className="text-4xl font-black text-white leading-[1.1] uppercase tracking-tighter drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                          {selectedItem.title}
                        </h2>

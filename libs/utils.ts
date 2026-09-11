@@ -30,13 +30,7 @@ export const splitTags = (tagString?: string): string[] => {
   );
 };
 
-/**
- * 文字列をサニタイズする関数。
- * 英数字、ハイフン(-)、アンダースコア(_)以外の文字が含まれている場合は、ランダムな文字列を生成して返す。
- *
- * @param {string} title - サニタイズする文字列
- * @returns {string} サニタイズされた文字列、またはランダムに生成された文字列
- */
+/** 英数字・-_以外を含むタイトルはランダム文字列に置き換える */
 export const sanitizeTitle = (title: string) => {
   const regex = /^[a-zA-Z0-9-_]+$/;
 
@@ -47,12 +41,7 @@ export const sanitizeTitle = (title: string) => {
   return title;
 };
 
-/**
- * 指定された長さのランダムな文字列を生成するヘルパー関数。
- *
- * @param {number} length - 生成する文字列の長さ
- * @returns {string} 生成されたランダムな文字列
- */
+/** 指定長のランダム文字列を生成する */
 export const generateRandomString = (length: number): string => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
@@ -65,27 +54,14 @@ export const generateRandomString = (length: number): string => {
   return result;
 };
 
-/**
- * 秒数を「分:秒」の形式にフォーマットする関数。
- *
- * @param {number} seconds - フォーマットする秒数
- * @returns {string} フォーマットされた時間文字列 (例: "3:25")
- */
+/** 秒数を「分:秒」形式にフォーマットする (例: "3:25") */
 export const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 };
 
-/**
- * URLからファイルをダウンロードする関数。
- *
- * @async
- * @param {string} url - ダウンロードするファイルのURL
- * @param {string} filename - 保存するファイル名
- * @returns {Promise<void>} ファイルのダウンロードが完了したら解決されるPromise
- * @throws {Error} ダウンロード中にエラーが発生した場合、エラーをスローする。
- */
+/** URLからファイルをダウンロードする */
 export const downloadFile = async (url: string, filename: string) => {
   try {
     const response = await fetch(url, {

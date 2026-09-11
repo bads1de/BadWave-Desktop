@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
 
         {/* メタデータライン */}
         <div className="flex justify-between items-center mb-6 text-[8px] text-theme-500/30 uppercase tracking-[0.4em] font-black">
-          <span>// SECTOR_ACCESS: AUTHORIZED</span>
+          <span>{"// SECTOR_ACCESS: AUTHORIZED"}</span>
           <div className="flex gap-4">
             <span>SCAN_NODE: 0x7F</span>
             <span className="animate-pulse">SIGNAL: OPTIMAL</span>

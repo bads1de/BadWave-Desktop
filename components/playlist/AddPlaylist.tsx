@@ -97,7 +97,7 @@ const AddPlaylist: React.FC<PlaylistMenuProps> = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="center" className="font-mono bg-[#0a0a0f]/95 backdrop-blur-xl border-theme-500/40 p-2 min-w-[200px]">
         <div className="px-3 py-2 text-[8px] text-theme-500/40 border-b border-theme-500/10 mb-1 tracking-widest uppercase">
-           // SELECT_TARGET_COLLECTION
+           {"// SELECT_TARGET_COLLECTION"}
         </div>
         {playlists.length === 0 ? (
           <DropdownMenuItem className="text-theme-900 text-[10px] tracking-widest">[ ! ] NO_PLAYLISTS_FOUND</DropdownMenuItem>

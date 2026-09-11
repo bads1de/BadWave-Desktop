@@ -33,7 +33,7 @@ const TrendSection: React.FC<TrendSectionProps> = ({
               TRENDING_NOW
             </h2>
             <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase">
-              // ANALYZING_GLOBAL_STREAM_METRICS
+              {"// ANALYZING_GLOBAL_STREAM_METRICS"}
             </p>
           </div>
         </div>

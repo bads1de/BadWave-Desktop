@@ -93,3 +93,17 @@ export const isNetworkError = (error: unknown): boolean => {
     errorMessage.toLowerCase().includes(pattern.toLowerCase())
   );
 };
+
+/**
+ * Electron環境ならfnを実行し、そうでなければfallbackを返す
+ * libs/electron配下の `if (isElectron())` 定型文の共通化用
+ */
+export const invokeOr = async <T>(
+  fallback: T,
+  fn: () => Promise<T>,
+): Promise<T> => {
+  if (!isElectron()) {
+    return fallback;
+  }
+  return fn();
+};

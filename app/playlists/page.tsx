@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { memo, useCallback } from "react";
 import useGetPlaylists from "@/hooks/data/useGetPlaylists";
 import { useSyncPlaylists } from "@/hooks/sync/useSyncPlaylists";
-import { twMerge } from "tailwind-merge";
 import { ROUTES } from "@/constants";
 
 
@@ -37,7 +36,7 @@ const PlaylistContent: React.FC = memo(() => {
           <div className="absolute inset-4 border-2 border-theme-500 rounded-none animate-pulse" />
         </div>
         <span className="text-theme-500 text-[10px] font-black tracking-[0.4em] uppercase animate-pulse">
-          // INITIALIZING_SYNC_PROTOCOL...
+          {"// INITIALIZING_SYNC_PROTOCOL..."}
         </span>
       </div>
     );
@@ -48,8 +47,8 @@ const PlaylistContent: React.FC = memo(() => {
       <div className="flex flex-col items-center justify-center py-24 gap-4 text-theme-500/40 font-mono">
         <h1 className="text-xl uppercase tracking-[0.5em] mb-4 font-black">[ ZERO_STREAMS_DETECTED ]</h1>
         <p className="text-[9px] uppercase tracking-widest text-center max-w-xs leading-loose">
-          // PLAYLIST_BUFFER_EMPTY. <br/>
-          // PLEASE_EXECUTE_CREATE_COLLECTION_COMMAND_IN_SIDEBAR.
+          {"// PLAYLIST_BUFFER_EMPTY."} <br/>
+          {"// PLEASE_EXECUTE_CREATE_COLLECTION_COMMAND_IN_SIDEBAR."}
         </p>
       </div>
     );
@@ -138,8 +137,8 @@ const Playlist = () => {
                   <span className="w-1.5 h-1.5 bg-theme-500 animate-pulse" />
                   USER_DATA_VAULT
                 </span>
-                <span>// ACCESS_LOG: 0xROOT</span>
-                <span className="hidden sm:inline">// SECTOR: 0x77_B</span>
+                <span>{"// ACCESS_LOG: 0xROOT"}</span>
+                <span className="hidden sm:inline">{"// SECTOR: 0x77_B"}</span>
               </div>
             </div>
             

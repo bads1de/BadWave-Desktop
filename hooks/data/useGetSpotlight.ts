@@ -4,13 +4,7 @@ import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
 
-/**
- * スポットライトデータを取得するカスタムフック (クライアントサイド)
- *
- * Electron環境ではローカルキャッシュから、Web環境では Supabase から取得。
- * オフライン時はクエリが pause され、PersistQueryClient により
- * キャッシュから即座に表示されます。
- */
+/** スポットライトを取得する (Electronはキャッシュ、WebはSupabase) */
 const useGetSpotlight = (initialData?: Spotlight[]) => {
   const {
     data: spotlightData = [],

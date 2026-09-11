@@ -4,7 +4,10 @@
 import { offline } from "@/libs/electron/offline";
 import { isElectron } from "@/libs/electron/common";
 
-jest.mock("@/libs/electron/common");
+jest.mock("@/libs/electron/common", () => ({
+  ...jest.requireActual("@/libs/electron/common"),
+  isElectron: jest.fn(),
+}));
 
 describe("electron/offline", () => {
   const mockGetSongs = jest.fn().mockResolvedValue([]);

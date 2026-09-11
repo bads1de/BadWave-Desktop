@@ -224,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
                         )}
                       >
                         <RiPlayListFill size={20} />
-                        <p className="font-bold">// PLAYLISTS</p>
+                        <p className="font-bold">{"// PLAYLISTS"}</p>
                       </Link>
                       <Link
                         href={ROUTES.LIKED}
@@ -236,7 +236,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
                         )}
                       >
                         <FaHeart size={20} />
-                        <p className="font-bold">// LIKED_LOG</p>
+                        <p className="font-bold">{"// LIKED_LOG"}</p>
                       </Link>
                     </div>
                   </PopoverContent>

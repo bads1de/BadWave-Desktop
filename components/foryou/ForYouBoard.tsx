@@ -16,7 +16,7 @@ const EMPTY_STATE = (
       [ ! ] ALGORITHM_TRAINING_IN_PROGRESS
     </p>
     <p className="text-[10px] text-theme-500/40 mt-2 uppercase tracking-widest">
-      // NEED_MORE_STREAM_DATA_FOR_PERSONALIZATION
+      {"// NEED_MORE_STREAM_DATA_FOR_PERSONALIZATION"}
     </p>
   </div>
 );

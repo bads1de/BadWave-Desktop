@@ -55,13 +55,11 @@ export const useBackgroundSync = () => {
 
       if (playlistsData) {
         await electronAPI.cache.syncPlaylists(playlistsData as Playlist[]);
-        console.log(`[Sync] Synced ${playlistsData.length} playlists`);
 
         // --- 2. 各プレイリスト内の曲を同期 ---
         for (const playlist of playlistsData) {
           // ループの各ステップでオフラインチェック
           if (!isOnlineRef.current) {
-            console.log("[Sync] Paused: Connection lost");
             break;
           }
 
@@ -92,9 +90,6 @@ export const useBackgroundSync = () => {
                 playlistId: String(playlist.id),
                 songs,
               });
-              console.log(
-                `[Sync] Synced ${songs.length} songs for playlist "${playlist.title}"`
-              );
             }
           } catch (e) {
             // 個別のプレイリスト同期エラーは全体の停止にはしないが、オフラインならループを抜ける
@@ -129,7 +124,6 @@ export const useBackgroundSync = () => {
           })) as Song[];
 
           await electronAPI.cache.syncLikedSongs({ userId: user.id, songs });
-          console.log(`[Sync] Synced ${songs.length} liked songs`);
 
           // キャッシュが更新されたことを TanStack Query に通知
           queryClient.invalidateQueries({
@@ -137,26 +131,16 @@ export const useBackgroundSync = () => {
           });
         }
       }
-
-      if (isOnlineRef.current) {
-        console.log("[Sync] Background sync completed successfully.");
-      } else {
-        console.log("[Sync] Background sync paused due to offline.");
-      }
     } catch (error) {
-      // エラーハンドリング: オフラインが原因の場合はログレベルを下げる
-      if (!isOnlineRef.current) {
-        console.log("[Sync] Operation paused/canceled due to network loss.");
-      } else {
+      // オフライン起因でなければエラーを出力
+      if (isOnlineRef.current) {
         console.error("[Sync] Background sync failed:", error);
       }
     } finally {
       syncInProgress.current = false;
       // リトライが予約されていて、かつ現在オンラインであれば即座に再実行
       if (shouldRetrySync.current && isOnlineRef.current) {
-        console.log("[Sync] Retrying sync as scheduled...");
-        // 再帰呼び出しを防ぐため、次のティックで実行（またはPromiseチェーンを使う）
-        // ここではシンプルに関数を再呼び出しする（非同期なのでスタックオーバーフローはしない）
+        // 非同期の再呼び出しなのでスタックオーバーフローはしない
         syncLibrary();
       }
     }

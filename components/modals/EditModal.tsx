@@ -37,7 +37,7 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
     onClose,
   });
 
-  const { register, handleSubmit, reset, setValue, watch, getValues } =
+  const { register, handleSubmit, reset, setValue, getValues } =
     useForm<EditFormValues>({
       defaultValues: {
         id: song.id,
@@ -90,10 +90,6 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
       setIsGenerating(false);
     }
   };
-
-  const watchVideo = watch("video");
-  const watchSong = watch("song");
-  const watchImage = watch("image");
 
   useEffect(() => {
     if (isOpen) {

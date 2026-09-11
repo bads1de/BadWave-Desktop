@@ -106,9 +106,9 @@ const SpeedAndEffectsControl: React.FC = () => {
             <div className="flex items-center justify-between px-1">
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-black tracking-widest uppercase transition-colors duration-300 ${effect.active ? "text-white" : "text-theme-500/60"}`}>
-                    // {effect.label}
-                  </span>
+                    <span className={`text-[10px] font-black tracking-widest uppercase transition-colors duration-300 ${effect.active ? "text-white" : "text-theme-500/60"}`}>
+                      {`// ${effect.label}`}
+                    </span>
                   {effect.active && <div className="w-1 h-1 bg-theme-500 rounded-full animate-ping" />}
                 </div>
                 <span className="text-[7px] text-theme-500/30 uppercase tracking-tighter mt-0.5">{effect.desc}</span>

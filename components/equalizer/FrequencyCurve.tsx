@@ -22,7 +22,6 @@ const FrequencyCurve: React.FC<FrequencyCurveProps> = ({
   isEnabled,
   className = "",
   accentFrom = "#7c3aed",
-  accentTo = "#ec4899",
 }) => {
   const viewBoxWidth = 280;
   const viewBoxHeight = 80;
@@ -72,7 +71,6 @@ const FrequencyCurve: React.FC<FrequencyCurveProps> = ({
 
   // カラースキームに基づくテーマカラー
   const themeColor = isEnabled ? accentFrom : "#555";
-  const themeColorLight = isEnabled ? accentTo : "#666";
 
   return (
     <div className="relative group overflow-hidden bg-[#0a0a0f] border border-theme-500/20 p-2 shadow-[inset_0_0_15px_rgba(var(--theme-500),0.05)]">

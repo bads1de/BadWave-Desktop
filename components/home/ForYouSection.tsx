@@ -21,7 +21,7 @@ const ForYouSection: React.FC<ForYouSectionProps> = ({ recommendations }) => {
             FOR_YOU_OPERATOR
           </h2>
           <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase">
-            // ALGORITHM_RECOMMENDATIONS_READY
+            {"// ALGORITHM_RECOMMENDATIONS_READY"}
           </p>
         </div>
       </div>

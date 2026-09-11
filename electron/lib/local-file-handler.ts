@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 
 // メディアファイルのMIMEタイプ
+// 注: electron tsconfig の rootDir 制約により constants/ から import できない。
+// 拡張子の一覧は constants/ALLOWED_MEDIA_EXTENSIONS が正。変更時はあわせて更新すること
 const MIME_TYPES: Record<string, string> = {
   ".mp3": "audio/mpeg",
   ".wav": "audio/wav",

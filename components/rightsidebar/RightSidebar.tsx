@@ -9,7 +9,7 @@ import { getPlayableImagePath } from "@/libs/songUtils";
 import { twMerge } from "tailwind-merge";
 import { motion, useSpring } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
-import { BsGripVertical, BsChevronLeft } from "react-icons/bs";
+import { BsChevronLeft } from "react-icons/bs";
 import { store } from "@/libs/electron/index";
 import { ELECTRON_STORE_KEYS, SPRING_SIDEBAR } from "@/constants";
 
@@ -26,13 +26,13 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ children }) => {
   const localCurrentSong = useMemo(() => {
     if (!player.activeId) return null;
     return player.getLocalSong(player.activeId);
-  }, [player.activeId, player.getLocalSong]);
+  }, [player]);
 
   const nextSongId = player.getNextSongId();
   const localNextSong = useMemo(() => {
     if (!nextSongId) return null;
     return player.getLocalSong(nextSongId);
-  }, [nextSongId, player.getLocalSong]);
+  }, [nextSongId, player]);
 
   // ローカルストアになければ useGetSongById でフェッチ（オンライン時のみ実行される）
   const { song: fetchedCurrentSong } = useGetSongById(

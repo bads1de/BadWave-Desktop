@@ -39,7 +39,7 @@ const SongListSection = memo(
             <div className="absolute inset-4 border-2 border-theme-500 rounded-none animate-pulse" />
           </div>
           <span className="text-theme-500 font-mono text-xs tracking-[0.3em] uppercase animate-pulse">
-            // SEARCHING_NETWORKS...
+            {"// SEARCHING_NETWORKS..."}
           </span>
         </div>
       );
@@ -94,7 +94,7 @@ const PlaylistSection = memo(
             <div className="absolute inset-4 border-2 border-theme-500 rounded-none animate-pulse" />
           </div>
           <span className="text-theme-500 font-mono text-xs tracking-[0.3em] uppercase animate-pulse">
-            // SCANNING_DB...
+            {"// SCANNING_DB..."}
           </span>
         </div>
       );
@@ -145,7 +145,7 @@ const PlaylistSection = memo(
               </div>
               <div className="space-y-1 font-mono">
                 <p className="text-[8px] text-theme-500/60 uppercase tracking-[0.3em]">
-                  // PLN_TYPE: LIST
+                  {"// PLN_TYPE: LIST"}
                 </p>
                 <h3 className="text-sm font-black text-white truncate uppercase tracking-widest group-hover:text-theme-300 transition-colors">
                   {playlist.title}
@@ -212,7 +212,7 @@ const Search = (props: SearchProps) => {
                       ? "PENDING..."
                       : "RESOLVED"}
                   </span>
-                  <span>// TARGET: DEEP_NET_RECORDS</span>
+                  <span>{"// TARGET: DEEP_NET_RECORDS"}</span>
                 </div>
               </div>
               <div className="hidden md:flex items-center gap-8 border-l border-theme-500/10 pl-8 font-mono">

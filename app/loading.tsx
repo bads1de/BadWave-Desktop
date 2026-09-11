@@ -51,7 +51,7 @@ const Loading = () => {
               transition={{ duration: DURATIONS.ROTATE_SLOW, repeat: Infinity }}
               className="text-xs text-theme-500 font-black tracking-[0.5em] uppercase"
             >
-              // INITIALIZING_SYSTEM_LINK...
+              {"// INITIALIZING_SYSTEM_LINK..."}
             </motion.p>
             <div className="flex gap-1">
               {[0, 1, 2].map((i) => (

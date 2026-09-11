@@ -121,8 +121,8 @@ const EqualizerControl: React.FC<EqualizerControlProps> = ({ className }) => {
 
       {/* フッター: ガイドラベル */}
       <div className="flex justify-between text-[8px] font-black text-theme-500/20 px-4 uppercase tracking-[0.2em]">
-        <span>// LOW_END</span>
-        <span>// HIGH_END</span>
+        <span>{"// LOW_END"}</span>
+        <span>{"// HIGH_END"}</span>
       </div>
     </div>
   );

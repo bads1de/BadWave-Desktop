@@ -30,7 +30,7 @@ const AccountPage = () => {
       await supabaseClient.auth.signOut();
       router.push("/");
       toast.success("ログアウトしました");
-    } catch (error) {
+    } catch {
       toast.error(ERROR_MESSAGES.LOGOUT_FAILED);
     } finally {
       setIsLoading(false);
@@ -94,10 +94,10 @@ const AccountPage = () => {
                   </h2>
                   <div className="flex items-center gap-4 mt-1">
                     <span className="text-[10px] text-theme-500/60 uppercase tracking-widest">
-                      // AUTH_STATUS: VERIFIED
+                      {"// AUTH_STATUS: VERIFIED"}
                     </span>
                     <span className="text-[10px] text-theme-500/60 uppercase tracking-widest">
-                      // ACCESS_LVL: NULL_SEC
+                      {"// ACCESS_LVL: NULL_SEC"}
                     </span>
                   </div>
                 </div>

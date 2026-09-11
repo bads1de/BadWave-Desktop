@@ -8,13 +8,7 @@ import {
   isNetworkError,
 } from "@/libs/electron";
 
-/**
- * 曲のいいね状態を取得するカスタムフック（ローカルファースト）
- *
- * @param songId 曲のID
- * @param userId ユーザーID
- * @returns いいね状態とローディング状態
- */
+/** 曲のいいね状態を取得する (ローカルファースト) */
 const useLikeStatus = (songId: string, userId?: string) => {
   const supabaseClient = createClient();
   const { isOnline } = useNetworkStatus();
@@ -47,7 +41,6 @@ const useLikeStatus = (songId: string, userId?: string) => {
       if (error && error.code !== "PGRST116") {
         // オフラインまたはネットワークエラーの場合はfalseを返す
         if (!onlineManager.isOnline() || isNetworkError(error)) {
-          console.log("[useLikeStatus] Fetch skipped: offline/network error");
           return false; // キャッシュがあればそれを使用
         }
         console.error("Error fetching like status:", error);

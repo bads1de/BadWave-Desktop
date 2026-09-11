@@ -14,7 +14,7 @@ interface SpotlightBoardProps {
 const SpotlightBoardComponent: React.FC<SpotlightBoardProps> = ({
   spotlightData,
 }) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [, setHoveredIndex] = useState<number | null>(null);
   const [showArrows, setShowArrows] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRefs = useRef<HTMLVideoElement[]>([]);

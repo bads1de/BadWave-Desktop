@@ -1,11 +1,25 @@
 /**
  * サポートされている音声ファイルの拡張子
  * 注: 配列として定義し、Set への変換は各利用側で行う（es5 target 対応）
+ * メインプロセス側 (electron/ipc/library.ts, electron/lib/local-file-handler.ts) は
+ * rootDir 制約で import できないため、変更時はあわせて更新すること
  */
 export const SUPPORTED_AUDIO_EXTENSIONS = [
   ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
   ".m4a", ".wma", ".alac", ".aiff", ".webm",
 ];
+
+/** サポートされている動画ファイルの拡張子 */
+export const SUPPORTED_VIDEO_EXTENSIONS = [".mp4", ".m4v", ".avi", ".mkv"];
+
+/** サポートされている画像ファイルの拡張子（オフラインDL用） */
+export const SUPPORTED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+
+/** 許可されるメディアファイルの拡張子（音声 + 動画 + 画像） */
+export const ALLOWED_MEDIA_EXTENSIONS = SUPPORTED_AUDIO_EXTENSIONS.concat(
+  SUPPORTED_VIDEO_EXTENSIONS,
+  SUPPORTED_IMAGE_EXTENSIONS
+);
 
 export const videoIds = [
   { id: 1, name: "synthwave radio", videoId: "4xDzrJKXOOY" },

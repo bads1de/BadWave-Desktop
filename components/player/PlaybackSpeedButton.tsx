@@ -8,10 +8,7 @@ import * as RadixSlider from "@radix-ui/react-slider";
 import { HelpCircle } from "lucide-react";
 import usePlaybackRateStore from "@/hooks/stores/usePlaybackRateStore";
 import useSpatialStore from "@/hooks/stores/useSpatialStore";
-import useEffectStore, {
-  ROTATION_SPEED_VALUES,
-  RotationSpeed,
-} from "@/hooks/stores/useEffectStore";
+import useEffectStore, { RotationSpeed } from "@/hooks/stores/useEffectStore";
 import useNightCoreStore from "@/hooks/stores/useNightCoreStore";
 
 const PlaybackSpeedButton: React.FC = () => {

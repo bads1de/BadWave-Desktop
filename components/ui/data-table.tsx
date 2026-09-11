@@ -74,7 +74,7 @@ export function DataTable<TData, TValue>({
               className="relative bg-[#0a0a0f] text-theme-300 border-theme-500/20 focus-visible:ring-theme-500/40 focus-visible:border-theme-500/60 transition-all duration-300 rounded-none uppercase tracking-widest text-[10px] h-10 px-4 placeholder:text-theme-500/20"
             />
             <div className="absolute top-0 right-0 h-full flex items-center pr-3 pointer-events-none">
-              <span className="text-theme-500/40 text-[8px] animate-pulse">// SCANNING_ENABLED</span>
+              <span className="text-theme-500/40 text-[8px] animate-pulse">{"// SCANNING_ENABLED"}</span>
             </div>
           </div>
         </div>

@@ -29,8 +29,7 @@ const LocalPage = () => {
   const player = usePlayer();
 
   // TanStack Query を使用してキャッシュ戦略を適用
-  const { libraryInfo: savedLibraryInfo, isLoading: isLoadingLibraryInfo } =
-    useGetSavedLibraryInfo();
+  const { libraryInfo: savedLibraryInfo } = useGetSavedLibraryInfo();
 
   // 保存されたディレクトリを自動選択
   useEffect(() => {
@@ -137,8 +136,8 @@ const LocalPage = () => {
                   <span className="w-1.5 h-1.5 bg-theme-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(var(--theme-500),0.5)]" />
                   FS_STATUS: READ_ONLY
                 </span>
-                <span>// SECTOR: LOCAL_NODE</span>
-                <span className="hidden sm:inline">// ENCRYPTION: NONE</span>
+                <span>{"// SECTOR: LOCAL_NODE"}</span>
+                <span className="hidden sm:inline">{"// ENCRYPTION: NONE"}</span>
               </div>
             </div>
 
@@ -164,7 +163,7 @@ const LocalPage = () => {
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1.5 h-6 bg-theme-500 shadow-[0_0_10px_rgba(var(--theme-500),0.5)]" />
                 <span className="font-black text-white uppercase tracking-widest text-sm">
-                  // SAVED_LIBRARY_DETECTED
+                  {"// SAVED_LIBRARY_DETECTED"}
                 </span>
               </div>
 
@@ -246,7 +245,7 @@ const LocalPage = () => {
         {errorMessage && (
           <div className="bg-red-500/5 border border-red-500/40 p-4 mb-8 text-red-500 font-mono text-[10px] tracking-widest flex items-center gap-3 animate-shake rounded-xl">
             <AlertCircle className="h-4 w-4" />
-            <span className="uppercase">// ERROR: {errorMessage}</span>
+            <span className="uppercase">{`// ERROR: ${errorMessage}`}</span>
           </div>
         )}
 
@@ -303,7 +302,7 @@ const LocalPage = () => {
               <div className="absolute inset-8 border-2 border-theme-500 animate-pulse rounded-full" />
             </div>
             <span className="text-theme-500 text-[10px] tracking-[0.4em] uppercase animate-pulse">
-              // INITIALIZING_IO_THREAD...
+              {"// INITIALIZING_IO_THREAD..."}
             </span>
           </div>
         )}
@@ -342,7 +341,7 @@ const LocalPage = () => {
             <div className="py-32 flex flex-col items-center justify-center gap-4 text-theme-500/20 border border-theme-500/10 mb-8 rounded-xl">
               <h2 className="text-xl uppercase tracking-[0.5em] font-black">[ ZERO_BLOCKS ]</h2>
               <p className="text-[10px] uppercase tracking-widest text-center mt-2 max-w-sm px-6">
-                // NO_VALID_AUDIO_BUFFERS_DETECTED_IN_MOUNT_POINT. PROCEED_TO_RESCAN_OR_CHANGE_PATH.
+                {"// NO_VALID_AUDIO_BUFFERS_DETECTED_IN_MOUNT_POINT. PROCEED_TO_RESCAN_OR_CHANGE_PATH."}
               </p>
             </div>
           )}

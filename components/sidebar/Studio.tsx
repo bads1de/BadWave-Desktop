@@ -126,7 +126,7 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
             className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
             <RiPlayListFill size={20} />
-            <p className="font-bold">// INIT_PLAYLIST</p>
+            <p className="font-bold">{"// INIT_PLAYLIST"}</p>
           </button>
 
           <button
@@ -134,7 +134,7 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
             className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
             <AiOutlinePlus size={20} />
-            <p className="font-bold">// INGEST_BINARY</p>
+            <p className="font-bold">{"// INGEST_BINARY"}</p>
           </button>
 
           <button
@@ -142,7 +142,7 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
             className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
             <GiMicrophone size={20} />
-            <p className="font-bold">// SPOTLIGHT_SYNC</p>
+            <p className="font-bold">{"// SPOTLIGHT_SYNC"}</p>
           </button>
 
           <button
@@ -150,7 +150,7 @@ const Studio: React.FC<StudioProps> = ({ isCollapsed }) => {
             className="flex items-center gap-x-3 px-3 py-3 rounded-none transition-all duration-300 border border-transparent hover:border-theme-500/30 text-theme-500/60 hover:text-white hover:bg-theme-500/10 w-full text-left cyber-glitch"
           >
             <RiPulseLine size={20} />
-            <p className="font-bold">// PULSE_GEN</p>
+            <p className="font-bold">{"// PULSE_GEN"}</p>
           </button>
         </div>
       </PopoverContent>

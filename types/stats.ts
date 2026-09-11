@@ -2,9 +2,6 @@
 
 export type Period = "day" | "week" | "month" | "all";
 
-/** @deprecated Period を使用してください */
-export type StatsPeriod = "week" | "month" | "all";
-
 export interface HourlyActivity {
   hour: number;
   count: number;

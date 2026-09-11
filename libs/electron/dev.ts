@@ -1,40 +1,24 @@
-import { isElectron } from "./common";
+import { invokeOr } from "./common";
 
 // 開発用ユーティリティ
 export const dev = {
-  /**
-   * オフラインモードのシミュレーションを切り替え（トグル）
-   * 開発時にネットワーク接続なしでオフライン機能をテストするために使用
-   */
-  toggleOfflineSimulation: async (): Promise<{ isOffline: boolean }> => {
-    if (isElectron()) {
-      return window.electron.dev.toggleOfflineSimulation();
-    }
-    console.warn("Offline simulation is only available in Electron");
-    return { isOffline: false };
-  },
+  /** オフラインシミュレーションを切り替え（開発時のオフライン機能テスト用） */
+  toggleOfflineSimulation: (): Promise<{ isOffline: boolean }> =>
+    invokeOr({ isOffline: false }, () =>
+      window.electron.dev.toggleOfflineSimulation()
+    ),
 
-  /**
-   * 現在のオフラインシミュレーション状態を取得
-   */
-  getOfflineSimulationStatus: async (): Promise<{ isOffline: boolean }> => {
-    if (isElectron()) {
-      return window.electron.dev.getOfflineSimulationStatus();
-    }
-    return { isOffline: false };
-  },
+  /** 現在のオフラインシミュレーション状態を取得 */
+  getOfflineSimulationStatus: (): Promise<{ isOffline: boolean }> =>
+    invokeOr({ isOffline: false }, () =>
+      window.electron.dev.getOfflineSimulationStatus()
+    ),
 
-  /**
-   * オフラインシミュレーションを明示的に ON/OFF
-   * @param offline - trueでオフラインモードをシミュレート
-   */
-  setOfflineSimulation: async (
+  /** オフラインシミュレーションを明示的に ON/OFF */
+  setOfflineSimulation: (
     offline: boolean
-  ): Promise<{ isOffline: boolean }> => {
-    if (isElectron()) {
-      return window.electron.dev.setOfflineSimulation(offline);
-    }
-    console.warn("Offline simulation is only available in Electron");
-    return { isOffline: false };
-  },
+  ): Promise<{ isOffline: boolean }> =>
+    invokeOr({ isOffline: false }, () =>
+      window.electron.dev.setOfflineSimulation(offline)
+    ),
 };

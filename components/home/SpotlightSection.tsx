@@ -23,7 +23,7 @@ const SpotlightSection: React.FC<SpotlightSectionProps> = ({
             SPOTLIGHT_SCAN
           </h2>
           <p className="text-[10px] text-theme-500/60 mt-1 font-mono tracking-widest uppercase">
-            // PRIORITY_ASSET_HIGHLIGHT_v2.0
+            {"// PRIORITY_ASSET_HIGHLIGHT_v2.0"}
           </p>
         </div>
       </div>

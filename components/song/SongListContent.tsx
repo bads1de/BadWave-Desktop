@@ -57,7 +57,7 @@ const SongListContent: React.FC<SongListContentProps> = memo(
             <div className="absolute inset-4 border-2 border-theme-500 rounded-none animate-pulse" />
           </div>
           <p className="text-theme-500 text-[10px] tracking-[0.3em] uppercase animate-pulse">
-            // SYNCING_TRACK_METADATA...
+            {"// SYNCING_TRACK_METADATA..."}
           </p>
         </div>
       );
@@ -68,7 +68,7 @@ const SongListContent: React.FC<SongListContentProps> = memo(
         <div className="flex flex-col items-center justify-center py-24 gap-4 text-theme-500/40 font-mono">
           <div className="text-xl uppercase tracking-[0.4em]">[ VOID_DETECTED ]</div>
           <p className="text-[10px] uppercase tracking-widest text-center max-w-xs">
-            // NO_AUDIO_STREAMS_FOUND_IN_THIS_SECTOR.
+            {"// NO_AUDIO_STREAMS_FOUND_IN_THIS_SECTOR."}
           </p>
         </div>
       );

@@ -14,7 +14,7 @@ interface LikeButtonProps {
 }
 
 const LikeButton: React.FC<LikeButtonProps> = memo(
-  ({ songId, songType, size, showText = false, disabled = false }) => {
+  ({ songId, size, showText = false, disabled = false }) => {
     const { user } = useUser();
     const authModal = useAuthModal();
 

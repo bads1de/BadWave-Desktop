@@ -44,6 +44,7 @@ const mockEngine = {
   audio: mockAudio,
   isInitialized: true,
   initialize: jest.fn(),
+  attachWebAudio: jest.fn(),
   currentSongId: null,
   context: { state: "running" },
   resumeContext: jest.fn().mockResolvedValue(undefined),
@@ -241,13 +242,13 @@ describe("useAudioPlayer", () => {
     unmount();
   });
 
-  it("should not set crossOrigin for badwave:// local URLs", () => {
+  it("should set crossOrigin anonymous for badwave:// local URLs (Web Audio CORS)", () => {
     const localUrl = "badwave://file/C%3A%5CMusic%5Csong.mp3";
     mockAudio.crossOrigin = null as any;
 
     renderHook(() => useAudioPlayer(localUrl, mockSong as any));
 
-    expect(mockAudio.crossOrigin).toBeNull();
+    expect(mockAudio.crossOrigin).toBe("anonymous");
   });
 
   it("should set crossOrigin for remote URLs", () => {

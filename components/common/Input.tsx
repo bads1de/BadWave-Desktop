@@ -3,7 +3,7 @@
 import { forwardRef, memo } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 // forwardRef でラップされたコンポーネントを定義
 const InputComponent = forwardRef<HTMLInputElement, InputProps>(

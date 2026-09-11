@@ -90,6 +90,6 @@ electron/
 ## 落とし穴
 
 - `electron/` 内の `.js` / `.js.map` はコンパイル生成物。直接編集・コミットしない
-- `electron-esbuild.config.js` は未使用（ビルドは tsc）。`docs/` はアーカイブのみ、`dist/` はビルド成果物
+- `electron/` のビルドは tsc（`npm run build:electron`）。esbuild 設定は使わないため置かない。`docs/` はアーカイブのみ、`dist/` はビルド成果物
 - `.env.local` はコミット済み（Supabase 等）。新しい env ファイルを作成・コミットしない
 - コメント・README・コミットメッセージは日本語。CI は未設定

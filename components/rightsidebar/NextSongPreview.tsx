@@ -40,7 +40,7 @@ const NextSongPreview: React.FC<NextSongPreviewProps> = React.memo(
                 {nextSong.title}
               </h3>
               <p className="text-[10px] text-theme-500/60 truncate w-full uppercase mt-0.5">
-                // AUTH: {nextSong.author}
+                {`// AUTH: ${nextSong.author}`}
               </p>
             </div>
           </div>

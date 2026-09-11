@@ -143,7 +143,7 @@ const AuthModal = () => {
         await window.electron!.auth.startGoogleOAuth(data.url);
       } else {
         // 非Electron環境では標準的なOAuthフロー
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        const { error } = await supabaseClient.auth.signInWithOAuth({
           provider: "google",
           options: {
             redirectTo: `${window.location.origin}/api/auth/callback`,

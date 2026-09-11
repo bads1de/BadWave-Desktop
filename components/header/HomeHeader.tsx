@@ -9,9 +9,6 @@ import Button from "../common/Button";
 import Image from "next/image";
 import { User } from "lucide-react";
 import Link from "next/link";
-import toast from "react-hot-toast";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
-import { createClient } from "@/libs/supabase/client";
 import { ROUTES } from "@/constants";
 
 interface HeaderProps {
@@ -22,7 +19,6 @@ const HomeHeader: React.FC<HeaderProps> = memo(({ className }) => {
   const router = useRouter();
   const authModal = useAuthModal();
   const { user, userDetails } = useUser();
-  const supabaseClient = createClient();
   const [scrolled, setScrolled] = useState(false);
 
   // Handle scroll effect
@@ -34,17 +30,6 @@ const HomeHeader: React.FC<HeaderProps> = memo(({ className }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      await supabaseClient.auth.signOut();
-      toast.success("ログアウトしました");
-      router.refresh();
-    } catch (error) {
-      toast.error(ERROR_MESSAGES.GENERIC_ERROR);
-    }
-  };
 
   return (
     <div

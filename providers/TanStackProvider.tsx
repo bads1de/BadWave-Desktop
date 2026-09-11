@@ -91,7 +91,6 @@ const TanStackProvider = ({ children }: Props) => {
       persistOptions={{ persister }}
     >
       {children}
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </PersistQueryClientProvider>
   );
 };

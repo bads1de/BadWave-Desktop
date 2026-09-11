@@ -17,9 +17,6 @@ const HeaderNav: React.FC<HeaderNavProps> = ({ className = "" }) => {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<string>("songs");
 
-  // 検索クエリがある場合はそれを取得
-  const title = searchParams.get("title") || "";
-
   useEffect(() => {
     // URLからtabパラメータを取得
     const tab = searchParams.get("tab") || "songs";

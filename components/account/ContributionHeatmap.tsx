@@ -36,7 +36,7 @@ const DEFAULT_COLORS = [
 const ContributionHeatmap: React.FC<ContributionHeatmapProps> = memo(
   ({ dailyActivity, colorScheme }) => {
     // 過去1年分の日付を生成
-    const { weeks, monthLabels, maxCount, activityMap } = useMemo(() => {
+    const { weeks, monthLabels, maxCount } = useMemo(() => {
       const today = new Date();
       const oneYearAgo = new Date(today);
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);

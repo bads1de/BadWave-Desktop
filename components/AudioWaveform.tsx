@@ -89,7 +89,9 @@ const AudioWaveform = ({
       setHasPlaybackStarted(false);
 
       // 親コンポーネントに再生終了を通知
-      onEnded && onEnded();
+      if (onEnded) {
+        onEnded();
+      }
     }
   }, [isEnded, onEnded]);
 
@@ -311,7 +313,9 @@ const AudioWaveform = ({
                   play();
                 }
                 // 親コンポーネントに再生/一時停止を通知
-                onPlayPause && onPlayPause();
+                if (onPlayPause) {
+                  onPlayPause();
+                }
               }} // クリックで再生/一時停止切り替え
               onMouseMove={handleMouseMove} // マウス移動でインタラクティブな効果
             />

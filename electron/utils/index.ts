@@ -86,24 +86,11 @@ export function debugLog(message: string, ...args: unknown[]): void {
 }
 
 /**
- * DBの songs テーブルレコードをレンダラープロセス向けのレスポンス形式に変換する
- *
- * cache.ts・offline.ts の複数箇所で重複していたマッピングロジックを共通化。
- *
- * @param song - DBから取得した songs テーブルのレコード
- * @param overrides - created_at など、呼び出し元ごとに異なるフィールドの上書き
- * @returns レンダラープロセス向けの Song レスポンスオブジェクト
- */
-/**
  * 存在しない曲のフォールバックオブジェクトを生成する
- *
- * cache.ts の get-cached-liked-songs と get-cached-playlist-songs で
- * 重複していた Unknown Song オブジェクトを共通化。
  *
  * @param id - 曲ID
  * @param userId - ユーザーID
  * @param createdAt - 作成日時
- * @returns フォールバック用のSongレスポンスオブジェクト
  */
 export function createUnknownSongFallback(
   id: string,
@@ -131,6 +118,7 @@ export function createUnknownSongFallback(
   };
 }
 
+/** DBレコードをレンダラー向けSongレスポンスに変換する */
 export function mapDbSongToResponse(
   song: DbSongRow,
   overrides?: {

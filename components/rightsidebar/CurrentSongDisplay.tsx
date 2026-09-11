@@ -70,7 +70,7 @@ const CurrentSongDisplay: React.FC<CurrentSongDisplayProps> = React.memo(
               </Link>
             </h1>
             <p className="text-theme-400 text-lg uppercase tracking-widest border-l-2 border-theme-500 pl-3">
-              // AUTH: {song.author}
+              {`// AUTH: ${song.author}`}
             </p>
           </div>
 

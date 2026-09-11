@@ -18,8 +18,6 @@ export function useMediaControl({
   useEffect(() => {
     // Electronのメディアコントロールイベントを受け取るリスナーを登録
     const unsubscribe = mediaControls.onMediaControl((action) => {
-      // console.log("メディアコントロールイベントを受信:", action); // ログ削減
-
       switch (action) {
         case "play-pause":
           onPlayPause();
