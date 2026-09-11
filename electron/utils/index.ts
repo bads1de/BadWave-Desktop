@@ -3,7 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
 import { fileURLToPath } from "url";
-import { DbSongRow } from "../../types/local";
+import { DbSongRow, DbPlaylistRow } from "../../types/local";
 
 /**
  * file:// または badwave:// URLをローカルパスに変換するヘルパー
@@ -144,5 +144,17 @@ export function mapDbSongToResponse(
     like_count: String(song.likeCount || 0),
     lyrics: song.lyrics || null,
     created_at: overrides?.created_at ?? song.createdAt ?? null,
+  };
+}
+
+/** DBレコードをレンダラー向けPlaylistレスポンスに変換する */
+export function mapDbPlaylistToResponse(playlist: DbPlaylistRow) {
+  return {
+    id: playlist.id,
+    user_id: playlist.userId,
+    title: playlist.title,
+    image_path: playlist.imagePath || undefined,
+    is_public: !!playlist.isPublic,
+    created_at: playlist.createdAt ?? null,
   };
 }

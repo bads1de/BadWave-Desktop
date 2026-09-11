@@ -1,31 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-
-// メディアファイルのMIMEタイプ
-// 注: electron tsconfig の rootDir 制約により constants/ から import できない。
-// 拡張子の一覧は constants/ALLOWED_MEDIA_EXTENSIONS が正。変更時はあわせて更新すること
-const MIME_TYPES: Record<string, string> = {
-  ".mp3": "audio/mpeg",
-  ".wav": "audio/wav",
-  ".flac": "audio/flac",
-  ".aac": "audio/aac",
-  ".ogg": "audio/ogg",
-  ".opus": "audio/opus",
-  ".m4a": "audio/mp4",
-  ".wma": "audio/x-ms-wma",
-  ".alac": "audio/mp4",
-  ".aiff": "audio/aiff",
-  ".webm": "audio/webm",
-  ".mp4": "video/mp4",
-  ".m4v": "video/mp4",
-  ".avi": "video/x-msvideo",
-  ".mkv": "video/x-matroska",
-  // オフラインDL用画像
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".webp": "image/webp",
-};
+import { MEDIA_MIME_TYPES } from "../constants";
+import { hasPathTraversal } from "./path-guard";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -75,19 +51,13 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
     const filePath = resolveFilePath(urlObj);
 
     // ディレクトリトラバーサル対策
-    const normalizedPath = path.normalize(filePath);
-    if (
-      filePath.includes("..") ||
-      normalizedPath.includes("..") ||
-      /(\/|\\)\.\.(\/|\\|$)/.test(filePath) ||
-      /(\/|\\)\.\.(\/|\\|$)/.test(normalizedPath)
-    ) {
+    if (hasPathTraversal(filePath)) {
       return new Response("Forbidden", { status: 403, headers: CORS_HEADERS });
     }
 
     // 拡張子チェック
     const ext = path.extname(filePath).toLowerCase();
-    if (!ext || !MIME_TYPES[ext]) {
+    if (!ext || !MEDIA_MIME_TYPES[ext]) {
       return new Response("Forbidden", { status: 403, headers: CORS_HEADERS });
     }
 
@@ -97,7 +67,7 @@ export function serveLocalFile(request: Request, urlObj: URL): Response {
 
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;
-    const contentType = MIME_TYPES[ext];
+    const contentType = MEDIA_MIME_TYPES[ext];
 
     const rangeHeader = request.headers.get("Range");
     if (rangeHeader) {

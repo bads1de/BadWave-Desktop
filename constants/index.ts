@@ -1,25 +1,15 @@
 /**
- * サポートされている音声ファイルの拡張子
+ * メディア拡張子・MIMEタイプ・electron-store キーは electron/constants.ts に集約し、
+ * メインプロセスとレンダラーで同じ定義を共有する。
  * 注: 配列として定義し、Set への変換は各利用側で行う（es5 target 対応）
- * メインプロセス側 (electron/ipc/library.ts, electron/lib/local-file-handler.ts) は
- * rootDir 制約で import できないため、変更時はあわせて更新すること
  */
-export const SUPPORTED_AUDIO_EXTENSIONS = [
-  ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
-  ".m4a", ".wma", ".alac", ".aiff", ".webm",
-];
-
-/** サポートされている動画ファイルの拡張子 */
-export const SUPPORTED_VIDEO_EXTENSIONS = [".mp4", ".m4v", ".avi", ".mkv"];
-
-/** サポートされている画像ファイルの拡張子（オフラインDL用） */
-export const SUPPORTED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
-
-/** 許可されるメディアファイルの拡張子（音声 + 動画 + 画像） */
-export const ALLOWED_MEDIA_EXTENSIONS = SUPPORTED_AUDIO_EXTENSIONS.concat(
+export {
+  SUPPORTED_AUDIO_EXTENSIONS,
   SUPPORTED_VIDEO_EXTENSIONS,
-  SUPPORTED_IMAGE_EXTENSIONS
-);
+  SUPPORTED_IMAGE_EXTENSIONS,
+  ALLOWED_MEDIA_EXTENSIONS,
+  ELECTRON_STORE_KEYS,
+} from "../electron/constants";
 
 export const videoIds = [
   { id: 1, name: "synthwave radio", videoId: "4xDzrJKXOOY" },
@@ -70,17 +60,6 @@ export const CACHED_QUERIES = {
   publicPlaylists: "publicPlaylists",
   userStats: "userStats",
   playlistSongStatus: "playlistSongStatus",
-} as const;
-
-/**
- * Electronストアのキー
- */
-export const ELECTRON_STORE_KEYS = {
-  VOLUME: "player_volume",
-  RIGHT_SIDEBAR_WIDTH: "right_sidebar_width",
-  RIGHT_SIDEBAR_CLOSED: "right_sidebar_closed",
-  MUSIC_LIBRARY: "music_library",
-  MUSIC_LIBRARY_LAST_SCAN: "music_library_last_scan",
 } as const;
 
 /**

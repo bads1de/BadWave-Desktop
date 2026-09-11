@@ -3,14 +3,15 @@ import { ipcMain, app } from "electron";
 import { spawn } from "child_process";
 import * as path from "path";
 import * as fs from "fs";
-import * as https from "https";
-import * as http from "http";
-import { z } from "zod";
-import { validateInput } from "../lib/ipc-validate";
+import {
+  validateInput,
+  audioPathSchema,
+  lyricsTextSchema,
+} from "../lib/ipc-validate";
+import { assertAllowedAudioPath } from "../lib/path-guard";
+import { downloadToFile } from "../lib/download";
+import { getErrorMessage } from "../lib/error";
 import { debugLog } from "../utils";
-
-const audioPathSchema = z.string().min(1).max(2048);
-const lyricsTextSchema = z.string().max(50000);
 
 /**
  * トランスクライブ関連のIPCハンドラーをセットアップする
@@ -144,48 +145,20 @@ export function setupTranscriptionHandlers() {
             app.getPath("temp"),
             `badwave_transcribe_${Date.now()}.mp3`,
           );
-          const file = fs.createWriteStream(tempPath);
-          const client = audioPath.startsWith("https") ? https : http;
 
-          const request = client.get(audioPath, (response) => {
-            if (response.statusCode !== 200) {
-              file.close();
-              fs.unlink(tempPath, () => {});
-              return resolve({
+          downloadToFile(audioPath, tempPath)
+            .then(() => runPython(tempPath, true))
+            .catch((error: unknown) => {
+              resolve({
                 status: "error",
-                message: `ファイルの取得に失敗しました(HTTP ${response.statusCode})`,
+                message: `ファイルの取得に失敗しました: ${getErrorMessage(error)}`,
               });
-            }
-            response.pipe(file);
-            file.on("finish", () => {
-              file.close(() => runPython(tempPath, true));
             });
-          });
-
-          request.on("error", (err) => {
-            file.close();
-            if (fs.existsSync(tempPath)) fs.unlink(tempPath, () => {});
-            resolve({ status: "error", message: `通信エラー: ${err.message}` });
-          });
         } else {
           debugLog(`[Transcribe] Local path detected.`);
 
-          // 安全なパスと拡張子のチェック
-          const ALLOWED_EXTENSIONS = new Set([
-            ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus", ".m4a", ".wma",
-            ".alac", ".aiff", ".webm", ".mp4", ".m4v", ".avi", ".mkv",
-          ]);
-          const normalized = path.normalize(audioPath);
-          const ext = path.extname(normalized).toLowerCase();
-
-          if (
-            audioPath.includes("..") ||
-            normalized.includes("..") ||
-            /(\/|\\)\.\.(\/|\\|$)/.test(audioPath) ||
-            !ALLOWED_EXTENSIONS.has(ext)
-          ) {
-            throw new Error("Invalid path or unsupported file extension");
-          }
+          // パストラバーサル・拡張子チェック (不正な場合は throw → reject)
+          assertAllowedAudioPath(audioPath);
 
           runPython(audioPath, false);
         }

@@ -2,31 +2,36 @@
  * @jest-environment jsdom
  */
 import { dev } from "@/libs/electron/dev";
-import { isElectron } from "@/libs/electron/common";
 
-jest.mock("@/libs/electron/common", () => ({
-  ...jest.requireActual("@/libs/electron/common"),
-  isElectron: jest.fn(),
-}));
+/**
+ * Electron ブリッジを設定する。
+ * isElectron() は window.electron.appInfo.isElectron を参照するため、
+ * appInfo を含めて差し替える必要がある。
+ */
+const setupElectronBridge = (devBridge: Record<string, jest.Mock>) => {
+  (window as any).electron = {
+    appInfo: { isElectron: true },
+    dev: devBridge,
+  };
+};
 
 describe("electron/dev", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (isElectron as jest.Mock).mockReturnValue(false);
+    // 既定はブラウザ環境（Electron ブリッジなし）
+    delete (window as any).electron;
   });
 
   describe("toggleOfflineSimulation", () => {
     it("should call electron dev toggle when in Electron", async () => {
-      (isElectron as jest.Mock).mockReturnValue(true);
-      (window as any).electron = {
-        dev: {
-          toggleOfflineSimulation: jest.fn().mockResolvedValue({ isOffline: true }),
-        },
-      };
+      const toggleOfflineSimulation = jest
+        .fn()
+        .mockResolvedValue({ isOffline: true });
+      setupElectronBridge({ toggleOfflineSimulation });
 
       const result = await dev.toggleOfflineSimulation();
       expect(result).toEqual({ isOffline: true });
-      expect((window as any).electron.dev.toggleOfflineSimulation).toHaveBeenCalled();
+      expect(toggleOfflineSimulation).toHaveBeenCalled();
     });
 
     it("should return isOffline: false when not in Electron", async () => {
@@ -37,15 +42,14 @@ describe("electron/dev", () => {
 
   describe("getOfflineSimulationStatus", () => {
     it("should call electron dev status when in Electron", async () => {
-      (isElectron as jest.Mock).mockReturnValue(true);
-      (window as any).electron = {
-        dev: {
-          getOfflineSimulationStatus: jest.fn().mockResolvedValue({ isOffline: false }),
-        },
-      };
+      const getOfflineSimulationStatus = jest
+        .fn()
+        .mockResolvedValue({ isOffline: false });
+      setupElectronBridge({ getOfflineSimulationStatus });
 
       const result = await dev.getOfflineSimulationStatus();
       expect(result).toEqual({ isOffline: false });
+      expect(getOfflineSimulationStatus).toHaveBeenCalled();
     });
 
     it("should return isOffline: false when not in Electron", async () => {
@@ -56,16 +60,14 @@ describe("electron/dev", () => {
 
   describe("setOfflineSimulation", () => {
     it("should call electron dev set when in Electron", async () => {
-      (isElectron as jest.Mock).mockReturnValue(true);
-      (window as any).electron = {
-        dev: {
-          setOfflineSimulation: jest.fn().mockResolvedValue({ isOffline: true }),
-        },
-      };
+      const setOfflineSimulation = jest
+        .fn()
+        .mockResolvedValue({ isOffline: true });
+      setupElectronBridge({ setOfflineSimulation });
 
       const result = await dev.setOfflineSimulation(true);
       expect(result).toEqual({ isOffline: true });
-      expect((window as any).electron.dev.setOfflineSimulation).toHaveBeenCalledWith(true);
+      expect(setOfflineSimulation).toHaveBeenCalledWith(true);
     });
 
     it("should return isOffline: false when not in Electron", async () => {

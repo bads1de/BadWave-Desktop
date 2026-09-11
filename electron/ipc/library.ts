@@ -5,26 +5,22 @@ import * as path from "path";
 import * as mm from "music-metadata";
 import store from "../lib/store";
 import { debugLog } from "../utils";
-import { getMainWindow } from "../lib/window-manager";
+import { sendToMainWindow } from "../lib/window-manager";
 import { validateInput, filePathSchema } from "../lib/ipc-validate";
 import { MusicLibrary, FileMetadata } from "../../types/local";
 import { getErrorMessage } from "../lib/error";
+import { SUPPORTED_AUDIO_EXTENSIONS, ELECTRON_STORE_KEYS } from "../constants";
 
 // サポートされている音声ファイルの拡張子
-// 注: electron tsconfig の rootDir 制約により、constants/ からインポートできないため直接定義
-const SUPPORTED_AUDIO_EXTENSIONS = [
-  ".mp3", ".wav", ".flac", ".aac", ".ogg", ".opus",
-  ".m4a", ".wma", ".alac", ".aiff", ".webm",
-];
+const AUDIO_EXTENSION_SET = new Set(SUPPORTED_AUDIO_EXTENSIONS);
 
 function isSupportedAudioFile(fileName: string): boolean {
-  const ext = path.extname(fileName).toLowerCase();
-  return SUPPORTED_AUDIO_EXTENSIONS.includes(ext);
+  return AUDIO_EXTENSION_SET.has(path.extname(fileName).toLowerCase());
 }
 
 // 音楽ライブラリのデータを保存するためのストアキー
-const MUSIC_LIBRARY_KEY = "music_library";
-const MUSIC_LIBRARY_LAST_SCAN_KEY = "music_library_last_scan";
+const MUSIC_LIBRARY_KEY = ELECTRON_STORE_KEYS.MUSIC_LIBRARY;
+const MUSIC_LIBRARY_LAST_SCAN_KEY = ELECTRON_STORE_KEYS.MUSIC_LIBRARY_LAST_SCAN;
 
 /**
  * スキャン進捗の型定義
@@ -41,22 +37,21 @@ export interface ScanProgress {
  * スキャン進捗をフロントエンドに送信するヘルパー関数
  */
 function sendScanProgress(progress: ScanProgress) {
-  const mainWindow = getMainWindow();
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send(CHANNELS.SCAN_PROGRESS, progress);
-  }
+  sendToMainWindow(CHANNELS.SCAN_PROGRESS, progress);
 }
 
 export function setupLibraryHandlers() {
+  /** 保存済みの音楽ライブラリを取得する */
+  const getSavedLibrary = (): MusicLibrary | undefined =>
+    store.get(MUSIC_LIBRARY_KEY) as MusicLibrary | undefined;
+
   // 指定されたフォルダ内のMP3ファイルをスキャン（永続化対応版）
   ipcMain.handle(
     CHANNELS.SCAN_MP3_FILES,
     async (_, directoryPath: string, forceFullScan: boolean = false) => {
       try {
         // 前回のスキャン結果を取得
-        const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
-          | MusicLibrary
-          | undefined;
+        const savedLibrary = getSavedLibrary();
         const isSameDirectory = savedLibrary?.directoryPath === directoryPath;
 
         // 差分スキャンを行うかどうかを決定
@@ -232,9 +227,7 @@ export function setupLibraryHandlers() {
   // 保存されている音楽ライブラリデータを取得
   ipcMain.handle(CHANNELS.GET_SAVED_MUSIC_LIBRARY, async () => {
     try {
-      const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
-        | MusicLibrary
-        | undefined;
+      const savedLibrary = getSavedLibrary();
       const lastScan = store.get(MUSIC_LIBRARY_LAST_SCAN_KEY) as
         | string
         | undefined;
@@ -270,9 +263,7 @@ export function setupLibraryHandlers() {
   // ページ遷移時の高速ロード用
   ipcMain.handle(CHANNELS.GET_CACHED_FILES_WITH_METADATA, async () => {
     try {
-      const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
-        | MusicLibrary
-        | undefined;
+      const savedLibrary = getSavedLibrary();
       const lastScan = store.get(MUSIC_LIBRARY_LAST_SCAN_KEY) as
         | string
         | undefined;
@@ -317,9 +308,7 @@ export function setupLibraryHandlers() {
     }
     saveTimeout = setTimeout(() => {
       if (pendingMetadataUpdates.size > 0) {
-        const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
-          | MusicLibrary
-          | undefined;
+        const savedLibrary = getSavedLibrary();
         if (savedLibrary) {
           pendingMetadataUpdates.forEach((update, filePath) => {
             if (!savedLibrary.files[filePath]) {
@@ -358,9 +347,7 @@ export function setupLibraryHandlers() {
     try {
 
       // 保存されているライブラリデータを取得
-      const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
-        | MusicLibrary
-        | undefined;
+      const savedLibrary = getSavedLibrary();
 
       // ファイルの最終更新日時を取得
       const stats = await fs.promises.stat(filePath);
@@ -394,9 +381,7 @@ export function setupLibraryHandlers() {
       const message = getErrorMessage(error);
 
       // エラー情報をライブラリデータに保存
-      const savedLibrary = store.get(MUSIC_LIBRARY_KEY) as
-        | MusicLibrary
-        | undefined;
+      const savedLibrary = getSavedLibrary();
       if (savedLibrary && savedLibrary.files[filePath]) {
         savedLibrary.files[filePath].error = message;
         store.set(MUSIC_LIBRARY_KEY, savedLibrary);

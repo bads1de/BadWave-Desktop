@@ -8,6 +8,18 @@ import { setupThumbBar } from "./thumbbar";
 let mainWindow: BrowserWindow | null = null;
 let miniPlayerWindow: BrowserWindow | null = null;
 
+/** preload スクリプトの絶対パス（全ウィンドウで共有） */
+const PRELOAD_PATH = path.join(__dirname, "../preload/index.js");
+
+/**
+ * レンダラーに公開する最小構成の webPreferences。
+ * IPC は preload の contextBridge 経由のみ許可する。
+ */
+export const SECURE_WEB_PREFERENCES = {
+  nodeIntegration: false,
+  contextIsolation: true,
+} as const;
+
 // メインウィンドウの取得
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
@@ -16,6 +28,37 @@ export function getMainWindow(): BrowserWindow | null {
 // ミニプレイヤーウィンドウの取得
 export function getMiniPlayerWindow(): BrowserWindow | null {
   return miniPlayerWindow;
+}
+
+/**
+ * メインウィンドウの webContents に送信する。
+ * ウィンドウが未生成・破棄済みの場合は何もせず false を返す。
+ */
+export function sendToMainWindow(channel: string, ...args: unknown[]): boolean {
+  const win = getMainWindow();
+  if (!win || win.isDestroyed()) return false;
+
+  win.webContents.send(channel, ...args);
+  return true;
+}
+
+/**
+ * 起動失敗時などに表示するエラーページを data URL として生成する
+ */
+function errorPageDataUrl(heading: string, messages: string[]): string {
+  const paragraphs = messages.map((message) => `<p>${message}</p>`).join("");
+  return (
+    "data:text/html;charset=utf-8," +
+    encodeURIComponent(
+      `<html>
+        <head><style>body{background:#121212;color:#fff;font-family:sans-serif;padding:40px;}</style></head>
+        <body>
+          <h1>${heading}</h1>
+          ${paragraphs}
+        </body>
+      </html>`,
+    )
+  );
 }
 
 // ミニプレイヤーウィンドウの作成
@@ -48,9 +91,8 @@ export async function createMiniPlayer(): Promise<BrowserWindow> {
     hasShadow: true,
     backgroundColor: "#121212",
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, "../preload/index.js"),
+      ...SECURE_WEB_PREFERENCES,
+      preload: PRELOAD_PATH,
       backgroundThrottling: true,
     },
   });
@@ -85,9 +127,8 @@ export async function createMainWindow() {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, "../preload/index.js"),
+      ...SECURE_WEB_PREFERENCES,
+      preload: PRELOAD_PATH,
       // =========================================================================
       // ✅ webSecurity: true（カスタムプロトコル方式に移行済み）
       // =========================================================================
@@ -145,16 +186,9 @@ export async function createMainWindow() {
       console.error("開発サーバーへの接続に失敗しました:", err);
       // 開発モードでは開発サーバーが必須
       await mainWindow.loadURL(
-        "data:text/html;charset=utf-8," +
-          encodeURIComponent(
-            `<html>
-              <head><style>body{background:#121212;color:#fff;font-family:sans-serif;padding:40px;}</style></head>
-              <body>
-                <h1>開発サーバーに接続できません</h1>
-                <p>別のターミナルで <code>npm run dev</code> を実行してから、アプリを再起動してください。</p>
-              </body>
-            </html>`,
-          ),
+        errorPageDataUrl("開発サーバーに接続できません", [
+          "別のターミナルで <code>npm run dev</code> を実行してから、アプリを再起動してください。",
+        ]),
       );
     }
   }
@@ -174,17 +208,10 @@ export async function createMainWindow() {
     } catch (err) {
       console.error("Standaloneサーバーの起動に失敗しました:", err);
       await mainWindow.loadURL(
-        "data:text/html;charset=utf-8," +
-          encodeURIComponent(
-            `<html>
-              <head><style>body{background:#121212;color:#fff;font-family:sans-serif;padding:40px;}</style></head>
-              <body>
-                <h1>アプリケーションの起動に失敗しました</h1>
-                <p>アプリケーションを再インストールしてください。</p>
-                <p>エラー: ${err}</p>
-              </body>
-            </html>`,
-          ),
+        errorPageDataUrl("アプリケーションの起動に失敗しました", [
+          "アプリケーションを再インストールしてください。",
+          `エラー: ${err}`,
+        ]),
       );
     }
   }

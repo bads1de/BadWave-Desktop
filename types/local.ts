@@ -88,6 +88,43 @@ export interface SongDownloadPayload {
 }
 
 /**
+ * ミニプレイヤーに送受信する再生状態（main / preload / renderer で共有）
+ */
+export interface MiniPlayerState {
+  song: {
+    id: string;
+    title: string;
+    author: string;
+    image_path: string | null;
+  } | null;
+  isPlaying: boolean;
+}
+
+/**
+ * electron-store に保存する認証ユーザー情報（main / preload / renderer で共有）
+ */
+export interface CachedUser {
+  id: string;
+  email?: string;
+  avatarUrl?: string;
+}
+
+/**
+ * Discord RPC に渡すアクティビティ（preload / renderer で共有）
+ */
+export interface DiscordActivity {
+  details?: string;
+  state?: string;
+  startTimestamp?: number;
+  endTimestamp?: number;
+  largeImageKey?: string;
+  largeImageText?: string;
+  smallImageKey?: string;
+  smallImageText?: string;
+  instance?: boolean;
+}
+
+/**
  * セクションデータのアイテム型（get-section-data用）
  */
 export interface SectionItem {
@@ -128,4 +165,16 @@ export interface DbSongRow {
   lyrics?: string | null;
   createdAt?: string | null;
   [key: string]: unknown;
+}
+
+/**
+ * DBのplaylistsテーブル行の型（mapDbPlaylistToResponse用）
+ */
+export interface DbPlaylistRow {
+  id: string;
+  userId: string;
+  title: string;
+  imagePath?: string | null;
+  isPublic?: boolean | null;
+  createdAt?: string | null;
 }

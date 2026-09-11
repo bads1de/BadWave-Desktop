@@ -91,19 +91,32 @@ describe("AudioEngine", () => {
   it("should initialize audio graph correctly", () => {
     engine.initialize();
 
-    expect(mockAudioContext.createMediaElementSource).toHaveBeenCalled();
     expect(mockAudioContext.createBiquadFilter).toHaveBeenCalled(); // EQ filters, Spatial, Retro
     expect(mockAudioContext.createGain).toHaveBeenCalled(); // Master, Reverb, LFO
     expect(mockAudioContext.createStereoPanner).toHaveBeenCalled();
     expect(engine.isInitialized).toBe(true);
   });
 
+  it("should attach MediaElementSource only when attachWebAudio is called", () => {
+    engine.initialize();
+    // 再生対象が決まるまでは MediaElementSource を張らない
+    expect(mockAudioContext.createMediaElementSource).not.toHaveBeenCalled();
+
+    engine.attachWebAudio();
+
+    expect(mockAudioContext.createMediaElementSource).toHaveBeenCalledWith(
+      engine.audio
+    );
+    expect(engine.sourceNode).not.toBeNull();
+    expect(mockConnect).toHaveBeenCalledWith(engine.filters[0]);
+  });
+
   it("should not initialize twice", () => {
     engine.initialize();
-    mockAudioContext.createMediaElementSource.mockClear();
+    mockAudioContext.createBiquadFilter.mockClear();
 
     engine.initialize();
-    expect(mockAudioContext.createMediaElementSource).not.toHaveBeenCalled();
+    expect(mockAudioContext.createBiquadFilter).not.toHaveBeenCalled();
   });
 
   describe("AnalyserNode", () => {

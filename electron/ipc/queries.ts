@@ -10,7 +10,7 @@ import {
   spotlights,
 } from "../db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
-import { mapDbSongToResponse, createUnknownSongFallback, normalizeId } from "../utils";
+import { mapDbSongToResponse, mapDbPlaylistToResponse, createUnknownSongFallback, normalizeId } from "../utils";
 import { SectionItem } from "../../types/local";
 import { getErrorMessage } from "../lib/error";
 
@@ -54,14 +54,7 @@ export function setupQueryHandlers() {
       const data = await db.query.playlists.findMany({
         where: eq(playlists.userId, String(userId)),
       });
-      return data.map((item) => ({
-        id: item.id,
-        user_id: item.userId,
-        title: item.title,
-        image_path: item.imagePath,
-        is_public: item.isPublic,
-        created_at: item.createdAt,
-      }));
+      return data.map(mapDbPlaylistToResponse);
     } catch (error) {
       return [];
     }
@@ -139,21 +132,12 @@ export function setupQueryHandlers() {
             })
           );
         } else if (type === "playlists") {
-          results = await db
+          const rows = await db
             .select()
             .from(playlists)
             .where(inArray(playlists.id, itemIds));
 
-          results.forEach((p) =>
-            idMap.set(p.id as string, {
-              id: p.id as string,
-              user_id: p.userId as string,
-              title: p.title as string,
-              image_path: p.imagePath as string | undefined,
-              is_public: !!p.isPublic,
-              created_at: p.createdAt as string | null,
-            })
-          );
+          rows.forEach((p) => idMap.set(p.id, mapDbPlaylistToResponse(p)));
         } else {
           results = await db
             .select()
@@ -254,14 +238,7 @@ export function setupQueryHandlers() {
         return null;
       }
 
-      return {
-        id: playlist.id,
-        user_id: playlist.userId,
-        title: playlist.title,
-        image_path: playlist.imagePath || undefined,
-        is_public: !!playlist.isPublic,
-        created_at: playlist.createdAt,
-      };
+      return mapDbPlaylistToResponse(playlist);
     } catch (error) {
       console.error(`[IPC] get-playlist-by-id(${playlistId}) error:`, error);
       return null;

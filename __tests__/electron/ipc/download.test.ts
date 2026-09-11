@@ -82,7 +82,10 @@ describe("IPC: Download", () => {
       mockResponse.headers = { "content-length": "100" };
       mockResponse.pipe = jest.fn();
 
-      const mockRequest = new EventEmitter();
+      const mockRequest = Object.assign(new EventEmitter(), {
+        setTimeout: jest.fn(),
+        destroy: jest.fn(),
+      });
       (https.get as jest.Mock).mockImplementation((url, cb) => {
         cb(mockResponse);
         return mockRequest;
@@ -91,7 +94,7 @@ describe("IPC: Download", () => {
       // Invoke handler
       const downloadPromise = invoke(
         "download-song-simple",
-        "http://example.com/song.mp3",
+        "https://example.com/song.mp3",
         "song.mp3",
       );
 
@@ -116,19 +119,23 @@ describe("IPC: Download", () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       (fs.createWriteStream as jest.Mock).mockReturnValue({
         on: jest.fn(),
-        close: jest.fn(),
+        close: jest.fn((cb) => cb()),
       });
 
       (https.get as jest.Mock).mockImplementation((url, cb) => {
         const mockResponse = new EventEmitter() as any;
         mockResponse.statusCode = 404;
+        mockResponse.headers = {};
         cb(mockResponse);
-        return new EventEmitter();
+        return Object.assign(new EventEmitter(), {
+          setTimeout: jest.fn(),
+          destroy: jest.fn(),
+        });
       });
 
       await expect(
-        invoke("download-song-simple", "http://example.com/404.mp3", "404.mp3"),
-      ).rejects.toThrow("Status Code: 404");
+        invoke("download-song-simple", "https://example.com/404.mp3", "404.mp3"),
+      ).rejects.toThrow("status code: 404");
 
       expect(fs.unlink).toHaveBeenCalled();
     });

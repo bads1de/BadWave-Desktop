@@ -1,7 +1,7 @@
 /// <reference types="electron" />
 
 import type { SongForSync, PlaylistForSync, SpotlightForSync, Playlist } from "../types";
-import type { OfflineSong, SongDownloadPayload, SectionItem } from "../types/local";
+import type { OfflineSong, SongDownloadPayload, SectionItem, MiniPlayerState, CachedUser, DiscordActivity } from "../types/local";
 
 // Electronのウィンドウオブジェクトに公開されるAPIの型定義
 export interface ElectronAPI {
@@ -132,17 +132,9 @@ export interface ElectronAPI {
   // 認証キャッシュ
   auth: {
     // ユーザー情報を保存
-    saveCachedUser: (user: {
-      id: string;
-      email?: string;
-      avatarUrl?: string;
-    }) => Promise<{ success: boolean }>;
+    saveCachedUser: (user: CachedUser) => Promise<{ success: boolean }>;
     // ユーザー情報を取得
-    getCachedUser: () => Promise<{
-      id: string;
-      email?: string;
-      avatarUrl?: string;
-    } | null>;
+    getCachedUser: () => Promise<CachedUser | null>;
     // ユーザー情報をクリア
     clearCachedUser: () => Promise<{ success: boolean }>;
     // Google OAuth開始
@@ -153,7 +145,7 @@ export interface ElectronAPI {
 
   // Discord RPC
   discord: {
-    setActivity: (activity: { details?: string; state?: string; largeImageKey?: string; largeImageText?: string; smallImageKey?: string; smallImageText?: string; startTimestamp?: number; endTimestamp?: number; instance?: boolean; }) => Promise<void>;
+    setActivity: (activity: DiscordActivity) => Promise<void>;
     clearActivity: () => Promise<void>;
   };
 
@@ -164,15 +156,7 @@ export interface ElectronAPI {
     // ミニプレイヤーを閉じる
     close: () => Promise<{ success: boolean; error?: string }>;
     // 再生状態を更新
-    updateState: (state: {
-      song: {
-        id: string;
-        title: string;
-        author: string;
-        image_path: string | null;
-      } | null;
-      isPlaying: boolean;
-    }) => Promise<{ success: boolean; error?: string }>;
+    updateState: (state: MiniPlayerState) => Promise<{ success: boolean; error?: string }>;
     // ミニプレイヤーから再生コントロール
     control: (
       action: "play-pause" | "next" | "previous",
@@ -183,15 +167,7 @@ export interface ElectronAPI {
     ready: () => Promise<{ success: boolean; error?: string }>;
     // 状態変更イベントのリスナーを登録
     onStateChange: (
-      callback: (state: {
-        song: {
-          id: string;
-          title: string;
-          author: string;
-          image_path: string | null;
-        } | null;
-        isPlaying: boolean;
-      }) => void,
+      callback: (state: MiniPlayerState) => void,
     ) => () => void;
     // 状態再送信リクエストのリスナーを登録
     onRequestState: (callback: () => void) => () => void;

@@ -1,9 +1,9 @@
 import { CHANNELS } from "../channels";
-import { BrowserWindow } from "electron";
 import * as http from "http";
 import * as path from "path";
 import * as fs from "fs";
 import { debugLog } from "../utils";
+import { sendToMainWindow } from "./window-manager";
 
 let oauthServer: http.Server | null = null;
 
@@ -22,13 +22,10 @@ export function startOAuthServer() {
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end(html);
 
-      const mainWindow = BrowserWindow.getAllWindows()[0];
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        if (code) {
-          mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { code });
-        } else if (error) {
-          mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { error });
-        }
+      if (code) {
+        sendToMainWindow(CHANNELS.AUTH_CALLBACK, { code });
+      } else if (error) {
+        sendToMainWindow(CHANNELS.AUTH_CALLBACK, { error });
       }
     } else {
       res.writeHead(404);

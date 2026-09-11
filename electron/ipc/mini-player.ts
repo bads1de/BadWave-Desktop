@@ -4,8 +4,9 @@ import {
   getMiniPlayerWindow,
   createMiniPlayer,
   closeMiniPlayer,
-  getMainWindow,
+  sendToMainWindow,
 } from "../lib/window-manager";
+import type { MiniPlayerState } from "../../types/local";
 
 /**
  * ミニプレイヤー関連のIPCハンドラーをセットアップ
@@ -17,10 +18,7 @@ export function setupMiniPlayerHandlers() {
       await createMiniPlayer();
 
       // メインウィンドウに状態再送信をリクエスト（ウィンドウが新規作成されたかどうかにかかわらず実行）
-      const mainWindow = getMainWindow();
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send(CHANNELS.MINI_PLAYER_REQUEST_STATE);
-      }
+      sendToMainWindow(CHANNELS.MINI_PLAYER_REQUEST_STATE);
 
       return { success: true };
     } catch (error) {
@@ -51,18 +49,7 @@ export function setupMiniPlayerHandlers() {
   // ミニプレイヤーの状態を更新（メインウィンドウからミニプレイヤーに曲情報を送る）
   ipcMain.handle(
     CHANNELS.MINI_PLAYER_UPDATE_STATE,
-    (
-      _event,
-      state: {
-        song: {
-          id: string;
-          title: string;
-          author: string;
-          image_path: string | null;
-        } | null;
-        isPlaying: boolean;
-      },
-    ) => {
+    (_event, state: MiniPlayerState) => {
       try {
         const miniPlayer = getMiniPlayerWindow();
         if (miniPlayer && !miniPlayer.isDestroyed()) {
@@ -81,13 +68,10 @@ export function setupMiniPlayerHandlers() {
     CHANNELS.MINI_PLAYER_CONTROL,
     (_event, action: "play-pause" | "next" | "previous") => {
       try {
-        const mainWindow = getMainWindow();
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, action);
+        if (sendToMainWindow(CHANNELS.MEDIA_CONTROL, action)) {
           return { success: true };
-        } else {
-          return { success: false, error: "Main window not available" };
         }
+        return { success: false, error: "Main window not available" };
       } catch (error) {
         console.error("メディアコントロールの転送に失敗:", error);
         return { success: false, error: String(error) };
@@ -104,10 +88,7 @@ export function setupMiniPlayerHandlers() {
   // ミニプレイヤーの準備完了通知
   ipcMain.handle(CHANNELS.MINI_PLAYER_READY, () => {
     try {
-      const mainWindow = getMainWindow();
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send(CHANNELS.MINI_PLAYER_REQUEST_STATE);
-      }
+      sendToMainWindow(CHANNELS.MINI_PLAYER_REQUEST_STATE);
       return { success: true };
     } catch (error) {
       console.error("ミニプレイヤーの準備完了処理に失敗:", error);

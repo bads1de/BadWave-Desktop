@@ -1,7 +1,7 @@
 import { CHANNELS } from "../channels";
 import { protocol } from "electron";
-import * as url from "url";
 import { serveLocalFile } from "./local-file-handler";
+import { sendToMainWindow } from "./window-manager";
 
 // カスタムプロトコルのスキームを登録（app ready前に呼び出す必要あり）
 export function registerSchemes() {
@@ -58,34 +58,27 @@ function handleAuthCallback(urlObj: URL): Response {
   const code = urlObj.searchParams.get("code");
   const error = urlObj.searchParams.get("error");
 
-  const { BrowserWindow } = require("electron");
-  const mainWindow = BrowserWindow.getAllWindows()[0];
-
   if (error) {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { error });
-    }
-    return new Response(
-      HTMLResponse("認証に失敗しました。このタブを閉じてアプリに戻ってください。"),
-      { headers: { "Content-Type": "text/html" } }
+    sendToMainWindow(CHANNELS.AUTH_CALLBACK, { error });
+    return authCallbackPage(
+      "認証に失敗しました。このタブを閉じてアプリに戻ってください。",
     );
   }
 
   if (code) {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send(CHANNELS.AUTH_CALLBACK, { code });
-    }
-    return new Response(
-      HTMLResponse("認証成功！このタブを閉じてアプリに戻ってください。"),
-      { headers: { "Content-Type": "text/html" } }
+    sendToMainWindow(CHANNELS.AUTH_CALLBACK, { code });
+    return authCallbackPage(
+      "認証成功！このタブを閉じてアプリに戻ってください。",
     );
   }
 
   return new Response("Bad Request", { status: 400 });
 }
 
-function HTMLResponse(message: string): string {
-  return `
+/** 認証コールバック時に表示するHTMLページ */
+function authCallbackPage(message: string): Response {
+  return new Response(
+    `
     <!DOCTYPE html>
     <html>
     <head>
@@ -120,5 +113,7 @@ function HTMLResponse(message: string): string {
       </div>
     </body>
     </html>
-  `;
+  `,
+    { headers: { "Content-Type": "text/html" } },
+  );
 }

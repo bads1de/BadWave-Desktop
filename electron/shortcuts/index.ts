@@ -1,11 +1,8 @@
 import { CHANNELS } from "../channels";
 import { globalShortcut, session, BrowserWindow } from "electron";
-import { getMainWindow } from "../lib/window-manager";
+import { getMainWindow, sendToMainWindow } from "../lib/window-manager";
 import { debugLog } from "../utils";
-import {
-  getIsSimulatingOffline,
-  setIsSimulatingOffline,
-} from "../ipc/settings";
+import { applyOfflineSimulation, getIsSimulatingOffline } from "../ipc/settings";
 
 /**
  * 開発用ショートカットキーのセットアップ
@@ -13,17 +10,13 @@ import {
 export function setupDevShortcuts() {
   // Ctrl+Shift+O: オフラインモードのトグル
   globalShortcut.register("CommandOrControl+Shift+O", () => {
-    // settings.ts の状態を更新
     const newState = !getIsSimulatingOffline();
-    setIsSimulatingOffline(newState);
+
+    // 1. ネットワークエミュレーションの設定
+    applyOfflineSimulation(newState);
 
     const mainWindow = getMainWindow();
     if (mainWindow) {
-      // 1. ネットワークエミュレーションの設定
-      mainWindow.webContents.session.enableNetworkEmulation({
-        offline: newState,
-      });
-
       // 2. WebRequestによる強制ブロック (localhost以外)
       const filter = { urls: ["*://*/*"] };
       if (newState) {
@@ -43,10 +36,10 @@ export function setupDevShortcuts() {
       } else {
         session.defaultSession.webRequest.onBeforeRequest(filter, null);
       }
-
-      // レンダラーに通知を送信
-      mainWindow.webContents.send(CHANNELS.OFFLINE_SIMULATION_CHANGED, newState);
     }
+
+    // レンダラーに通知を送信
+    sendToMainWindow(CHANNELS.OFFLINE_SIMULATION_CHANGED, newState);
 
     debugLog(
       `[Shortcut] Offline simulation: ${newState ? "ON" : "OFF"} (Ctrl+Shift+O)`

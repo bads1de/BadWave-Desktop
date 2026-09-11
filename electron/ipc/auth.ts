@@ -1,20 +1,18 @@
 import { CHANNELS } from "../channels";
 import { ipcMain, shell, BrowserWindow } from "electron";
-import Store from "electron-store";
 import {
   validateInput,
   authUrlSchema,
   cachedUserSchema,
 } from "../lib/ipc-validate";
 import { getErrorMessage } from "../lib/error";
-
-interface CachedUser {
-  id: string;
-  email: string | undefined;
-  avatarUrl?: string;
-}
-
-const store = new Store<{ cachedUser: CachedUser | null }>();
+import store from "../lib/store";
+import {
+  getMainWindow,
+  sendToMainWindow,
+  SECURE_WEB_PREFERENCES,
+} from "../lib/window-manager";
+import type { CachedUser } from "../../types/local";
 
 export function setupAuthHandlers() {
   /**
@@ -50,7 +48,7 @@ export function setupAuthHandlers() {
         CHANNELS.OPEN_OAUTH_WINDOW,
       );
 
-      const mainWindow = BrowserWindow.getAllWindows()[0];
+      const mainWindow = getMainWindow();
       if (!mainWindow) {
         throw new Error("メインウィンドウが見つかりません");
       }
@@ -62,10 +60,7 @@ export function setupAuthHandlers() {
         show: false,
         width: 500,
         height: 600,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-        },
+        webPreferences: { ...SECURE_WEB_PREFERENCES },
       });
 
       authWindow.once("ready-to-show", () => {
@@ -82,8 +77,8 @@ export function setupAuthHandlers() {
       });
 
       authWindow.on("closed", () => {
-        // セッションをリフレッシュして認ッシュして認証完了を検知
-        mainWindow.webContents.send(CHANNELS.AUTH_WINDOW_CLOSED);
+        // 認証ウィンドウが閉じられたことをレンダラーに通知（認証完了の検知用）
+        sendToMainWindow(CHANNELS.AUTH_WINDOW_CLOSED);
       });
 
       return { success: true };
@@ -112,7 +107,7 @@ export function setupAuthHandlers() {
    */
   ipcMain.handle(CHANNELS.GET_CACHED_USER, async () => {
     try {
-      const user = store.get("cachedUser", null);
+      const user = store.get("cachedUser", null) as CachedUser | null;
       return user;
     } catch (error) {
       console.error("[Auth] Failed to get cached user:", error);

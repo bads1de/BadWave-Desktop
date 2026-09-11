@@ -52,6 +52,7 @@ jest.mock("@/electron/lib/window-manager", () => ({
       send: jest.fn(),
     },
   }),
+  sendToMainWindow: jest.fn(),
 }));
 
 describe("IPC: Library", () => {

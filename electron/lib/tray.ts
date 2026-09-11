@@ -2,9 +2,42 @@ import { CHANNELS } from "../channels";
 import { app, Tray, Menu, nativeImage } from "electron";
 import * as path from "path";
 import * as fs from "fs";
-import { getMainWindow, createMainWindow } from "./window-manager";
+import { getMainWindow, createMainWindow, sendToMainWindow } from "./window-manager";
 
 let tray: Tray | null = null;
+
+/** メインウィンドウを表示する（未作成なら作成する） */
+function showMainWindow() {
+  const mainWindow = getMainWindow();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    createMainWindow();
+  }
+}
+
+/** 再生コントロールのメニュー項目 */
+const MEDIA_MENU_ITEMS: Electron.MenuItemConstructorOptions[] = [
+  {
+    label: "再生/一時停止",
+    click: () => sendToMainWindow(CHANNELS.MEDIA_CONTROL, "play-pause"),
+  },
+  {
+    label: "次の曲",
+    click: () => sendToMainWindow(CHANNELS.MEDIA_CONTROL, "next"),
+  },
+  {
+    label: "前の曲",
+    click: () => sendToMainWindow(CHANNELS.MEDIA_CONTROL, "previous"),
+  },
+];
+
+/** アプリ表示・終了のメニュー項目 */
+const APP_MENU_ITEMS: Electron.MenuItemConstructorOptions[] = [
+  { label: "アプリを表示", click: showMainWindow },
+  { label: "終了", click: () => app.quit() },
+];
 
 // システムトレイの設定
 export function setupTray() {
@@ -117,52 +150,9 @@ export function setupTray() {
       const menuTemplate: Electron.MenuItemConstructorOptions[] = [
         { label: "BadWave", enabled: false },
         { type: "separator" },
-        {
-          label: "再生/一時停止",
-          click: () => {
-            const mainWindow = getMainWindow();
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "play-pause");
-            }
-          },
-        },
-        {
-          label: "次の曲",
-          click: () => {
-            const mainWindow = getMainWindow();
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "next");
-            }
-          },
-        },
-        {
-          label: "前の曲",
-          click: () => {
-            const mainWindow = getMainWindow();
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "previous");
-            }
-          },
-        },
+        ...MEDIA_MENU_ITEMS,
         { type: "separator" },
-        {
-          label: "アプリを表示",
-          click: () => {
-            const mainWindow = getMainWindow();
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.show();
-              mainWindow.focus();
-            } else {
-              createMainWindow();
-            }
-          },
-        },
-        {
-          label: "終了",
-          click: () => {
-            app.quit();
-          },
-        },
+        ...APP_MENU_ITEMS,
       ];
 
       // メニューを構築
@@ -175,15 +165,10 @@ export function setupTray() {
       // トレイアイコンのクリックでウィンドウを表示/非表示
       tray.on("click", () => {
         const mainWindow = getMainWindow();
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          if (mainWindow.isVisible()) {
-            mainWindow.hide();
-          } else {
-            mainWindow.show();
-            mainWindow.focus();
-          }
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
+          mainWindow.hide();
         } else {
-          createMainWindow();
+          showMainWindow();
         }
       });
     } catch (menuError) {
@@ -211,29 +196,9 @@ export function setupTray() {
 
         // 最小限のコンテキストメニュー
         const fallbackMenu = Menu.buildFromTemplate([
-          {
-            label: "BadWave",
-            enabled: false,
-          } as Electron.MenuItemConstructorOptions,
-          { type: "separator" } as Electron.MenuItemConstructorOptions,
-          {
-            label: "アプリを表示",
-            click: () => {
-              const mainWindow = getMainWindow();
-              if (mainWindow && !mainWindow.isDestroyed()) {
-                mainWindow.show();
-                mainWindow.focus();
-              } else {
-                createMainWindow();
-              }
-            },
-          } as Electron.MenuItemConstructorOptions,
-          {
-            label: "終了",
-            click: () => {
-              app.quit();
-            },
-          } as Electron.MenuItemConstructorOptions,
+          { label: "BadWave", enabled: false },
+          { type: "separator" },
+          ...APP_MENU_ITEMS,
         ]);
 
         tray.setContextMenu(fallbackMenu);

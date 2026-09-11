@@ -1,4 +1,3 @@
-import * as path from "path";
 import { z } from "zod";
 
 /**
@@ -13,6 +12,7 @@ const MAX_ID_LENGTH = 64;
 const MAX_LOCAL_ID_LENGTH = 512;
 const MAX_FILENAME_LENGTH = 255;
 const MAX_URL_LENGTH = 2048;
+const MAX_AUDIO_PATH_LENGTH = 2048;
 const MAX_LYRICS_LENGTH = 50000;
 const MAX_STORE_KEY_LENGTH = 64;
 
@@ -183,18 +183,21 @@ export const playlistSongInputSchema = z.object({
   songId: idSchema,
 });
 
+/** トランスクライブ対象の音声パス (ローカルパスまたはURL) */
+export const audioPathSchema = z.string().min(1).max(MAX_AUDIO_PATH_LENGTH);
+
+/** トランスクライブに渡す歌詞テキスト */
+export const lyricsTextSchema = z.string().max(MAX_LYRICS_LENGTH);
+
 /**
- * トランスクライブ入力: コマンドインジェクション防止のためlyricsTextの特殊文字を検証
+ * トランスクライブ入力 (タプル形式 / オブジェクト形式の両方を受け付ける)
  */
 export const transcribeInputSchema = z
-  .tuple([
-    z.string().min(1).max(MAX_URL_LENGTH), // audioPath
-    z.string().max(MAX_LYRICS_LENGTH), // lyricsText
-  ])
+  .tuple([audioPathSchema, lyricsTextSchema])
   .or(
     z.object({
-      audioPath: z.string().min(1).max(MAX_URL_LENGTH),
-      lyricsText: z.string().max(MAX_LYRICS_LENGTH),
+      audioPath: audioPathSchema,
+      lyricsText: lyricsTextSchema,
     }),
   );
 

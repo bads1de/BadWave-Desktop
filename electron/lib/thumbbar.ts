@@ -1,7 +1,7 @@
 import { CHANNELS } from "../channels";
 import { BrowserWindow, ipcMain, nativeImage, NativeImage } from "electron";
 import * as zlib from "zlib";
-import { getMainWindow } from "./window-manager";
+import { getMainWindow, sendToMainWindow } from "./window-manager";
 import { debugLog } from "../utils";
 
 // アイコンサイズ
@@ -182,32 +182,17 @@ function buildThumbBarButtons(): Electron.ThumbarButton[] {
     {
       tooltip: "前の曲",
       icon: createPreviousIcon(),
-      click: () => {
-        const mainWindow = getMainWindow();
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "previous");
-        }
-      },
+      click: () => sendToMainWindow(CHANNELS.MEDIA_CONTROL, "previous"),
     },
     {
       tooltip: isPlaying ? "一時停止" : "再生",
       icon: isPlaying ? createPauseIcon() : createPlayIcon(),
-      click: () => {
-        const mainWindow = getMainWindow();
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "play-pause");
-        }
-      },
+      click: () => sendToMainWindow(CHANNELS.MEDIA_CONTROL, "play-pause"),
     },
     {
       tooltip: "次の曲",
       icon: createNextIcon(),
-      click: () => {
-        const mainWindow = getMainWindow();
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send(CHANNELS.MEDIA_CONTROL, "next");
-        }
-      },
+      click: () => sendToMainWindow(CHANNELS.MEDIA_CONTROL, "next"),
     },
   ];
 }

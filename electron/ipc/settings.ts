@@ -22,6 +22,15 @@ export function setIsSimulatingOffline(value: boolean) {
   isSimulatingOffline = value;
 }
 
+/**
+ * オフライン状態を更新し、ネットワークエミュレーションに反映する
+ */
+export function applyOfflineSimulation(offline: boolean) {
+  isSimulatingOffline = offline;
+  session.defaultSession.enableNetworkEmulation({ offline });
+  debugLog(`[Debug] Offline simulation: ${offline ? "ON" : "OFF"}`);
+}
+
 export function setupSettingsHandlers() {
   // アプリケーション設定の取得
   ipcMain.handle(CHANNELS.GET_STORE_VALUE, (_, rawKey: string) => {
@@ -43,15 +52,7 @@ export function setupSettingsHandlers() {
 
   // オフラインモードのシミュレーションを切り替え（開発用）
   ipcMain.handle(CHANNELS.TOGGLE_OFFLINE_SIMULATION, async () => {
-    isSimulatingOffline = !isSimulatingOffline;
-
-    session.defaultSession.enableNetworkEmulation({
-      offline: isSimulatingOffline,
-    });
-
-    debugLog(
-      `[Debug] Offline simulation: ${isSimulatingOffline ? "ON" : "OFF"}`,
-    );
+    applyOfflineSimulation(!isSimulatingOffline);
     return { isOffline: isSimulatingOffline };
   });
 
@@ -63,15 +64,7 @@ export function setupSettingsHandlers() {
   // オフラインシミュレーションを設定（明示的に ON/OFF）
   ipcMain.handle(CHANNELS.SET_OFFLINE_SIMULATION, async (_, rawOffline: unknown) => {
     const offline = validateInput(booleanSchema, rawOffline, CHANNELS.SET_OFFLINE_SIMULATION);
-    isSimulatingOffline = offline;
-
-    session.defaultSession.enableNetworkEmulation({
-      offline: isSimulatingOffline,
-    });
-
-    debugLog(
-      `[Debug] Offline simulation set to: ${isSimulatingOffline ? "ON" : "OFF"}`,
-    );
+    applyOfflineSimulation(offline);
     return { isOffline: isSimulatingOffline };
   });
 }

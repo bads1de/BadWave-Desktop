@@ -2,16 +2,14 @@ import { CHANNELS } from "../channels";
 import { ipcMain, app } from "electron";
 import fs from "fs";
 import path from "path";
-import https from "https";
-import http from "http";
-import { fileURLToPath } from "url";
-import { toLocalPath, mapDbSongToResponse } from "../utils";
+import { toLocalPath } from "../utils";
 import { getDb } from "../db/client";
 import { songs } from "../db/schema";
 import { eq, isNotNull } from "drizzle-orm";
 import type { SongDownloadPayload } from "../../types/local";
-import { validateInput, songDownloadPayloadSchema, idSchema, songIdSchema } from "../lib/ipc-validate";
+import { validateInput, songDownloadPayloadSchema, songIdSchema } from "../lib/ipc-validate";
 import { getErrorMessage } from "../lib/error";
+import { downloadToFile } from "../lib/download";
 
 export const setupOfflineDownloadHandlers = () => {
   const db = getDb();
@@ -61,66 +59,13 @@ export const setupOfflineDownloadHandlers = () => {
       const localSongPath = path.join(songsDir, localSongFilename);
       const localImagePath = path.join(imagesDir, localImageFilename);
 
-      // 2. ファイルをダウンロード
-      // HTTP/HTTPS両方に対応し、リダイレクトも処理するヘルパー関数
-      const downloadFile = (url: string, dest: string) => {
-        return new Promise<void>((resolve, reject) => {
-          const client = url.startsWith("https") ? https : http;
-          const file = fs.createWriteStream(dest);
-
-          const request = client.get(url, (response) => {
-            // リダイレクトの処理 (301, 302)
-            if (response.statusCode === 301 || response.statusCode === 302) {
-              const redirectUrl = response.headers.location;
-              if (redirectUrl) {
-                // ハンドルを完全に閉じてから再帰的にダウンロードし直す
-                // (Windows で同一パスを同時に開こうとすると EBUSY になるのを防ぐ)
-                file.close(() => {
-                  downloadFile(redirectUrl, dest).then(resolve).catch(reject);
-                });
-                return;
-              }
-            }
-
-            if (response.statusCode !== 200) {
-              fs.unlink(dest, () => {});
-              reject(
-                new Error(
-                  `Download failed with status code: ${response.statusCode} for ${url}`,
-                ),
-              );
-              return;
-            }
-
-            response.pipe(file);
-            file.on("finish", () => {
-              file.close(() => resolve());
-            });
-          });
-
-          request.on("error", (err) => {
-            fs.unlink(dest, () => {});
-            reject(err);
-          });
-
-          // タイムアウト設定 (30秒)
-          request.setTimeout(30000, () => {
-            request.destroy();
-            reject(new Error(`Download timeout for ${url}`));
-          });
-        });
-      };
-
-      // 並列でダウンロードを実行
-      const downloadTasks = [];
-      if (song.song_path) {
-        downloadTasks.push(downloadFile(song.song_path, localSongPath));
-      }
+      // 2. ファイルをダウンロード (HTTP/HTTPS両対応・リダイレクト追従)
+      const downloadTasks = [downloadToFile(song.song_path, localSongPath)];
 
       let finalLocalImagePath: string | null = null;
       if (song.image_path) {
         downloadTasks.push(
-          downloadFile(song.image_path, localImagePath).then(() => {
+          downloadToFile(song.image_path, localImagePath).then(() => {
             finalLocalImagePath = `badwave://file/${encodeURIComponent(localImagePath)}`;
           }),
         );
