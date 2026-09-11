@@ -43,6 +43,12 @@ const useDownloadSong = (song: Song | null): UseDownloadSongResult => {
     // song が null、または is_downloaded が既に true なら IPC 不要
     if (!song || song.is_downloaded || !electronAPI.isElectron()) return;
 
+    // ライブラリのローカルファイルはダウンロード概念外
+    if (typeof song.id === "string" && song.id.startsWith("local_")) {
+      setIsDownloaded(true);
+      return;
+    }
+
     try {
       const { isDownloaded } = await electronAPI.offline.checkStatus(song.id);
       setIsDownloaded(isDownloaded);

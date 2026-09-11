@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { usePathname } from "next/navigation";
 import useGetSongById from "@/hooks/data/useGetSongById";
@@ -11,25 +11,24 @@ import LyricsModal from "../modals/LyricsModal/LyricsModal";
 const Player = () => {
   const pathname = usePathname();
   const isPulsePage = pathname === "/pulse";
-  const player = usePlayer();
+  const activeId = usePlayer((s) => s.activeId);
+  // Map そのものを購読しないと setLocalSongs が反映されない
+  const localSongs = usePlayer((s) => s.localSongs);
   const { playlists } = useGetPlaylists();
 
-  // 1. まずローカルストア（Zustand）から曲を取得（ローカルパス不問）
+  // 1. ローカルストア（Zustand）から曲を取得
   const localSong = useMemo(() => {
-    if (!player.activeId) return null;
-    return player.getLocalSong(player.activeId);
-  }, [player.activeId, player.getLocalSong]);
+    if (!activeId) return null;
+    return localSongs.get(activeId) ?? null;
+  }, [activeId, localSongs]);
 
   // 2. ローカルストアになく、かつIDが local_ で始まらない場合のみ Supabase から取得
   const isActuallyLocalId = useMemo(() => {
-    return (
-      typeof player.activeId === "string" &&
-      player.activeId.startsWith("local_")
-    );
-  }, [player.activeId]);
+    return typeof activeId === "string" && activeId.startsWith("local_");
+  }, [activeId]);
 
   const { song: onlineSong } = useGetSongById(
-    localSong || isActuallyLocalId ? undefined : player.activeId,
+    localSong || isActuallyLocalId ? undefined : activeId,
   );
 
   // 最適な楽曲を決定
@@ -50,7 +49,7 @@ const Player = () => {
         <div className="bg-[#0a0a0f] border-t-2 border-theme-500/40 w-full h-[100px] shadow-[0_-10px_30px_rgba(0,0,0,0.8),0_-5px_15px_rgba(var(--theme-500),0.1)] relative">
           {/* HUD装飾ライン */}
           <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-theme-500/40 to-transparent" />
-          
+
           <PlayerContent song={finalSong} playlists={playlists} />
         </div>
       </div>
@@ -62,4 +61,3 @@ const Player = () => {
 };
 
 export default memo(Player);
-

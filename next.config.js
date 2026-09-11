@@ -6,16 +6,22 @@ const nextConfig = {
   // Electronアプリ内でNode.jsサーバーとして起動するために必要
   output: "standalone",
   images: {
+    // ローカル/Electronでも全ての外部画像を受け付けるためワイルドカード許可
+    // セキュリティ上は特定ドメイン列挙が理想だが、要件により全許可とする
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "pub-e2a37609c94e4d128a7638f0e5ebe05e.r2.dev",
+        hostname: "**",
+        pathname: "**",
       },
       {
-        protocol: "https",
-        hostname: "pub-5cf6f4d1134946fc9b0ae6736c735478.r2.dev",
+        protocol: "http",
+        hostname: "**",
+        pathname: "**",
       },
     ],
+    // Electronローカル起動では最適化サーバー経由だと外部画像でコケやすいので無効化して直読み
+    unoptimized: true,
   },
   experimental: {
     forceSwcTransforms: true,

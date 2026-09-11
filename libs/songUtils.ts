@@ -43,8 +43,8 @@ export function isLocalFilePath(songPath: string | null | undefined): boolean {
     return true;
   }
 
-  // ローカルファイルパス（Windows: C:\, Unix: /）の場合
-  const isWindowsPath = /^[A-Za-z]:\\/.test(songPath);
+  // ローカルファイルパス（Windows: C:\ または C:/、Unix: /）の場合
+  const isWindowsPath = /^[A-Za-z]:[\\/]/.test(songPath);
   const isUnixPath = songPath.startsWith("/");
 
   return isWindowsPath || isUnixPath;
@@ -123,12 +123,14 @@ export function toFileUrl(filePath: string): string {
 /**
  * ローカル曲用のIDを生成する
  *
- * @param filePath - ファイルパス
- * @returns ローカル曲用のID
+ * パスを base64url にエンコードする。標準 base64 の `+` `/` `=` は
+ * IPC バリデーションやファイル名に不向きなため URL-safe な文字のみ使う。
  */
 export function generateLocalSongId(filePath: string): string {
-  // ファイルパスをBase64エンコードしてプレフィックスを付ける
-  const encoded = btoa(encodeURIComponent(filePath));
+  const encoded = btoa(encodeURIComponent(filePath))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
   return `local_${encoded}`;
 }
 
@@ -144,7 +146,12 @@ export function extractFilePathFromLocalId(localId: string): string | null {
   }
 
   try {
-    const encoded = localId.substring(6); // 'local_'を除去
+    let encoded = localId.substring(6); // 'local_'を除去
+    // base64url → base64
+    encoded = encoded.replace(/-/g, "+").replace(/_/g, "/");
+    while (encoded.length % 4 !== 0) {
+      encoded += "=";
+    }
     const decoded = atob(encoded);
     return decodeURIComponent(decoded);
   } catch (error) {
@@ -186,6 +193,12 @@ export function getPlayablePath(song: Song | null | undefined): string {
   // ダウンロード済みかつローカルパスが存在する場合はローカルパスを使用
   if (song.is_downloaded && song.local_song_path) {
     const localUrl = toFileUrl(song.local_song_path);
+    if (localUrl) return localUrl;
+  }
+
+  // ライブラリのローカルファイル（C:\... や badwave:// 等）は badwave:// に正規化
+  if (song.song_path && isLocalFilePath(song.song_path)) {
+    const localUrl = toFileUrl(song.song_path);
     if (localUrl) return localUrl;
   }
 

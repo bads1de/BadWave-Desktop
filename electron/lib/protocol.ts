@@ -40,6 +40,15 @@ function registerBadwaveProtocol() {
       return serveLocalFile(request, urlObj);
     }
 
+    // hostname が file 以外（badwave://C:/... 形式など）も拾う
+    if (
+      urlObj.protocol === "badwave:" &&
+      urlObj.pathname &&
+      urlObj.pathname !== "/auth/callback"
+    ) {
+      return serveLocalFile(request, urlObj);
+    }
+
     return new Response("Not Found", { status: 404 });
   });
 }

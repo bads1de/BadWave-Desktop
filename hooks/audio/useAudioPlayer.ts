@@ -24,6 +24,9 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
     engine.initialize();
   }
 
+  const isLocalFile = useMemo(() => isLocalFilePath(songUrl), [songUrl]);
+
+  // 再生対象の audio 要素（ローカル / オンライン共に Web Audio 経由）
   const audio = engine.audio;
 
   // マウント時にエンジンの状態を引き継ぐ（リマウント対策の核心）
@@ -39,7 +42,6 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
 
   const isRepeating = usePlayer((state) => state.isRepeating);
   const isShuffling = usePlayer((state) => state.isShuffling);
-  const isLocalFile = useMemo(() => isLocalFilePath(songUrl), [songUrl]);
 
   const { volume } = useVolumeStore();
   const {
@@ -70,8 +72,10 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
     if (isRestoring) {
       setIsRestoring(false);
     }
+    // ユーザー操作の同期コンテキストで AudioContext を resume（suspended のままだと無音になる）
+    void engine.resumeContext();
     setIsPlaying((prev) => !prev);
-  }, [isRestoring, setIsRestoring]);
+  }, [isRestoring, setIsRestoring, engine]);
 
   const handleSeek = useCallback(
     (time: number) => {
@@ -131,17 +135,35 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
   // 再生/停止の同期
   useEffect(() => {
     if (!audio) return;
+    let cancelled = false;
 
-    // AudioContextをresumeする
-    if (isPlaying && engine.context?.state === "suspended") {
-      engine.resumeContext();
-    }
+    const sync = async () => {
+      // Web Audio 経由のため context が suspended だと play 成功しても無音になる
+      if (isPlaying && engine.context?.state === "suspended") {
+        try {
+          await engine.resumeContext();
+        } catch (e) {
+          console.error("[useAudioPlayer] resumeContext failed:", e);
+        }
+      }
+      if (cancelled || !audio) return;
 
-    if (isPlaying && audio.paused) {
-      audio.play().catch(() => {});
-    } else if (!isPlaying && !audio.paused) {
-      audio.pause();
-    }
+      if (isPlaying && audio.paused) {
+        try {
+          await audio.play();
+        } catch (e) {
+          console.error("[useAudioPlayer] play() failed:", e);
+          setIsPlaying(false);
+        }
+      } else if (!isPlaying && !audio.paused) {
+        audio.pause();
+      }
+    };
+
+    void sync();
+    return () => {
+      cancelled = true;
+    };
   }, [isPlaying, audio, engine]);
 
   // イベントリスナー
@@ -159,8 +181,19 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
       errorHandlerRef.current.resetErrors();
       // アプリ起動時の復元中は自動再生しない
       if (isRestoringRef.current) return;
-      // 曲がロードされたら再生開始
-      audio.play().catch(() => {});
+      // 曲がロードされたら再生開始（context resume を先に）
+      void (async () => {
+        if (engine.context?.state === "suspended") {
+          await engine.resumeContext();
+        }
+        if (audio.paused) {
+          try {
+            await audio.play();
+          } catch (e) {
+            console.error("[useAudioPlayer] auto play() failed:", e);
+          }
+        }
+      })();
     };
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => {
@@ -198,7 +231,7 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("error", handleError);
     };
-  }, [audio, player.activeId, player.ids, savePlaybackState]);
+  }, [audio, engine, player.activeId, player.ids, savePlaybackState]);
 
   // ボリューム適用
   useEffect(() => {
@@ -209,32 +242,39 @@ const useAudioPlayer = (songUrl: string, song?: Song) => {
 
   // 曲のロード（リマウント対策: 同一曲ならスキップ）
   useEffect(() => {
-    if (!audio || !songUrl || !song?.id) return;
+    if (!songUrl || !song?.id) return;
 
     const newSongId = String(song.id);
 
+    // Web Audio 経由（EQ 等）で再生。crossOrigin は src より先に設定する
+    engine.attachWebAudio();
+    const el = engine.audio;
+    if (!el) return;
+
     // 同一曲なら再設定をスキップ
-    if (engine.currentSongId === newSongId && audio.src !== "") {
+    if (engine.currentSongId === newSongId && el.src !== "") {
       return;
     }
 
     engine.currentSongId = newSongId;
-    audio.currentTime = 0;
     errorHandlerRef.current.resetErrors();
+
+    // MediaElementSource 用。これを外すと media が tainted になり無音になる
+    el.crossOrigin = "anonymous";
+    el.currentTime = 0;
+    el.volume = volume;
 
     if (isLocalFile) {
       const localUrl = toFileUrl(songUrl);
       if (!localUrl) {
-        console.error("Invalid local file path:", songUrl);
+        console.error("[useAudioPlayer] Invalid local file path:", songUrl);
         return;
       }
-      audio.src = localUrl;
-      audio.crossOrigin = null;
+      el.src = localUrl;
     } else {
-      audio.src = songUrl;
-      audio.crossOrigin = "anonymous";
+      el.src = songUrl;
     }
-  }, [songUrl, isLocalFile, song?.id, audio, engine]);
+  }, [songUrl, isLocalFile, song?.id, engine, volume]);
 
   // 再生位置の自動保存
   useEffect(() => {

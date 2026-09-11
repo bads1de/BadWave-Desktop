@@ -43,6 +43,8 @@ class AudioEngine {
   // 状態管理
   public currentSongId: string | null = null;
   public isInitialized = false;
+  /** MediaElementSource を audio に接続済みか（一度付けると外せない） */
+  private webAudioAttached = false;
 
   private constructor() {
     // ブラウザ環境でのみ audio 要素を作成
@@ -61,13 +63,15 @@ class AudioEngine {
   /**
    * Web Audio API グラフを初期化（イコライザー、リバーブ含む）
    * 一度だけ呼ばれる
+   *
+   * 注意: MediaElementSource はここでは張らない。
+   * 再生対象が決まった attachWebAudio() で張る。
    */
   public initialize(): void {
     if (!this.audio || this.isInitialized) return;
 
     try {
       this.context = new AudioContext();
-      this.sourceNode = this.context.createMediaElementSource(this.audio);
 
       // --- ノード作成 ---
 
@@ -152,17 +156,24 @@ class AudioEngine {
       this.analyser.smoothingTimeConstant = 0.8;
 
       // --- 接続 (Routing) ---
-      // Main Path: Source -> EQ -> Spatial -> 8D Panner -> Retro(HighPass->LowPass->Distortion) -> MasterGain -> Dest
-      let currentNode: AudioNode = this.sourceNode;
+      // Source は attachWebAudio() で後から filters[0] に接続する
+      // Main Path: (Source) -> EQ -> Spatial -> 8D Panner -> Retro -> Bass -> MasterGain -> Dest
+      const firstFilter = this.filters[0];
+      if (!firstFilter) {
+        throw new Error("EQ filters not created");
+      }
+      let currentNode: AudioNode = firstFilter;
 
-      this.filters.forEach((filter) => {
-        currentNode.connect(filter);
-        currentNode = filter;
-      });
+      for (let i = 1; i < this.filters.length; i++) {
+        currentNode.connect(this.filters[i]);
+        currentNode = this.filters[i];
+      }
 
       // Spatial Filter 接続
-      currentNode.connect(this.spatialFilter);
-      currentNode = this.spatialFilter;
+      const spatial = this.spatialFilter;
+      if (!spatial) throw new Error("spatialFilter not created");
+      currentNode.connect(spatial);
+      currentNode = spatial;
 
       // 8D Audio Panner 接続
       currentNode.connect(this.stereoPanner);
@@ -191,9 +202,27 @@ class AudioEngine {
       this.convolver.connect(this.context.destination);
 
       this.isInitialized = true;
-      console.log("[AudioEngine] Initialized successfully");
     } catch (error) {
       console.error("[AudioEngine] Initialization failed:", error);
+    }
+  }
+
+  /**
+   * MediaElementSource を張り Web Audio 経由にする（ローカル / オンライン共通）
+   *
+   * 前提: audio は crossOrigin を設定し、配信側が CORS を返す必要がある。
+   * CORS なしで張ると media が tainted になり、再生は進むが無音になる。
+   */
+  public attachWebAudio(): void {
+    if (this.webAudioAttached) return;
+    if (!this.audio || !this.context || this.filters.length === 0) return;
+
+    try {
+      this.sourceNode = this.context.createMediaElementSource(this.audio);
+      this.sourceNode.connect(this.filters[0]);
+      this.webAudioAttached = true;
+    } catch (e) {
+      console.error("[AudioEngine] attachWebAudio failed:", e);
     }
   }
 

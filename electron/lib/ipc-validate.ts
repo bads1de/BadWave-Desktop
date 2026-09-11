@@ -10,6 +10,7 @@ import { z } from "zod";
  */
 
 const MAX_ID_LENGTH = 64;
+const MAX_LOCAL_ID_LENGTH = 512;
 const MAX_FILENAME_LENGTH = 255;
 const MAX_URL_LENGTH = 2048;
 const MAX_LYRICS_LENGTH = 50000;
@@ -23,6 +24,21 @@ export const idSchema = z
   .min(1, "ID cannot be empty")
   .max(MAX_ID_LENGTH, `ID must be ${MAX_ID_LENGTH} chars or less`)
   .regex(/^[A-Za-z0-9_\-:.]+$/, "ID contains invalid characters");
+
+/**
+ * ローカル曲IDスキーマ (`local_` + base64url でパスを埋め込む形式)
+ * ファイルパスが長いため通常の idSchema より緩い
+ */
+export const localIdSchema = z
+  .string()
+  .min(1, "ID cannot be empty")
+  .max(MAX_LOCAL_ID_LENGTH, `Local ID must be ${MAX_LOCAL_ID_LENGTH} chars or less`)
+  .regex(/^local_[A-Za-z0-9_\-]+$/, "Local ID contains invalid characters");
+
+/**
+ * 楽曲ID: リモートUUID / ローカル埋め込みID の両方を受け付ける
+ */
+export const songIdSchema = z.union([idSchema, localIdSchema]);
 
 /**
  * ファイル名スキーマ: パストラバーサル防止
@@ -111,11 +127,12 @@ export const storeKeySchema = z
  * 設定ストア値: JSONシリアライズ可能な型に限定
  */
 export const storeValueSchema: z.ZodType<unknown> = z.union([
-  z.string().max(10000),
+  // React Query キャッシュ等が巨大な値で永続化されるため長さ制限なし
+  z.string(),
   z.number().finite(),
   z.boolean(),
   z.null(),
-  z.array(z.unknown()).max(1000),
+  z.array(z.unknown()),
   z.record(z.string(), z.unknown()),
 ]);
 

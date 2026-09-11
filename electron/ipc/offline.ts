@@ -10,7 +10,7 @@ import { getDb } from "../db/client";
 import { songs } from "../db/schema";
 import { eq, isNotNull } from "drizzle-orm";
 import type { SongDownloadPayload } from "../../types/local";
-import { validateInput, songDownloadPayloadSchema, idSchema } from "../lib/ipc-validate";
+import { validateInput, songDownloadPayloadSchema, idSchema, songIdSchema } from "../lib/ipc-validate";
 import { getErrorMessage } from "../lib/error";
 
 export const setupOfflineDownloadHandlers = () => {
@@ -164,9 +164,34 @@ export const setupOfflineDownloadHandlers = () => {
   });
 
   // オフラインステータスの確認
+  // ローカル曲ID (`local_` + base64url) も受け付ける
   ipcMain.handle(CHANNELS.CHECK_OFFLINE_STATUS, async (_, rawSongId: string) => {
-    const songId = validateInput(idSchema, rawSongId, CHANNELS.CHECK_OFFLINE_STATUS);
+    const songId = validateInput(songIdSchema, rawSongId, CHANNELS.CHECK_OFFLINE_STATUS);
     try {
+      // ライブラリのローカルファイル (`local_` で始まる) は DB に無く、
+      // ID からパスを復元して存在確認する
+      if (songId.startsWith("local_")) {
+        const encoded = songId
+          .slice("local_".length)
+          .replace(/-/g, "+")
+          .replace(/_/g, "/");
+        const padded = encoded + "=".repeat((4 - (encoded.length % 4)) % 4);
+        let filePath: string;
+        try {
+          filePath = decodeURIComponent(Buffer.from(padded, "base64").toString("utf8"));
+        } catch {
+          return { isDownloaded: false };
+        }
+        const exists = await fs.promises
+          .stat(filePath)
+          .then((s) => s.isFile())
+          .catch(() => false);
+        return {
+          isDownloaded: exists,
+          localPath: exists ? filePath : undefined,
+        };
+      }
+
       const result = await db.query.songs.findFirst({
         where: eq(songs.id, songId),
         columns: {
@@ -228,7 +253,7 @@ export const setupOfflineDownloadHandlers = () => {
 
   // オフライン楽曲の削除 (ファイルとDBレコードの両方を削除)
   ipcMain.handle(CHANNELS.DELETE_OFFLINE_SONG, async (_, rawSongId: string) => {
-    const songId = validateInput(idSchema, rawSongId, CHANNELS.DELETE_OFFLINE_SONG);
+    const songId = validateInput(songIdSchema, rawSongId, CHANNELS.DELETE_OFFLINE_SONG);
     try {
       // 1. ファイルパスを取得するためにレコードを確認
       const songRecord = await db.query.songs.findFirst({
