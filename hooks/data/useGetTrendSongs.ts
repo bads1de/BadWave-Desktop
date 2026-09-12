@@ -4,6 +4,7 @@ import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 import { subMonths, subWeeks, subDays } from "date-fns";
 
 /** トレンド曲を取得する (Electronはキャッシュ、WebはSupabase) */
@@ -23,6 +24,8 @@ const useGetTrendSongs = (
     offlineFallback: [],
     initialData,
     networkMode: "always",
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     webFn: async () => {
       let query = createClient().from(TABLES.SONGS).select("*");
 
@@ -46,7 +49,8 @@ const useGetTrendSongs = (
         throw new Error(getErrorMessage(error));
       }
 
-      return (data as Song[]) || [];
+      // songs.id は Supabase では数値で返るため文字列に揃える
+      return normalizeIds(data);
     },
   });
 

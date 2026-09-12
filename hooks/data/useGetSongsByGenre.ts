@@ -3,6 +3,7 @@ import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * 指定したジャンルの曲一覧を取得するカスタムフック (オフライン対応)
@@ -25,6 +26,8 @@ const useGetSongsByGenre = (genre: string | string[]) => {
   } = useSectionQuery<Song[]>({
     queryKey: [CACHED_QUERIES.songsByGenres, genreArray.join(",")],
     enabled: genreArray.length > 0,
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     webFn: async () => {
       if (genreArray.length === 0) {
         return [];
@@ -40,7 +43,8 @@ const useGetSongsByGenre = (genre: string | string[]) => {
         throw new Error(getErrorMessage(error));
       }
 
-      return (data as Song[]) || [];
+      // songs.id は Supabase では数値で返るため文字列に揃える
+      return normalizeIds(data);
     },
   });
 

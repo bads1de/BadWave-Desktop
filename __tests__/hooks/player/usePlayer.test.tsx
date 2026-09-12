@@ -142,6 +142,28 @@ describe("usePlayer (Zustand Store)", () => {
     expect(usePlayer.getState().getLocalSong("song-3")).toEqual(songs[2]);
   });
 
+  it("Supabase由来の数値IDも文字列に揃えて保持する", () => {
+    // 数値と文字列が混ざると getNextSongId の `id === activeId` が一致しなくなる
+    const song = { id: 104, title: "Scroll Back" } as any;
+
+    act(() => {
+      usePlayer.getState().playSongWithData(song, [104, 93] as any);
+    });
+
+    const state = usePlayer.getState();
+    expect(state.activeId).toBe("104");
+    expect(state.ids).toEqual(["104", "93"]);
+    expect(state.getLocalSong("104")?.title).toBe("Scroll Back");
+    expect(state.getNextSongId()).toBe("93");
+
+    act(() => {
+      usePlayer.getState().setIds([104, 93] as any);
+      usePlayer.getState().setId(104 as any);
+    });
+    expect(usePlayer.getState().ids).toEqual(["104", "93"]);
+    expect(usePlayer.getState().activeId).toBe("104");
+  });
+
   it("getNextSongId でエッジケースを処理できる", () => {
     // 空リスト
     expect(usePlayer.getState().getNextSongId()).toBeUndefined();

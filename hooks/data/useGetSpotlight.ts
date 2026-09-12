@@ -3,6 +3,7 @@ import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /** スポットライトを取得する (Electronはキャッシュ、WebはSupabase) */
 const useGetSpotlight = (initialData?: Spotlight[]) => {
@@ -18,6 +19,8 @@ const useGetSpotlight = (initialData?: Spotlight[]) => {
     offlineFallback: [],
     initialData,
     networkMode: "always",
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     webFn: async () => {
       const { data, error } = await createClient()
         .from(TABLES.SPOTLIGHTS)
@@ -28,7 +31,8 @@ const useGetSpotlight = (initialData?: Spotlight[]) => {
         throw new Error(getErrorMessage(error));
       }
 
-      return (data as Spotlight[]) || [];
+      // spotlights.id は Supabase では数値で返るため文字列に揃える
+      return normalizeIds(data);
     },
   });
 

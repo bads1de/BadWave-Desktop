@@ -81,7 +81,8 @@ const useGetSongById = (id?: string | number) => {
         throw new Error(`Failed to load song: ${error.message}`);
       }
 
-      return data as Song | null;
+      // songs.id は Supabase では数値で返るため文字列に揃える
+      return data ? ({ ...data, id: String(data.id) } as Song) : null;
     },
     staleTime: CACHE_CONFIG.staleTime,
     gcTime: CACHE_CONFIG.gcTime,

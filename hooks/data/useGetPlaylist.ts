@@ -20,6 +20,8 @@ const useGetPlaylist = (playlistId?: string) => {
   } = useSectionQuery<Playlist>({
     queryKey: [CACHED_QUERIES.playlists, playlistId],
     enabled: !!playlistId,
+    // playlists.id は Supabase では数値で返るため文字列に揃える（キャッシュ済みデータにも適用）
+    select: (data) => (data ? { ...data, id: String(data.id) } : data),
     electron: {
       getLocal: async () => {
         try {

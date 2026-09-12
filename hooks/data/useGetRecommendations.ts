@@ -5,6 +5,7 @@ import { useUser } from "@/hooks/auth/useUser";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { mapRecommendationToSong } from "@/libs/songUtils";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * おすすめ曲を取得するカスタムフック (クライアントサイド)
@@ -32,6 +33,8 @@ const useGetRecommendations = (initialData?: Song[], limit: number = 10) => {
     initialData,
     enabled: !!user?.id,
     networkMode: "always",
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     webFn: async () => {
       // ユーザーがログインしていない場合は空配列を返す
       if (!user?.id) {
@@ -53,8 +56,11 @@ const useGetRecommendations = (initialData?: Song[], limit: number = 10) => {
 
         if (!data) return [];
 
-        return data.map((item: SongWithRecommendation) =>
-          mapRecommendationToSong(item, user.id)
+        // RPC も songs.id を数値で返すため文字列に揃える
+        return normalizeIds(
+          data.map((item: SongWithRecommendation) =>
+            mapRecommendationToSong(item, user.id)
+          )
         );
       } catch (e) {
         console.error("Exception in getRecommendations:", e);

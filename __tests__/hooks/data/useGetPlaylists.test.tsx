@@ -131,5 +131,37 @@ describe("useGetPlaylists", () => {
       // ローカルDBは呼ばれない
       expect(mockGetCachedPlaylists).not.toHaveBeenCalled();
     });
+
+    it("Supabaseが数値IDを返しても、文字列IDに揃えて返す", async () => {
+      // playlists.id は数値カラムのため JSON では number で返る
+      // （数値のままだと playlist.id.slice() で画面がクラッシュする）
+      const mockPlaylists = [
+        { id: 73, title: "playlist1", user_id: "user-1" },
+        { id: 74, title: "Vapor wave remix", user_id: "user-1" },
+      ];
+
+      mockFrom.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        order: jest
+          .fn()
+          .mockResolvedValue({ data: mockPlaylists, error: null }),
+      });
+
+      const { result } = renderHook(() => useGetPlaylists(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.playlists.map((p) => p.id)).toEqual(["73", "74"]);
+      result.current.playlists.forEach((playlist) => {
+        expect(typeof playlist.id).toBe("string");
+        // 画面側の表示処理が例外を投げないこと
+        expect(() => playlist.id.slice(0, 4).toUpperCase()).not.toThrow();
+      });
+    });
   });
 });

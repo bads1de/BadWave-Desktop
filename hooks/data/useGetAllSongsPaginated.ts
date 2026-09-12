@@ -6,6 +6,7 @@ import { createClient } from "@/libs/supabase/client";
 import { electronAPI } from "@/libs/electron";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * ページネーション対応の曲取得フック
@@ -32,6 +33,9 @@ const useGetAllSongsPaginated = (page: number = 0, pageSize: number = 24) => {
   } = useSectionQuery<PaginatedSongsResult>({
     queryKey: [CACHED_QUERIES.songs, "paginated", page, pageSize],
     networkMode: "always",
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: (data) =>
+      data ? { ...data, songs: normalizeIds(data.songs) } : data,
     electron: {
       getLocal: async () => {
         const [songs, totalCount] = await Promise.all([
@@ -66,7 +70,8 @@ const useGetAllSongsPaginated = (page: number = 0, pageSize: number = 24) => {
       const totalCount = countResult.count || 0;
 
       return {
-        songs: (songsResult.data as Song[]) || [],
+        // songs.id は Supabase では数値で返るため文字列に揃える
+        songs: normalizeIds(songsResult.data),
         totalCount,
         totalPages: Math.ceil(totalCount / pageSize),
         currentPage: page,

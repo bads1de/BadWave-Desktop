@@ -31,6 +31,11 @@ export interface SectionQueryOptions<T> {
   enabled?: boolean;
   /** ページ遷移時など古いデータを保持する */
   keepPreviousData?: boolean;
+  /**
+   * 取得結果を消費側の型に整える。
+   * キャッシュ済みデータにも適用されるため、IDの正規化などに使う。
+   */
+  select?: (data: T | undefined) => T | undefined;
   /** Web オフライン時・ネットワークエラー時の戻り値（デフォルト undefined） */
   offlineFallback?: T;
   /** Electron の getSectionData が空だった場合の戻り値（セクション系フックで使用） */
@@ -56,6 +61,7 @@ export function useSectionQuery<T>(options: SectionQueryOptions<T>) {
     initialData,
     enabled = true,
     keepPreviousData: useKeepPreviousData = false,
+    select,
     offlineFallback,
     emptySectionFallback,
     staleTime = CACHE_CONFIG.staleTime,
@@ -110,6 +116,7 @@ export function useSectionQuery<T>(options: SectionQueryOptions<T>) {
     retry,
     ...(useKeepPreviousData ? { placeholderData: keepPreviousData } : {}),
     ...(initialData !== undefined ? { initialData } : {}),
+    ...(select ? { select } : {}),
     ...(networkMode ? { networkMode } : {}),
   });
 

@@ -99,7 +99,8 @@ const PlaylistContent: React.FC = memo(() => {
               <div className="flex items-center gap-3">
                 <div className="h-[1px] flex-grow bg-theme-500/10 group-hover:bg-theme-500/30" />
                 <span className="text-[8px] text-theme-500 font-bold tracking-tight">
-                  0x{playlist.id.slice(0, 4).toUpperCase()}
+                  {/* Supabase の ID は数値で返るため文字列に揃えてから表示する */}
+                  0x{String(playlist.id).slice(0, 4).toUpperCase()}
                 </span>
                 <div className="w-1 h-1 bg-theme-500 animate-pulse" />
               </div>

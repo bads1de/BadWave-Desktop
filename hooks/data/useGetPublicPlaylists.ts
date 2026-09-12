@@ -3,6 +3,7 @@ import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * パブリックプレイリストを取得するカスタムフック (クライアントサイド)
@@ -27,6 +28,8 @@ const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
     offlineFallback: [],
     initialData,
     networkMode: "always",
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     webFn: async () => {
       const { data, error } = await createClient()
         .from(TABLES.PLAYLISTS)
@@ -39,7 +42,8 @@ const useGetPublicPlaylists = (initialData?: Playlist[], limit: number = 6) => {
         throw new Error(getErrorMessage(error));
       }
 
-      return (data as Playlist[]) || [];
+      // playlists.id は Supabase では数値で返るため文字列に揃える
+      return normalizeIds(data);
     },
   });
 

@@ -146,5 +146,27 @@ describe("useGetPlaylist", () => {
       expect(result.current.error).toBeDefined();
       consoleSpy.mockRestore();
     });
+
+    it("Supabaseが数値IDを返しても文字列IDで返す", async () => {
+      // playlists.id は数値カラムのため JSON では number で返る
+      // （数値のままだと詳細画面の playlistId.slice() でクラッシュする）
+      mockSingle.mockResolvedValue({
+        data: { id: 73, title: "playlist1", user_id: "user-1" },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useGetPlaylist("73"), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.playlist?.id).toBe("73");
+      expect(() =>
+        String(result.current.playlist?.id).slice(0, 8).toUpperCase()
+      ).not.toThrow();
+    });
   });
 });

@@ -3,6 +3,7 @@ import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * 最新曲を取得するカスタムフック (クライアントサイド)
@@ -27,6 +28,8 @@ const useGetSongs = (initialData?: Song[], limit: number = 12) => {
     offlineFallback: [],
     initialData,
     networkMode: "always",
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     webFn: async () => {
       const { data, error } = await createClient()
         .from(TABLES.SONGS)
@@ -38,7 +41,8 @@ const useGetSongs = (initialData?: Song[], limit: number = 12) => {
         throw new Error(getErrorMessage(error));
       }
 
-      return (data as Song[]) || [];
+      // songs.id は Supabase では数値で返るため文字列に揃える
+      return normalizeIds(data);
     },
   });
 

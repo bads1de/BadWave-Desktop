@@ -1,5 +1,6 @@
 import { Song, SongWithRecommendation } from "@/types";
 import { ALLOWED_MEDIA_EXTENSIONS } from "@/constants";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * 曲がローカルファイルかどうかを判定する
@@ -260,10 +261,12 @@ export function mapRecommendationToSong(
  * @returns Song 配列
  */
 export function extractSongsFromJoin(data: Record<string, unknown>[]): Song[] {
-  return data.map((item) => ({
+  const songs = data.map((item) => ({
     ...(item.songs as Song),
     songType: "regular" as const,
   })) as Song[];
+
+  return normalizeIds(songs);
 }
 
 /**

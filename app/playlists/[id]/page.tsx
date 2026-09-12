@@ -97,7 +97,7 @@ const PlaylistHeader: React.FC<PlaylistHeaderProps> = memo(
                   <div className="px-2 py-0.5 border border-theme-500/40 bg-theme-500/5">
                     <span className="text-[9px] font-black text-theme-500 uppercase tracking-widest">ARCHIVE_RECORD</span>
                   </div>
-                  <span className="text-[10px] text-theme-500/40 font-bold uppercase tracking-widest">ID: 0x{playlistId.slice(0, 8).toUpperCase()}</span>
+                  <span className="text-[10px] text-theme-500/40 font-bold uppercase tracking-widest">ID: 0x{String(playlistId).slice(0, 8).toUpperCase()}</span>
                 </div>
                 
                 <h1 className="text-4xl lg:text-7xl font-black text-white uppercase tracking-tight drop-shadow-[0_0_20px_rgba(var(--theme-500),0.3)] cyber-glitch">

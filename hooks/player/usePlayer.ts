@@ -62,34 +62,38 @@ const usePlayer = create<PlayerStore>()(
       isLoading: false,
       hasHydrated: false,
       localSongs: new Map<string, Song>(),
-      setId: (id: string) => set({ activeId: id }),
-      setIds: (ids: string[]) => set({ ids }),
+      // Supabase のIDは数値で返るため、どの経路から来ても文字列に揃える
+      setId: (id: string) => set({ activeId: String(id) }),
+      setIds: (ids: string[]) => set({ ids: ids.map(String) }),
       setLocalSong: (song: Song) =>
         set((state) => {
           const newLocalSongs = new Map(state.localSongs);
-          newLocalSongs.set(song.id, song);
+          const normalized = { ...song, id: String(song.id) };
+          newLocalSongs.set(normalized.id, normalized);
           return { localSongs: newLocalSongs };
         }),
       setLocalSongs: (songs: Song[]) =>
         set((state) => {
           const newLocalSongs = new Map(state.localSongs);
           for (const song of songs) {
-            newLocalSongs.set(song.id, song);
+            const normalized = { ...song, id: String(song.id) };
+            newLocalSongs.set(normalized.id, normalized);
           }
           return { localSongs: newLocalSongs };
         }),
       getLocalSong: (id: string) => {
         const state = get();
-        return state.localSongs.get(id);
+        return state.localSongs.get(String(id));
       },
       playSongWithData: (song: Song, ids: string[]) =>
         set((state) => {
+          const normalized = { ...song, id: String(song.id) };
           const newLocalSongs = new Map(state.localSongs);
-          newLocalSongs.set(song.id, song);
+          newLocalSongs.set(normalized.id, normalized);
           return {
             localSongs: newLocalSongs,
-            activeId: song.id,
-            ids,
+            activeId: normalized.id,
+            ids: ids.map(String),
           };
         }),
       toggleRepeat: () => set((state) => ({ isRepeating: !state.isRepeating })),

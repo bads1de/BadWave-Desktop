@@ -5,6 +5,7 @@ import { useUser } from "@/hooks/auth/useUser";
 import { electronAPI } from "@/libs/electron";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * ユーザーのプレイリスト一覧を取得するカスタムフック (ローカルファースト)
@@ -27,6 +28,8 @@ const useGetPlaylists = () => {
     queryKey: [CACHED_QUERIES.playlists, "user", user?.id],
     enabled: !!user?.id,
     networkMode: "always",
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     electron: {
       getLocal: () =>
         electronAPI.cache.getCachedPlaylists(user?.id ?? "") as Promise<Playlist[]>,
@@ -44,7 +47,8 @@ const useGetPlaylists = () => {
         throw new Error(getErrorMessage(error));
       }
 
-      return (data as Playlist[]) || [];
+      // playlists.id は Supabase では数値で返るため文字列に揃える
+      return normalizeIds(data);
     },
   });
 

@@ -3,6 +3,7 @@ import { CACHED_QUERIES, TABLES } from "@/constants";
 import { createClient } from "@/libs/supabase/client";
 import { useSectionQuery } from "@/libs/query/useSectionQuery";
 import { getErrorMessage } from "@/libs/utils/error";
+import { normalizeIds } from "@/libs/utils/normalizeIds";
 
 /**
  * タイトルで曲を検索するカスタムフック (オフライン対応)
@@ -21,6 +22,8 @@ const useGetSongsByTitle = (title: string) => {
   } = useSectionQuery<Song[]>({
     queryKey: [CACHED_QUERIES.songs, "search", title],
     offlineFallback: [],
+    // キャッシュ済みデータにも適用されるため、既存キャッシュの数値IDもここで揃う
+    select: normalizeIds,
     webFn: async () => {
       const query = createClient()
         .from(TABLES.SONGS)
@@ -38,7 +41,8 @@ const useGetSongsByTitle = (title: string) => {
         throw new Error(getErrorMessage(error));
       }
 
-      return (data as Song[]) || [];
+      // songs.id は Supabase では数値で返るため文字列に揃える
+      return normalizeIds(data);
     },
   });
 

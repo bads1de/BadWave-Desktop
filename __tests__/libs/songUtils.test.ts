@@ -8,8 +8,10 @@ import {
   isValidLocalFilePath,
   getPlayablePath,
   getPlayableImagePath,
+  extractSongsFromJoin,
 } from "@/libs/songUtils";
 import { Song } from "@/types";
+import { songIdSchema } from "@/electron/lib/ipc-validate";
 
 describe("songUtils", () => {
   describe("isLocalSong", () => {
@@ -186,6 +188,21 @@ describe("songUtils", () => {
         image_path: "C:\\path\\to\\image.jpg",
       } as Song;
       expect(getPlayableImagePath(song)).toBe("");
+    });
+  });
+
+  describe("extractSongsFromJoin", () => {
+    it("JOIN結果からSongを取り出し、IDを文字列に揃える", () => {
+      const data = [
+        { songs: { id: 104, title: "Scroll Back" } },
+        { songs: { id: 93, title: "Beyond Recall" } },
+      ];
+
+      const songs = extractSongsFromJoin(data);
+
+      expect(songs.map((s) => s.id)).toEqual(["104", "93"]);
+      expect(songs.map((s) => s.title)).toEqual(["Scroll Back", "Beyond Recall"]);
+      expect(songIdSchema.safeParse(songs[0].id).success).toBe(true);
     });
   });
 
