@@ -74,8 +74,8 @@ export async function createMiniPlayer(): Promise<BrowserWindow> {
   const { width: screenWidth, height: screenHeight } =
     screen.getPrimaryDisplay().workAreaSize;
 
-  const miniPlayerWidth = 320;
-  const miniPlayerHeight = 80;
+  const miniPlayerWidth = 380;
+  const miniPlayerHeight = 100;
   const margin = 20;
 
   miniPlayerWindow = new BrowserWindow({
@@ -89,7 +89,8 @@ export async function createMiniPlayer(): Promise<BrowserWindow> {
     skipTaskbar: true,
     transparent: false,
     hasShadow: true,
-    backgroundColor: "#121212",
+    // アプリ本体と同じサーフェス色（読み込み中の白フラッシュも防ぐ）
+    backgroundColor: "#0a0a0f",
     webPreferences: {
       ...SECURE_WEB_PREFERENCES,
       preload: PRELOAD_PATH,

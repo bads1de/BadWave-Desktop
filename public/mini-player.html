@@ -5,238 +5,548 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BadWave Mini Player</title>
     <style>
+      /*
+       * アプリ本体（プレイヤーバー / HUDパネル）と同じデザイン言語:
+       *   フラットな #0a0a0f / シャープな角 / アクセントのヘアライン枠 /
+       *   コーナーブラケット / 等幅大文字の計器表示
+       * --theme-* の既定値は constants/colorSchemes.ts の cyberpunk。
+       * 実際の値は IPC で受け取った状態（state.theme）で上書きされる。
+       */
+      :root {
+        --theme-300: 165, 243, 252;
+        --theme-400: 34, 211, 238;
+        --theme-500: 6, 182, 212;
+        --theme-600: 219, 39, 119;
+        --theme-900: 15, 23, 42;
+        --surface: #0a0a0f;
+        --surface-deep: #030305;
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
+      html,
+      body {
+        height: 100%;
+      }
+
       body {
         font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: linear-gradient(135deg, #1a1a2e 0%, #121212 100%);
-        color: white;
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        background: var(--surface);
+        color: #fff;
         overflow: hidden;
         user-select: none;
-        height: 100vh;
-        width: 100vw;
-      }
-
-      .container {
-        display: flex;
-        align-items: center;
-        height: 100%;
-        padding: 12px 16px;
-        position: relative;
-      }
-
-      /* ドラッグ可能な領域 */
-      .drag-region {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 40px;
-        height: 100%;
         -webkit-app-region: drag;
       }
 
-      /* 閉じるボタン */
-      .close-btn {
+      /* ── パネル（HUDの枠） ─────────────────────────────── */
+      .panel {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 100%;
+        padding: 0 12px 0 14px;
+        background: var(--surface);
+        border: 1px solid rgba(var(--theme-500), 0.35);
+        transition: border-color 0.3s ease;
+      }
+
+      /* 上端のアクセントライン（プレイヤーバーと同じ意匠・再生中は走査する） */
+      .hairline {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 24px;
-        height: 24px;
-        border: none;
-        background: transparent;
-        color: #a0a0a0;
-        cursor: pointer;
-        border-radius: 50%;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(var(--theme-500), 0.5),
+          transparent
+        );
+        background-size: 200% 100%;
+        pointer-events: none;
+      }
+
+      /* HUDグリッド */
+      .grid {
+        position: absolute;
+        inset: 0;
+        opacity: 0.05;
+        background-image:
+          linear-gradient(
+            to right,
+            rgba(var(--theme-500), 0.6) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(var(--theme-500), 0.6) 1px,
+            transparent 1px
+          );
+        background-size: 14px 14px;
+        pointer-events: none;
+      }
+
+      /* コーナーブラケット */
+      .bracket {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-color: rgba(var(--theme-500), 0.6);
+        pointer-events: none;
+      }
+
+      .bracket.tl {
+        top: 4px;
+        left: 4px;
+        border-top: 1px solid;
+        border-left: 1px solid;
+      }
+
+      .bracket.br {
+        bottom: 4px;
+        right: 4px;
+        border-bottom: 1px solid;
+        border-right: 1px solid;
+      }
+
+      /* 再生状態で枠の温度を変える */
+      body[data-state="paused"] .panel {
+        border-color: rgba(var(--theme-500), 0.28);
+      }
+
+      body[data-state="empty"] .panel {
+        border-color: rgba(var(--theme-500), 0.18);
+      }
+
+      body[data-state="paused"] .hairline,
+      body[data-state="empty"] .hairline {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(var(--theme-500), 0.22),
+          transparent
+        );
+      }
+
+      body[data-state="playing"] .hairline {
+        animation: sweep 4s linear infinite;
+      }
+
+      @keyframes sweep {
+        from {
+          background-position: 200% 0;
+        }
+        to {
+          background-position: -200% 0;
+        }
+      }
+
+      /* ── 閉じる ────────────────────────────────────────── */
+      .close {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        z-index: 2;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s;
+        width: 20px;
+        height: 20px;
+        background: transparent;
+        border: none;
+        color: rgba(var(--theme-500), 0.55);
+        cursor: pointer;
         -webkit-app-region: no-drag;
-        z-index: 100;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease;
       }
 
-      .close-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+      /* ヒットエリアを 28x28 に拡張（トランスポートには重ねない） */
+      .close::before {
+        content: "";
+        position: absolute;
+        inset: -4px;
       }
 
-      .close-btn svg {
-        width: 16px;
-        height: 16px;
+      .close:hover {
+        background: #dc2626;
+        color: #fff;
       }
 
-      /* アルバムアート */
-      .album-art {
+      .close svg {
+        position: relative;
+        width: 12px;
+        height: 12px;
+      }
+
+      /* ── アルバムアート ───────────────────────────────── */
+      .art {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 56px;
         width: 56px;
         height: 56px;
-        border-radius: 8px;
         overflow: hidden;
-        flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        background: linear-gradient(135deg, #7c3aed, #6d28d9);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: var(--surface-deep);
+        border: 1px solid rgba(var(--theme-500), 0.2);
       }
 
-      .album-art img {
+      .art img {
+        display: block;
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
 
-      .album-art .placeholder {
-        color: rgba(255, 255, 255, 0.6);
+      .art img[hidden],
+      .art .ph[hidden] {
+        display: none;
       }
 
-      /* 曲情報 */
-      .song-info {
-        flex: 1;
+      .art .ph {
+        color: rgba(var(--theme-500), 0.6);
+      }
+
+      body[data-state="empty"] .art {
+        border-color: rgba(var(--theme-500), 0.12);
+      }
+
+      /* ── 曲情報（計器表示） ───────────────────────────── */
+      .meta {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        flex: 1 1 auto;
         min-width: 0;
-        margin: 0 12px;
-        -webkit-app-region: no-drag;
       }
 
-      .song-title {
-        font-size: 13px;
-        font-weight: 600;
-        white-space: nowrap;
+      /* タイトル: 幅に収まらない場合だけ等速で流す（アプリ本体の ScrollingText と同じ挙動） */
+      .title {
         overflow: hidden;
+        color: rgb(var(--theme-300));
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
         text-overflow: ellipsis;
-        margin-bottom: 2px;
+        white-space: nowrap;
+        text-shadow: 0 0 8px rgba(var(--theme-500), 0.35);
       }
 
-      .song-artist {
+      /* マーキー: 同じテキストを2つ並べ、その間隔ぶん動かすと継ぎ目なくループする */
+      .title .track {
+        display: inline-flex;
+        gap: var(--marquee-gap, 28px);
+        will-change: transform;
+        animation: marquee var(--marquee-duration, 10s) linear infinite;
+        animation-delay: var(--marquee-delay, 1s);
+      }
+
+      .title .track > span {
+        display: block;
+      }
+
+      /* 読みたいときに読めるよう、ホバー中は止める */
+      .title:hover .track {
+        animation-play-state: paused;
+      }
+
+      @keyframes marquee {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(calc(-1 * var(--marquee-distance, 100%)));
+        }
+      }
+
+      .sub {
+        overflow: hidden;
+        /* 淡いテーマ色でも AA(4.5:1) を満たす濃さ */
+        color: rgba(var(--theme-300), 0.7);
         font-size: 11px;
-        color: #a0a0a0;
-        white-space: nowrap;
-        overflow: hidden;
+        line-height: 1.2;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
         text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      /* コントロール */
-      .controls {
+      /* 空状態は「光らない」ことで区別する（文字の可読性は落とさない） */
+      body[data-state="empty"] .title {
+        color: rgba(var(--theme-300), 0.65);
+        text-shadow: none;
+      }
+
+      /* ── トランスポート ───────────────────────────────── */
+      .transport {
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 3px;
+        flex: 0 0 auto;
         -webkit-app-region: no-drag;
-        position: relative;
-        z-index: 10;
       }
 
-      .control-btn {
-        width: 32px;
-        height: 32px;
-        border: none;
-        background: transparent;
-        color: #a0a0a0;
-        cursor: pointer;
-        border-radius: 50%;
+      .ctl {
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s;
-        position: relative;
-        z-index: 20;
+        width: 32px;
+        height: 32px;
+        background: transparent;
+        border: none;
+        color: rgba(var(--theme-500), 0.75);
+        cursor: pointer;
+        transition:
+          color 0.2s ease,
+          filter 0.2s ease;
       }
 
-      .control-btn:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+      .ctl:hover:not(:disabled) {
+        color: #fff;
+        filter: drop-shadow(0 0 8px rgba(var(--theme-500), 0.8));
       }
 
-      .control-btn:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
+      .ctl:disabled {
+        color: rgba(var(--theme-500), 0.3);
+        cursor: default;
       }
 
-      .control-btn svg {
-        width: 16px;
-        height: 16px;
-      }
-
-      .play-btn {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, #7c3aed, #6d28d9);
-        color: white;
-        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-      }
-
-      .play-btn:hover:not(:disabled) {
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        transform: scale(1.05);
-        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.5);
-      }
-
-      .play-btn svg {
+      .ctl svg {
         width: 18px;
         height: 18px;
       }
+
+      /* 再生ボタン: 二重ヘアライン枠 + ブラケット + 内円（アプリ本体と同型） */
+      .play {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        margin: 0 3px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+      }
+
+      .p-frame {
+        position: absolute;
+        border: 1px solid rgba(var(--theme-500), 0.2);
+        transition: border-color 0.2s ease;
+      }
+
+      .p-frame.outer {
+        inset: 0;
+      }
+
+      .p-frame.inner {
+        inset: 5px;
+        border-color: rgba(var(--theme-500), 0.4);
+      }
+
+      .p-corner {
+        position: absolute;
+        width: 7px;
+        height: 7px;
+        border-color: rgba(var(--theme-500), 0.5);
+        transition: border-color 0.2s ease;
+      }
+
+      .p-corner.tr {
+        top: 0;
+        right: 0;
+        border-top: 1px solid;
+        border-right: 1px solid;
+      }
+
+      .p-corner.bl {
+        bottom: 0;
+        left: 0;
+        border-bottom: 1px solid;
+        border-left: 1px solid;
+      }
+
+      .p-disc {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        color: #fff;
+        background: rgba(var(--theme-500), 0.2);
+        border: 1px solid rgba(var(--theme-500), 0.6);
+        box-shadow: 0 0 20px rgba(var(--theme-500), 0.3);
+        transition:
+          box-shadow 0.25s ease,
+          transform 0.25s ease;
+      }
+
+      .p-disc svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .play:hover:not(:disabled) .p-frame.outer {
+        border-color: rgba(var(--theme-500), 0.45);
+      }
+
+      .play:hover:not(:disabled) .p-frame.inner {
+        border-color: rgba(var(--theme-500), 0.85);
+      }
+
+      .play:hover:not(:disabled) .p-corner {
+        border-color: rgba(var(--theme-500), 0.9);
+      }
+
+      .play:hover:not(:disabled) .p-disc {
+        box-shadow: 0 0 30px rgba(var(--theme-500), 0.6);
+        transform: scale(1.08);
+      }
+
+      .play:disabled {
+        cursor: default;
+      }
+
+      .play:disabled .p-frame {
+        border-color: rgba(var(--theme-500), 0.12);
+      }
+
+      .play:disabled .p-corner {
+        border-color: rgba(var(--theme-500), 0.2);
+      }
+
+      .play:disabled .p-disc {
+        color: rgba(var(--theme-500), 0.4);
+        background: rgba(var(--theme-500), 0.08);
+        border-color: rgba(var(--theme-500), 0.25);
+        box-shadow: none;
+      }
+
+      /* ── フォーカス / モーション設定 ─────────────────── */
+      button:focus-visible {
+        outline: 2px solid rgba(var(--theme-300), 0.9);
+        outline-offset: 2px;
+      }
+
+      .swap {
+        animation: enter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(3px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        body[data-state="playing"] .hairline {
+          animation: none;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(var(--theme-500), 0.5),
+            transparent
+          );
+        }
+
+        /* タイトルは流さず、先頭を静止表示する（JS 側でも組み立てを中止する） */
+        .title .track {
+          animation: none;
+        }
+
+        .swap {
+          animation: none;
+        }
+      }
     </style>
   </head>
-  <body>
-    <div class="container">
-      <!-- ドラッグ可能な領域 -->
-      <div class="drag-region"></div>
+  <body data-state="empty">
+    <div class="panel">
+      <span class="hairline" aria-hidden="true"></span>
+      <span class="grid" aria-hidden="true"></span>
+      <span class="bracket tl" aria-hidden="true"></span>
+      <span class="bracket br" aria-hidden="true"></span>
 
-      <!-- 閉じるボタン -->
-      <button class="close-btn" id="closeBtn" title="閉じる">
+      <button class="close" id="closeBtn" type="button" aria-label="閉じる">
         <svg
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          aria-hidden="true"
         >
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>
       </button>
 
-      <!-- アルバムアート -->
-      <div class="album-art" id="albumArt">
+      <div class="art" id="art">
+        <img id="artImg" alt="" hidden />
         <svg
-          class="placeholder"
+          class="ph"
+          id="artPh"
           viewBox="0 0 24 24"
           fill="currentColor"
           width="24"
           height="24"
+          aria-hidden="true"
         >
-          <path d="M8 5v14l11-7z" />
+          <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" />
         </svg>
       </div>
 
-      <!-- 曲情報 -->
-      <div class="song-info">
-        <div class="song-title" id="songTitle">曲を選択してください</div>
-        <div class="song-artist" id="songArtist">アーティスト</div>
+      <div class="meta" role="status" aria-live="polite" aria-atomic="true">
+        <div class="title" id="songTitle">NO SIGNAL</div>
+        <div class="sub" id="songArtist">// AWAITING TRACK</div>
       </div>
 
-      <!-- コントロール -->
-      <div class="controls">
-        <button class="control-btn" id="prevBtn" disabled title="前の曲">
-          <svg viewBox="0 0 24 24" fill="currentColor">
+      <div class="transport">
+        <button class="ctl" id="prevBtn" type="button" aria-label="前の曲" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
           </svg>
         </button>
 
-        <button
-          class="control-btn play-btn"
-          id="playBtn"
-          disabled
-          title="再生/一時停止"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" id="playIcon">
-            <path d="M8 5v14l11-7z" />
-          </svg>
+        <button class="play" id="playBtn" type="button" aria-label="再生" disabled>
+          <span class="p-frame outer" aria-hidden="true"></span>
+          <span class="p-frame inner" aria-hidden="true"></span>
+          <span class="p-corner tr" aria-hidden="true"></span>
+          <span class="p-corner bl" aria-hidden="true"></span>
+          <span class="p-disc">
+            <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path id="iconPlay" d="M8 5v14l11-7z" />
+              <path id="iconPause" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" hidden />
+            </svg>
+          </span>
         </button>
 
-        <button class="control-btn" id="nextBtn" disabled title="次の曲">
-          <svg viewBox="0 0 24 24" fill="currentColor">
+        <button class="ctl" id="nextBtn" type="button" aria-label="次の曲" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
           </svg>
         </button>
@@ -246,63 +556,178 @@
     <script>
       // DOM要素
       const closeBtn = document.getElementById("closeBtn");
-      const albumArt = document.getElementById("albumArt");
+      const art = document.getElementById("art");
+      const artImg = document.getElementById("artImg");
+      const artPh = document.getElementById("artPh");
+      const meta = document.querySelector(".meta");
       const songTitle = document.getElementById("songTitle");
       const songArtist = document.getElementById("songArtist");
       const prevBtn = document.getElementById("prevBtn");
       const playBtn = document.getElementById("playBtn");
       const nextBtn = document.getElementById("nextBtn");
-      const playIcon = document.getElementById("playIcon");
+      const iconPlay = document.getElementById("iconPlay");
+      const iconPause = document.getElementById("iconPause");
 
-      // 再生中かどうか
-      let isPlaying = false;
-      let hasSong = false;
+      const transport = [prevBtn, playBtn, nextBtn];
+      let currentSongId = null;
+      let currentTitleText = null;
 
-      // アイコンSVG
-      const playIconPath = '<path d="M8 5v14l11-7z"/>';
-      const pauseIconPath = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+      // マーキー設定（等速・px/秒）
+      const MARQUEE_SPEED = 40;
+      const MARQUEE_GAP = 28;
+      const MARQUEE_DELAY = 1;
 
-      // 状態を更新
-      function updateState(state) {
-        if (state.song) {
-          hasSong = true;
-          songTitle.textContent = state.song.title || "不明なタイトル";
-          songArtist.textContent = state.song.author || "不明なアーティスト";
+      const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-          // アルバムアート更新
-          let imgPath = state.song.image_path || "";
-          if (imgPath.startsWith("file://") || /^[a-zA-Z]:\\/.test(imgPath)) {
-            imgPath = ""; // ローカルパスはセキュリティエラーになるため無視
-          }
+      /** テーマ（--theme-*）をアプリ本体のカラースキームに合わせる */
+      function applyTheme(theme) {
+        const style = document.documentElement.style;
+        Object.keys(theme).forEach((key) => {
+          // theme300 -> --theme-300
+          const cssVar = key.replace(/^theme(\d+)$/, "theme-$1");
+          style.setProperty(`--${cssVar}`, theme[key]);
+        });
+      }
 
-          if (imgPath) {
-            albumArt.innerHTML = `<img src="${imgPath}" alt="Album Art" onerror="this.parentElement.innerHTML='<svg class=\\'placeholder\\' viewBox=\\'0 0 24 24\\' fill=\\'currentColor\\' width=\\'24\\' height=\\'24\\'><path d=\\'M8 5v14l11-7z\\'/></svg>'">`;
-          } else {
-            albumArt.innerHTML =
-              '<svg class="placeholder" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M8 5v14l11-7z"/></svg>';
-          }
+      /**
+       * タイトルを描画する。幅に収まらない場合だけ、等速で流れるマーキーにする。
+       * （アプリ本体の ScrollingText と同じ「長いときだけ動かす」挙動）
+       */
+      function renderTitle(text, options = {}) {
+        // 曲や再生状態の更新ごとに呼ばれるため、変化がなければ作り直さない
+        if (text === currentTitleText && !options.force) return;
 
-          // ボタンを有効化
-          prevBtn.disabled = false;
-          playBtn.disabled = false;
-          nextBtn.disabled = false;
-        } else {
-          hasSong = false;
-          songTitle.textContent = "曲を選択してください";
-          songArtist.textContent = "アーティスト";
-          albumArt.innerHTML =
-            '<svg class="placeholder" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M8 5v14l11-7z"/></svg>';
+        // まず素のテキストに戻して幅を測る（収まる場合はこのまま）
+        songTitle.textContent = text;
 
-          // ボタンを無効化
-          prevBtn.disabled = true;
-          playBtn.disabled = true;
-          nextBtn.disabled = true;
+        // 動かさない設定では、はみ出しは省略記号に任せる
+        if (motionQuery.matches) {
+          currentTitleText = text;
+          return;
         }
 
-        // 再生状態を更新
-        isPlaying = state.isPlaying;
-        playIcon.innerHTML = isPlaying ? pauseIconPath : playIconPath;
+        const textWidth = songTitle.scrollWidth;
+        const visibleWidth = songTitle.clientWidth;
+
+        // レイアウト前で測れない場合は、次のフレームで測り直す
+        if (visibleWidth <= 0) {
+          requestAnimationFrame(() => renderTitle(text, { force: true }));
+          return;
+        }
+
+        if (textWidth <= visibleWidth) {
+          currentTitleText = text;
+          return;
+        }
+
+        // 同じテキストを2つ並べ、間隔ぶん動かすと継ぎ目なくループする
+        const distance = textWidth + MARQUEE_GAP;
+        const track = document.createElement("span");
+        track.className = "track";
+        for (let i = 0; i < 2; i++) {
+          const copy = document.createElement("span");
+          copy.textContent = text;
+          if (i > 0) copy.setAttribute("aria-hidden", "true");
+          track.appendChild(copy);
+        }
+
+        songTitle.textContent = "";
+        songTitle.appendChild(track);
+        songTitle.style.setProperty("--marquee-gap", `${MARQUEE_GAP}px`);
+        songTitle.style.setProperty("--marquee-delay", `${MARQUEE_DELAY}s`);
+        songTitle.style.setProperty("--marquee-distance", `${distance}px`);
+        songTitle.style.setProperty(
+          "--marquee-duration",
+          `${(distance / MARQUEE_SPEED).toFixed(2)}s`,
+        );
+
+        currentTitleText = text;
       }
+
+      /** ローカルファイルは読み込めないため空扱いにする */
+      function toDisplayableImage(imagePath) {
+        const path = imagePath || "";
+        if (path.startsWith("file://") || /^[a-zA-Z]:[\\/]/.test(path)) {
+          return "";
+        }
+        return path;
+      }
+
+      function setArt(imagePath) {
+        if (imagePath) {
+          artImg.src = imagePath;
+          artImg.hidden = false;
+          artPh.hidden = true;
+        } else {
+          artImg.removeAttribute("src");
+          artImg.hidden = true;
+          artPh.hidden = false;
+        }
+      }
+
+      /** 曲が切り替わったときだけ入場アニメーションをやり直す */
+      function replayEnter(el) {
+        el.classList.remove("swap");
+        void el.offsetWidth;
+        el.classList.add("swap");
+      }
+
+      function updateState(state) {
+        if (state.theme) {
+          applyTheme(state.theme);
+        }
+
+        const song = state.song;
+        const isPlaying = Boolean(state.isPlaying);
+
+        document.body.dataset.state = !song
+          ? "empty"
+          : isPlaying
+            ? "playing"
+            : "paused";
+
+        if (song) {
+          const songId = song.id || "";
+          const isNewSong = songId !== currentSongId;
+          currentSongId = songId;
+
+          renderTitle(song.title || "UNKNOWN TITLE");
+          songArtist.textContent = `// AUTH: ${song.author || "UNKNOWN ARTIST"}`;
+          setArt(toDisplayableImage(song.image_path));
+
+          if (isNewSong) {
+            replayEnter(art);
+            replayEnter(meta);
+          }
+        } else {
+          currentSongId = null;
+          renderTitle("NO SIGNAL");
+          songArtist.textContent = "// AWAITING TRACK";
+          setArt("");
+        }
+
+        transport.forEach((btn) => {
+          btn.disabled = !song;
+        });
+
+        iconPlay.hidden = isPlaying;
+        iconPause.hidden = !isPlaying;
+        playBtn.setAttribute("aria-label", isPlaying ? "一時停止" : "再生");
+      }
+
+      // OSの「視差効果を減らす」が切り替わったら、流す/止めるを即座に反映する
+      motionQuery.addEventListener("change", () => {
+        if (currentTitleText !== null) {
+          renderTitle(currentTitleText, { force: true });
+        }
+      });
+
+      // 画像の読み込みに失敗したらプレースホルダに戻す
+      artImg.addEventListener("error", () => {
+        artImg.removeAttribute("src");
+        artImg.hidden = true;
+        artPh.hidden = false;
+      });
 
       // イベントリスナー
       closeBtn.addEventListener("click", () => {
@@ -312,21 +737,21 @@
       });
 
       prevBtn.addEventListener("click", async () => {
-        if (!hasSong) return;
+        if (prevBtn.disabled) return;
         if (window.electron && window.electron.miniPlayer) {
           await window.electron.miniPlayer.control("previous");
         }
       });
 
       playBtn.addEventListener("click", async () => {
-        if (!hasSong) return;
+        if (playBtn.disabled) return;
         if (window.electron && window.electron.miniPlayer) {
           await window.electron.miniPlayer.control("play-pause");
         }
       });
 
       nextBtn.addEventListener("click", async () => {
-        if (!hasSong) return;
+        if (nextBtn.disabled) return;
         if (window.electron && window.electron.miniPlayer) {
           await window.electron.miniPlayer.control("next");
         }

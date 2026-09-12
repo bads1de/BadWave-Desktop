@@ -88,7 +88,21 @@ export interface SongDownloadPayload {
 }
 
 /**
+ * ミニプレイヤーに渡すカラースキーム（アプリの --theme-* 変数と同じ RGB 文字列）
+ */
+export interface MiniPlayerTheme {
+  theme300: string;
+  theme400: string;
+  theme500: string;
+  theme600: string;
+  theme900: string;
+}
+
+/**
  * ミニプレイヤーに送受信する再生状態（main / preload / renderer で共有）
+ *
+ * `theme` はミニプレイヤーが別オリジン（file://）で動作し localStorage の
+ * カラースキームを読めないため、状態と一緒に渡して外観を同期させる。
  */
 export interface MiniPlayerState {
   song: {
@@ -98,6 +112,7 @@ export interface MiniPlayerState {
     image_path: string | null;
   } | null;
   isPlaying: boolean;
+  theme?: MiniPlayerTheme;
 }
 
 /**

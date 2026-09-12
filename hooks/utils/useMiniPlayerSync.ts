@@ -3,10 +3,19 @@ import { Song } from "@/types";
 import { CHANNELS } from "@/electron/channels";
 import { miniPlayer, isElectron } from "@/libs/electron";
 import { isLocalFilePath } from "@/libs/songUtils";
+import useColorSchemeStore from "@/hooks/stores/useColorSchemeStore";
+import type { MiniPlayerTheme } from "@/types/local";
 
 interface UseMiniPlayerSyncProps {
   song: Song | null;
   isPlaying: boolean;
+}
+
+/** ミニプレイヤーは別オリジンで動くため、テーマは状態に同梱して渡す */
+function getTheme(): MiniPlayerTheme {
+  const { theme300, theme400, theme500, theme600, theme900 } =
+    useColorSchemeStore.getState().getColorScheme().colors;
+  return { theme300, theme400, theme500, theme600, theme900 };
 }
 
 /**
@@ -16,6 +25,7 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
   // 最新の状態を保持するためのref
   const songRef = useRef(song);
   const isPlayingRef = useRef(isPlaying);
+  const colorSchemeId = useColorSchemeStore((s) => s.colorSchemeId);
 
   // refを更新
   useEffect(() => {
@@ -42,6 +52,7 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
           }
         : null,
       isPlaying: currentIsPlaying,
+      theme: getTheme(),
     });
   }, []);
 
@@ -65,11 +76,11 @@ export function useMiniPlayerSync({ song, isPlaying }: UseMiniPlayerSyncProps) {
     };
   }, [sendState]);
 
-  // song または isPlaying が変更されたときにミニプレイヤーに同期
+  // song / isPlaying / テーマが変更されたときにミニプレイヤーに同期
   useEffect(() => {
     if (!isElectron()) return;
 
     // ミニプレイヤーに状態を同期（メインプロセス側でウィンドウがなければ無視される）
     sendState();
-  }, [song, isPlaying, sendState]);
+  }, [song, isPlaying, colorSchemeId, sendState]);
 }
