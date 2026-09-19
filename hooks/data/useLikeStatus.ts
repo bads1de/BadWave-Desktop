@@ -7,6 +7,7 @@ import {
   cache as electronCache,
   isNetworkError,
 } from "@/libs/electron";
+import { isLocalSongId } from "@/libs/songUtils";
 
 /** 曲のいいね状態を取得する (ローカルファースト) */
 const useLikeStatus = (songId: string, userId?: string) => {
@@ -55,7 +56,7 @@ const useLikeStatus = (songId: string, userId?: string) => {
     enabled:
       (isElectron() || isOnline) &&
       !!userId &&
-      !(typeof songId === "string" && songId.startsWith("local_")),
+      !isLocalSongId(songId),
   });
 
   return {

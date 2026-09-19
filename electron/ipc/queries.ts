@@ -10,15 +10,33 @@ import {
   spotlights,
 } from "../db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
-import { mapDbSongToResponse, mapDbPlaylistToResponse, createUnknownSongFallback, normalizeId } from "../utils";
+import {
+  mapDbSongToResponse,
+  mapDbPlaylistToResponse,
+  mapDbSpotlightToResponse,
+  createUnknownSongFallback,
+  normalizeId,
+} from "../utils";
 import { SectionItem } from "../../types/local";
 import { getErrorMessage } from "../lib/error";
+import {
+  validateInput,
+  idSchema,
+  songIdSchema,
+  sectionQuerySchema,
+  paginationSchema,
+} from "../lib/ipc-validate";
 
 export function setupQueryHandlers() {
   const db = getDb();
 
-  ipcMain.handle(CHANNELS.GET_CACHED_LIKED_SONGS, async (_, userId: string) => {
+  ipcMain.handle(CHANNELS.GET_CACHED_LIKED_SONGS, async (_, rawUserId: unknown) => {
     try {
+      const userId = validateInput(
+        idSchema,
+        rawUserId,
+        CHANNELS.GET_CACHED_LIKED_SONGS,
+      );
       const results = await db
         .select()
         .from(likedSongs)
@@ -49,121 +67,131 @@ export function setupQueryHandlers() {
     }
   });
 
-  ipcMain.handle(CHANNELS.GET_CACHED_PLAYLISTS, async (_, userId: string) => {
+  ipcMain.handle(CHANNELS.GET_CACHED_PLAYLISTS, async (_, rawUserId: unknown) => {
     try {
+      const userId = validateInput(
+        idSchema,
+        rawUserId,
+        CHANNELS.GET_CACHED_PLAYLISTS,
+      );
       const data = await db.query.playlists.findMany({
         where: eq(playlists.userId, String(userId)),
       });
       return data.map(mapDbPlaylistToResponse);
     } catch (error) {
-      return [];
-    }
-  });
-
-  ipcMain.handle(CHANNELS.GET_CACHED_PLAYLIST_SONGS, async (_, playlistId: string) => {
-    try {
-      const results = await db
-        .select()
-        .from(playlistSongs)
-        .leftJoin(
-          songs,
-          sql`CAST(${playlistSongs.songId} AS TEXT) = CAST(${songs.id} AS TEXT)`
-        )
-        .where(eq(playlistSongs.playlistId, normalizeId(playlistId)));
-
-      return results.map((row) => {
-        const playlist_songs = row.playlist_songs;
-        const song = row.songs;
-        if (!song) {
-          return createUnknownSongFallback(
-            playlist_songs.songId,
-            "",
-            playlist_songs.addedAt,
-          );
-        }
-        return mapDbSongToResponse(song, {
-          created_at: playlist_songs.addedAt,
-        });
-      });
-    } catch (error) {
+      console.error("[IPC] get-cached-playlists error:", error);
       return [];
     }
   });
 
   ipcMain.handle(
-    CHANNELS.GET_SECTION_DATA,
-    async (
-      _,
-      { key, type }: { key: string; type: "songs" | "spotlights" | "playlists" }
-    ) => {
+    CHANNELS.GET_CACHED_PLAYLIST_SONGS,
+    async (_, rawPlaylistId: unknown) => {
       try {
-        const cache = await db.query.sectionCache.findFirst({
-          where: eq(sectionCache.key, key),
-        });
+        const playlistId = validateInput(
+          idSchema,
+          rawPlaylistId,
+          CHANNELS.GET_CACHED_PLAYLIST_SONGS,
+        );
+        const results = await db
+          .select()
+          .from(playlistSongs)
+          .leftJoin(
+            songs,
+            sql`CAST(${playlistSongs.songId} AS TEXT) = CAST(${songs.id} AS TEXT)`
+          )
+          .where(eq(playlistSongs.playlistId, normalizeId(playlistId)));
 
-        if (!cache || !cache.itemIds) {
-          return [];
-        }
-
-        const itemIds = cache.itemIds as unknown as string[];
-        if (itemIds.length === 0) return [];
-
-        let results: Record<string, unknown>[] = [];
-        let idMap = new Map<string, SectionItem>();
-
-        if (type === "spotlights") {
-          results = await db
-            .select()
-            .from(spotlights)
-            .where(inArray(spotlights.id, itemIds));
-
-          results.forEach((item) =>
-            idMap.set(item.id as string, {
-              id: item.id as string,
-              title: item.title as string,
-              author: item.author as string,
-              description: item.description as string | null,
-              genre: item.genre as string | null,
-              video_path: item.originalVideoPath as string | null,
-              thumbnail_path: item.originalThumbnailPath as string | null,
-              local_video_path: item.videoPath as string | null,
-              local_thumbnail_path: item.thumbnailPath as string | null,
-              created_at: item.createdAt as string | null,
-            })
-          );
-        } else if (type === "playlists") {
-          const rows = await db
-            .select()
-            .from(playlists)
-            .where(inArray(playlists.id, itemIds));
-
-          rows.forEach((p) => idMap.set(p.id, mapDbPlaylistToResponse(p)));
-        } else {
-          results = await db
-            .select()
-            .from(songs)
-            .where(inArray(songs.id, itemIds));
-
-          results.forEach((s) => {
-            const song = mapDbSongToResponse(s as unknown as import("../../types/local").DbSongRow);
-            idMap.set(s.id as string, song as unknown as SectionItem);
+        return results.map((row) => {
+          const playlist_songs = row.playlist_songs;
+          const song = row.songs;
+          if (!song) {
+            return createUnknownSongFallback(
+              playlist_songs.songId,
+              "",
+              playlist_songs.addedAt,
+            );
+          }
+          return mapDbSongToResponse(song, {
+            created_at: playlist_songs.addedAt,
           });
-        }
-
-        return itemIds
-          .map((id) => idMap.get(id))
-          .filter((item) => item !== undefined);
+        });
       } catch (error) {
-        console.error(`[IPC] get-section-data(${key}) error:`, error);
+        console.error("[IPC] get-cached-playlist-songs error:", error);
         return [];
       }
     }
   );
 
+  ipcMain.handle(CHANNELS.GET_SECTION_DATA, async (_, rawInput: unknown) => {
+    let key = "";
+    try {
+      const input = validateInput(
+        sectionQuerySchema,
+        rawInput,
+        CHANNELS.GET_SECTION_DATA,
+      );
+      key = input.key;
+      const { type } = input;
+
+      const cache = await db.query.sectionCache.findFirst({
+        where: eq(sectionCache.key, key),
+      });
+
+      const itemIds = cache?.itemIds;
+      if (!itemIds || itemIds.length === 0) {
+        return [];
+      }
+
+      const idMap = new Map<string, SectionItem>();
+
+      if (type === "spotlights") {
+        const rows = await db
+          .select()
+          .from(spotlights)
+          .where(inArray(spotlights.id, itemIds));
+
+        for (const row of rows) {
+          idMap.set(row.id, mapDbSpotlightToResponse(row));
+        }
+      } else if (type === "playlists") {
+        const rows = await db
+          .select()
+          .from(playlists)
+          .where(inArray(playlists.id, itemIds));
+
+        for (const row of rows) {
+          idMap.set(row.id, mapDbPlaylistToResponse(row));
+        }
+      } else {
+        const rows = await db
+          .select()
+          .from(songs)
+          .where(inArray(songs.id, itemIds));
+
+        for (const row of rows) {
+          idMap.set(row.id, mapDbSongToResponse(row));
+        }
+      }
+
+      return itemIds
+        .map((id) => idMap.get(id))
+        .filter((item): item is SectionItem => item !== undefined);
+    } catch (error) {
+      console.error(`[IPC] get-section-data(${key}) error:`, error);
+      return [];
+    }
+  });
+
   ipcMain.handle(
     CHANNELS.GET_SONGS_PAGINATED,
-    async (_, { offset, limit }: { offset: number; limit: number }) => {
+    async (_, rawInput: unknown) => {
       try {
+        const { offset, limit } = validateInput(
+          paginationSchema,
+          rawInput,
+          CHANNELS.GET_SONGS_PAGINATED,
+        );
         const results = await db
           .select()
           .from(songs)
@@ -205,12 +233,18 @@ export function setupQueryHandlers() {
         .limit(10);
       return { liked, allSongs, joined };
     } catch (error: unknown) {
+      console.error("[IPC] debug-dump-db error:", error);
       return { error: getErrorMessage(error) };
     }
   });
 
-  ipcMain.handle(CHANNELS.GET_SONG_BY_ID, async (_, songId: string) => {
+  ipcMain.handle(CHANNELS.GET_SONG_BY_ID, async (_, rawSongId: unknown) => {
     try {
+      const songId = validateInput(
+        songIdSchema,
+        rawSongId,
+        CHANNELS.GET_SONG_BY_ID,
+      );
       const normalizedId = normalizeId(songId);
       const song = await db.query.songs.findFirst({
         where: eq(songs.id, normalizedId),
@@ -222,26 +256,34 @@ export function setupQueryHandlers() {
 
       return mapDbSongToResponse(song);
     } catch (error) {
-      console.error(`[IPC] get-song-by-id(${songId}) error:`, error);
+      console.error(`[IPC] get-song-by-id error:`, error);
       return null;
     }
   });
 
-  ipcMain.handle(CHANNELS.GET_PLAYLIST_BY_ID, async (_, playlistId: string) => {
-    try {
-      const normalizedId = normalizeId(playlistId);
-      const playlist = await db.query.playlists.findFirst({
-        where: eq(playlists.id, normalizedId),
-      });
+  ipcMain.handle(
+    CHANNELS.GET_PLAYLIST_BY_ID,
+    async (_, rawPlaylistId: unknown) => {
+      try {
+        const playlistId = validateInput(
+          idSchema,
+          rawPlaylistId,
+          CHANNELS.GET_PLAYLIST_BY_ID,
+        );
+        const normalizedId = normalizeId(playlistId);
+        const playlist = await db.query.playlists.findFirst({
+          where: eq(playlists.id, normalizedId),
+        });
 
-      if (!playlist) {
+        if (!playlist) {
+          return null;
+        }
+
+        return mapDbPlaylistToResponse(playlist);
+      } catch (error) {
+        console.error(`[IPC] get-playlist-by-id error:`, error);
         return null;
       }
-
-      return mapDbPlaylistToResponse(playlist);
-    } catch (error) {
-      console.error(`[IPC] get-playlist-by-id(${playlistId}) error:`, error);
-      return null;
     }
-  });
+  );
 }

@@ -1,7 +1,7 @@
 import { Song } from "@/types";
 import { createClient } from "@/libs/supabase/client";
 import { electronAPI, isNetworkError } from "@/libs/electron/index";
-import { toFileUrl } from "@/libs/songUtils";
+import { toFileUrl, isLocalSongId } from "@/libs/songUtils";
 import {
   useQuery,
   keepPreviousData,
@@ -36,7 +36,7 @@ const useGetSongById = (id?: string | number) => {
       }
 
       // ローカル曲のIDの場合は処理をスキップ
-      if (normalizedId.startsWith("local_")) {
+      if (isLocalSongId(normalizedId)) {
         return null;
       }
 
@@ -89,7 +89,7 @@ const useGetSongById = (id?: string | number) => {
     // IDが有効でローカル曲でない場合に有効化
     // オフライン時もクエリは有効だが、networkMode: offlineFirst により
     // キャッシュがあればそれを使い、なければ pause される
-    enabled: !!normalizedId && !normalizedId.startsWith("local_"),
+    enabled: !!normalizedId && !isLocalSongId(normalizedId),
     placeholderData: keepPreviousData,
     retry: false,
   });

@@ -1,6 +1,16 @@
 import { Song, SongWithRecommendation } from "@/types";
 import { ALLOWED_MEDIA_EXTENSIONS } from "@/constants";
 import { normalizeIds } from "@/libs/utils/normalizeIds";
+import { isLocalSongId } from "@/electron/lib/song-id";
+
+// ローカル曲ID コーデック (接頭辞 / 判定 / 生成 / 復元) は
+// electron/lib/song-id.ts を唯一のソースとする。ここでは再エクスポートのみ行う。
+export {
+  LOCAL_SONG_ID_PREFIX,
+  isLocalSongId,
+  generateLocalSongId,
+  extractFilePathFromLocalId,
+} from "@/electron/lib/song-id";
 
 /**
  * 曲がローカルファイルかどうかを判定する
@@ -19,7 +29,7 @@ export function isLocalSong(song: Song | null | undefined): boolean {
 
   // IDが'local_'で始まる場合は本当のローカルファイル
   // キャッシュされたオンライン曲はオリジナルのIDを保持しているため、falseを返す
-  return typeof song.id === "string" && song.id.startsWith("local_");
+  return isLocalSongId(song.id);
 }
 
 /**
@@ -114,46 +124,6 @@ export function toFileUrl(filePath: string): string {
   }
 
   return `badwave://file/${encodeURIComponent(filePath)}`;
-}
-
-/**
- * ローカル曲用のIDを生成する
- *
- * パスを base64url にエンコードする。標準 base64 の `+` `/` `=` は
- * IPC バリデーションやファイル名に不向きなため URL-safe な文字のみ使う。
- */
-export function generateLocalSongId(filePath: string): string {
-  const encoded = btoa(encodeURIComponent(filePath))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  return `local_${encoded}`;
-}
-
-/**
- * ローカル曲のIDからファイルパスを復元する
- *
- * @param localId - ローカル曲のID
- * @returns ファイルパス
- */
-export function extractFilePathFromLocalId(localId: string): string | null {
-  if (!localId.startsWith("local_")) {
-    return null;
-  }
-
-  try {
-    let encoded = localId.substring(6); // 'local_'を除去
-    // base64url → base64
-    encoded = encoded.replace(/-/g, "+").replace(/_/g, "/");
-    while (encoded.length % 4 !== 0) {
-      encoded += "=";
-    }
-    const decoded = atob(encoded);
-    return decodeURIComponent(decoded);
-  } catch (error) {
-    console.error("Failed to decode local song ID:", error);
-    return null;
-  }
 }
 
 /**

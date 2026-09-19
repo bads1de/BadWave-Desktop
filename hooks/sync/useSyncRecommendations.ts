@@ -37,9 +37,12 @@ export const useSyncRecommendations = (
     // 1. メタデータを保存
     await electronAPI.cache.syncSongsMetadata(songs);
 
-    // 2. セクション順序を保存
+    // 2. セクション順序を保存（ワイヤ上は id のみ参照されるため Song から射影する）
     const cacheKey = `home_recommendations_${user!.id}`;
-    await electronAPI.cache.syncSection({ key: cacheKey, data: songs as unknown as import("@/types/local").SectionItem[] });
+    await electronAPI.cache.syncSection({
+      key: cacheKey,
+      data: songs.map((song) => ({ id: song.id, title: song.title })),
+    });
 
     // キャッシュ無効化
     await queryClient.invalidateQueries({

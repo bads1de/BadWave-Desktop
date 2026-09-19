@@ -7,6 +7,7 @@ import useGetPlaylists from "@/hooks/data/useGetPlaylists";
 import React, { memo, useMemo } from "react";
 import PlayerContent from "./PlayerContent";
 import LyricsModal from "../modals/LyricsModal/LyricsModal";
+import { isLocalSongId } from "@/libs/songUtils";
 
 const Player = () => {
   const pathname = usePathname();
@@ -24,7 +25,7 @@ const Player = () => {
 
   // 2. ローカルストアになく、かつIDが local_ で始まらない場合のみ Supabase から取得
   const isActuallyLocalId = useMemo(() => {
-    return typeof activeId === "string" && activeId.startsWith("local_");
+    return isLocalSongId(activeId);
   }, [activeId]);
 
   const { song: onlineSong } = useGetSongById(

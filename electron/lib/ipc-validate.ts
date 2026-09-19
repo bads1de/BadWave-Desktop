@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LOCAL_SONG_ID_PREFIX } from "./song-id";
 
 /**
  * 共通ZodスキーマとIPC入力検証ヘルパー
@@ -33,7 +34,10 @@ export const localIdSchema = z
   .string()
   .min(1, "ID cannot be empty")
   .max(MAX_LOCAL_ID_LENGTH, `Local ID must be ${MAX_LOCAL_ID_LENGTH} chars or less`)
-  .regex(/^local_[A-Za-z0-9_\-]+$/, "Local ID contains invalid characters");
+  .regex(
+    new RegExp(`^${LOCAL_SONG_ID_PREFIX}[A-Za-z0-9_\\-]+$`),
+    "Local ID contains invalid characters",
+  );
 
 /**
  * 楽曲ID: リモートUUID / ローカル埋め込みID の両方を受け付ける
@@ -200,6 +204,151 @@ export const transcribeInputSchema = z
       lyricsText: lyricsTextSchema,
     }),
   );
+
+/**
+ * 同期系ID: Supabase は数値IDを返すことがあるため string / number 両方を受け付ける
+ */
+const syncIdSchema = z.union([z.string().min(1).max(128), z.number()]);
+
+/** null 許容の任意文字列 */
+const nullableString = (max: number) =>
+  z.string().max(max).nullable().optional();
+
+/**
+ * 曲の同期ペイロード (SongForSync)
+ * mapper が参照しない追加フィールドはそのまま通す (passthrough)
+ */
+export const songForSyncSchema = z
+  .object({
+    id: syncIdSchema,
+    user_id: z.union([z.string().max(128), z.number()]).nullable().optional(),
+    title: z.string().max(1000).nullable().optional(),
+    author: z.string().max(1000).nullable().optional(),
+    song_path: nullableString(MAX_URL_LENGTH),
+    image_path: nullableString(MAX_URL_LENGTH),
+    video_path: nullableString(MAX_URL_LENGTH),
+    genre: nullableString(200),
+    count: z.union([z.string(), z.number()]).nullable().optional(),
+    like_count: z.union([z.string(), z.number()]).nullable().optional(),
+    created_at: z.string().max(200).nullable().optional(),
+    duration: z.union([z.number(), z.string()]).nullable().optional(),
+    lyrics: z.string().max(MAX_LYRICS_LENGTH).nullable().optional(),
+    is_downloaded: z.boolean().optional(),
+    local_song_path: nullableString(4096),
+    local_image_path: nullableString(4096),
+  })
+  .passthrough();
+
+/** 曲同期の配列 (1回の invoke の最大件数を制限) */
+export const songsForSyncSchema = z.array(songForSyncSchema).max(10000);
+
+/** プレイリストの同期ペイロード (PlaylistForSync) */
+export const playlistForSyncSchema = z
+  .object({
+    id: syncIdSchema,
+    title: z.string().max(1000).nullable().optional(),
+    image_path: nullableString(MAX_URL_LENGTH),
+    is_public: z.boolean().nullable().optional(),
+    created_at: z.string().max(200).nullable().optional(),
+    createdAt: z.string().max(200).nullable().optional(),
+    user_id: z.union([z.string().max(128), z.number()]).nullable().optional(),
+    user_name: z.string().max(500).nullable().optional(),
+  })
+  .passthrough();
+
+/** プレイリスト同期の配列 */
+export const playlistsForSyncSchema = z.array(playlistForSyncSchema).max(10000);
+
+/** スポットライトの同期ペイロード (SpotlightForSync) */
+export const spotlightForSyncSchema = z
+  .object({
+    id: syncIdSchema,
+    title: z.string().max(1000).nullable().optional(),
+    author: z.string().max(1000).nullable().optional(),
+    description: nullableString(10000),
+    genre: nullableString(200),
+    video_path: nullableString(MAX_URL_LENGTH),
+    thumbnail_path: nullableString(MAX_URL_LENGTH),
+    created_at: z.string().max(200).nullable().optional(),
+  })
+  .passthrough();
+
+/** スポットライト同期の配列 */
+export const spotlightsForSyncSchema = z
+  .array(spotlightForSyncSchema)
+  .max(10000);
+
+/** プレイリスト内の曲を同期するペイロード */
+export const playlistSongsSyncSchema = z.object({
+  playlistId: idSchema,
+  songs: songsForSyncSchema,
+});
+
+/** いいね曲を同期するペイロード */
+export const likedSongsSyncSchema = z.object({
+  userId: idSchema,
+  songs: songsForSyncSchema,
+});
+
+/** セクション順序を同期するペイロード ({id} の配列) */
+export const sectionSyncSchema = z.object({
+  key: z.string().min(1).max(200),
+  data: z
+    .array(z.object({ id: syncIdSchema }).passthrough())
+    .max(10000),
+});
+
+/** セクションデータ取得のペイロード */
+export const sectionQuerySchema = z.object({
+  key: z.string().min(1).max(200),
+  type: z.enum(["songs", "spotlights", "playlists"]),
+});
+
+/** ページネーション (offset/limit) */
+export const paginationSchema = z.object({
+  offset: z.number().int().nonnegative().max(1_000_000),
+  limit: z.number().int().positive().max(1000),
+});
+
+/** ミニプレイヤーの再生状態 */
+export const miniPlayerStateSchema = z.object({
+  song: z
+    .object({
+      id: z.string().min(1).max(MAX_LOCAL_ID_LENGTH),
+      title: z.string().max(1000),
+      author: z.string().max(1000),
+      image_path: z.string().max(MAX_URL_LENGTH).nullable(),
+    })
+    .nullable(),
+  isPlaying: z.boolean(),
+  theme: z
+    .object({
+      theme300: z.string().max(100),
+      theme400: z.string().max(100),
+      theme500: z.string().max(100),
+      theme600: z.string().max(100),
+      theme900: z.string().max(100),
+    })
+    .optional(),
+});
+
+/** ミニプレイヤーの操作アクション */
+export const miniPlayerControlSchema = z.enum(["play-pause", "next", "previous"]);
+
+/** Discord RPC のアクティビティ (DiscordRPC.Presence 相当) */
+export const discordActivitySchema = z
+  .object({
+    details: z.string().max(128).optional(),
+    state: z.string().max(128).optional(),
+    startTimestamp: z.number().optional(),
+    endTimestamp: z.number().optional(),
+    largeImageKey: z.string().max(256).optional(),
+    largeImageText: z.string().max(128).optional(),
+    smallImageKey: z.string().max(256).optional(),
+    smallImageText: z.string().max(128).optional(),
+    instance: z.boolean().optional(),
+  })
+  .passthrough();
 
 /**
  * 入力検証ヘルパー

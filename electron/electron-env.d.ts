@@ -189,7 +189,7 @@ export interface ElectronAPI {
   // 文字起こし
   transcribe: {
     // LRCファイルを生成
-    generateLrc: (audioPath: string, lyricsText: string) => Promise<{ status: string; lrc?: string; message?: string }>;
+    generateLrc: (audioPath: string, lyricsText: string) => Promise<{ success: boolean; lrc?: string; error?: string }>;
   };
 }
 

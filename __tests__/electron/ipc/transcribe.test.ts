@@ -61,8 +61,8 @@ describe("IPC: Transcribe", () => {
         "test lyrics",
       );
 
-      expect(result.status).toBe("error");
-      expect(result.message).toContain("Python実行環境が見つかりません");
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Python実行環境が見つかりません");
     });
 
     it("successfully returns LRC from python process", async () => {
@@ -103,7 +103,7 @@ describe("IPC: Transcribe", () => {
         "test lyrics",
       );
 
-      expect(result.status).toBe("success");
+      expect(result.success).toBe(true);
       expect(result.lrc).toBe("[00:00.00]Test LRC");
       expect(spawn).toHaveBeenCalled();
     });
@@ -139,18 +139,18 @@ describe("IPC: Transcribe", () => {
         "test lyrics",
       );
 
-      expect(result.status).toBe("error");
-      expect(result.message).toContain(
+      expect(result.success).toBe(false);
+      expect(result.error).toContain(
         "トランスクライブエンジンの実行に失敗しました",
       );
     });
 
     it("returns an error object (not a rejection) on invalid input", async () => {
       // 空文字列は audioPathSchema (min(1)) を満たさないためバリデーションエラーになる。
-      // 修正後は Promise が { status: "error", message } で resolve されること。
+      // Promise が { success: false, error } で resolve されること。
       const result = await invoke("transcribe:generate-lrc", "", "test lyrics");
-      expect(result.status).toBe("error");
-      expect(typeof result.message).toBe("string");
+      expect(result.success).toBe(false);
+      expect(typeof result.error).toBe("string");
     });
 
     it("throws error if audioPath contains path traversal", async () => {

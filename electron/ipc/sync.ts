@@ -19,6 +19,15 @@ import {
 } from "../utils/syncMapper";
 import { inArray, sql } from "drizzle-orm";
 import { getErrorMessage } from "../lib/error";
+import {
+  validateInput,
+  songsForSyncSchema,
+  playlistsForSyncSchema,
+  playlistSongsSyncSchema,
+  likedSongsSyncSchema,
+  spotlightsForSyncSchema,
+  sectionSyncSchema,
+} from "../lib/ipc-validate";
 import type {
   PlaylistForSync,
   SongForSync,
@@ -97,17 +106,29 @@ export function setupSyncHandlers() {
     return songsData.length;
   }
 
-  ipcMain.handle(CHANNELS.SYNC_SONGS_METADATA, async (_, data: SongForSync[]) => {
+  ipcMain.handle(CHANNELS.SYNC_SONGS_METADATA, async (_, rawData: unknown) => {
     try {
+      const data = validateInput(
+        songsForSyncSchema,
+        rawData,
+        CHANNELS.SYNC_SONGS_METADATA,
+      ) as SongForSync[];
       const count = internalSyncSongs(data);
       return { success: true, count };
     } catch (error: unknown) {
+      console.error("[Sync] Songs Metadata Error:", error);
       return { success: false, error: getErrorMessage(error) };
     }
   });
 
-  ipcMain.handle(CHANNELS.SYNC_PLAYLISTS, async (_, data: PlaylistForSync[]) => {
+  ipcMain.handle(CHANNELS.SYNC_PLAYLISTS, async (_, rawData: unknown) => {
     try {
+      const data = validateInput(
+        playlistsForSyncSchema,
+        rawData,
+        CHANNELS.SYNC_PLAYLISTS,
+      ) as PlaylistForSync[];
+
       if (data.length === 0) return { success: true, count: 0 };
 
       const records = data.map(mapSyncPlaylistToRow);
@@ -130,17 +151,21 @@ export function setupSyncHandlers() {
 
       return { success: true, count: data.length };
     } catch (error: unknown) {
+      console.error("[Sync] Playlists Error:", error);
       return { success: false, error: getErrorMessage(error) };
     }
   });
 
   ipcMain.handle(
     CHANNELS.SYNC_PLAYLIST_SONGS,
-    async (
-      _,
-      { playlistId, songs: fullSongsData }: { playlistId: string; songs: SongForSync[] }
-    ) => {
+    async (_, rawInput: unknown) => {
       try {
+        const { playlistId, songs: fullSongsData } = validateInput(
+          playlistSongsSyncSchema,
+          rawInput,
+          CHANNELS.SYNC_PLAYLIST_SONGS,
+        ) as { playlistId: string; songs: SongForSync[] };
+
         db.transaction(() => {
           internalSyncSongs(fullSongsData);
 
@@ -159,6 +184,7 @@ export function setupSyncHandlers() {
 
         return { success: true };
       } catch (error: unknown) {
+        console.error("[Sync] Playlist Songs Error:", error);
         return { success: false, error: getErrorMessage(error) };
       }
     }
@@ -166,11 +192,14 @@ export function setupSyncHandlers() {
 
   ipcMain.handle(
     CHANNELS.SYNC_LIKED_SONGS,
-    async (
-      _,
-      { userId, songs: fullSongsData }: { userId: string; songs: SongForSync[] }
-    ) => {
+    async (_, rawInput: unknown) => {
       try {
+        const { userId, songs: fullSongsData } = validateInput(
+          likedSongsSyncSchema,
+          rawInput,
+          CHANNELS.SYNC_LIKED_SONGS,
+        ) as { userId: string; songs: SongForSync[] };
+
         db.transaction(() => {
           internalSyncSongs(fullSongsData);
 
@@ -194,8 +223,14 @@ export function setupSyncHandlers() {
     }
   );
 
-  ipcMain.handle(CHANNELS.SYNC_SPOTLIGHTS_METADATA, async (_, data: SpotlightForSync[]) => {
+  ipcMain.handle(CHANNELS.SYNC_SPOTLIGHTS_METADATA, async (_, rawData: unknown) => {
     try {
+      const data = validateInput(
+        spotlightsForSyncSchema,
+        rawData,
+        CHANNELS.SYNC_SPOTLIGHTS_METADATA,
+      ) as SpotlightForSync[];
+
       if (data.length === 0) return { success: true, count: 0 };
 
       // 既存レコードのdownloaded fieldsをバッチでプリフェッチ
@@ -246,34 +281,40 @@ export function setupSyncHandlers() {
 
       return { success: true, count: data.length };
     } catch (error: unknown) {
+      console.error("[Sync] Spotlights Metadata Error:", error);
       return { success: false, error: getErrorMessage(error) };
     }
   });
 
   ipcMain.handle(
     CHANNELS.SYNC_SECTION,
-    async (_, { key, data }: { key: string; data: { id: string }[] }) => {
+    async (_, rawInput: unknown) => {
       try {
+        const { key, data } = validateInput(
+          sectionSyncSchema,
+          rawInput,
+          CHANNELS.SYNC_SECTION,
+        );
         const itemIds = data.map((item) => normalizeId(item.id));
 
         await db
           .insert(sectionCache)
           .values({
             key,
-            itemIds: itemIds as string[],
+            itemIds,
             updatedAt: new Date(),
           })
           .onConflictDoUpdate({
             target: sectionCache.key,
             set: {
-              itemIds: itemIds as string[],
+              itemIds,
               updatedAt: new Date(),
             },
           });
 
         return { success: true, count: itemIds.length };
       } catch (error: unknown) {
-        console.error(`[Sync] Section ${key} Error:`, error);
+        console.error(`[Sync] Section Error:`, error);
         return { success: false, error: getErrorMessage(error) };
       }
     }

@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { CACHED_QUERIES, TABLES } from "@/constants";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { isElectron, cache as electronCache } from "@/libs/electron";
+import { isLocalSongId } from "@/libs/songUtils";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 
 /**
@@ -20,7 +21,7 @@ const useLikeMutation = (songId: string, userId?: string) => {
 
   return useMutation({
     mutationFn: async (isCurrentlyLiked: boolean) => {
-      if (typeof songId === "string" && songId.startsWith("local_")) {
+      if (isLocalSongId(songId)) {
         throw new Error("ローカル曲にはいいねできません");
       }
 

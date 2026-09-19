@@ -71,12 +71,18 @@ export const cache = {
       window.electron.cache.getCachedPlaylistSongs(playlistId)
     ),
 
-  /** キャッシュからセクションデータを取得 */
-  getSectionData: (
+  /**
+   * キャッシュからセクションデータを取得。
+   * 要素の型はセクション種別に依存するため呼び出し側で型引数を指定する
+   * (未指定時は SectionItem[])。実際の写像は IPC 応答が担う。
+   */
+  getSectionData: <T = SectionItem[]>(
     key: string,
     type: "songs" | "spotlights" | "playlists"
-  ): Promise<SectionItem[]> =>
-    invokeOr([], () => window.electron.cache.getSectionData(key, type)),
+  ): Promise<T> =>
+    invokeOr([], () =>
+      window.electron.cache.getSectionData(key, type)
+    ) as unknown as Promise<T>,
 
   // --- Local-first Mutation Methods ---
 

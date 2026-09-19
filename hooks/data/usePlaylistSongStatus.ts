@@ -4,6 +4,7 @@ import { CACHE_CONFIG, CACHED_QUERIES, TABLES } from "@/constants";
 import { useUser } from "@/hooks/auth/useUser";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { isNetworkError } from "@/libs/electron/index";
+import { isLocalSongId } from "@/libs/songUtils";
 
 /** 曲がプレイリストに含まれるかを確認する */
 const usePlaylistSongStatus = (songId: string, playlists: { id: string }[]) => {
@@ -60,7 +61,7 @@ const usePlaylistSongStatus = (songId: string, playlists: { id: string }[]) => {
       !!user?.id &&
       !!songId &&
       playlistIds.length > 0 &&
-      !(typeof songId === "string" && songId.startsWith("local_")),
+      !isLocalSongId(songId),
   });
 
   return {

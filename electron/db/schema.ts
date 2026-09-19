@@ -117,7 +117,7 @@ export const spotlights = sqliteTable("spotlights", {
 // 例: トレンド、スポットライト、For Youなど
 export const sectionCache = sqliteTable("section_cache", {
   key: text("key").primaryKey(), // 例: "home_trends_all", "home_spotlight"
-  itemIds: text("item_ids", { mode: "json" }), // IDの順序付き配列 string[]
+  itemIds: text("item_ids", { mode: "json" }).$type<string[]>(), // IDの順序付き配列 string[]
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .default(sql`(unixepoch())`)
     .$onUpdate(() => new Date()),

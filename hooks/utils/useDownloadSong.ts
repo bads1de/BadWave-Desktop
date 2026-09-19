@@ -6,6 +6,7 @@ import { Song } from "@/types";
 import toast from "react-hot-toast";
 
 import { electronAPI } from "@/libs/electron/index";
+import { isLocalSongId } from "@/libs/songUtils";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface UseDownloadSongResult {
@@ -44,7 +45,7 @@ const useDownloadSong = (song: Song | null): UseDownloadSongResult => {
     if (!song || song.is_downloaded || !electronAPI.isElectron()) return;
 
     // ライブラリのローカルファイルはダウンロード概念外
-    if (typeof song.id === "string" && song.id.startsWith("local_")) {
+    if (isLocalSongId(song.id)) {
       setIsDownloaded(true);
       return;
     }

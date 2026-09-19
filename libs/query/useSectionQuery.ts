@@ -81,12 +81,12 @@ export function useSectionQuery<T>(options: SectionQueryOptions<T>) {
 
         // ローカルに見つからない場合は Web 取得にフォールバック
       } else if (sectionKey) {
-        const cached = await electronAPI.cache.getSectionData(
+        const cached = await electronAPI.cache.getSectionData<T>(
           sectionKey,
           sectionType ?? "songs",
         );
 
-        if (cached != null) return cached as unknown as T;
+        if (cached != null) return cached;
         return emptySectionFallback ?? undefined;
       }
     }

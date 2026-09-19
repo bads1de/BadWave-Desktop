@@ -62,14 +62,16 @@ export interface OfflineSong {
   user_id: string;
   title: string;
   author: string;
+  // レンダラーの Song 型と構造的に互換にする
+  // (DB 上は null になり得るが UI 層では string として扱う)
   song_path: string;
-  image_path: string | null;
+  image_path: string;
   original_song_path: string | null;
   original_image_path: string | null;
-  duration: number | null;
-  genre: string | null;
-  lyrics: string | null;
-  created_at: string | null;
+  duration?: number;
+  genre?: string;
+  lyrics?: string;
+  created_at: string;
   downloaded_at: Date | null;
 }
 

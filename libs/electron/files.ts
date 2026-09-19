@@ -1,5 +1,6 @@
 import { Song } from "@/types";
 import { CHANNELS } from "@/electron/channels";
+import { isLocalSongId } from "@/libs/songUtils";
 
 /**
  * ローカルファイルの存在確認
@@ -32,7 +33,7 @@ export async function filterStaleLocalSongs(
   const results = await Promise.all(
     ids.map(async (id) => {
       // ローカルIDでない場合はそのまま通す
-      if (!id.startsWith("local_")) {
+      if (!isLocalSongId(id)) {
         return { id, keep: true };
       }
 

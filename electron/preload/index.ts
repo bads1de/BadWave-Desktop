@@ -19,11 +19,14 @@ import type { PlaylistForSync, SongForSync, SpotlightForSync } from "../../types
  * 正 (=single source of truth): electron/channels.ts
  *   - main プロセスの ipcMain.handle
  *   - renderer の invoke / on / send
- * このインライン定義との一致は
+ * 下の GENERATED:CHANNELS ブロックは
+ *   scripts/generate-preload-channels.mjs が channels.ts から自動生成する。
+ * 手で編集せず、channels.ts を変更してから `npm run generate:preload-channels`
+ * (または build:electron) を実行すること。一致は
  * __tests__/electron/preload/channels-consistency.test.ts が保証する。
- * 値を変更する場合は必ず channels.ts と同時に変更すること。
  */
 
+/* === GENERATED:CHANNELS:START (electron/channels.ts から scripts/generate-preload-channels.mjs が自動生成。手で編集しない) === */
 export const CHANNELS = {
   // Window
   WINDOW_MINIMIZE: "window-minimize",
@@ -39,14 +42,11 @@ export const CHANNELS = {
   SCAN_MP3_FILES: "handle-scan-mp3-files",
   GET_MP3_METADATA: "handle-get-mp3-metadata",
   GET_SAVED_MUSIC_LIBRARY: "handle-get-saved-music-library",
-  CHECK_FILE_EXISTS: "check-file-exists",
   CHECK_LOCAL_FILE_EXISTS: "check-local-file-exists",
-  GET_LOCAL_FILE_PATH: "get-local-file-path",
   GET_CACHED_FILES_WITH_METADATA: "handle-get-cached-files-with-metadata",
 
   // Offline
   DOWNLOAD_SONG: "download-song",
-  DELETE_SONG: "delete-song",
   GET_OFFLINE_SONGS: "get-offline-songs",
   DELETE_OFFLINE_SONG: "delete-offline-song",
   CHECK_OFFLINE_STATUS: "check-offline-status",
@@ -126,12 +126,9 @@ export const INVOKE_CHANNELS = [
   CHANNELS.SCAN_MP3_FILES,
   CHANNELS.GET_MP3_METADATA,
   CHANNELS.GET_SAVED_MUSIC_LIBRARY,
-  CHANNELS.CHECK_FILE_EXISTS,
   CHANNELS.CHECK_LOCAL_FILE_EXISTS,
-  CHANNELS.GET_LOCAL_FILE_PATH,
   CHANNELS.GET_CACHED_FILES_WITH_METADATA,
   CHANNELS.DOWNLOAD_SONG,
-  CHANNELS.DELETE_SONG,
   CHANNELS.GET_OFFLINE_SONGS,
   CHANNELS.DELETE_OFFLINE_SONG,
   CHANNELS.CHECK_OFFLINE_STATUS,
@@ -188,6 +185,7 @@ export const ON_CHANNELS = [
 
 /** send (送信) 許可チャンネル */
 export const SEND_CHANNELS = [CHANNELS.LOG, CHANNELS.PLAYER_STATE_CHANGE] as const;
+/* === GENERATED:CHANNELS:END === */
 
 // チャンネル検証用の共通関数
 function validateChannel(

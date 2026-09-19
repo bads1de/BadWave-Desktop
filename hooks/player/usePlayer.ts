@@ -32,6 +32,40 @@ interface PlayerStore {
 }
 
 /**
+ * 再生リストを direction 方向に1つ進めた曲IDを返す。
+ * リピート/シャッフルの挙動は従来の getNextSongId / getPreviousSongId と同一。
+ *
+ * @param state - プレイヤーの再生状態
+ * @param direction - 1: 次へ / -1: 前へ
+ * @returns 移動先の曲ID (移動できない場合は undefined)
+ */
+function stepSong(
+  state: Pick<
+    PlayerStore,
+    "ids" | "activeId" | "isShuffling" | "isRepeating" | "shuffledIds"
+  >,
+  direction: 1 | -1,
+): string | undefined {
+  const { ids, activeId, isShuffling, isRepeating, shuffledIds } = state;
+
+  if (ids.length === 0) {
+    return undefined;
+  }
+
+  // リピート時は現在の曲に留まる
+  if (isRepeating) {
+    return activeId;
+  }
+
+  const list = isShuffling ? shuffledIds : ids;
+  const currentIndex = list.findIndex((id) => id === activeId);
+  if (currentIndex === -1) return undefined;
+
+  const nextIndex = (currentIndex + direction + list.length) % list.length;
+  return list[nextIndex];
+}
+
+/**
  * プレイヤーの状態を管理するカスタムフック
  *
  * @returns {Object} プレイヤーの状態と操作関数
@@ -122,53 +156,8 @@ const usePlayer = create<PlayerStore>()(
           isShuffling: false,
           isLoading: false,
         }),
-      getNextSongId: () => {
-        const { ids, activeId, isShuffling, isRepeating, shuffledIds } = get();
-
-        if (ids.length === 0) {
-          return undefined;
-        }
-
-        if (isRepeating) {
-          return activeId;
-        }
-
-        if (isShuffling) {
-          const currentIndex = shuffledIds.findIndex((id) => id === activeId);
-          if (currentIndex === -1) return undefined;
-          const nextIndex = (currentIndex + 1) % shuffledIds.length;
-          return shuffledIds[nextIndex];
-        } else {
-          const currentIndex = ids.findIndex((id) => id === activeId);
-          if (currentIndex === -1) return undefined;
-          const nextIndex = (currentIndex + 1) % ids.length;
-          return ids[nextIndex];
-        }
-      },
-      getPreviousSongId: () => {
-        const { ids, activeId, isShuffling, isRepeating, shuffledIds } = get();
-
-        if (ids.length === 0) {
-          return undefined;
-        }
-
-        if (isRepeating) {
-          return activeId;
-        }
-
-        if (isShuffling) {
-          const currentIndex = shuffledIds.findIndex((id) => id === activeId);
-          if (currentIndex === -1) return undefined;
-          const prevIndex =
-            (currentIndex - 1 + shuffledIds.length) % shuffledIds.length;
-          return shuffledIds[prevIndex];
-        } else {
-          const currentIndex = ids.findIndex((id) => id === activeId);
-          if (currentIndex === -1) return undefined;
-          const prevIndex = (currentIndex - 1 + ids.length) % ids.length;
-          return ids[prevIndex];
-        }
-      },
+      getNextSongId: () => stepSong(get(), 1),
+      getPreviousSongId: () => stepSong(get(), -1),
       setIsLoading: (isLoading: boolean) => set({ isLoading }),
       setHasHydrated: (state: boolean) => set({ hasHydrated: state }),
       play: () => set({ isLoading: true }),

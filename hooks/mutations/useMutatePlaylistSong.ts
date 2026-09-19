@@ -5,6 +5,7 @@ import { CACHED_QUERIES, TABLES } from "@/constants";
 import type { Song } from "@/types";
 import { useUser } from "@/hooks/auth/useUser";
 import { getErrorMessage } from "@/libs/utils/error";
+import { isLocalSongId } from "@/libs/songUtils";
 import { useRouter } from "next/navigation";
 import { isElectron, cache as electronCache } from "@/libs/electron";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
@@ -33,7 +34,7 @@ const useMutatePlaylistSong = () => {
       songId: string;
       playlistId: string;
     }) => {
-      if (typeof songId === "string" && songId.startsWith("local_")) {
+      if (isLocalSongId(songId)) {
         throw new Error("ローカル曲はプレイリストから削除できません");
       }
 
@@ -123,7 +124,7 @@ const useMutatePlaylistSong = () => {
       songType?: "regular";
       updateImagePath?: string;
     }) => {
-      if (typeof songId === "string" && songId.startsWith("local_")) {
+      if (isLocalSongId(songId)) {
         throw new Error("ローカル曲はプレイリストに追加できません");
       }
 

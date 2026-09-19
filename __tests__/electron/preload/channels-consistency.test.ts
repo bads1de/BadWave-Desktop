@@ -18,6 +18,8 @@ import {
   ON_CHANNELS as PRELOAD_ON,
   SEND_CHANNELS as PRELOAD_SEND,
 } from "@/electron/preload/index";
+import * as fs from "fs";
+import * as path from "path";
 
 jest.mock("electron", () => ({
   contextBridge: { exposeInMainWorld: jest.fn() },
@@ -44,5 +46,30 @@ describe("preload IPC channel consistency", () => {
 
   it("SEND_CHANNELS が electron/channels.ts と一致する", () => {
     expect(PRELOAD_SEND).toEqual(CANONICAL_SEND);
+  });
+
+  it("preload の自動生成ブロックが electron/channels.ts と一致する", () => {
+    // scripts/generate-preload-channels.mjs が channels.ts の定義ブロックを
+    // そのまま preload に埋め込む。channels.ts を変更して再生成を忘れるとここで検出する。
+    const root = path.join(__dirname, "../../..");
+    const channelsSource = fs.readFileSync(
+      path.join(root, "electron/channels.ts"),
+      "utf8",
+    );
+    const preloadSource = fs.readFileSync(
+      path.join(root, "electron/preload/index.ts"),
+      "utf8",
+    );
+
+    const start = channelsSource.indexOf("export const CHANNELS = {");
+    const sendDecl = channelsSource.indexOf("export const SEND_CHANNELS");
+    const block = channelsSource.slice(
+      start,
+      channelsSource.indexOf(";", sendDecl) + 1,
+    );
+
+    expect(preloadSource).toContain(block);
+    expect(preloadSource).toContain("GENERATED:CHANNELS:START");
+    expect(preloadSource).toContain("GENERATED:CHANNELS:END");
   });
 });

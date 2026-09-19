@@ -6,7 +6,8 @@ import {
   closeMiniPlayer,
   sendToMainWindow,
 } from "../lib/window-manager";
-import type { MiniPlayerState } from "../../types/local";
+import { validateInput, miniPlayerStateSchema, miniPlayerControlSchema } from "../lib/ipc-validate";
+import { getErrorMessage } from "../lib/error";
 
 /**
  * ミニプレイヤー関連のIPCハンドラーをセットアップ
@@ -23,7 +24,7 @@ export function setupMiniPlayerHandlers() {
       return { success: true };
     } catch (error) {
       console.error("ミニプレイヤーの作成に失敗:", error);
-      return { success: false, error: String(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -42,15 +43,20 @@ export function setupMiniPlayerHandlers() {
       return { success: true };
     } catch (error) {
       console.error("ミニプレイヤーの終了に失敗:", error);
-      return { success: false, error: String(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
   // ミニプレイヤーの状態を更新（メインウィンドウからミニプレイヤーに曲情報を送る）
   ipcMain.handle(
     CHANNELS.MINI_PLAYER_UPDATE_STATE,
-    (_event, state: MiniPlayerState) => {
+    (_event, rawState: unknown) => {
       try {
+        const state = validateInput(
+          miniPlayerStateSchema,
+          rawState,
+          CHANNELS.MINI_PLAYER_UPDATE_STATE,
+        );
         const miniPlayer = getMiniPlayerWindow();
         if (miniPlayer && !miniPlayer.isDestroyed()) {
           miniPlayer.webContents.send(CHANNELS.MINI_PLAYER_STATE_CHANGED, state);
@@ -58,7 +64,7 @@ export function setupMiniPlayerHandlers() {
         return { success: true };
       } catch (error) {
         console.error("ミニプレイヤーの状態更新に失敗:", error);
-        return { success: false, error: String(error) };
+        return { success: false, error: getErrorMessage(error) };
       }
     },
   );
@@ -66,15 +72,20 @@ export function setupMiniPlayerHandlers() {
   // ミニプレイヤーからの操作をメインウィンドウに転送
   ipcMain.handle(
     CHANNELS.MINI_PLAYER_CONTROL,
-    (_event, action: "play-pause" | "next" | "previous") => {
+    (_event, rawAction: unknown) => {
       try {
+        const action = validateInput(
+          miniPlayerControlSchema,
+          rawAction,
+          CHANNELS.MINI_PLAYER_CONTROL,
+        );
         if (sendToMainWindow(CHANNELS.MEDIA_CONTROL, action)) {
           return { success: true };
         }
         return { success: false, error: "Main window not available" };
       } catch (error) {
         console.error("メディアコントロールの転送に失敗:", error);
-        return { success: false, error: String(error) };
+        return { success: false, error: getErrorMessage(error) };
       }
     },
   );
@@ -92,7 +103,7 @@ export function setupMiniPlayerHandlers() {
       return { success: true };
     } catch (error) {
       console.error("ミニプレイヤーの準備完了処理に失敗:", error);
-      return { success: false, error: String(error) };
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 }

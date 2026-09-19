@@ -77,11 +77,11 @@ const EditModal = ({ song, isOpen, onClose }: EditModalProps) => {
         lyrics,
       );
 
-      if (result.status === "success") {
+      if (result.success) {
         setValue("lyrics", result.lrc);
         toast.success("自動同期が完了しました", { id: toastId });
       } else {
-        toast.error(result.message || ERROR_MESSAGES.SYNC_FAILED, { id: toastId });
+        toast.error(result.error || ERROR_MESSAGES.SYNC_FAILED, { id: toastId });
       }
     } catch (error) {
       console.error("Transcribe Sync Error:", error);

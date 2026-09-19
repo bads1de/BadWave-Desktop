@@ -1,6 +1,8 @@
 import { CHANNELS } from "../channels";
 import { ipcMain } from "electron";
 import * as DiscordRPC from "discord-rpc";
+import { validateInput, discordActivitySchema } from "../lib/ipc-validate";
+import { getErrorMessage } from "../lib/error";
 
 const CLIENT_ID = "1459951305647722568";
 
@@ -36,10 +38,23 @@ export const setupDiscordHandlers = () => {
   // アクティビティの更新
   ipcMain.handle(
     CHANNELS.DISCORD_SET_ACTIVITY,
-    async (_, activity: DiscordRPC.Presence) => {
+    async (_, rawActivity: unknown) => {
+      let activity: DiscordRPC.Presence;
+      try {
+        activity = validateInput(
+          discordActivitySchema,
+          rawActivity,
+          CHANNELS.DISCORD_SET_ACTIVITY,
+        ) as DiscordRPC.Presence;
+      } catch (error) {
+        console.error("Failed to validate Discord activity:", error);
+        return { success: false, error: getErrorMessage(error) };
+      }
+
       try {
         await initRpc();
       } catch (e) {
+        console.error("Failed to connect to Discord RPC:", e);
         return { success: false, error: "Failed to connect to Discord" };
       }
 
@@ -49,7 +64,7 @@ export const setupDiscordHandlers = () => {
           return { success: true };
         } catch (error) {
           console.error("Failed to set activity:", error);
-          return { success: false, error };
+          return { success: false, error: getErrorMessage(error) };
         }
       } else {
         return { success: false, error: "Discord RPC not initialized" };

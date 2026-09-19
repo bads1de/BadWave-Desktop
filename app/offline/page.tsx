@@ -30,8 +30,8 @@ const OfflinePage = () => {
       try {
         if (electronAPI.isElectron()) {
           const songs = await electronAPI.offline.getSongs();
-          // OfflineSong[] を Song[] に変換してセット
-          setOfflineSongs(songs as unknown as Song[]);
+          // OfflineSong は Song と構造的に互換 (types/local.ts 参照)
+          setOfflineSongs(songs);
         }
       } catch (error) {
         console.error("Failed to fetch offline songs:", error);

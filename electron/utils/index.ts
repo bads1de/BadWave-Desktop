@@ -4,6 +4,7 @@ import * as fs from "fs";
 import * as dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { DbSongRow, DbPlaylistRow } from "../../types/local";
+import type { SpotlightRow } from "../db/schema";
 
 /**
  * file:// または badwave:// URLをローカルパスに変換するヘルパー
@@ -156,5 +157,21 @@ export function mapDbPlaylistToResponse(playlist: DbPlaylistRow) {
     image_path: playlist.imagePath || undefined,
     is_public: !!playlist.isPublic,
     created_at: playlist.createdAt ?? null,
+  };
+}
+
+/** DBレコードをスポットライトのセクションアイテムに変換する */
+export function mapDbSpotlightToResponse(spotlight: SpotlightRow) {
+  return {
+    id: spotlight.id,
+    title: spotlight.title,
+    author: spotlight.author,
+    description: spotlight.description,
+    genre: spotlight.genre,
+    video_path: spotlight.originalVideoPath,
+    thumbnail_path: spotlight.originalThumbnailPath,
+    local_video_path: spotlight.videoPath,
+    local_thumbnail_path: spotlight.thumbnailPath,
+    created_at: spotlight.createdAt,
   };
 }

@@ -1,5 +1,5 @@
 import { CHANNELS } from "../channels";
-import { ipcMain, app } from "electron";
+import { ipcMain } from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import * as mm from "music-metadata";
@@ -10,6 +10,10 @@ import { validateInput, filePathSchema } from "../lib/ipc-validate";
 import { MusicLibrary, FileMetadata } from "../../types/local";
 import { getErrorMessage } from "../lib/error";
 import { SUPPORTED_AUDIO_EXTENSIONS, ELECTRON_STORE_KEYS } from "../constants";
+import { scanMusicLibrary } from "../lib/library-scan";
+import type { ScanProgress } from "../lib/library-scan";
+
+export type { ScanProgress } from "../lib/library-scan";
 
 // サポートされている音声ファイルの拡張子
 const AUDIO_EXTENSION_SET = new Set(SUPPORTED_AUDIO_EXTENSIONS);
@@ -21,17 +25,6 @@ function isSupportedAudioFile(fileName: string): boolean {
 // 音楽ライブラリのデータを保存するためのストアキー
 const MUSIC_LIBRARY_KEY = ELECTRON_STORE_KEYS.MUSIC_LIBRARY;
 const MUSIC_LIBRARY_LAST_SCAN_KEY = ELECTRON_STORE_KEYS.MUSIC_LIBRARY_LAST_SCAN;
-
-/**
- * スキャン進捗の型定義
- */
-export interface ScanProgress {
-  phase: "scanning" | "analyzing" | "metadata" | "complete";
-  current: number;
-  total: number;
-  currentFile?: string;
-  message: string;
-}
 
 /**
  * スキャン進捗をフロントエンドに送信するヘルパー関数
@@ -61,158 +54,33 @@ export function setupLibraryHandlers() {
           `[Scan] スキャン開始: ${directoryPath} (差分スキャン: ${shouldPerformDiffScan})`
         );
 
-        // 進捗: スキャン開始
-        sendScanProgress({
-          phase: "scanning",
-          current: 0,
-          total: 0,
-          message: "ファイルを検索中...",
+        // スキャン本体は純粋関数に委譲する（進捗は scanning / analyzing を通知）
+        const result = await scanMusicLibrary(directoryPath, savedLibrary, {
+          forceFullScan,
+          onProgress: sendScanProgress,
         });
-
-        // 現在のライブラリ情報を初期化
-        const currentLibrary: MusicLibrary = {
-          directoryPath,
-          files: {},
-        };
-
-        // ディレクトリ内のファイルを再帰的に取得する関数（シンボリックリンクループ保護付き）
-        const scanDirectory = async (dir: string, visited = new Set<string>()): Promise<string[]> => {
-          const realDir = await fs.promises.realpath(dir);
-          if (visited.has(realDir)) {
-            return [];
-          }
-          visited.add(realDir);
-
-          const entries = await fs.promises.readdir(dir, {
-            withFileTypes: true,
-          });
-          const files: string[] = [];
-
-          for (const entry of entries) {
-            const fullPath = path.join(dir, entry.name);
-
-            if (entry.isDirectory()) {
-              // サブディレクトリを再帰的にスキャン
-              const subFiles = await scanDirectory(fullPath, visited);
-              files.push(...subFiles);
-            } else if (entry.isFile() && isSupportedAudioFile(entry.name)) {
-              // サポートされている音声ファイルを追加
-              files.push(fullPath);
-            }
-          }
-
-          return files;
-        };
-
-        // ディレクトリ内のすべてのMP3ファイルを取得
-        const allFiles = await scanDirectory(directoryPath);
-
-        // 進捗: ファイル検索完了、分類開始
-        sendScanProgress({
-          phase: "analyzing",
-          current: 0,
-          total: allFiles.length,
-          message: `${allFiles.length}個のファイルを分析中...`,
-        });
-
-        // 新しいファイル、変更されたファイル、変更なしのファイルを分類
-        const newFiles: string[] = [];
-        const modifiedFiles: string[] = [];
-        const unchangedFiles: string[] = [];
-
-        for (let i = 0; i < allFiles.length; i++) {
-          const filePath = allFiles[i];
-          const stats = await fs.promises.stat(filePath);
-          const lastModified = stats.mtimeMs;
-
-          // 100ファイルごとに進捗を更新（パフォーマンス考慮）
-          if (i % 100 === 0 || i === allFiles.length - 1) {
-            sendScanProgress({
-              phase: "analyzing",
-              current: i + 1,
-              total: allFiles.length,
-              currentFile: path.basename(filePath),
-              message: `ファイルを分析中... (${i + 1}/${allFiles.length})`,
-            });
-          }
-
-          if (shouldPerformDiffScan && savedLibrary.files[filePath]) {
-            // 前回のスキャン結果と比較
-            const savedFile = savedLibrary.files[filePath];
-
-            if (savedFile.lastModified === lastModified) {
-              // ファイルが変更されていない場合
-              unchangedFiles.push(filePath);
-              // 前回のメタデータを再利用
-              currentLibrary.files[filePath] = savedFile;
-            } else {
-              // ファイルが変更されている場合
-              modifiedFiles.push(filePath);
-              // 新しいエントリを作成（メタデータは後で取得）
-              currentLibrary.files[filePath] = {
-                lastModified,
-              };
-            }
-          } else {
-            // 新しいファイルの場合
-            newFiles.push(filePath);
-            // 新しいエントリを作成（メタデータは後で取得）
-            currentLibrary.files[filePath] = {
-              lastModified,
-            };
-          }
-        }
-
-        // 削除されたファイルを特定（前回のスキャン結果にあるが、今回のスキャンにないファイル）
-        const deletedFiles: string[] = [];
-        if (shouldPerformDiffScan) {
-          const allFilesSet = new Set(allFiles); // O(1)検索のためSetを使用
-          for (const filePath in savedLibrary.files) {
-            if (!allFilesSet.has(filePath)) {
-              deletedFiles.push(filePath);
-            }
-          }
-        }
 
         // スキャン結果をストアに保存
-        store.set(MUSIC_LIBRARY_KEY, currentLibrary);
+        store.set(MUSIC_LIBRARY_KEY, result.currentLibrary);
         store.set(MUSIC_LIBRARY_LAST_SCAN_KEY, new Date().toISOString());
 
         debugLog(
-          `[Scan] スキャン完了: 新規=${newFiles.length}, 変更=${modifiedFiles.length}, 変更なし=${unchangedFiles.length}, 削除=${deletedFiles.length}`
+          `[Scan] スキャン完了: 新規=${result.scanInfo.newFiles.length}, 変更=${result.scanInfo.modifiedFiles.length}, 変更なし=${result.scanInfo.unchangedFiles.length}, 削除=${result.scanInfo.deletedFiles.length}`
         );
 
         // 進捗: スキャン完了
         sendScanProgress({
           phase: "complete",
-          current: allFiles.length,
-          total: allFiles.length,
-          message: `スキャン完了: ${allFiles.length}ファイルを処理しました`,
+          current: result.files.length,
+          total: result.files.length,
+          message: `スキャン完了: ${result.files.length}ファイルを処理しました`,
         });
 
-        // スキャン結果を返す
-        // キャッシュ済みメタデータも一緒に返す（フロントエンドでの個別IPC呼び出しを削減）
-        const filesWithMetadata = allFiles.map((filePath) => {
-          const fileInfo = currentLibrary.files[filePath];
-          return {
-            path: filePath,
-            metadata: fileInfo?.metadata || null,
-            lastModified: fileInfo?.lastModified ?? null,
-            needsMetadata: !fileInfo?.metadata, // メタデータ取得が必要かどうか
-          };
-        });
-
+        // スキャン結果を返す (キャッシュ済みメタデータも含む)
         return {
-          files: allFiles,
-          filesWithMetadata,
-          scanInfo: {
-            newFiles,
-            modifiedFiles,
-            unchangedFiles,
-            deletedFiles,
-            isSameDirectory,
-            isFullScan: !shouldPerformDiffScan,
-          },
+          files: result.files,
+          filesWithMetadata: result.filesWithMetadata,
+          scanInfo: result.scanInfo,
         };
       } catch (error: unknown) {
         debugLog(

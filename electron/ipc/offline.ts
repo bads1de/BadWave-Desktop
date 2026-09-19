@@ -9,6 +9,7 @@ import { eq, isNotNull } from "drizzle-orm";
 import type { SongDownloadPayload } from "../../types/local";
 import { validateInput, songDownloadPayloadSchema, songIdSchema } from "../lib/ipc-validate";
 import { getErrorMessage } from "../lib/error";
+import { isLocalSongId, extractFilePathFromLocalId } from "../lib/song-id";
 import { downloadToFile } from "../lib/download";
 
 export const setupOfflineDownloadHandlers = () => {
@@ -115,16 +116,9 @@ export const setupOfflineDownloadHandlers = () => {
     try {
       // ライブラリのローカルファイル (`local_` で始まる) は DB に無く、
       // ID からパスを復元して存在確認する
-      if (songId.startsWith("local_")) {
-        const encoded = songId
-          .slice("local_".length)
-          .replace(/-/g, "+")
-          .replace(/_/g, "/");
-        const padded = encoded + "=".repeat((4 - (encoded.length % 4)) % 4);
-        let filePath: string;
-        try {
-          filePath = decodeURIComponent(Buffer.from(padded, "base64").toString("utf8"));
-        } catch {
+      if (isLocalSongId(songId)) {
+        const filePath = extractFilePathFromLocalId(songId);
+        if (!filePath) {
           return { isDownloaded: false };
         }
         const exists = await fs.promises

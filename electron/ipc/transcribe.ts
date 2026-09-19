@@ -41,14 +41,11 @@ export function setupTranscriptionHandlers() {
             "transcribe:generate-lrc:lyricsText",
           );
         } catch (validationError) {
-          // バリデーション失敗は例外ではなく、クライアントが期待する
-          // { status: "error", message } 形式で返す
+          // バリデーション失敗は例外ではなく { success: false, error } 形式で返す
+          console.error("[Transcribe] Invalid input:", validationError);
           resolve({
-            status: "error",
-            message:
-              validationError instanceof Error
-                ? validationError.message
-                : "Invalid input",
+            success: false,
+            error: getErrorMessage(validationError, "Invalid input"),
           });
           return;
         }
@@ -82,9 +79,10 @@ export function setupTranscriptionHandlers() {
 
         // Python実行環境の存在確認
         if (!fs.existsSync(pythonPath)) {
+          console.error("[Transcribe] Python runtime not found:", pythonPath);
           return resolve({
-            status: "error",
-            message: `Python実行環境が見つかりません: ${pythonPath}`,
+            success: false,
+            error: `Python実行環境が見つかりません: ${pythonPath}`,
           });
         }
 
@@ -117,19 +115,30 @@ export function setupTranscriptionHandlers() {
                 `[Transcribe] Python Error (code ${code}): ${stderr}`,
               );
               return resolve({
-                status: "error",
-                message: `トランスクライブエンジンの実行に失敗しました`,
+                success: false,
+                error: `トランスクライブエンジンの実行に失敗しました`,
               });
             }
 
             try {
               const result = JSON.parse(stdout.trim());
-              resolve(result);
+              // Python 側は { status, lrc } 形式で返すため、共通の { success, error } に正規化する
+              if (result?.status === "success") {
+                resolve({ success: true, lrc: result.lrc });
+              } else {
+                resolve({
+                  success: false,
+                  error:
+                    typeof result?.message === "string"
+                      ? result.message
+                      : "トランスクライブエンジンが失敗しました",
+                });
+              }
             } catch (e) {
               console.error(`[Transcribe] JSON Parse Error: ${stdout}`);
               resolve({
-                status: "error",
-                message: "トランスクライブエンジンの出力解析に失敗しました",
+                success: false,
+                error: "トランスクライブエンジンの出力解析に失敗しました",
               });
             }
           });
@@ -149,9 +158,10 @@ export function setupTranscriptionHandlers() {
           downloadToFile(audioPath, tempPath)
             .then(() => runPython(tempPath, true))
             .catch((error: unknown) => {
+              console.error("[Transcribe] Failed to download remote audio:", error);
               resolve({
-                status: "error",
-                message: `ファイルの取得に失敗しました: ${getErrorMessage(error)}`,
+                success: false,
+                error: `ファイルの取得に失敗しました: ${getErrorMessage(error)}`,
               });
             });
         } else {
