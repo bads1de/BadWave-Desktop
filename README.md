@@ -73,7 +73,7 @@
 ## 📂 ディレクトリ構造の解説
 
 ```bash
-badwave-windows/
+badwave-desktop/
 ├── app/                # Next.js App Router (レンダラープロセス)
 ├── electron/           # Electron メインプロセス
 │   ├── ipc/            # IPC ハンドラー (API実装)
@@ -99,8 +99,8 @@ badwave-windows/
 1. **リポジトリのクローン:**
 
    ```bash
-   git clone https://github.com/yourusername/badwave-windows.git
-   cd badwave-windows
+   git clone https://github.com/bads1de/BadWave-Desktop.git
+   cd BadWave-Desktop
    ```
 
 2. **依存関係のインストール:**

@@ -1,6 +1,6 @@
 # Discord Rich Presence 実装ガイド
 
-このドキュメントでは、`badwave-windows` (Electron 版) に Discord Rich Presence (DRPC) を実装する手順を解説します。
+このドキュメントでは、`badwave-desktop` (Electron 版) に Discord Rich Presence (DRPC) を実装する手順を解説します。
 DRPC を導入することで、Discord のユーザープロフィール上に「BadWave で楽曲を再生中」といったステータスを表示できます。
 
 ## 1. 準備

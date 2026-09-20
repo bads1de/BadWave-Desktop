@@ -1,4 +1,4 @@
-# BadWave Desktop (badwave-windows)
+# BadWave Desktop (badwave-desktop)
 
 ## 概要
 
@@ -7,7 +7,7 @@
 ## レイヤー構造
 
 ```text
-badwave-windows/
+badwave-desktop/
 ├── app/                  # Next.js App Router（レンダラー UI・ルート）
 │   ├── (site)/ account/ genre/ liked/ playlists/ pulse/ search/ songs/
 │   └── local/ offline/   # デスクトップ専用ページ（ローカル楽曲・オフライン）
