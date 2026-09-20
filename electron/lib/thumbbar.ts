@@ -229,6 +229,8 @@ export function updateThumbBarState(playing: boolean) {
 // IPCハンドラーをセットアップ（rendererからの状態受信）
 export function setupThumbBarHandlers() {
   ipcMain.on(CHANNELS.PLAYER_STATE_CHANGE, (_event, state: { isPlaying: boolean }) => {
-    updateThumbBarState(state.isPlaying);
+    // 不正なメッセージで（ipcMain.on は例外を reject できないため）
+    // メインプロセスが落ちないよう防御する
+    updateThumbBarState(state?.isPlaying === true);
   });
 }

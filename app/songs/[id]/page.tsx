@@ -34,7 +34,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import AudioWaveform from "@/components/AudioWaveform";
-import { getRandomColor } from "@/libs/utils";
+import { formatTime, getRandomColor } from "@/libs/utils";
 import useAudioWaveStore from "@/hooks/audio/useAudioWave";
 import useDownloadSong from "@/hooks/utils/useDownloadSong";
 import { electronAPI } from "@/libs/electron";
@@ -122,14 +122,27 @@ const SongPage = (props: SongPageProps) => {
   }, [pause]);
 
   useEffect(() => {
-    if (song?.song_path) {
-      const audio = new Audio(song.song_path);
-      audio.addEventListener("loadedmetadata", () => {
-        const minutes = Math.floor(audio.duration / 60);
-        const seconds = Math.floor(audio.duration % 60);
-        setDuration(`${minutes}:${seconds.toString().padStart(2, "0")}`);
-      });
+    if (!song?.song_path) {
+      return;
     }
+
+    // 長さの取得だけが目的なので、音声本体のダウンロードは抑える
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.src = song.song_path;
+
+    const handleLoadedMetadata = () => {
+      setDuration(formatTime(audio.duration));
+    };
+
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+    // 曲を切り替えたときに古い要素の読み込みが残らないようにする
+    return () => {
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeAttribute("src");
+      audio.load();
+    };
   }, [song?.song_path]);
 
   const handleDownloadClick = useCallback(async () => {

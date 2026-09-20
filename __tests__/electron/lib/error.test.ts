@@ -27,6 +27,23 @@ describe("electron/lib/error", () => {
       expect(getErrorMessage({ foo: "bar" })).toBe("Unknown error");
     });
 
+    it("should return fallback for an empty message", () => {
+      expect(getErrorMessage(new Error(""))).toBe("Unknown error");
+      expect(getErrorMessage({ message: "" })).toBe("Unknown error");
+      expect(getErrorMessage({ message: "   " })).toBe("Unknown error");
+    });
+
+    it("should stringify a numeric message", () => {
+      expect(getErrorMessage({ message: 404 })).toBe("404");
+    });
+
+    it("should return fallback for non string/number messages", () => {
+      expect(getErrorMessage({ message: null })).toBe("Unknown error");
+      expect(getErrorMessage({ message: undefined })).toBe("Unknown error");
+      expect(getErrorMessage({ message: true })).toBe("Unknown error");
+      expect(getErrorMessage({ message: { nested: 1 } })).toBe("Unknown error");
+    });
+
     it("should return Error.message even when fallback is provided", () => {
       const error = new Error("Real error");
       expect(getErrorMessage(error, "Fallback")).toBe("Real error");

@@ -302,7 +302,13 @@ if __name__ == "__main__":
     if audio_path.startswith("file://"):
         audio_path = audio_path.replace("file://", "")
         # Windowsの場合、file:///C:/... となっていることがあるので先頭の / を除去
-        if audio_path.startswith("/") and audio_path[2] == ":":
+        # (短いパスで audio_path[2] が IndexError にならないよう長さも確認する)
+        if (
+            sys.platform == "win32"
+            and audio_path.startswith("/")
+            and len(audio_path) > 2
+            and audio_path[2] == ":"
+        ):
             audio_path = audio_path[1:]
         # URLエンコードのデコード (スペースが %20 になっている場合など)
         import urllib.parse

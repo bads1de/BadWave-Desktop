@@ -1,8 +1,9 @@
 "use client";
 
 import React, { use } from "react";
-import GenreHeader from "@/components/genre/GenreHeader";
 import GenreContent from "@/components/genre/GenreContent";
+import GenreHeader from "@/components/genre/GenreHeader";
+import { safeDecodeURIComponent } from "@/libs/utils";
 
 interface genreProps {
   params: Promise<{
@@ -13,7 +14,7 @@ interface genreProps {
 const GenrePage = (props: genreProps) => {
   const params = use(props.params);
   const { genre } = params;
-  const decodedGenre = decodeURIComponent(genre);
+  const decodedGenre = safeDecodeURIComponent(genre);
 
   return (
     <div className="bg-[#0a0a0f] w-full h-full overflow-hidden overflow-y-auto custom-scrollbar relative">

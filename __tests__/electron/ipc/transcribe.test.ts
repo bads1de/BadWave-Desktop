@@ -145,6 +145,35 @@ describe("IPC: Transcribe", () => {
       );
     });
 
+    it("python の起動に失敗した場合は reject せずエラーを返す", async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+
+      const mockProcess: any = {
+        stdout: { on: jest.fn() },
+        stderr: { on: jest.fn() },
+        on: jest.fn(),
+      };
+      (spawn as jest.Mock).mockReturnValue(mockProcess);
+
+      // spawn 失敗時は 'error' が発火し、'close' は来ない
+      mockProcess.on.mockImplementation((event: string, callback: Function) => {
+        if (event === "error") {
+          callback(new Error("EACCES: permission denied"));
+        }
+      });
+
+      const result = await invoke(
+        "transcribe:generate-lrc",
+        "test.mp3",
+        "test lyrics",
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain(
+        "トランスクライブエンジンの起動に失敗しました",
+      );
+    });
+
     it("returns an error object (not a rejection) on invalid input", async () => {
       // 空文字列は audioPathSchema (min(1)) を満たさないためバリデーションエラーになる。
       // Promise が { success: false, error } で resolve されること。

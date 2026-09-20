@@ -105,6 +105,16 @@ export function setupTranscriptionHandlers() {
             stderr += data.toString();
           });
 
+          // spawn 自体に失敗した場合（実行権限なし等）は 'close' が来ない上、
+          // リスナーが無いと未処理の 'error' でメインプロセスが落ちる
+          pythonProcess.on("error", (error) => {
+            console.error("[Transcribe] Failed to spawn python process:", error);
+            resolve({
+              success: false,
+              error: `トランスクライブエンジンの起動に失敗しました: ${getErrorMessage(error)}`,
+            });
+          });
+
           pythonProcess.on("close", (code) => {
             if (isTemp && fs.existsSync(targetPath)) {
               fs.unlink(targetPath, () => {});

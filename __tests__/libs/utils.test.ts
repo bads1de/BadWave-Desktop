@@ -8,6 +8,7 @@ import {
   sanitizeTitle, 
   generateRandomString, 
   formatTime, 
+  safeDecodeURIComponent,
   downloadFile 
 } from "@/libs/utils";
 
@@ -62,6 +63,29 @@ describe("libs/utils", () => {
       expect(formatTime(0)).toBe("0:00");
       expect(formatTime(65)).toBe("1:05");
       expect(formatTime(600)).toBe("10:00");
+    });
+
+    it("should return 0:00 for invalid values", () => {
+      expect(formatTime(NaN)).toBe("0:00");
+      expect(formatTime(Infinity)).toBe("0:00");
+      expect(formatTime(-1)).toBe("0:00");
+    });
+  });
+
+  describe("safeDecodeURIComponent", () => {
+    it("should decode encoded values", () => {
+      expect(safeDecodeURIComponent("hip%20hop")).toBe("hip hop");
+      expect(safeDecodeURIComponent("r%26b")).toBe("r&b");
+    });
+
+    it("should return the original value when it is already decoded", () => {
+      expect(safeDecodeURIComponent("R&B")).toBe("R&B");
+      expect(safeDecodeURIComponent("j-pop")).toBe("j-pop");
+    });
+
+    it("should not throw on malformed escape sequences", () => {
+      expect(safeDecodeURIComponent("100% Rock")).toBe("100% Rock");
+      expect(safeDecodeURIComponent("%")).toBe("%");
     });
   });
 

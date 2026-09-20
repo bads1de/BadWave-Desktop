@@ -56,9 +56,30 @@ export const generateRandomString = (length: number): string => {
 
 /** 秒数を「分:秒」形式にフォーマットする (例: "3:25") */
 export const formatTime = (seconds: number) => {
+  // 不正値（NaN・Infinity・負値）は 0:00 として扱う
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "0:00";
+  }
+
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+};
+
+/**
+ * ルートパラメータを安全にデコードする。
+ *
+ * Next.js はルートパラメータをデコード済みで渡すことがあり、
+ * その状態で decodeURIComponent を再度呼ぶと "100%" のような
+ * 不正なエスケープシーケンスで URIError になりページが落ちる。
+ * デコードできない場合は元の値をそのまま使う。
+ */
+export const safeDecodeURIComponent = (value: string): string => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 };
 
 /** URLからファイルをダウンロードする */
