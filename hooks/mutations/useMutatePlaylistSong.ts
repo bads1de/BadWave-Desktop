@@ -10,6 +10,17 @@ import { useRouter } from "next/navigation";
 import { isElectron, cache as electronCache } from "@/libs/electron";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import {
+  applyOptimisticUpdate,
+  rollbackOptimisticUpdate,
+} from "@/libs/query/optimistic";
+
+/** プレイリスト一覧のクエリキー */
+const PLAYLISTS_QUERY_KEY = [CACHED_QUERIES.playlists] as const;
+
+/** プレイリスト内の曲一覧のクエリキー */
+const playlistSongsKey = (playlistId: string) =>
+  [CACHED_QUERIES.playlists, playlistId, "songs"] as const;
 
 /**
  * プレイリスト曲の操作（追加・削除）を行うカスタムフック（ローカルファースト）
@@ -71,39 +82,24 @@ const useMutatePlaylistSong = () => {
 
       return { songId, playlistId };
     },
-    onMutate: async ({ songId, playlistId }) => {
-      await queryClient.cancelQueries({
-        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
-      });
-
-      const previousSongs = queryClient.getQueryData<Song[]>([
-        CACHED_QUERIES.playlists,
-        playlistId,
-        "songs",
-      ]);
-
-      queryClient.setQueryData<Song[]>(
-        [CACHED_QUERIES.playlists, playlistId, "songs"],
+    onMutate: ({ songId, playlistId }) =>
+      applyOptimisticUpdate<Song[]>(
+        queryClient,
+        playlistSongsKey(playlistId),
         (old) => (old || []).filter((s: Song) => s.id !== songId),
-      );
-
-      return { previousSongs, playlistId };
-    },
+      ),
     onSuccess: (_data, { playlistId }) => {
-      queryClient.invalidateQueries({
-        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
-      });
-      queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
+      queryClient.invalidateQueries({ queryKey: playlistSongsKey(playlistId) });
+      queryClient.invalidateQueries({ queryKey: PLAYLISTS_QUERY_KEY });
       toast.success("プレイリストから曲が削除されました！");
       router.refresh();
     },
-    onError: (error: Error, _variables, context) => {
-      if (context?.previousSongs !== undefined) {
-        queryClient.setQueryData(
-          [CACHED_QUERIES.playlists, context.playlistId, "songs"],
-          context.previousSongs,
-        );
-      }
+    onError: (error: Error, { playlistId }, context) => {
+      rollbackOptimisticUpdate(
+        queryClient,
+        playlistSongsKey(playlistId),
+        context,
+      );
       console.error("Error deleting song from playlist:", error);
       toast.error(getErrorMessage(error, ERROR_MESSAGES.PLAYLIST_DELETE_SONG_FAILED));
     },
@@ -174,44 +170,29 @@ const useMutatePlaylistSong = () => {
 
       return { songId, playlistId };
     },
-    onMutate: async ({ songId, playlistId }) => {
-      await queryClient.cancelQueries({
-        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
-      });
-
-      const previousSongs = queryClient.getQueryData<Song[]>([
-        CACHED_QUERIES.playlists,
-        playlistId,
-        "songs",
-      ]);
-
-      queryClient.setQueryData<Song[]>(
-        [CACHED_QUERIES.playlists, playlistId, "songs"],
+    onMutate: ({ songId, playlistId }) =>
+      applyOptimisticUpdate<Song[]>(
+        queryClient,
+        playlistSongsKey(playlistId),
         (old) => [
           ...(old || []),
           { id: songId, playlist_id: playlistId } as unknown as Song,
         ],
-      );
-
-      return { previousSongs, playlistId };
-    },
+      ),
     onSuccess: (_data, { playlistId }) => {
-      queryClient.invalidateQueries({
-        queryKey: [CACHED_QUERIES.playlists, playlistId, "songs"],
-      });
-      queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
+      queryClient.invalidateQueries({ queryKey: playlistSongsKey(playlistId) });
+      queryClient.invalidateQueries({ queryKey: PLAYLISTS_QUERY_KEY });
       queryClient.invalidateQueries({
         queryKey: [CACHED_QUERIES.playlistSongStatus],
       });
       toast.success("プレイリストに曲が追加されました！");
     },
-    onError: (error: Error, _variables, context) => {
-      if (context?.previousSongs !== undefined) {
-        queryClient.setQueryData(
-          [CACHED_QUERIES.playlists, context.playlistId, "songs"],
-          context.previousSongs,
-        );
-      }
+    onError: (error: Error, { playlistId }, context) => {
+      rollbackOptimisticUpdate(
+        queryClient,
+        playlistSongsKey(playlistId),
+        context,
+      );
       console.error("Error adding song to playlist:", error);
       toast.error(getErrorMessage(error, ERROR_MESSAGES.PLAYLIST_ADD_SONG_FAILED));
     },

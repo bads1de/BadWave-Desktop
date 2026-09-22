@@ -6,6 +6,10 @@ import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { isElectron, cache as electronCache } from "@/libs/electron";
 import { isLocalSongId } from "@/libs/songUtils";
 import { useNetworkStatus } from "@/hooks/utils/useNetworkStatus";
+import {
+  applyOptimisticUpdate,
+  rollbackOptimisticUpdate,
+} from "@/libs/query/optimistic";
 
 /**
  * 曲のいいね操作を行うカスタムフック（ローカルファースト）
@@ -18,6 +22,7 @@ const useLikeMutation = (songId: string, userId?: string) => {
   const supabaseClient = createClient();
   const queryClient = useQueryClient();
   const { isOnline } = useNetworkStatus();
+  const likeStatusKey = [CACHED_QUERIES.likeStatus, songId, userId] as const;
 
   return useMutation({
     mutationFn: async (isCurrentlyLiked: boolean) => {
@@ -102,30 +107,13 @@ const useLikeMutation = (songId: string, userId?: string) => {
 
       return !isCurrentlyLiked;
     },
-    onMutate: async (isCurrentlyLiked: boolean) => {
-      await queryClient.cancelQueries({
-        queryKey: [CACHED_QUERIES.likeStatus, songId, userId],
-      });
-
-      const previousLikeStatus = queryClient.getQueryData<boolean>([
-        CACHED_QUERIES.likeStatus,
-        songId,
-        userId,
-      ]);
-
-      queryClient.setQueryData(
-        [CACHED_QUERIES.likeStatus, songId, userId],
-        !isCurrentlyLiked,
-      );
-
-      return { previousLikeStatus };
-    },
+    onMutate: async (isCurrentlyLiked: boolean) =>
+      applyOptimisticUpdate<boolean>(queryClient, likeStatusKey, () =>
+        !isCurrentlyLiked
+      ),
     onSuccess: (newLikeStatus) => {
       // いいね状態のキャッシュを更新
-      queryClient.setQueryData(
-        [CACHED_QUERIES.likeStatus, songId, userId],
-        newLikeStatus
-      );
+      queryClient.setQueryData(likeStatusKey, newLikeStatus);
 
       // 曲データのキャッシュを無効化（いいねカウントが変わるため）
       queryClient.invalidateQueries({
@@ -143,12 +131,7 @@ const useLikeMutation = (songId: string, userId?: string) => {
       }
     },
     onError: (error, _variables, context) => {
-      if (context?.previousLikeStatus !== undefined) {
-        queryClient.setQueryData(
-          [CACHED_QUERIES.likeStatus, songId, userId],
-          context.previousLikeStatus
-        );
-      }
+      rollbackOptimisticUpdate(queryClient, likeStatusKey, context);
       console.error("Like mutation error:", error);
       toast.error(ERROR_MESSAGES.GENERIC_ERROR_RETRY);
     },

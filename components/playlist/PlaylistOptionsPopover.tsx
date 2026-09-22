@@ -17,6 +17,10 @@ import { useUser } from "@/hooks/auth/useUser";
 import { CACHED_QUERIES, ROUTES, TABLES } from "@/constants";
 import { Playlist } from "@/types";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import {
+  applyOptimisticUpdate,
+  rollbackOptimisticUpdate,
+} from "@/libs/query/optimistic";
 
 interface PlaylistOptionsPopoverProps {
   playlistId: string;
@@ -35,6 +39,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
   const supabase = createClient();
   const { user } = useUser();
   const queryClient = useQueryClient();
+  const playlistsKey = [CACHED_QUERIES.playlists] as const;
 
   const updatePlaylistMutation = useMutation({
     mutationFn: async () => {
@@ -54,25 +59,14 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
 
       return { newTitle };
     },
-    onMutate: async () => {
-      await queryClient.cancelQueries({
-        queryKey: [CACHED_QUERIES.playlists],
-      });
-
-      const previousPlaylists = queryClient.getQueryData<Playlist[]>([
-        CACHED_QUERIES.playlists,
-      ]);
-
-      queryClient.setQueryData<Playlist[]>([CACHED_QUERIES.playlists], (old) =>
+    onMutate: () =>
+      applyOptimisticUpdate<Playlist[]>(queryClient, playlistsKey, (old) =>
         (old || []).map((p) =>
           p.id === playlistId ? { ...p, title: newTitle } : p,
         ),
-      );
-
-      return { previousPlaylists };
-    },
+      ),
     onSuccess: ({ newTitle }) => {
-      queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
+      queryClient.invalidateQueries({ queryKey: playlistsKey });
       toast.success("プレイリスト名を更新しました");
       router.push(
         `${ROUTES.PLAYLISTS_DETAIL(playlistId)}?title=${encodeURIComponent(newTitle)}`
@@ -80,12 +74,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
       setIsEditing(false);
     },
     onError: (_error, _variables, context) => {
-      if (context?.previousPlaylists) {
-        queryClient.setQueryData(
-          [CACHED_QUERIES.playlists],
-          context.previousPlaylists,
-        );
-      }
+      rollbackOptimisticUpdate(queryClient, playlistsKey, context);
       toast.error(ERROR_MESSAGES.PLAYLIST_UPDATE_FAILED);
     },
   });
@@ -107,25 +96,14 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
       }
       return { isPublic: !isPublic };
     },
-    onMutate: async () => {
-      await queryClient.cancelQueries({
-        queryKey: [CACHED_QUERIES.playlists],
-      });
-
-      const previousPlaylists = queryClient.getQueryData<Playlist[]>([
-        CACHED_QUERIES.playlists,
-      ]);
-
-      queryClient.setQueryData<Playlist[]>([CACHED_QUERIES.playlists], (old) =>
+    onMutate: () =>
+      applyOptimisticUpdate<Playlist[]>(queryClient, playlistsKey, (old) =>
         (old || []).map((p) =>
           p.id === playlistId ? { ...p, is_public: !isPublic } : p,
         ),
-      );
-
-      return { previousPlaylists };
-    },
+      ),
     onSuccess: ({ isPublic }) => {
-      queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
+      queryClient.invalidateQueries({ queryKey: playlistsKey });
       toast.success(
         isPublic
           ? "プレイリストを公開しました"
@@ -134,12 +112,7 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
       router.refresh();
     },
     onError: (_error, _variables, context) => {
-      if (context?.previousPlaylists) {
-        queryClient.setQueryData(
-          [CACHED_QUERIES.playlists],
-          context.previousPlaylists,
-        );
-      }
+      rollbackOptimisticUpdate(queryClient, playlistsKey, context);
       toast.error(ERROR_MESSAGES.PLAYLIST_VISIBILITY_UPDATE_FAILED);
     },
   });
@@ -162,34 +135,18 @@ const PlaylistOptionsPopover: React.FC<PlaylistOptionsPopoverProps> = ({
         .eq("id", playlistId)
         .eq("user_id", user.id);
     },
-    onMutate: async () => {
-      await queryClient.cancelQueries({
-        queryKey: [CACHED_QUERIES.playlists],
-      });
-
-      const previousPlaylists = queryClient.getQueryData<Playlist[]>([
-        CACHED_QUERIES.playlists,
-      ]);
-
-      queryClient.setQueryData<Playlist[]>([CACHED_QUERIES.playlists], (old) =>
+    onMutate: () =>
+      applyOptimisticUpdate<Playlist[]>(queryClient, playlistsKey, (old) =>
         (old || []).filter((p) => p.id !== playlistId),
-      );
-
-      return { previousPlaylists };
-    },
+      ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [CACHED_QUERIES.playlists] });
+      queryClient.invalidateQueries({ queryKey: playlistsKey });
       toast.success("プレイリストを削除しました");
       router.push(ROUTES.PLAYLISTS);
       router.refresh();
     },
     onError: (_error, _variables, context) => {
-      if (context?.previousPlaylists) {
-        queryClient.setQueryData(
-          [CACHED_QUERIES.playlists],
-          context.previousPlaylists,
-        );
-      }
+      rollbackOptimisticUpdate(queryClient, playlistsKey, context);
       toast.error(ERROR_MESSAGES.PLAYLIST_DELETE_FAILED);
     },
   });
