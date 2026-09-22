@@ -3,15 +3,12 @@
 import Header from "@/components/header/Header";
 import SearchInput from "@/components/common/SearchInput";
 import HeaderNav from "@/components/header/HeaderNav";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import useOnPlay from "@/hooks/player/useOnPlay";
-import { useUser } from "@/hooks/auth/useUser";
 import { Playlist, Song } from "@/types";
 import usePlayer from "@/hooks/player/usePlayer";
-import SongOptionsPopover from "@/components/song/SongOptionsPopover";
-import SongList from "@/components/song/SongList";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import SongListRow from "@/components/song/SongListRow";
+import PlaylistCard from "@/components/playlist/PlaylistCard";
 import { useCallback, memo, use } from "react";
 import useGetSongsByTitle from "@/hooks/data/useGetSongsByTitle";
 import useGetPlaylistsByTitle from "@/hooks/data/useGetPlaylistsByTitle";
@@ -28,8 +25,6 @@ const SongListSection = memo(
     onPlay: (id: string) => void;
     isLoading: boolean;
   }) => {
-    const { user } = useUser();
-
     if (isLoading) {
       return (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -61,19 +56,13 @@ const SongListSection = memo(
     return (
       <div className="flex flex-col gap-y-3 w-full p-6">
         {songs.map((song) => (
-          <div
+          <SongListRow
             key={song.id}
-            className="flex items-center gap-x-4 w-full group/item"
-          >
-            <div className="flex-1 min-w-0">
-              <SongList data={song} onClick={(id: string) => onPlay(id)} />
-            </div>
-            {user?.id && (
-              <div className="opacity-0 group-hover/item:opacity-100 transition-opacity">
-                <SongOptionsPopover song={song} />
-              </div>
-            )}
-          </div>
+            song={song}
+            onPlay={onPlay}
+            hideOptionsWhenSignedOut
+            optionsOnHover
+          />
         ))}
       </div>
     );
@@ -83,8 +72,6 @@ const SongListSection = memo(
 // プレイリストセクションコンポーネント（メモ化）
 const PlaylistSection = memo(
   ({ playlists, isLoading }: { playlists: Playlist[]; isLoading: boolean }) => {
-    const router = useRouter();
-
     if (isLoading) {
       return (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -116,46 +103,37 @@ const PlaylistSection = memo(
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
         {playlists.map((playlist, i) => (
-          <motion.div
+          <PlaylistCard
             key={playlist.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: i * 0.05 }}
-            className="group relative cursor-pointer cyber-glitch"
-            onClick={() =>
-              router.push(
-                `${ROUTES.PLAYLISTS_DETAIL(playlist.id)}?title=${encodeURIComponent(
-                  playlist.title,
-                )}`,
-              )
-            }
-          >
-            <div className="relative bg-[#0a0a0f] border border-theme-500/20 group-hover:border-theme-500/60 p-4 transition-all duration-500 group-hover:-translate-y-2 rounded-none">
-              <div className="relative aspect-square w-full overflow-hidden mb-4 border border-theme-500/10">
-                <Image
-                  src={playlist.image_path || "/images/playlist.png"}
-                  alt={playlist.title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100"
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
-                />
+            playlist={playlist}
+            href={`${ROUTES.PLAYLISTS_DETAIL(playlist.id)}?title=${encodeURIComponent(
+              playlist.title,
+            )}`}
+            index={i}
+            duration={0.4}
+            className="cyber-glitch"
+            cardClassName="group-hover:-translate-y-2 rounded-none"
+            imageClassName="transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+            imageOverlay={
+              <>
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                 {/* 装飾用グリッド */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none bg-[length:20px_20px] bg-[linear-gradient(to_right,rgba(var(--theme-500),0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--theme-500),0.3)_1px,transparent_1px)]" />
-              </div>
-              <div className="space-y-1 font-mono">
-                <p className="text-[8px] text-theme-500/60 uppercase tracking-[0.3em]">
-                  {"// PLN_TYPE: LIST"}
-                </p>
-                <h3 className="text-sm font-black text-white truncate uppercase tracking-widest group-hover:text-theme-300 transition-colors">
-                  {playlist.title}
-                </h3>
-              </div>
-              {/* HUDコーナー */}
-              <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-theme-500/20 group-hover:border-theme-500 transition-colors" />
-              <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-theme-500/20 group-hover:border-theme-500 transition-colors" />
+              </>
+            }
+          >
+            <div className="space-y-1 font-mono">
+              <p className="text-[8px] text-theme-500/60 uppercase tracking-[0.3em]">
+                {"// PLN_TYPE: LIST"}
+              </p>
+              <h3 className="text-sm font-black text-white truncate uppercase tracking-widest group-hover:text-theme-300 transition-colors">
+                {playlist.title}
+              </h3>
             </div>
-          </motion.div>
+            {/* HUDコーナー */}
+            <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-theme-500/20 group-hover:border-theme-500 transition-colors" />
+            <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-theme-500/20 group-hover:border-theme-500 transition-colors" />
+          </PlaylistCard>
         ))}
       </div>
     );

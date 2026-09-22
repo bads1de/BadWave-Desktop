@@ -1,11 +1,9 @@
 "use client";
 
 import useOnPlay from "@/hooks/player/useOnPlay";
-import { useUser } from "@/hooks/auth/useUser";
 import { Song } from "@/types";
 import React, { memo, useCallback } from "react";
-import SongList from "@/components/song/SongList";
-import SongOptionsPopover from "@/components/song/SongOptionsPopover";
+import SongListRow from "@/components/song/SongListRow";
 import useGetSongsByGenre from "@/hooks/data/useGetSongsByGenre";
 
 interface Props {
@@ -16,7 +14,6 @@ const GenreContent: React.FC<Props> = memo(({ genre }) => {
   // クライアントサイドでデータを取得（オフライン対応付き）
   const { songs, isLoading } = useGetSongsByGenre(genre);
   const onPlay = useOnPlay(songs);
-  const { user } = useUser();
 
   // 再生ハンドラをメモ化
   const handlePlay = useCallback(
@@ -46,16 +43,12 @@ const GenreContent: React.FC<Props> = memo(({ genre }) => {
   return (
     <div className="flex flex-col gap-y-2 w-full p-6">
       {songs.map((song: Song) => (
-        <div key={song.id} className="flex items-center gap-x-4 w-full">
-          <div className="flex-1 min-w-0">
-            <SongList data={song} onClick={handlePlay} />
-          </div>
-          {user?.id && (
-            <div className="flex items-center gap-x-2">
-              <SongOptionsPopover song={song} />
-            </div>
-          )}
-        </div>
+        <SongListRow
+          key={song.id}
+          song={song}
+          onPlay={handlePlay}
+          hideOptionsWhenSignedOut
+        />
       ))}
     </div>
   );

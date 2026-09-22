@@ -128,6 +128,8 @@ describe("useGetLikedSongs", () => {
 
       expect(result.current.likedSongs).toHaveLength(1);
       expect(result.current.likedSongs[0].title).toBe("Liked Song 1");
+      // 正しいテーブルから取得する
+      expect(mockFrom).toHaveBeenCalledWith("liked_songs_regular");
       // ローカルDBは呼ばれない
       expect(mockGetCachedLikedSongs).not.toHaveBeenCalled();
     });

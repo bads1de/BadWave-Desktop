@@ -1,13 +1,10 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
 import Image from "next/image";
 
-import { createClient } from "@/libs/supabase/client";
 import { useUser } from "@/hooks/auth/useUser";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import useLogout from "@/hooks/auth/useLogout";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Palette, Database, Activity, BarChart2 } from "lucide-react";
@@ -18,24 +15,9 @@ import StatsOverview from "@/components/account/StatsOverview";
 import { SyncSection } from "@/components/account/SyncSection";
 
 const AccountPage = () => {
-  const router = useRouter();
   const { userDetails: user } = useUser();
-  const supabaseClient = createClient();
-  const [isLoading, setIsLoading] = useState(false);
+  const { logout: handleLogout, isLoading } = useLogout();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  const handleLogout = async () => {
-    setIsLoading(true);
-    try {
-      await supabaseClient.auth.signOut();
-      router.push("/");
-      toast.success("ログアウトしました");
-    } catch {
-      toast.error(ERROR_MESSAGES.LOGOUT_FAILED);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="bg-[#0a0a0f] h-full w-full overflow-hidden overflow-y-auto custom-scrollbar relative font-mono">

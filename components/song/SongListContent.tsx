@@ -2,8 +2,7 @@
 
 import { Song } from "@/types";
 import useOnPlay from "@/hooks/player/useOnPlay";
-import SongOptionsPopover from "@/components/song/SongOptionsPopover";
-import SongList from "@/components/song/SongList";
+import SongListRow from "@/components/song/SongListRow";
 import BulkDownloadButton from "@/components/downloads/BulkDownloadButton";
 import { memo, useCallback } from "react";
 import useGetLikedSongs from "@/hooks/data/useGetLikedSongs";
@@ -97,22 +96,17 @@ const SongListContent: React.FC<SongListContentProps> = memo(
 
         <div className="grid grid-cols-1 gap-y-3">
           {displayedSongs.map((song: Song, index: number) => (
-            <div
+            <SongListRow
               key={song.id}
-              className="flex items-center gap-x-4 w-full animate-fade-in"
+              song={song}
+              onPlay={handlePlay}
+              playlistId={playlistId}
+              playlistUserId={playlistUserId}
+              className="animate-fade-in"
               style={{
                 animationDelay: `${index * 50}ms`,
               }}
-            >
-              <div className="flex-1 min-w-0">
-                <SongList data={song} onClick={handlePlay} />
-              </div>
-              <SongOptionsPopover
-                song={song}
-                playlistId={playlistId}
-                playlistUserId={playlistUserId}
-              />
-            </div>
+            />
           ))}
         </div>
       </div>

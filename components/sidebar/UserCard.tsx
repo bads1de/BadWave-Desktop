@@ -5,10 +5,8 @@ import { Card } from "@/components/ui/card";
 import { User, Settings, LogOut } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/libs/supabase/client";
-import { toast } from "react-hot-toast";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import useAuthModal from "@/hooks/auth/useAuthModal";
+import useLogout from "@/hooks/auth/useLogout";
 import { ROUTES } from "@/constants";
 import { UserDetails } from "@/types";
 
@@ -19,24 +17,9 @@ interface UserCardProps {
 
 const UserCard: React.FC<UserCardProps> = ({ userDetails, isCollapsed }) => {
   const router = useRouter();
-  const supabaseClient = createClient();
-  const [, setIsLoading] = useState(false);
+  const { logout: handleLogout } = useLogout();
   const authModal = useAuthModal();
   const [, setIsHovered] = useState(false);
-
-  const handleLogout = async () => {
-    setIsLoading(true);
-
-    try {
-      await supabaseClient.auth.signOut();
-      router.push("/");
-      toast.success("ログアウトしました");
-    } catch {
-      toast.error(ERROR_MESSAGES.GENERIC_ERROR);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (!userDetails) {
     if (isCollapsed) {

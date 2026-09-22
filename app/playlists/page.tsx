@@ -1,31 +1,18 @@
 "use client";
 
 import Header from "@/components/header/Header";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { memo, useCallback } from "react";
+import PlaylistCard from "@/components/playlist/PlaylistCard";
+import { memo } from "react";
 import useGetPlaylists from "@/hooks/data/useGetPlaylists";
 import { useSyncPlaylists } from "@/hooks/sync/useSyncPlaylists";
 import { ROUTES } from "@/constants";
 
-
-
 const PlaylistContent: React.FC = memo(() => {
-  const router = useRouter();
-
   // バックグラウンド同期を開始
   useSyncPlaylists({ autoSync: true });
 
   // ローカルDBからデータを取得
   const { playlists, isLoading } = useGetPlaylists();
-
-  const handlePlaylistClick = useCallback(
-    (id: string) => {
-      router.push(ROUTES.PLAYLISTS_DETAIL(id));
-    },
-    [router]
-  );
 
   if (isLoading) {
     return (
@@ -57,56 +44,47 @@ const PlaylistContent: React.FC = memo(() => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 p-8 font-mono">
       {playlists.map((playlist, i) => (
-        <motion.div
+        <PlaylistCard
           key={playlist.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: i * 0.05 }}
-          className="group relative cursor-pointer"
-          onClick={() => handlePlaylistClick(playlist.id)}
-        >
-          {/* Main Card Container */}
-          <div className="relative bg-[#0a0a0f] border border-theme-500/20 p-4 transition-all duration-500 group-hover:border-theme-500/60 group-hover:bg-theme-500/5 overflow-hidden">
-            {/* HUD Decoration */}
-            <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-theme-500/0 group-hover:border-theme-500/40 transition-all duration-300" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-theme-500/0 group-hover:border-theme-500/40 transition-all duration-300" />
-            
-            {/* Top Info Bar */}
+          playlist={playlist}
+          href={ROUTES.PLAYLISTS_DETAIL(playlist.id)}
+          index={i}
+          cardClassName="group-hover:bg-theme-500/5 overflow-hidden"
+          imageClassName="transition-all duration-700 grayscale-[40%] group-hover:scale-110 group-hover:grayscale-0"
+          header={
+            /* Top Info Bar */
             <div className="flex items-center justify-between mb-3 text-[7px] text-theme-500/40 font-black tracking-widest uppercase">
-              <span>VOL_0x{i.toString(16).padStart(4, '0')}</span>
+              <span>VOL_0x{i.toString(16).padStart(4, "0")}</span>
               <span className="group-hover:text-theme-500 transition-colors">READY</span>
             </div>
-
-            {/* Image Container */}
-            <div className="relative aspect-square w-full overflow-hidden mb-4 border border-theme-500/10">
-              <Image
-                src={playlist.image_path || "/images/playlist.png"}
-                alt={playlist.title}
-                fill
-                className="object-cover transition-all duration-700 grayscale-[40%] group-hover:scale-110 group-hover:grayscale-0"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width:1280px) 25vw, 20vw"
-              />
-              {/* Overlay Decor */}
+          }
+          imageOverlay={
+            /* Overlay Decor */
+            <>
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent opacity-60" />
               <div className="absolute bottom-2 right-2 w-6 h-[1px] bg-theme-500/40 group-hover:w-10 transition-all" />
-            </div>
-
-            {/* Title and Metadata */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-black text-white truncate uppercase tracking-widest group-hover:text-theme-400 group-hover:translate-x-1 transition-all">
-                {playlist.title}
-              </h3>
-              <div className="flex items-center gap-3">
-                <div className="h-[1px] flex-grow bg-theme-500/10 group-hover:bg-theme-500/30" />
-                <span className="text-[8px] text-theme-500 font-bold tracking-tight">
-                  {/* Supabase の ID は数値で返るため文字列に揃えてから表示する */}
-                  0x{String(playlist.id).slice(0, 4).toUpperCase()}
-                </span>
-                <div className="w-1 h-1 bg-theme-500 animate-pulse" />
-              </div>
+            </>
+          }
+        >
+          {/* Title and Metadata */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-black text-white truncate uppercase tracking-widest group-hover:text-theme-400 group-hover:translate-x-1 transition-all">
+              {playlist.title}
+            </h3>
+            <div className="flex items-center gap-3">
+              <div className="h-[1px] flex-grow bg-theme-500/10 group-hover:bg-theme-500/30" />
+              <span className="text-[8px] text-theme-500 font-bold tracking-tight">
+                {/* Supabase の ID は数値で返るため文字列に揃えてから表示する */}
+                0x{String(playlist.id).slice(0, 4).toUpperCase()}
+              </span>
+              <div className="w-1 h-1 bg-theme-500 animate-pulse" />
             </div>
           </div>
-        </motion.div>
+
+          {/* HUD Decoration */}
+          <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-theme-500/0 group-hover:border-theme-500/40 transition-all duration-300" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-theme-500/0 group-hover:border-theme-500/40 transition-all duration-300" />
+        </PlaylistCard>
       ))}
     </div>
   );
@@ -164,4 +142,3 @@ const Playlist = () => {
 };
 
 export default Playlist;
-
