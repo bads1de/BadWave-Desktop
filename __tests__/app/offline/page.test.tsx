@@ -119,8 +119,10 @@ describe("OfflinePage", () => {
 
     fireEvent.click(screen.getByText("Offline Song 1"));
 
-    // プレイヤーへのセットアップを等検証
-    expect(mockPlayer.setLocalSongs).toHaveBeenCalledWith(mockSongs);
+    // プレイヤーへのセットアップを等検証（image_path は Song 型に合わせて正規化される）
+    expect(mockPlayer.setLocalSongs).toHaveBeenCalledWith([
+      { ...mockSongs[0], image_path: "" },
+    ]);
     expect(mockPlayer.setIds).toHaveBeenCalledWith(["song-1"]);
     expect(mockPlayer.setId).toHaveBeenCalledWith("song-1");
   });

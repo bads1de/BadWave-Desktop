@@ -32,7 +32,9 @@ const useLogout = ({
     setIsLoading(true);
 
     try {
-      await supabaseClient.auth.signOut();
+      // signOut は throw せず { error } を返すことが多い
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) throw error;
       toast.success(successMessage);
 
       if (redirectTo) {

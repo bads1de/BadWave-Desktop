@@ -65,7 +65,8 @@ export interface OfflineSong {
   // レンダラーの Song 型と構造的に互換にする
   // (DB 上は null になり得るが UI 層では string として扱う)
   song_path: string;
-  image_path: string;
+  // DB 列は nullable。UI 層の Song 型 (image_path: string) に渡す前に利用側で正規化する
+  image_path: string | null;
   original_song_path: string | null;
   original_image_path: string | null;
   duration?: number;

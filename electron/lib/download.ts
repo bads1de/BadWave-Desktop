@@ -42,6 +42,17 @@ export function downloadToFile(
     const client = url.startsWith("https") ? https : http;
     const file = fs.createWriteStream(destPath);
 
+    // リダイレクト再帰後は旧リスナーを無効化する。
+    // 旧ストリームの error/timeout が生きたままだと、成果物を消したり
+    // 外側の Promise を誤 reject してしまう
+    let settled = false;
+
+    const settle = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      fn();
+    };
+
     // 失敗時: ハンドルを閉じてから書きかけのファイルを削除する
     // (Windows では開いたままのファイルを削除できないため)
     const removePartialFile = () => {
@@ -51,16 +62,20 @@ export function downloadToFile(
     // 書き込みストリームの失敗（権限なし・容量不足・パス不正など）を拾う。
     // リスナーが無いと未処理の 'error' イベントでメインプロセスが落ちる
     file.on("error", (error) => {
-      removePartialFile();
-      reject(error);
+      settle(() => {
+        removePartialFile();
+        reject(error);
+      });
     });
 
     const request = client.get(url, (response) => {
       // ダウンロード中に接続が切れた場合も 'error' が発火する。
       // リスナーが無いと未処理イベントになり、Promise も未解決のまま残る
       response.on("error", (error) => {
-        removePartialFile();
-        reject(error);
+        settle(() => {
+          removePartialFile();
+          reject(error);
+        });
       });
 
       const statusCode = response.statusCode ?? 0;
@@ -69,13 +84,18 @@ export function downloadToFile(
       if (REDIRECT_STATUS_CODES.has(statusCode) && redirectUrl) {
         // リダイレクトループで無限に再帰しないよう上限を設ける
         if (redirectCount >= MAX_REDIRECTS) {
-          removePartialFile();
-          reject(new Error(`Too many redirects for ${url}`));
+          settle(() => {
+            removePartialFile();
+            reject(new Error(`Too many redirects for ${url}`));
+          });
           return;
         }
 
-        // ハンドルを完全に閉じてから再帰的にダウンロードし直す
-        // (Windows で同一パスを同時に開こうとすると EBUSY になるのを防ぐ)
+        // 旧リスナーを無効化してからリクエストを破棄し、再帰先の結果で外側を settle する
+        // (Windows で同一パスを同時に開こうとすると EBUSY になるのを防ぐため file.close 後に再帰)
+        settled = true;
+        request.destroy();
+        response.destroy();
         const nextOptions = { ...options, redirectCount: redirectCount + 1 };
         file.close(() => {
           downloadToFile(redirectUrl, destPath, nextOptions)
@@ -86,10 +106,14 @@ export function downloadToFile(
       }
 
       if (statusCode !== 200) {
-        removePartialFile();
-        reject(
-          new Error(`Download failed with status code: ${statusCode} for ${url}`),
-        );
+        settle(() => {
+          removePartialFile();
+          reject(
+            new Error(
+              `Download failed with status code: ${statusCode} for ${url}`,
+            ),
+          );
+        });
         return;
       }
 
@@ -105,19 +129,25 @@ export function downloadToFile(
 
       response.pipe(file);
       file.on("finish", () => {
-        file.close(() => resolve());
+        settle(() => {
+          file.close(() => resolve());
+        });
       });
     });
 
     request.on("error", (error) => {
-      removePartialFile();
-      reject(error);
+      settle(() => {
+        removePartialFile();
+        reject(error);
+      });
     });
 
     request.setTimeout(timeoutMs, () => {
-      request.destroy();
-      removePartialFile();
-      reject(new Error(`Download timeout for ${url}`));
+      settle(() => {
+        request.destroy();
+        removePartialFile();
+        reject(new Error(`Download timeout for ${url}`));
+      });
     });
   });
 }

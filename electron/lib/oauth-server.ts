@@ -39,7 +39,10 @@ export function startOAuthServer() {
       if (!res.headersSent) {
         res.writeHead(500, { "Content-Type": "text/plain" });
       }
-      res.end("Internal Server Error");
+      // 既にレスポンスを返し済みの場合は二重 end しない
+      if (!res.writableEnded) {
+        res.end("Internal Server Error");
+      }
     }
   });
 

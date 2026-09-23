@@ -76,6 +76,22 @@ describe("hooks/auth/useLogout", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
+  it("signOut が throw せず error を返した場合もエラーを表示すること", async () => {
+    // Supabase の signOut は throw せず { error } を返すことが多い
+    mockSignOut.mockResolvedValue({ error: new Error("signOut failed") });
+    const { result } = renderHook(() => useLogout());
+
+    await act(async () => {
+      await result.current.logout();
+    });
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(ERROR_MESSAGES.LOGOUT_FAILED);
+    });
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
   it("処理中はisLoadingがtrueになること", async () => {
     let resolveSignOut: (value: unknown) => void = () => {};
     mockSignOut.mockImplementation(
