@@ -1,0 +1,54 @@
+# Supabase Free プランの pause（約7日の非アクティブ）を防ぐ。
+# 鍵は Secrets に置く。Service Role は絶対に入れないこと。
+#
+# Secrets (GitHub Environment "supabase" 配下):
+#   secrets.SUPABASE_URL          … https://xxxx.supabase.co
+#   secrets.SUPABASE_ANON_KEY     … anon (publishable) key のみ
+#
+# 第三者 Action は使わず、runner 組み込みの curl のみで叩く。
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # 毎日 UTC 6:00（JST 15:00）。7日より十分短い間隔。
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Environment secrets (Settings → Environments → supabase) を参照する
+    environment: supabase
+    steps:
+      - name: Hit Supabase API (keep project active)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_ANON_KEY}" ]; then
+            echo "SUPABASE_URL / SUPABASE_ANON_KEY secrets are required" >&2
+            exit 1
+          fi
+          BASE="${SUPABASE_URL%/}"
+          # 注意: /rest/v1/ のルートや /auth/v1/health はゲートウェイ応答のみで
+          # Postgres に届かず、pause判定の database activity としてカウントされない。
+          # PostgREST 経由で実テーブルに SELECT を投げること（空配列 [] でも可）。
+          echo "Querying songs (PostgREST -> Postgres)..."
+          code=$(curl -sS -o /tmp/keepalive_resp.json -w "%{http_code}" --max-time 20 \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Accept: application/json" \
+            "${BASE}/rest/v1/songs?select=id&limit=1") || code=000
+          echo "songs -> HTTP ${code}"
+          head -c 500 /tmp/keepalive_resp.json; echo
+          # 200 のみ成功扱い。401/404 を無視すると「グリーンなのに pause」が再発する。
+          if [ "${code}" != "200" ]; then
+            echo "DB query failed (expected HTTP 200, got ${code}). Check RLS / anon key." >&2
+            exit 1
+          fi
+          echo "keep-alive done"
