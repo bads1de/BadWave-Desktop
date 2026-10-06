@@ -11,12 +11,14 @@ icon: public/logo.png
 # ファイル設定
 files:
   - electron/main.js
+  - electron/*.js
   - electron/preload/**/*
   - electron/lib/**/*
   - electron/ipc/**/*
   - electron/db/**/*
   - electron/utils/**/*
   - electron/shortcuts/**/*
+  - electron/static/**/*
   - package.json
   - public/**/*
   # Electronメインプロセスで必要なネイティブモジュール

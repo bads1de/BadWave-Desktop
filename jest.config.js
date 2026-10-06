@@ -42,6 +42,11 @@ module.exports = {
       testMatch: ["**/__tests__/**/*.test.ts"],
       runner: "@kayahr/jest-electron-runner/main",
       testEnvironment: "node",
+      testEnvironmentOptions: {
+        // ESM専用パッケージ (music-metadata 等) を Node.js の require(esm) と同じ
+        // 条件で解決させる。テスト側は jest.mock で差し替えるため実際の読込はしない。
+        customExportConditions: ["node", "node-addons", "module-sync"],
+      },
       ...commonConfig,
     },
     {

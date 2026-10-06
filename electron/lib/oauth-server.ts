@@ -19,8 +19,25 @@ export function startOAuthServer() {
         const code = url.searchParams.get("code");
         const error = url.searchParams.get("error");
 
-        const htmlPath = path.join(__dirname, "static", "auth-callback.html");
-        const html = fs.readFileSync(htmlPath, "utf-8");
+        const htmlPath = path.join(__dirname, "..", "static", "auth-callback.html");
+        // oauth-server.ts は electron/lib/ 配下にあるため、static へは ".." で上がる。
+        // 旧コードは path.join(__dirname, "static", ...) で electron/lib/static/ を
+        // 参照していたため ENOENT → 500 になっていた。
+        // 万が一 HTML が同梱漏れでも code の受け渡し自体は継続できるよう、
+        // 読み込み失敗時はフォールバック HTML を返す。
+        let html: string;
+        try {
+          html = fs.readFileSync(htmlPath, "utf-8");
+        } catch (readError) {
+          console.error(
+            `[OAuth] コールバックHTMLの読み込みに失敗しました (${htmlPath}):`,
+            readError,
+          );
+          html =
+            '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>認証完了</title></head>' +
+            '<body style="background:#0a0a0f;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">' +
+            "<h1>認証が完了しました。このタブを閉じてアプリに戻ってください。</h1></body></html>";
+        }
 
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(html);

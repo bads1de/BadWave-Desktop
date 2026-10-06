@@ -1,5 +1,7 @@
 import { startOAuthServer, stopOAuthServer } from "../../../electron/lib/oauth-server";
 import * as http from "http";
+import * as fs from "fs";
+import * as path from "path";
 
 jest.mock("electron", () => ({
   app: {
@@ -33,6 +35,16 @@ describe("oauth-server", () => {
   it("should bind to 127.0.0.1", () => {
     startOAuthServer();
     expect(listenSpy).toHaveBeenCalledWith(4321, "127.0.0.1", expect.any(Function));
+  });
+
+  it("コールバック用HTMLが oauth-server から解決できる位置に存在する", () => {
+    // oauth-server.ts は electron/lib/ 配下にあるため ".." で static を参照する。
+    // 参照先を間違えると /auth/callback が ENOENT → 500 になる（過去の不具合）。
+    const htmlPath = path.join(
+      __dirname,
+      "../../../electron/static/auth-callback.html",
+    );
+    expect(fs.existsSync(htmlPath)).toBe(true);
   });
 
   it("listen に失敗してもクラッシュせず、再度起動を試みられる", () => {
