@@ -1,4 +1,10 @@
 // カラースキームのプリセット定義
+//
+// ※ 本ファイルの共通部分（ColorScheme / colorSchemes / getColorSchemeById）は
+//   web（badwave/constants/colorSchemes.ts）と完全に同一。
+//   意図的な差分は DEFAULT_COLOR_SCHEME_ID のみ（web="violet" / desktop="cyberpunk"。各環境のテストで固定）。
+//   変更する際は 2 環境両方に同じ差分を適用すること。
+//   mobile の対応物は constants/ThemeColors.ts だが、テーマ集合・キー構造が異なるため統合しない。
 export interface ColorScheme {
   id: string;
   name: string;
@@ -183,4 +189,5 @@ export const getColorSchemeById = (id: string): ColorScheme => {
   return colorSchemes.find((scheme) => scheme.id === id) || colorSchemes[0];
 };
 
+// web="violet" / desktop="cyberpunk" の意図的な差（各環境のテストで固定）。
 export const DEFAULT_COLOR_SCHEME_ID = "cyberpunk";

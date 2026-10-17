@@ -46,10 +46,38 @@
   差分を確認すること」という注意喚起コメントを追加（drift の可視化）
 - 検証: tsc PASS、実コード差分ゼロ
 
+### 3. `constants/colorSchemes.ts`（テーマ定義）
+
+- 状態: **web↔desktop は「DEFAULT 以外完全一致」= 統合候補、mobile は統合不可**
+  - 機械比較の結果、差分は `DEFAULT_COLOR_SCHEME_ID` の1行のみ（web="violet" / desktop="cyberpunk"）
+  - 当該差は**意図的**（各環境のテストで値を固定: desktop=`__tests__/constants/colorSchemes.test.ts`）
+  - mobile の対応物は `constants/ThemeColors.ts` — 5テーマ・別キー構造で統合不可
+- 対応: web/desktop の冒頭に「共通部分は完全に同一・差分は意図的な DEFAULT のみ」の注記、
+  `DEFAULT_COLOR_SCHEME_ID` 行にも意図差の注記を追加
+- 検証: 定数テスト desktop 33 / web 25 件 PASS、renderer tsc PASS、実コード差分ゼロ
+
+### 4. `constants/index.ts`（純粋定数）
+
+- 状態: **ファイル全体では統合不可。定数単位で選別可能**:
+  - 3環境同一: `CACHE_PREFIX`（"@query-cache"）/ `CACHE_CONFIG.staleTime`（10分）
+  - web=desktop 完全一致: `videoIds` / `genres`
+  - 意図的な差: `CACHE_CONFIG.gcTime`（web/desktop=30分 / mobile=7日）
+  - 上位集合: `CACHED_QUERIES`（本環境 = web + 5キー。共通15キーは値まで一致）/
+    `TABLES`（本環境 = web + `PLAY_HISTORY`）
+  - 別体系: mobile の `CACHED_QUERIES` / `SUPABASE_TABLES`（キー命名が異なる）
+  - 環境固有: `PROTECTED_ROUTES` / `DURATIONS`（web/desktop は秒・mobile は
+    `ANIMATION_DURATION` ミリ秒）/ `SPRING_*` / `ROUTES`
+- 知見: web の `PROTECTED_ROUTES` は `"/playlist"`（単数）で、実ルート `"/playlists"` を
+  `startsWith` の prefix 一致で偶然カバーしている。本環境は `"/playlists"` を保護しない（経緯不明）
+- 対応: 3環境の `constants/index.ts` 冒頭に定数単位の drift マップ注記を追加
+- 検証: 定数テスト desktop 33 / web 25 / mobile 62 件 + renderer tsc PASS。実コード差分ゼロ
+
 ## 次の候補（未着手）
 
-- `constants/index.ts` の `CACHE_CONFIG` など、3環境で一致・かつ安全に統合できる純粋定数
-- `constants/colorSchemes.ts`（テーマ定義）— 構造を確認して統合可否を判断
+- `PROTECTED_ROUTES` の単数/複数整理: web の `"/playlist"` を `"/playlists"` に直し、
+  `proxy.ts` のテストに `/playlists` 保護のケースを追加（本環境の扱いも要検討）
+- web↔desktop のバイト一致ファイルの棚卸し: 件数が計測方法で揺れる（初版 14 個 / 再計測 11 個）。
+  スクリプトを固定して再計測し、統合候補リストを確定させる
 - 将来的に `@badwave/shared` パッケージを作り、真実を1箇所に集約する
   （desktop 内の `electron/lib/error.ts` → `libs/utils/error.ts` パターンを横展開する形）
 

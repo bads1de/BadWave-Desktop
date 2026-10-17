@@ -11,6 +11,14 @@ export {
   ELECTRON_STORE_KEYS,
 } from "../electron/constants";
 
+// ※ 3環境（web / desktop / mobile）共通化候補の純粋定数群。
+//   drift 状況（2026-10-18 調査時点。変更する際は 3 環境すべてで差分を確認すること）:
+//   - CACHE_PREFIX: 3 環境すべて同一（"@query-cache"）
+//   - videoIds / genres: web=desktop 完全に同一（mobile は対応定義なし）
+//   - CACHE_CONFIG: staleTime は 3 環境同一（10分）。gcTime は web/desktop=30分・mobile=7日で意図的に異なる
+//   - CACHED_QUERIES: 本ファイルは web の上位集合（共通キーは値まで一致、追加キーは desktop 専用）。mobile は別キー体系
+//   - TABLES: 本ファイルは web + PLAY_HISTORY。mobile は SUPABASE_TABLES（キー命名が異なる）
+//   - PROTECTED_ROUTES / DURATIONS / SPRING_SIDEBAR / ROUTES: 環境ごとに異なる（統合しない）
 export const videoIds = [
   { id: 1, name: "synthwave radio", videoId: "4xDzrJKXOOY" },
   { id: 2, name: "lofi hip hop radio", videoId: "jfKfPfyJRdk" },
