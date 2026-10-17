@@ -68,14 +68,20 @@
   - 環境固有: `PROTECTED_ROUTES` / `DURATIONS`（web/desktop は秒・mobile は
     `ANIMATION_DURATION` ミリ秒）/ `SPRING_*` / `ROUTES`
 - 知見: web の `PROTECTED_ROUTES` は `"/playlist"`（単数）で、実ルート `"/playlists"` を
-  `startsWith` の prefix 一致で偶然カバーしている。本環境は `"/playlists"` を保護しない（経緯不明）
+  `startsWith` の prefix 一致で偶然カバーしている。本環境は `"/playlists"` を保護しない（→ 5 で判断記録）
 - 対応: 3環境の `constants/index.ts` 冒頭に定数単位の drift マップ注記を追加
 - 検証: 定数テスト desktop 33 / web 25 / mobile 62 件 + renderer tsc PASS。実コード差分ゼロ
 
+### 5. プレイリストページの未認証時挙動（判断のみ・コード変更なし）
+
+- 経緯: web 側の `PROTECTED_ROUTES` 整理（"/playlist" → "/playlists"）に伴い本環境の扱いを確認
+- 判断: 本環境は `middleware.ts` の matcher が `/account/:path*` / `/liked/:path*` のみで、
+  `/playlists` では middleware 自体が実行されない。未認証時は `useGetPlaylists` の
+  `enabled: !!user?.id` により空状態を表示する local-first 設計のため、**変更しない**
+- 検証: コード変更なし（テスト影響なし）
+
 ## 次の候補（未着手）
 
-- `PROTECTED_ROUTES` の単数/複数整理: web の `"/playlist"` を `"/playlists"` に直し、
-  `proxy.ts` のテストに `/playlists` 保護のケースを追加（本環境の扱いも要検討）
 - web↔desktop のバイト一致ファイルの棚卸し: 件数が計測方法で揺れる（初版 14 個 / 再計測 11 個）。
   スクリプトを固定して再計測し、統合候補リストを確定させる
 - 将来的に `@badwave/shared` パッケージを作り、真実を1箇所に集約する
