@@ -38,7 +38,10 @@ export interface SectionQueryOptions<T> {
   select?: (data: T | undefined) => T | undefined;
   /** Web オフライン時・ネットワークエラー時の戻り値（デフォルト undefined） */
   offlineFallback?: T;
-  /** Electron の getSectionData が空だった場合の戻り値（セクション系フックで使用） */
+  /**
+   * Electron のセクションキャッシュが空で、Web 取得もできない場合の戻り値。
+   * オンライン時は空キャッシュでも Web 取得を試みる。
+   */
   emptySectionFallback?: T;
   staleTime?: number;
   gcTime?: number;
@@ -73,27 +76,33 @@ export function useSectionQuery<T>(options: SectionQueryOptions<T>) {
   const queryFn = async (): Promise<T | undefined> => {
     if (electron && electronAPI.isElectron()) {
       const { sectionKey, sectionType, getLocal } = electron;
-      if (getLocal) {
-        
-        const local = await getLocal();
+      try {
+        if (getLocal) {
+          const local = await getLocal();
 
-        if (local != null) return local;
+          if (local != null) return local;
 
-        // ローカルに見つからない場合は Web 取得にフォールバック
-      } else if (sectionKey) {
-        const cached = await electronAPI.cache.getSectionData<T>(
-          sectionKey,
-          sectionType ?? "songs",
-        );
+          // ローカルに見つからない場合は Web 取得にフォールバック
+        } else if (sectionKey) {
+          const cached = await electronAPI.cache.getSectionData<T>(
+            sectionKey,
+            sectionType ?? "songs",
+          );
 
-        if (cached != null) return cached;
-        return emptySectionFallback ?? undefined;
+          // 空配列は「キャッシュ未同期」として Web 取得にフォールバックする。
+          // IPC ハンドラは取得失敗時に reject するため、ここでの空配列は
+          // 正常な「データなし」だけを意味する。
+          if (hasData(cached)) return cached;
+        }
+      } catch (error) {
+        // ローカルDBの読み取り失敗は、オンラインなら Web 取得で回復させる
+        console.error("[useSectionQuery] local cache read failed:", error);
       }
     }
 
     // Web オフライン時はフェッチをスキップ（キャッシュがあればそれを表示）
     if (!onlineManager.isOnline()) {
-      return offlineFallback ?? undefined;
+      return offlineFallback ?? emptySectionFallback ?? undefined;
     }
 
     try {
@@ -101,7 +110,7 @@ export function useSectionQuery<T>(options: SectionQueryOptions<T>) {
     } catch (error) {
       // ネットワークエラー・オフライン時はスローせずにフォールバック
       if (!onlineManager.isOnline() || isNetworkError(error)) {
-        return offlineFallback ?? undefined;
+        return offlineFallback ?? emptySectionFallback ?? undefined;
       }
       throw error;
     }
@@ -123,4 +132,10 @@ export function useSectionQuery<T>(options: SectionQueryOptions<T>) {
   const isPaused = query.fetchStatus === "paused";
 
   return { ...query, isPaused };
+}
+
+/** 配列は要素がある場合のみ、それ以外は null/undefined 以外をデータありとみなす */
+function hasData<T>(value: T | null | undefined): value is T {
+  if (Array.isArray(value)) return value.length > 0;
+  return value != null;
 }
