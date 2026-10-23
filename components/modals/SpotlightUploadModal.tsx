@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useRef } from "react";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
 import { RiVideoLine, RiUploadCloud2Line } from "react-icons/ri";
 
@@ -10,9 +10,10 @@ import Button from "@/components/common/Button";
 
 import useSpotLightUploadModal from "@/hooks/modal/useSpotLightUpload";
 import useSpotlightUploadMutation from "@/hooks/mutations/useSpotlightUploadMutation";
+import useFilePreview from "@/hooks/utils/useFilePreview";
+import useResetOnClose from "@/hooks/utils/useResetOnClose";
 
 const SpotlightUploadModal: React.FC = memo(() => {
-  const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const spotlightUploadModal = useSpotLightUploadModal();
@@ -21,53 +22,49 @@ const SpotlightUploadModal: React.FC = memo(() => {
   const { mutateAsync, isPending: isLoading } =
     useSpotlightUploadMutation(spotlightUploadModal);
 
-  const { register, handleSubmit, reset, setValue, watch } =
-    useForm<FieldValues>({
-      defaultValues: {
-        video: null,
-        title: "",
-        author: "",
-        genre: "",
-        description: "",
-      },
-    });
+  const { register, handleSubmit, reset, setValue } = useForm<FieldValues>({
+    defaultValues: {
+      video: null,
+      title: "",
+      author: "",
+      genre: "",
+      description: "",
+    },
+  });
 
-  const video = watch("video");
+  // Blob URL の生成・解放は共通フックに任せる
+  const {
+    previewUrl: videoPreview,
+    showPreview,
+    clearPreview,
+  } = useFilePreview();
 
-  useEffect(() => {
-    if (video && video.length > 0) {
-      const file = video[0];
-      setVideoPreview(URL.createObjectURL(file));
-    }
-  }, [video]);
+  const resetForm = useCallback(() => {
+    reset();
+    clearPreview();
+  }, [reset, clearPreview]);
 
-  useEffect(() => {
-    if (!spotlightUploadModal.isOpen) {
-      reset();
-      setVideoPreview(null);
-    }
-  }, [spotlightUploadModal.isOpen, reset]);
+  // ストア経由で閉じられた場合もフォームとプレビューをリセットする
+  useResetOnClose(spotlightUploadModal.isOpen, resetForm);
 
   const onFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
         setValue("video", [file]);
-        setVideoPreview(URL.createObjectURL(file));
+        showPreview(file);
       }
     },
-    [setValue]
+    [setValue, showPreview]
   );
 
   const onChange = useCallback(
     (open: boolean) => {
       if (!open) {
-        reset();
-        setVideoPreview(null);
         spotlightUploadModal.onClose();
       }
     },
-    [reset, spotlightUploadModal]
+    [spotlightUploadModal]
   );
 
   const onSubmit: SubmitHandler<FieldValues> = useCallback(
@@ -83,14 +80,13 @@ const SpotlightUploadModal: React.FC = memo(() => {
         });
 
         // 成功時の処理はミューテーションのonSuccessで行われる
-        reset();
-        setVideoPreview(null);
+        resetForm();
       } catch (error) {
         // エラー処理はミューテーション内で行われる
         console.error("Spotlight upload error:", error);
       }
     },
-    [mutateAsync, reset]
+    [mutateAsync, resetForm]
   );
 
   return (

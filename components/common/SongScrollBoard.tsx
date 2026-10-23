@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback, memo, ReactNode } from "react";
+import { useCallback, memo, ReactNode } from "react";
 import SongItem from "@/components/song/SongItem";
 import { Song } from "@/types";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
+import useHoverArrows from "@/hooks/utils/useHoverArrows";
 import { motion } from "framer-motion";
 import { DURATIONS } from "@/constants";
 
@@ -44,7 +45,7 @@ const SongScrollBoard: React.FC<SongScrollBoardProps> = ({
   className,
   emptyState = DEFAULT_EMPTY_STATE,
 }) => {
-  const [showArrows, setShowArrows] = useState(false);
+  const { showArrows, onMouseEnter, onMouseLeave } = useHoverArrows();
 
   const handlePlay = useCallback(
     (id: string) => {
@@ -60,8 +61,8 @@ const SongScrollBoard: React.FC<SongScrollBoardProps> = ({
   return (
     <div
       className={`${className ?? ""} relative`}
-      onMouseEnter={() => setShowArrows(true)}
-      onMouseLeave={() => setShowArrows(false)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <ScrollableContainer showArrows={showArrows}>
         <motion.div

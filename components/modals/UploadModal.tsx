@@ -1,14 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  useState,
-  useRef,
-  useEffect,
-  DragEvent,
-  memo,
-  useCallback,
-} from "react";
+import { useState, useRef, DragEvent, memo, useCallback } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
@@ -16,6 +9,8 @@ import Image from "next/image";
 import useUploadModal from "@/hooks/modal/useUploadModal";
 import { useUser } from "@/hooks/auth/useUser";
 import useUploadSongMutation from "@/hooks/mutations/useUploadSongMutation";
+import useFilePreview from "@/hooks/utils/useFilePreview";
+import useResetOnClose from "@/hooks/utils/useResetOnClose";
 
 import Modal from "./Modal";
 import Input from "../common/Input";
@@ -27,8 +22,6 @@ import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 const UploadModal: React.FC = memo(() => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -41,19 +34,36 @@ const UploadModal: React.FC = memo(() => {
   const { mutateAsync, isPending: isLoading } =
     useUploadSongMutation(uploadModal);
 
-  const { register, handleSubmit, reset, watch, setValue } =
-    useForm<FieldValues>({
-      defaultValues: {
-        author: "",
-        title: "",
-        lyrics: "",
-        song: null,
-        image: null,
-      },
-    });
+  const { register, handleSubmit, reset, setValue } = useForm<FieldValues>({
+    defaultValues: {
+      author: "",
+      title: "",
+      lyrics: "",
+      song: null,
+      image: null,
+    },
+  });
 
-  const song = watch("song");
-  const image = watch("image");
+  // Blob URL の生成・解放は共通フックに任せる
+  const {
+    previewUrl: imagePreview,
+    showPreview: showImagePreview,
+    clearPreview: clearImagePreview,
+  } = useFilePreview();
+  const {
+    previewUrl: audioPreview,
+    showPreview: showAudioPreview,
+    clearPreview: clearAudioPreview,
+  } = useFilePreview();
+
+  const resetForm = useCallback(() => {
+    reset();
+    clearImagePreview();
+    clearAudioPreview();
+  }, [reset, clearImagePreview, clearAudioPreview]);
+
+  // ストア経由で閉じられた場合もフォームとプレビューをリセットする
+  useResetOnClose(uploadModal.isOpen, resetForm);
 
   const handleFiles = useCallback(
     (files: FileList) => {
@@ -62,16 +72,16 @@ const UploadModal: React.FC = memo(() => {
 
         if (file.type.startsWith("audio/")) {
           setValue("song", [file]);
-          setAudioPreview(URL.createObjectURL(file));
+          showAudioPreview(file);
         } else if (file.type.startsWith("image/")) {
           setValue("image", [file]);
-          setImagePreview(URL.createObjectURL(file));
+          showImagePreview(file);
         } else {
           toast.error(ERROR_MESSAGES.UNSUPPORTED_FILE_FORMAT);
         }
       }
     },
-    [setValue]
+    [setValue, showAudioPreview, showImagePreview]
   );
 
   const handleFileDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -99,38 +109,13 @@ const UploadModal: React.FC = memo(() => {
     setIsDragging(false);
   }, []);
 
-  useEffect(() => {
-    if (image && image.length > 0) {
-      const file = image[0];
-      setImagePreview(URL.createObjectURL(file));
-    }
-  }, [image]);
-
-  useEffect(() => {
-    if (song && song.length > 0) {
-      const file = song[0];
-      setAudioPreview(URL.createObjectURL(file));
-    }
-  }, [song]);
-
-  useEffect(() => {
-    if (!uploadModal.isOpen) {
-      reset();
-      setImagePreview(null);
-      setAudioPreview(null);
-    }
-  }, [uploadModal.isOpen, reset]);
-
   const onChange = useCallback(
     (open: boolean) => {
       if (!open) {
-        reset();
-        setImagePreview(null);
-        setAudioPreview(null);
         uploadModal.onClose();
       }
     },
-    [reset, uploadModal]
+    [uploadModal]
   );
 
   const onSubmit: SubmitHandler<FieldValues> = useCallback(
@@ -155,15 +140,13 @@ const UploadModal: React.FC = memo(() => {
         });
 
         // 成功時の処理はミューテーションのonSuccessで行われるため、ここでは最小限の処理のみ。
-        reset();
-        setImagePreview(null);
-        setAudioPreview(null);
+        resetForm();
       } catch (error) {
         // エラー処理はミューテーション内で行われるため、ここでは何もしない
         console.error("Upload error:", error);
       }
     },
-    [mutateAsync, reset, user, selectedGenres, setImagePreview, setAudioPreview]
+    [mutateAsync, resetForm, user, selectedGenres]
   );
 
   return (

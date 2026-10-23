@@ -1,18 +1,19 @@
 "use client";
 
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useRef } from "react";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
 import { RiPulseLine } from "react-icons/ri";
 
 import usePulseUploadModal from "@/hooks/modal/usePulseUploadModal";
 import usePulseUploadMutation from "@/hooks/mutations/usePulseUploadMutation";
+import useFilePreview from "@/hooks/utils/useFilePreview";
+import useResetOnClose from "@/hooks/utils/useResetOnClose";
 
 import Modal from "./Modal";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 
 const PulseUploadModal: React.FC = memo(() => {
-  const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const pulseUploadModal = usePulseUploadModal();
@@ -20,51 +21,47 @@ const PulseUploadModal: React.FC = memo(() => {
   const { mutateAsync, isPending: isLoading } =
     usePulseUploadMutation(pulseUploadModal);
 
-  const { register, handleSubmit, reset, setValue, watch } =
-    useForm<FieldValues>({
-      defaultValues: {
-        music: null,
-        title: "",
-        genre: "",
-      },
-    });
+  const { register, handleSubmit, reset, setValue } = useForm<FieldValues>({
+    defaultValues: {
+      music: null,
+      title: "",
+      genre: "",
+    },
+  });
 
-  const music = watch("music");
+  // Blob URL の生成・解放は共通フックに任せる
+  const {
+    previewUrl: audioPreview,
+    showPreview,
+    clearPreview,
+  } = useFilePreview();
 
-  useEffect(() => {
-    if (music && music.length > 0) {
-      const file = music[0];
-      setAudioPreview(URL.createObjectURL(file));
-    }
-  }, [music]);
+  const resetForm = useCallback(() => {
+    reset();
+    clearPreview();
+  }, [reset, clearPreview]);
 
-  useEffect(() => {
-    if (!pulseUploadModal.isOpen) {
-      reset();
-      setAudioPreview(null);
-    }
-  }, [pulseUploadModal.isOpen, reset]);
+  // ストア経由で閉じられた場合もフォームとプレビューをリセットする
+  useResetOnClose(pulseUploadModal.isOpen, resetForm);
 
   const onFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
         setValue("music", [file]);
-        setAudioPreview(URL.createObjectURL(file));
+        showPreview(file);
       }
     },
-    [setValue],
+    [setValue, showPreview],
   );
 
   const onChange = useCallback(
     (open: boolean) => {
       if (!open) {
-        reset();
-        setAudioPreview(null);
         pulseUploadModal.onClose();
       }
     },
-    [reset, pulseUploadModal],
+    [pulseUploadModal],
   );
 
   const onSubmit: SubmitHandler<FieldValues> = useCallback(
@@ -76,13 +73,12 @@ const PulseUploadModal: React.FC = memo(() => {
           musicFile: values.music?.[0] || null,
         });
 
-        reset();
-        setAudioPreview(null);
+        resetForm();
       } catch (error) {
         console.error("Pulse upload error:", error);
       }
     },
-    [mutateAsync, reset],
+    [mutateAsync, resetForm],
   );
 
   return (

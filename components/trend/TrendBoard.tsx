@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, memo, useCallback } from "react";
+import { memo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getPlayableImagePath } from "@/libs/songUtils";
 import { motion } from "framer-motion";
 import useOnPlay from "@/hooks/player/useOnPlay";
+import useHoverArrows from "@/hooks/utils/useHoverArrows";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
 import { Song } from "@/types";
 
@@ -21,12 +22,8 @@ interface TrendBoardProps {
 
 const TrendBoard: React.FC<TrendBoardProps> = memo(
   ({ className = "", songs = [], isLoading = false, error = null }) => {
-    const [showArrows, setShowArrows] = useState(false);
+    const { showArrows, onMouseEnter, onMouseLeave } = useHoverArrows();
     const onPlay = useOnPlay(songs);
-
-    // マウスイベントハンドラをメモ化
-    const handleMouseEnter = useCallback(() => setShowArrows(true), []);
-    const handleMouseLeave = useCallback(() => setShowArrows(false), []);
 
     // 再生クリックハンドラをメモ化
     const handlePlay = useCallback(
@@ -46,8 +43,8 @@ const TrendBoard: React.FC<TrendBoardProps> = memo(
     return (
       <div
         className={`${className}`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         {isLoading ? (
           <p className="text-center text-cyan-400 animate-pulse">LOADING...</p>

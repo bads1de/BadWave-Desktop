@@ -3,7 +3,7 @@
 import { Playlist } from "@/types";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
 import PlaylistCard from "@/components/playlist/PlaylistCard";
-import { useState } from "react";
+import useHoverArrows from "@/hooks/utils/useHoverArrows";
 import { ROUTES, DURATIONS } from "@/constants";
 
 interface PublicPlaylistBoardProps {
@@ -13,14 +13,14 @@ interface PublicPlaylistBoardProps {
 const PublicPlaylistBoard: React.FC<PublicPlaylistBoardProps> = ({
   playlists,
 }) => {
-  const [showArrows, setShowArrows] = useState(false);
+  const { showArrows, onMouseEnter, onMouseLeave } = useHoverArrows();
 
   return (
     <section className="mb-4">
       {/* プレイリストスクロールエリア */}
       <div
-        onMouseEnter={() => setShowArrows(true)}
-        onMouseLeave={() => setShowArrows(false)}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         <ScrollableContainer showArrows={showArrows}>
           {playlists.map((playlist, i) => (

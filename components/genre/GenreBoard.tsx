@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, memo } from "react";
+import { memo } from "react";
 import GenreCard from "./GenreCard";
 import ScrollableContainer from "@/components/common/ScrollableContainer";
+import useHoverArrows from "@/hooks/utils/useHoverArrows";
 
 export interface GenreData {
   id: number;
@@ -26,13 +27,13 @@ const genreData: GenreData[] = [
 ];
 
 const GenreBoard: React.FC<GenreBoardProps> = memo(({ className = "" }) => {
-  const [showArrows, setShowArrows] = useState(false);
+  const { showArrows, onMouseEnter, onMouseLeave } = useHoverArrows();
 
   return (
     <div
       className={`${className}`}
-      onMouseEnter={() => setShowArrows(true)}
-      onMouseLeave={() => setShowArrows(false)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <ScrollableContainer showArrows={showArrows}>
         {genreData.map((genre) => (
