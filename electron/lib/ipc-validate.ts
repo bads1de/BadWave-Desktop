@@ -304,6 +304,12 @@ export const sectionQuerySchema = z.object({
   type: z.enum(["songs", "spotlights", "playlists"]),
 });
 
+/** 音楽ライブラリのスキャン入力 (directoryPath, forceFullScan) */
+export const scanLibrarySchema = z.tuple([
+  filePathSchema,
+  z.boolean().optional(),
+]);
+
 /** ページネーション (offset/limit) */
 export const paginationSchema = z.object({
   offset: z.number().int().nonnegative().max(1_000_000),

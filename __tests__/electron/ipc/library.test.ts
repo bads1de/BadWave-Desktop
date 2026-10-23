@@ -30,6 +30,7 @@ jest.mock("fs", () => ({
 
 jest.mock("path", () => ({
   join: (...args: string[]) => args.join("/"),
+  resolve: (p: string) => p,
   extname: (file: string) => {
     const parts = file.split(".");
     return parts.length > 1 ? "." + parts[parts.length - 1] : "";
@@ -57,6 +58,7 @@ jest.mock("@/electron/lib/window-manager", () => ({
 
 describe("IPC: Library", () => {
   let handlers: Record<string, Function> = {};
+  let allowDirectory!: (directoryPath: string) => void;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,6 +68,7 @@ describe("IPC: Library", () => {
     });
     
     jest.isolateModules(() => {
+        ({ allowDirectory } = require("@/electron/lib/allowed-directories"));
         const { setupLibraryHandlers } = require("@/electron/ipc/library");
         setupLibraryHandlers();
     });
@@ -99,6 +102,7 @@ describe("IPC: Library", () => {
 
       (fs.promises.stat as jest.Mock).mockResolvedValue({ mtimeMs: 1000 });
       mockStore.get.mockReturnValue(null); // No saved library
+      allowDirectory(mockDir);
 
       const result = await invoke("handle-scan-mp3-files", mockDir);
 
@@ -133,12 +137,35 @@ describe("IPC: Library", () => {
 
       (fs.promises.stat as jest.Mock).mockResolvedValue({ mtimeMs: 1000 });
       mockStore.get.mockReturnValue(null);
+      allowDirectory(dirA);
 
       const result = await invoke("handle-scan-mp3-files", dirA);
 
       // Should find 1 file without infinite loop
       expect(result.files).toHaveLength(1);
       expect(result.files).toContain("/music/dirA/song.mp3");
+    });
+  });
+
+  describe("directory allowlist", () => {
+    it("rejects directories that were not selected by the user", async () => {
+      const result = await invoke("handle-scan-mp3-files", "/not-approved");
+
+      expect(result.error).toBe("Directory is not allowed");
+      expect(fs.promises.readdir).not.toHaveBeenCalled();
+    });
+
+    it("allows the saved music library directory", async () => {
+      mockStore.get.mockReturnValue({
+        directoryPath: "/saved-music",
+        files: {},
+      });
+      (fs.promises.readdir as jest.Mock).mockResolvedValue([]);
+
+      const result = await invoke("handle-scan-mp3-files", "/saved-music");
+
+      expect(result.error).toBeUndefined();
+      expect(fs.promises.readdir).toHaveBeenCalled();
     });
   });
 

@@ -6,7 +6,11 @@ import * as mm from "music-metadata";
 import store from "../lib/store";
 import { debugLog } from "../utils";
 import { sendToMainWindow } from "../lib/window-manager";
-import { validateInput, filePathSchema } from "../lib/ipc-validate";
+import { validateInput, filePathSchema, scanLibrarySchema } from "../lib/ipc-validate";
+import {
+  isDirectoryAllowed,
+  isSameDirectoryPath,
+} from "../lib/allowed-directories";
 import { MusicLibrary, FileMetadata } from "../../types/local";
 import { getErrorMessage } from "../lib/error";
 import { SUPPORTED_AUDIO_EXTENSIONS, ELECTRON_STORE_KEYS } from "../constants";
@@ -41,11 +45,35 @@ export function setupLibraryHandlers() {
   // 指定されたフォルダ内のMP3ファイルをスキャン（永続化対応版）
   ipcMain.handle(
     CHANNELS.SCAN_MP3_FILES,
-    async (_, directoryPath: string, forceFullScan: boolean = false) => {
+    async (_, rawDirectoryPath: string, rawForceFullScan: boolean = false) => {
       try {
+        const [directoryPath, forceFullScan] = validateInput(
+          scanLibrarySchema,
+          [rawDirectoryPath, rawForceFullScan],
+          CHANNELS.SCAN_MP3_FILES,
+        );
+
         // 前回のスキャン結果を取得
         const savedLibrary = getSavedLibrary();
-        const isSameDirectory = savedLibrary?.directoryPath === directoryPath;
+        const savedDirectoryPath = savedLibrary?.directoryPath;
+
+        // ダイアログで選択済み、または保存済みライブラリのディレクトリのみ許可する
+        const isAllowed =
+          isDirectoryAllowed(directoryPath) ||
+          (savedDirectoryPath
+            ? isSameDirectoryPath(savedDirectoryPath, directoryPath)
+            : false);
+
+        if (!isAllowed) {
+          debugLog(
+            `[Scan] 許可されていないディレクトリのスキャンを拒否: ${directoryPath}`
+          );
+          return { error: "Directory is not allowed" };
+        }
+
+        const isSameDirectory = savedDirectoryPath
+          ? isSameDirectoryPath(savedDirectoryPath, directoryPath)
+          : false;
 
         // 差分スキャンを行うかどうかを決定
         const shouldPerformDiffScan = isSameDirectory && !forceFullScan;
@@ -84,7 +112,7 @@ export function setupLibraryHandlers() {
         };
       } catch (error: unknown) {
         debugLog(
-          `[Error] MP3ファイルのスキャンに失敗: ${directoryPath}`,
+          `[Error] MP3ファイルのスキャンに失敗: ${rawDirectoryPath}`,
           error
         );
         return { error: getErrorMessage(error) };

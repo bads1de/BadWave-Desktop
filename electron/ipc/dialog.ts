@@ -1,5 +1,6 @@
 import { CHANNELS } from "../channels";
 import { ipcMain, dialog, BrowserWindow } from "electron";
+import { allowDirectory } from "../lib/allowed-directories";
 
 export function setupDialogHandlers() {
   // フォルダ選択ダイアログの表示
@@ -17,7 +18,12 @@ export function setupDialogHandlers() {
     if (result.canceled) {
       return { canceled: true };
     } else {
-      return { filePath: result.filePaths[0] };
+      const filePath = result.filePaths[0];
+      // 以後のスキャンで許可するディレクトリとして記録する
+      if (filePath) {
+        allowDirectory(filePath);
+      }
+      return { filePath };
     }
   });
 }
